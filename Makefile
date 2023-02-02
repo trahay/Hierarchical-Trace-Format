@@ -1,4 +1,4 @@
-BIN= liblock.so read_trace analyze_trace
+BIN= liblock.so read_trace #analyze_trace
 
 CFLAGS=-Wall -g
 LDFLAGS=-ldl -pthread

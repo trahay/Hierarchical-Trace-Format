@@ -60,12 +60,18 @@ enum event_type {
    function_exit,
 };
 
-struct lock_event {
-  uint64_t timestamp;//8
+struct event_data {
   void* ptr;//8
   pthread_t tid; //8
   enum intercepted_function function;
   enum event_type event_type;
+};
+
+typedef int event_data_id;
+
+struct event {
+  uint64_t timestamp;//8
+  event_data_id data_id;
 } __attribute__((packed));
 
 
