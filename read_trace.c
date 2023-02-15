@@ -3,9 +3,10 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <assert.h>
-#include "liblock.h"
 #include <sys/mman.h>
 #include <sys/stat.h>
+#include "liblock.h"
+#include "event.h"
 
 struct event_data *event_data = NULL;
 int nb_event_data = 0;

@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include <dlfcn.h>
 #include <stdint.h>
+#include "event.h"
+
 //#define DEBUG 1
 
 #if DEBUG
@@ -24,6 +26,22 @@ static void* get_callback(const char*fname){
   return ret;
 }
 
+ 
+
+static char* function_names [] __attribute__((unused)) = {
+   "mutex_lock",
+   "mutex_trylock",
+   "mutex_unlock",
+   "mutex_init",
+   "mutex_destroy",
+   "cond_wait",
+   "cond_timedwait",
+   "cond_signal",
+   "cond_broadcast",
+   "cond_init",
+   "cond_destroy"
+};
+
 
 enum intercepted_function
   {
@@ -41,38 +59,13 @@ enum intercepted_function
    NB_FUNCTIONS,
   };
 
-static char* function_names [] __attribute__((unused)) = {
-   "mutex_lock",
-   "mutex_trylock",
-   "mutex_unlock",
-   "mutex_init",
-   "mutex_destroy",
-   "cond_wait",
-   "cond_timedwait",
-   "cond_signal",
-   "cond_broadcast",
-   "cond_init",
-   "cond_destroy"
-};
 
-enum event_type {
-   function_entry,
-   function_exit,
-};
+//struct event {
+//  uint64_t timestamp;//8
+//  event_data_id data_id;
+//} __attribute__((packed));
+//typedef int event_data_id;
 
-struct event_data {
-  void* ptr;//8
-  pthread_t tid; //8
-  enum intercepted_function function;
-  enum event_type event_type;
-};
-
-typedef int event_data_id;
-
-struct event {
-  uint64_t timestamp;//8
-  event_data_id data_id;
-} __attribute__((packed));
 
 
 void enter_function(enum intercepted_function f, void* ptr);
