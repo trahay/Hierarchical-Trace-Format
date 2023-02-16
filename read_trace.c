@@ -6,8 +6,10 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include "liblock.h"
+#include "trace_storage.h"
 #include "event.h"
 
+#if 0
 struct event_data *event_data = NULL;
 int nb_event_data = 0;
 
@@ -44,13 +46,15 @@ struct event_data* get_data(event_data_id data_id) {
 
   return &event_data[data_id];
 }
+#endif
 
 int main(int argc, char**argv) {
-  if(argc!=3) {
+  if(argc!=2) {
     printf("usage: %s trace\n", argv[0]);
     return EXIT_FAILURE;
   }
-
+#if 0
+  
   int fd = open(argv[1], O_RDONLY);
   assert(fd>0);
   load_event_data(argv[2]);
@@ -63,5 +67,10 @@ int main(int argc, char**argv) {
       printf("[%lx] %lf\texit %s(%p)\n", data->tid, e.timestamp/1e9, function_names[data->function], data->ptr);
   }
   close(fd);
+#endif
+
+  struct trace trace;
+  read_trace(&trace, argv[1]);
+
   return EXIT_SUCCESS;
 }
