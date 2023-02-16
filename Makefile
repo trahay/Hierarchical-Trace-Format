@@ -3,7 +3,8 @@ BIN= liblock.so read_trace #analyze_trace
 CFLAGS=-Wall -g -O3
 LDFLAGS=-ldl -pthread
 
-OBJ=write_events.o timestamp.o
+OBJ=write_events.o timestamp.o trace_storage.o
+
 all: $(BIN)
 
 read_trace: read_trace.c liblock.h
