@@ -14,7 +14,32 @@ list(APPEND SCRIPTS
   )
 
 #####################################################
-# eztrace
+# htf-trace
+
+add_library(htf-trace
+  SHARED
+)
+
+target_sources(
+    htf-trace
+PRIVATE
+    tracer.c
+    cond.c
+    mutex.c
+)
+
+target_include_directories(htf-trace
+  PRIVATE
+  ${CMAKE_SOURCE_DIR}/src/
+  )
+
+target_link_libraries(htf-trace
+  PRIVATE
+    htf
+)
+
+#####################################################
+# read_trace
 
 add_executable(read_trace
 read_trace.c
@@ -38,6 +63,11 @@ target_link_libraries(read_trace
 
 
 install(PROGRAMS ${SCRIPTS} DESTINATION ${INSTALL_BINDIR})
+
+install(
+  TARGETS htf-trace
+  LIBRARY DESTINATION ${INSTALL_LIBDIR}
+)
 
 install(
   TARGETS read_trace

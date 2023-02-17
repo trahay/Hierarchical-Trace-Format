@@ -6,9 +6,9 @@
 #include <libgen.h>
 #include <pthread.h>
 
-#include "event.h"
-#include "timestamp.h"
-#include "trace_storage.h"
+#include "htf.h"
+#include "htf_timestamp.h"
+#include "htf_storage.h"
 
 static char *base_dirname = NULL;
 
@@ -163,7 +163,10 @@ void read_thread_trace(struct trace*trace, int thread_index) {
     read_thread_loop(&th->loops[i], thread_index, i);
 }
 
-void write_trace(struct trace*trace) {
+void htw_write_trace(struct trace*trace) {
+  if(! trace)
+    return;
+
   mkdir(base_dirname, 0777);
 
   char main_filename[1024];

@@ -1,8 +1,7 @@
-#ifndef EVENT_H
-#define EVENT_H
+#ifndef HTF_H
+#define HTF_H
 
-#include "timestamp.h"
-#include <uthash.h>
+#include "htf_timestamp.h"
 
 /* A token is either:
    - an event
@@ -75,6 +74,7 @@ struct event_summary {
 };
 
 struct thread_trace {
+  struct trace *trace;
   token_t *tokens;
   unsigned nb_allocated_tokens;
   unsigned nb_tokens;
@@ -105,6 +105,20 @@ struct thread_trace_reader {
   int next_event;		/* TODO: rename to next_token ? */
   int *event_index;
 };
+
+/* Initialize a trace in write mode */
+void htf_write_init(struct trace* trace);
+void htf_write_init_thread(struct trace* trace,
+			   struct thread_trace *thread_trace,
+			   int thread_rank);
+
+void htf_record_event(struct thread_trace* thread_trace,
+		      enum event_type event_type,
+		      int function_id);
+void htf_write_finalize(struct trace* trace);
+
+
+
 
 void thread_trace_reader_init(struct thread_trace_reader *reader,
 			      struct trace* trace,

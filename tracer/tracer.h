@@ -1,12 +1,12 @@
-#ifndef LIBLOCK_H
-#define LIBLOCK_H
+#ifndef TRACER_H
+#define TRACER_H
 
-#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <dlfcn.h>
 #include <stdint.h>
-#include "event.h"
+
+#include "htf.h"
 
 //#define DEBUG 1
 
@@ -17,15 +17,7 @@
 #endif
 
 
-static void* get_callback(const char*fname) __attribute__((unused));
-static void* get_callback(const char*fname){
-  void* ret = dlsym(RTLD_NEXT, fname);
-  if(!ret) {
-    fprintf(stderr, "Warning: cannot find %s: %s\n", fname, dlerror());
-  }
-  return ret;
-}
-
+void* get_callback(const char *fname);
  
 
 static char* function_names [] __attribute__((unused)) = {
@@ -59,16 +51,7 @@ enum intercepted_function
    NB_FUNCTIONS,
   };
 
-
-//struct event {
-//  uint64_t timestamp;//8
-//  event_data_id data_id;
-//} __attribute__((packed));
-//typedef int event_data_id;
-
-
-
 void enter_function(enum intercepted_function f, void* ptr);
 void leave_function(enum intercepted_function f, void* ptr);
 
-#endif
+#endif	/* TRACER_H */

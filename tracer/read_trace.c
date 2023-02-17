@@ -3,9 +3,10 @@
 #include <assert.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
+
 #include "tracer.h"
-#include "trace_storage.h"
-#include "event.h"
+#include "htf.h"
+#include "htf_storage.h"
 
 #if 0
 struct event_data *event_data = NULL;

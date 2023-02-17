@@ -11,17 +11,17 @@ add_library(htf
 )
 
 set(HTF_HEADERS
-    event.h
-    timestamp.h
-    trace_storage.h
+    htf.h
+    htf_timestamp.h
+    htf_storage.h
 )
 
 target_sources(
     htf
 PRIVATE
-    timestamp.c
-    trace_storage.c
-    write_events.c
+    htf_timestamp.c
+    htf_storage.c
+    htf.c
 PUBLIC
     ${HTF_HEADERS}
 )

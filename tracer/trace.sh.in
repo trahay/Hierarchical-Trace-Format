@@ -30,7 +30,7 @@ done
 shift $(($OPTIND - 1))
 
 
-LD_PRELOAD="$libdir/libhtf.so"
+LD_PRELOAD="$libdir/libhtf.so:$libdir/libhtf-trace.so"
 
 if [ x$debug = xy ]; then
 

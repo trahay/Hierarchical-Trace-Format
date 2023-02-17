@@ -1,10 +1,11 @@
-#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <dlfcn.h>
+#include <assert.h>
 
 #include <pthread.h>
-#include "liblock.h"
+
+#include "tracer.h"
 
 int (*pthread_cond_wait_original)(pthread_cond_t *cond, pthread_mutex_t *mutex);
 int (*pthread_cond_timedwait_original)(pthread_cond_t *cond, pthread_mutex_t *mutex, const struct timespec *abstime);

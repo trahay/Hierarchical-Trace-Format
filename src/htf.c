@@ -8,15 +8,9 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 
-#include "event.h"
-#include "timestamp.h"
-#include "trace_storage.h"
-
-static struct trace *trace = NULL;
-static _Thread_local struct thread_trace* thread_trace = NULL;
-static _Thread_local int thread_rank;
-
-static int verbose=0;
+#include "htf.h"
+#include "htf_timestamp.h"
+#include "htf_storage.h"
 
 #define NB_TOKEN_DEFAULT 100000
 #define NB_EVENT_DEFAULT 1000
@@ -24,7 +18,11 @@ static int verbose=0;
 #define NB_LOOP_DEFAULT 1000
 #define NB_TIMESTAMP_DEFAULT 100000
 
-event_id get_event_id(struct event *e) {
+static int verbose=0;
+static _Thread_local int recursion_shield = 0;
+
+event_id _htf_get_event_id(struct thread_trace *thread_trace,
+			   struct event *e) {
   if(verbose)
     printf("Searching for {.func=%d, .event_type=%d}\n", e->function_id, e->event_type);
 
@@ -55,7 +53,9 @@ event_id get_event_id(struct event *e) {
 }
 
 
-void store_timestamp(event_id e_id, timestamp_t ts) {
+void _htf_store_timestamp(struct thread_trace *thread_trace,
+			  event_id e_id,
+			  timestamp_t ts) {
   assert(e_id < thread_trace->nb_allocated_events);
 
   struct event_summary *es = &thread_trace->events[e_id];
@@ -70,7 +70,8 @@ void store_timestamp(event_id e_id, timestamp_t ts) {
   es->timestamps[es->nb_timestamps++] = ts;  
 }
 
-void store_token(token_t t) {
+void _htf_store_token(struct thread_trace *thread_trace,
+		      token_t t) {
   if(thread_trace->nb_tokens >= thread_trace->nb_allocated_tokens) {
     fprintf(stderr, "Error: too many tokens\n");
     abort();
@@ -79,45 +80,65 @@ void store_token(token_t t) {
   thread_trace->tokens[thread_trace->nb_tokens++] = t;
 }
 
-void store_event(event_id id) {
+void _htf_store_event(struct thread_trace *thread_trace,
+		      event_id id) {
   //  assert((2<<30) > event_id);  
   token_t t = TOKENIZE(TYPE_EVENT, id);
-  store_token(t);
+  _htf_store_token(thread_trace, t);
 }
 
-static void _init_thread( );
-void init_trace() {
-  trace = malloc(sizeof(struct trace));
-  trace->threads = NULL;
-  trace->nb_threads = 0;
-  pthread_mutex_init(&trace->lock, NULL);
-}
-
-void record_event(enum event_type event_type,
-		  int function_id) {
-  static _Thread_local int recursion_shield = 0;
+void htf_record_event(struct thread_trace *thread_trace,
+		      enum event_type event_type,
+		      int function_id) {
   if(recursion_shield)
     return;
   recursion_shield++;
 
-  //#error Bug here: the first event is of a thread is not recorded
-  if(trace == NULL)
-    init_trace();
-  if(thread_trace == NULL)
-    _init_thread();
   struct event e = {.function_id = function_id, .event_type = event_type};
-  event_id e_id = get_event_id(&e);
+  event_id e_id = _htf_get_event_id(thread_trace, &e);
 
-  store_timestamp(e_id, get_timestamp());
-  store_event(e_id);
+  _htf_store_timestamp(thread_trace, e_id, htf_get_timestamp());
+  _htf_store_event(thread_trace, e_id);
 
   recursion_shield--;
 }
 
+void htf_write_finalize(struct trace *trace) {
+  if(!trace)
+    return;
 
-static void _init_thread( ) {
-  thread_trace = malloc(sizeof(struct thread_trace));
+  htw_write_trace(trace);
+}
 
+void htf_write_init(struct trace *trace) {
+  if(recursion_shield)
+    return;
+  recursion_shield++;
+
+  trace->threads = NULL;
+  trace->nb_threads = 0;
+  pthread_mutex_init(&trace->lock, NULL);
+
+  char* verbose_str = getenv("VERBOSE");
+  if(verbose_str)
+    verbose = 1;
+
+  trace_storage_init();
+  recursion_shield--;
+}
+
+void htf_write_init_thread(struct trace* trace,
+			   struct thread_trace *thread_trace,
+			   int thread_rank) {
+  if(recursion_shield)
+    return;
+  recursion_shield++;
+
+  printf("htf_write_init_thread\n");
+  assert(thread_rank >= 0);
+  assert(thread_rank >= trace->nb_threads);
+
+  thread_trace->trace = trace;
   thread_trace->tokens = malloc(sizeof(token_t)* NB_TOKEN_DEFAULT);
   thread_trace->nb_allocated_tokens = NB_TOKEN_DEFAULT;
   thread_trace->nb_tokens = 0;
@@ -136,31 +157,17 @@ static void _init_thread( ) {
 
   pthread_mutex_lock(&trace->lock);
   {
-    thread_rank = trace->nb_threads++;
+    trace->nb_threads++;
+    if(thread_rank > trace->nb_threads)
+      trace->nb_threads = thread_rank;
     trace->threads = realloc(trace->threads, sizeof(struct thread_trace *) * trace->nb_threads);
     trace->threads[thread_rank] = thread_trace;
   }
   pthread_mutex_unlock(&trace->lock);
+  recursion_shield--;
 }
 
 
-static void _write_events_init(void) __attribute__((constructor));
-static void _write_events_init(void) {
-  printf("[LIBLOCK] initializing write_events\n");
-
-  char* verbose_str = getenv("VERBOSE");
-  if(verbose_str)
-    verbose = 1;
-
-  trace_storage_init();
-}
-
-static void _write_events_conclude(void) __attribute__((destructor));
-static void _write_events_conclude(void) {
-  printf("[LIBLOCK] finalizing write_events\n");
-
-  write_trace(trace);
-}
 
 void thread_trace_reader_init(struct thread_trace_reader *reader,
 			      struct trace* trace,
