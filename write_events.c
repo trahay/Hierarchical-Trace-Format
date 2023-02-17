@@ -8,6 +8,7 @@
 #include <sys/stat.h>
 
 #include "timestamp.h"
+#include "trace_storage.h"
 
 static struct trace *trace = NULL;
 static _Thread_local struct thread_trace* thread_trace = NULL;
@@ -72,12 +73,13 @@ void store_token(token_t t) {
     fprintf(stderr, "Error: too many tokens\n");
     abort();
   }
+  printf("E#%d: (%d, %d)\n", thread_trace->nb_tokens, TOKEN_TYPE(t), TOKEN_ID(t));
   thread_trace->tokens[thread_trace->nb_tokens++] = t;
 }
 
 void store_event(event_id id) {
-  //  assert((2<<30) > event_id);
-  token_t t = {.token_type= TYPE_EVENT, .token_id = id };
+  //  assert((2<<30) > event_id);  
+  token_t t = TOKENIZE(TYPE_EVENT, id);
   store_token(t);
 }
 
@@ -93,6 +95,7 @@ void record_event(enum event_type event_type,
 		  enum intercepted_function f,
 		  void* ptr) {
 
+  //#error Bug here: the first event is of a thread is not recorded
   if(trace == NULL)
     init_trace();
   if(thread_trace == NULL)
@@ -104,14 +107,36 @@ void record_event(enum event_type event_type,
   store_event(e_id);
 }
 
+static _Thread_local int recursion_shield = 0;
 void enter_function(enum intercepted_function f, void* ptr) {
-  DEBUG_PRINTF("Entering %s\n", function_names[f]);
+  if(recursion_shield)
+    return;
+  recursion_shield++;
+
+  if(trace == NULL)
+    init_trace();
+  if(thread_trace == NULL)
+    _init_thread();
+
+  int index = thread_trace->nb_tokens;
+  printf("Entering %s (%d)\n", function_names[f], index);
+  fflush(stdout);
   record_event(function_entry, f, ptr);
+  assert( thread_trace->nb_tokens > index);
+  
+  recursion_shield--;
 }
 
 void leave_function(enum intercepted_function f, void* ptr) {
-  DEBUG_PRINTF("Leaving %s\n", function_names[f]);
+  if(recursion_shield)
+    return;
+  recursion_shield++;
+
+  printf("Leaving %s\n", function_names[f]);
+  fflush(stdout);
   record_event(function_exit, f, ptr);
+
+  recursion_shield--;
 }
 
 static void _init_thread( ) {
@@ -159,4 +184,44 @@ static void _write_events_conclude(void) {
   DEBUG_PRINTF("[LIBLOCK] finalizing write_events\n");
 
   write_trace(trace);
+}
+
+void thread_trace_reader_init(struct thread_trace_reader *reader,
+			      struct trace* trace,
+			      int thread_index) {
+  reader->trace = trace;
+  assert(thread_index < trace->nb_threads);
+  reader->thread_trace = trace->threads[thread_index];
+  reader->next_event = 0;
+}
+
+int thread_trace_reader_next_event(struct thread_trace_reader *reader,
+				   struct event_occurence *e) {
+  if(reader->next_event < 0)
+    return -1;			/* TODO: return EOF */
+
+  if(reader->next_event >= reader->thread_trace->nb_tokens)
+    return -1;			/* TODO: return EOF */
+
+  token_t t = reader->thread_trace->tokens[reader->next_event];
+  switch(TOKEN_TYPE(t)) {
+  case TYPE_EVENT:
+    memcpy(&e->event, &reader->thread_trace->events[TOKEN_ID(t)].event, sizeof(e->event));
+    e->timestamp = 0;
+    break;
+  case TYPE_SEQUENCE:
+    fprintf(stderr, "SEQUENCE events not supported yet !\n");
+    abort();
+    break;
+  case TYPE_LOOP:
+    fprintf(stderr, "LOOP events not supported yet !\n");
+    abort();
+    break;
+  case TYPE_INVALID:
+    fprintf(stderr, "INVALID event detected at position %d\n", reader->next_event);
+    abort();
+    break;
+  }
+  reader->next_event++;
+  return 0;
 }

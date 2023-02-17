@@ -23,10 +23,10 @@ typedef int loop_id;
 #define TYPE_LOOP     3
 
 /* identify a token */
-typedef struct token {
-  unsigned token_type : 2; 	/* can be ETYPE_INVALID, ETYPE_EVENT, ETYPE_SEQUENCE, or ETYPE_LOOP */
-  unsigned token_id   : 30;	/* can be an event_id, a sequence_id, or a loop_id */
-} token_t;
+typedef uint32_t token_t;
+#define TOKEN_TYPE(t) ( (t) >> 30)
+#define TOKEN_ID(t) ( (t) & (~(3<<30)))
+#define TOKENIZE(type, id) ((type)<<30 | (id))
 
 
 /*************************** Events **********************/
@@ -62,6 +62,11 @@ struct loop {
 };
 
 
+struct event_occurence {
+  struct event event;
+  timestamp_t timestamp;
+};
+
 struct event_summary {
   struct event event;
   timestamp_t *timestamps;
@@ -94,4 +99,17 @@ struct trace {
   pthread_mutex_t lock;
 };
 
+struct thread_trace_reader {
+  struct trace *trace;
+  struct thread_trace *thread_trace;
+  int next_event;		/* TODO: rename to next_token ? */
+};
+
+void thread_trace_reader_init(struct thread_trace_reader *reader,
+			      struct trace* trace,
+			      int thread_index);
+
+/* return the next event in a thread. Return -1 in case of an error (such as the end of the trace) */
+int thread_trace_reader_next_event(struct thread_trace_reader *reader,
+				   struct event_occurence *e);
 #endif /* EVENT_H */

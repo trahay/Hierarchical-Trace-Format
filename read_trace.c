@@ -48,6 +48,27 @@ struct event_data* get_data(event_data_id data_id) {
 }
 #endif
 
+#define ET2C(et) (((et) == function_entry? 'E':	\
+    (et)==function_exit? 'L':			\
+		   'S'))
+void print_event(struct event_occurence *e) {
+  int id = e->event.function_id;
+  printf("%llu\t%c\t%d (%s)\n", e->timestamp, ET2C(e->event.event_type), id, function_names[id]);
+}
+
+void print_thread_trace(struct trace *trace, int thread_index) {
+  printf("Events for thread %d:\n", thread_index);
+
+  struct thread_trace_reader reader;
+  thread_trace_reader_init(&reader, trace, thread_index);
+  struct event_occurence e;
+
+  while(thread_trace_reader_next_event(&reader, &e) == 0) {
+    print_event(&e);
+  }
+
+}
+
 int main(int argc, char**argv) {
   if(argc!=2) {
     printf("usage: %s trace\n", argv[0]);
@@ -71,6 +92,10 @@ int main(int argc, char**argv) {
 
   struct trace trace;
   read_trace(&trace, argv[1]);
+
+  for(int i=0; i<trace.nb_threads; i++) {
+    print_thread_trace(&trace, i);
+  }
 
   return EXIT_SUCCESS;
 }
