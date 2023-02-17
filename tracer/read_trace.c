@@ -1,11 +1,9 @@
-#define _GNU_SOURCE
-
 #include <fcntl.h>
 #include <unistd.h>
 #include <assert.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
-#include "liblock.h"
+#include "tracer.h"
 #include "trace_storage.h"
 #include "event.h"
 

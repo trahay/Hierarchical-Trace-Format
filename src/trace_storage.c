@@ -6,7 +6,7 @@
 #include <libgen.h>
 #include <pthread.h>
 
-#include "liblock.h"
+#include "event.h"
 #include "timestamp.h"
 #include "trace_storage.h"
 

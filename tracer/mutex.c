@@ -7,6 +7,34 @@
 
 #include "liblock.h"
 
+void enter_function(enum intercepted_function f, void* ptr) {
+
+  if(trace == NULL)
+    init_trace();
+  if(thread_trace == NULL)
+    _init_thread();
+
+  int index = thread_trace->nb_tokens;
+  printf("Entering %s (%d)\n", function_names[f], index);
+  fflush(stdout);
+  record_event(function_entry, f, ptr);
+  assert( thread_trace->nb_tokens > index);
+  
+}
+
+void leave_function(enum intercepted_function f, void* ptr) {
+  if(recursion_shield)
+    return;
+  recursion_shield++;
+
+  printf("Leaving %s\n", function_names[f]);
+  fflush(stdout);
+  record_event(function_exit, f, ptr);
+
+  recursion_shield--;
+}
+
+
 int (*pthread_mutex_lock_original)(pthread_mutex_t *mutex);
 int (*pthread_mutex_trylock_original)(pthread_mutex_t *mutex);
 int (*pthread_mutex_unlock_original)(pthread_mutex_t *mutex);

@@ -1,6 +1,7 @@
 #!/bin/bash
 
 prefix=$(dirname $(realpath $0))
+libdir="@INSTALL_LIBDIR@"
 
 debug=n
 usage()
@@ -29,14 +30,14 @@ done
 shift $(($OPTIND - 1))
 
 
-LD_PRELOAD="$prefix/liblock.so"
+LD_PRELOAD="$libdir/libhtf.so"
 
 if [ x$debug = xy ]; then
 
 #  generate a gdbinit file that will preload all the modules
 
    gdbinit_file=`mktemp`
-   echo "set env LD_PRELOAD $LD_PRELOAD" > $gdbinit_file
+   echo "set env @LD_PRELOAD_NAME@ $LD_PRELOAD" > $gdbinit_file
    echo "echo \n" >> $gdbinit_file
    echo "echo trace.sh: hook loaded\n" >> $gdbinit_file
 
@@ -44,5 +45,5 @@ if [ x$debug = xy ]; then
    rm $gdbinit_file
 
 else
-    LD_PRELOAD=$LD_PRELOAD $@
+    @LD_PRELOAD_NAME@=$LD_PRELOAD $@
 fi   

@@ -1,12 +1,14 @@
-#include "liblock.h"
 #include <time.h>
 #include <assert.h>
 #include <pthread.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <sys/stat.h>
 
+#include "event.h"
 #include "timestamp.h"
 #include "trace_storage.h"
 
@@ -92,52 +94,26 @@ void init_trace() {
 }
 
 void record_event(enum event_type event_type,
-		  enum intercepted_function f,
-		  void* ptr) {
+		  int function_id) {
+  static _Thread_local int recursion_shield = 0;
+  if(recursion_shield)
+    return;
+  recursion_shield++;
 
   //#error Bug here: the first event is of a thread is not recorded
   if(trace == NULL)
     init_trace();
   if(thread_trace == NULL)
     _init_thread();
-  struct event e = {.function_id = (int)f, .event_type = event_type};
+  struct event e = {.function_id = function_id, .event_type = event_type};
   event_id e_id = get_event_id(&e);
 
   store_timestamp(e_id, get_timestamp());
   store_event(e_id);
-}
-
-static _Thread_local int recursion_shield = 0;
-void enter_function(enum intercepted_function f, void* ptr) {
-  if(recursion_shield)
-    return;
-  recursion_shield++;
-
-  if(trace == NULL)
-    init_trace();
-  if(thread_trace == NULL)
-    _init_thread();
-
-  int index = thread_trace->nb_tokens;
-  printf("Entering %s (%d)\n", function_names[f], index);
-  fflush(stdout);
-  record_event(function_entry, f, ptr);
-  assert( thread_trace->nb_tokens > index);
-  
-  recursion_shield--;
-}
-
-void leave_function(enum intercepted_function f, void* ptr) {
-  if(recursion_shield)
-    return;
-  recursion_shield++;
-
-  printf("Leaving %s\n", function_names[f]);
-  fflush(stdout);
-  record_event(function_exit, f, ptr);
 
   recursion_shield--;
 }
+
 
 static void _init_thread( ) {
   thread_trace = malloc(sizeof(struct thread_trace));
@@ -170,7 +146,7 @@ static void _init_thread( ) {
 
 static void _write_events_init(void) __attribute__((constructor));
 static void _write_events_init(void) {
-  DEBUG_PRINTF("[LIBLOCK] initializing write_events\n");
+  printf("[LIBLOCK] initializing write_events\n");
 
   char* verbose_str = getenv("VERBOSE");
   if(verbose_str)
@@ -181,7 +157,7 @@ static void _write_events_init(void) {
 
 static void _write_events_conclude(void) __attribute__((destructor));
 static void _write_events_conclude(void) {
-  DEBUG_PRINTF("[LIBLOCK] finalizing write_events\n");
+  printf("[LIBLOCK] finalizing write_events\n");
 
   write_trace(trace);
 }
