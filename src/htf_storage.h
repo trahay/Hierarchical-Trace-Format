@@ -9,6 +9,6 @@ void write_thread_sequence(struct sequence *s, int thread_index, int sequence_id
 void write_thread_loop(struct loop *l, int thread_index, int loop_id);
 void write_thread_trace(struct trace*trace, int thread_index);
 
-void write_trace(struct trace*trace);
+void htf_write_trace(struct trace*trace);
 
 #endif	/* TRACE_STORAGE_H */

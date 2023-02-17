@@ -33,7 +33,7 @@ target_compile_options(htf
   PUBLIC
     -D_GNU_SOURCE
   PRIVATE
-    -Wall -Wextra
+    -Wall -Wextra -Wno-sign-compare
 )
 
 target_link_libraries(htf

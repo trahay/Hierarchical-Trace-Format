@@ -4,6 +4,7 @@
 #include <sys/stat.h>
 #include <errno.h>
 #include <libgen.h>
+#include <string.h>
 #include <pthread.h>
 
 #include "htf.h"
@@ -163,7 +164,7 @@ void read_thread_trace(struct trace*trace, int thread_index) {
     read_thread_loop(&th->loops[i], thread_index, i);
 }
 
-void htw_write_trace(struct trace*trace) {
+void htf_write_trace(struct trace*trace) {
   if(! trace)
     return;
 
@@ -180,7 +181,7 @@ void htw_write_trace(struct trace*trace) {
   }
 }
 
-void read_trace(struct trace*trace, char* main_filename) {
+void htw_read_trace(struct trace*trace, char* main_filename) {
   base_dirname=malloc(sizeof(char)*(strlen(main_filename)+1));
   strcpy(base_dirname, main_filename);
   base_dirname = dirname(base_dirname);

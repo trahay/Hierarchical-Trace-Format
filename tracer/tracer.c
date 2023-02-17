@@ -28,19 +28,12 @@ void enter_function(enum intercepted_function f, void* ptr) {
   if(thread_trace == NULL)
     _init_thread();
 
-  int index = thread_trace->nb_tokens;
-  printf("Entering %s (%d)\n", function_names[f], index);
-  fflush(stdout);
   htf_record_event(thread_trace, function_entry, (int)f);
-  //  assert( thread_trace->nb_tokens > index);
-  
 }
 
 void leave_function(enum intercepted_function f, void* ptr) {
   if(! initialized) return;
 
-  printf("Leaving %s\n", function_names[f]);
-  fflush(stdout);
   htf_record_event(thread_trace, function_exit, (int)f);
 }
 

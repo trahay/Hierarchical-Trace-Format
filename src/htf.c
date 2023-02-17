@@ -12,17 +12,17 @@
 #include "htf_timestamp.h"
 #include "htf_storage.h"
 
-#define NB_TOKEN_DEFAULT 100000
+#define NB_TOKEN_DEFAULT 1000000
 #define NB_EVENT_DEFAULT 1000
 #define NB_SEQUENCE_DEFAULT 1000
 #define NB_LOOP_DEFAULT 1000
-#define NB_TIMESTAMP_DEFAULT 100000
+#define NB_TIMESTAMP_DEFAULT 1000000
 
 static int verbose=0;
 static _Thread_local int recursion_shield = 0;
 
-event_id _htf_get_event_id(struct thread_trace *thread_trace,
-			   struct event *e) {
+static inline event_id _htf_get_event_id(struct thread_trace *thread_trace,
+					 struct event *e) {
   if(verbose)
     printf("Searching for {.func=%d, .event_type=%d}\n", e->function_id, e->event_type);
 
@@ -76,7 +76,8 @@ void _htf_store_token(struct thread_trace *thread_trace,
     fprintf(stderr, "Error: too many tokens\n");
     abort();
   }
-  printf("E#%d: (%d, %d)\n", thread_trace->nb_tokens, TOKEN_TYPE(t), TOKEN_ID(t));
+  if(verbose)
+    printf("E#%d: (%d, %d)\n", thread_trace->nb_tokens, TOKEN_TYPE(t), TOKEN_ID(t));
   thread_trace->tokens[thread_trace->nb_tokens++] = t;
 }
 
@@ -99,7 +100,6 @@ void htf_record_event(struct thread_trace *thread_trace,
 
   _htf_store_timestamp(thread_trace, e_id, htf_get_timestamp());
   _htf_store_event(thread_trace, e_id);
-
   recursion_shield--;
 }
 
@@ -107,7 +107,7 @@ void htf_write_finalize(struct trace *trace) {
   if(!trace)
     return;
 
-  htw_write_trace(trace);
+  htf_write_trace(trace);
 }
 
 void htf_write_init(struct trace *trace) {
@@ -134,7 +134,9 @@ void htf_write_init_thread(struct trace* trace,
     return;
   recursion_shield++;
 
-  printf("htf_write_init_thread\n");
+  if(verbose)
+    printf("htf_write_init_thread\n");
+
   assert(thread_rank >= 0);
   assert(thread_rank >= trace->nb_threads);
 

@@ -119,6 +119,7 @@ void htf_write_finalize(struct trace* trace);
 
 
 
+void htw_read_trace(struct trace* trace, char* filename);
 
 void thread_trace_reader_init(struct thread_trace_reader *reader,
 			      struct trace* trace,

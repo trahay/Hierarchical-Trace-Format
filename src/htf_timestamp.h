@@ -4,6 +4,6 @@
 #include <stdint.h>
 typedef  uint64_t timestamp_t;
 
-timestamp_t get_timestamp();
+timestamp_t htf_get_timestamp();
 
 #endif /* TIMESTAMP_H */

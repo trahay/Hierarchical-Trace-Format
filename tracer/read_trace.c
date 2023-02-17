@@ -90,7 +90,7 @@ int main(int argc, char**argv) {
 #endif
 
   struct trace trace;
-  read_trace(&trace, argv[1]);
+  htw_read_trace(&trace, argv[1]);
 
   for(int i=0; i<trace.nb_threads; i++) {
     print_thread_trace(&trace, i);
