@@ -9,11 +9,20 @@
 
 #include "htf.h"
 #include "htf_timestamp.h"
-#include "htf_storage.h"
 
 static char *base_dirname = NULL;
 
-FILE* file_open(char* filename, char* mode) {
+static void _htf_store_event(struct event_summary *e, int thread_index, int event_id);
+static void _htf_store_sequence(struct sequence *s, int thread_index, int sequence_id);
+static void _htf_store_loop(struct loop *l, int thread_index, int loop_id);
+static void _htf_store_thread_trace(struct trace *trace, int thread_index);
+
+static void _htf_read_event(struct event_summary *e, int thread_index, int event_id);
+static void _htf_read_sequence(struct sequence *s, int thread_index, int sequence_id);
+static void _htf_read_loop(struct loop *l, int thread_index, int loop_id);
+static void _htf_read_thread_trace(struct trace *trace, int thread_index);
+
+static FILE* _htf_file_open(char* filename, char* mode) {
   printf("Open %s with mode %s\n", filename, mode);
 
   FILE* file = fopen(filename, mode);
@@ -24,18 +33,19 @@ FILE* file_open(char* filename, char* mode) {
   return file;
 }
 
-void trace_storage_init() {
-  base_dirname = getenv("TRACE_FILENAME");
-  if(! base_dirname) {
-    base_dirname=malloc(sizeof(char)*100);
-    snprintf(base_dirname, 100, "trace");
-  }
+void htf_storage_init(const char* dirname) {
+  base_dirname = malloc(sizeof(char)*(strlen(dirname)+1));
+  strcpy(base_dirname, dirname);
 }
 
-void write_thread_event(struct event_summary *e, int thread_index, int event_id) {
+static FILE* _htf_get_event_file(int thread_index, int event_id, char* mode) {
   char filename[1024];
   snprintf(filename, 1024, "%s/%d/event_%d", base_dirname, thread_index, event_id);
-  FILE* file = file_open(filename, "w");
+  return _htf_file_open(filename, mode);
+}
+
+static void _htf_store_event(struct event_summary *e, int thread_index, int event_id) {
+  FILE* file = _htf_get_event_file(thread_index, event_id, "w");
 
   fwrite(&e->event, sizeof(struct event), 1, file);
   fwrite(&e->nb_timestamps, sizeof(e->nb_timestamps), 1, file);
@@ -44,10 +54,8 @@ void write_thread_event(struct event_summary *e, int thread_index, int event_id)
   fclose(file);
 }
 
-void read_thread_event(struct event_summary *e, int thread_index, int event_id) {
-  char filename[1024];
-  snprintf(filename, 1024, "%s/%d/event_%d", base_dirname, thread_index, event_id);
-  FILE* file = file_open(filename, "r");
+static void _htf_read_event(struct event_summary *e, int thread_index, int event_id) {
+  FILE* file = _htf_get_event_file(thread_index, event_id, "r");
 
   fread(&e->event, sizeof(struct event), 1, file);
   fread(&e->nb_timestamps, sizeof(e->nb_timestamps), 1, file);
@@ -58,49 +66,55 @@ void read_thread_event(struct event_summary *e, int thread_index, int event_id) 
 }
 
 
-void write_thread_sequence(struct sequence *s, int thread_index, int sequence_id) {
+static FILE* _htf_get_sequence_file(int thread_index, int sequence_id, char* mode) {
   char filename[1024];
   snprintf(filename, 1024, "%s/%d/sequence_%d", base_dirname, thread_index, sequence_id);
-  FILE* file = file_open(filename, "w");
+  return _htf_file_open(filename, mode);
+}
 
+static void _htf_store_sequence(struct sequence *s, int thread_index, int sequence_id) {
+  FILE* file = _htf_get_sequence_file(thread_index, sequence_id, "w");
   fwrite(&s->length, sizeof(s->length), 1, file);
-  fwrite(s->token, sizeof(s->token[0]), s->length, file);
-  
+  fwrite(s->token, sizeof(s->token[0]), s->length, file);  
   fclose(file);
 }
 
-void read_thread_sequence(struct sequence *s, int thread_index, int sequence_id) {
-  char filename[1024];
-  snprintf(filename, 1024, "%s/%d/sequence_%d", base_dirname, thread_index, sequence_id);
-  FILE* file = file_open(filename, "r");
-
+static void _htf_read_sequence(struct sequence *s, int thread_index, int sequence_id) {
+  FILE* file = _htf_get_sequence_file(thread_index, sequence_id, "r");
   fread(&s->length, sizeof(s->length), 1, file);
-  fread(s->token, sizeof(token_t), s->length, file);
-  
+  fread(s->token, sizeof(token_t), s->length, file);  
   fclose(file);
 }
 
-void write_thread_loop(struct loop *l, int thread_index, int loop_id) {
+
+
+static FILE* _htf_get_loop_file(int thread_index, int loop_id, char* mode) {
   char filename[1024];
   snprintf(filename, 1024, "%s/%d/loop_%d", base_dirname, thread_index, loop_id);
-  FILE* file = file_open(filename, "w");
+  return _htf_file_open(filename, mode);
+}
+
+static void _htf_store_loop(struct loop *l, int thread_index, int loop_id) {
+  FILE* file = _htf_get_loop_file(thread_index, loop_id, "w");
   fwrite(&l, sizeof(l), 1, file);
   fclose(file);
 }
 
-void read_thread_loop(struct loop *l, int thread_index, int loop_id) {
-  char filename[1024];
-  snprintf(filename, 1024, "%s/%d/loop_%d", base_dirname, thread_index, loop_id);
-  FILE* file = file_open(filename, "r");
+static void _htf_read_loop(struct loop *l, int thread_index, int loop_id) {
+  FILE* file = _htf_get_loop_file(thread_index, loop_id, "r");
   fread(&l, sizeof(l), 1, file);
   fclose(file);
 }
 
-void write_thread_trace(struct trace*trace, int thread_index) {
-  /* write tokens */
-  char token_filename[1024];
-  snprintf(token_filename, 1024, "%s/%d.tok", base_dirname, thread_index);
-  FILE* token_file = file_open(token_filename, "w");
+
+static FILE* _htf_get_thread_file(int thread_index, char* mode) {
+  char filename[1024];
+  snprintf(filename, 1024, "%s/%d.tok", base_dirname, thread_index);
+  return _htf_file_open(filename, mode);
+}
+
+static void _htf_store_thread_trace(struct trace *trace, int thread_index) {
+  FILE* token_file = _htf_get_thread_file(thread_index, "w");
 
   struct thread_trace *th = trace->threads[thread_index];
   fwrite(&th->nb_tokens, sizeof(th->nb_tokens), 1, token_file);
@@ -108,10 +122,7 @@ void write_thread_trace(struct trace*trace, int thread_index) {
   fwrite(&th->nb_sequences, sizeof(th->nb_sequences), 1, token_file);
   fwrite(&th->nb_loops, sizeof(th->nb_loops), 1, token_file);
 
-  fwrite(th->tokens,
-	 sizeof(token_t),
-	 th->nb_tokens,
-	 token_file);
+  fwrite(th->tokens, sizeof(token_t), th->nb_tokens, token_file);
   fclose(token_file);
 
   char dir_filename[1024];
@@ -119,20 +130,18 @@ void write_thread_trace(struct trace*trace, int thread_index) {
   mkdir(dir_filename, 0777);
 
   for(int i=0; i<th->nb_events; i++)
-    write_thread_event(&th->events[i], thread_index, i);
+    _htf_store_event(&th->events[i], thread_index, i);
 
   for(int i=0; i<th->nb_sequences; i++)
-    write_thread_sequence(&th->sequences[i], thread_index, i);
+    _htf_store_sequence(&th->sequences[i], thread_index, i);
 
   for(int i=0; i<th->nb_loops; i++)
-    write_thread_loop(&th->loops[i], thread_index, i);
+    _htf_store_loop(&th->loops[i], thread_index, i);
 }
 
+static void _htf_read_thread_trace(struct trace *trace, int thread_index) {
+  FILE* token_file = _htf_get_thread_file(thread_index, "r");
 
-void read_thread_trace(struct trace*trace, int thread_index) {
-  char token_filename[1024];
-  snprintf(token_filename, 1024, "%s/%d.tok", base_dirname, thread_index);
-  FILE* token_file = file_open(token_filename, "r");
   trace->threads[thread_index] = malloc(sizeof(struct thread_trace));
   struct thread_trace *th = trace->threads[thread_index];
   fread(&th->nb_tokens, sizeof(th->nb_tokens), 1, token_file);
@@ -145,26 +154,25 @@ void read_thread_trace(struct trace*trace, int thread_index) {
   th->sequences = malloc(sizeof(struct sequence) * th->nb_sequences);
   th->loops = malloc(sizeof(struct loop) * th->nb_loops);
 
-  fread(th->tokens,
-	 sizeof(token_t),
-	 th->nb_tokens,
-	 token_file);
+  fread(th->tokens, sizeof(token_t), th->nb_tokens, token_file);
   fclose(token_file);
 
   printf("Reading %d events\n", th->nb_events);
   for(int i=0; i<th->nb_events; i++)
-    read_thread_event(&th->events[i], thread_index, i);
+    _htf_read_event(&th->events[i], thread_index, i);
 
   printf("Reading %d sequences\n", th->nb_sequences);
   for(int i=0; i<th->nb_sequences; i++)
-    read_thread_sequence(&th->sequences[i], thread_index, i);
+    _htf_read_sequence(&th->sequences[i], thread_index, i);
 
   printf("Reading %d loops\n", th->nb_loops);
   for(int i=0; i<th->nb_loops; i++)
-    read_thread_loop(&th->loops[i], thread_index, i);
+    _htf_read_loop(&th->loops[i], thread_index, i);
 }
 
-void htf_write_trace(struct trace*trace) {
+
+
+void htf_storage_finalize(struct trace*trace) {
   if(! trace)
     return;
 
@@ -172,22 +180,21 @@ void htf_write_trace(struct trace*trace) {
 
   char main_filename[1024];
   snprintf(main_filename, 1024, "%s/main.htf", base_dirname);
-  FILE* main_file = file_open(main_filename, "w");
+  FILE* main_file = _htf_file_open(main_filename, "w");
   fwrite(&trace->nb_threads, sizeof(int), 1, main_file);
   fclose(main_file);
 
   for(int i = 0; i<trace->nb_threads; i++) {
-    write_thread_trace(trace, i);
+    _htf_store_thread_trace(trace, i);
   }
 }
 
-void htw_read_trace(struct trace*trace, char* main_filename) {
+void htf_read_trace(struct trace*trace, char* main_filename) {
   base_dirname=malloc(sizeof(char)*(strlen(main_filename)+1));
   strcpy(base_dirname, main_filename);
   base_dirname = dirname(base_dirname);
-  printf("Open %s -> %s\n", main_filename, base_dirname);
 
-  FILE* main_file = file_open(main_filename, "r");
+  FILE* main_file = _htf_file_open(main_filename, "r");
   fread(&trace->nb_threads, sizeof(int), 1, main_file);
   fclose(main_file);
 
@@ -195,6 +202,6 @@ void htw_read_trace(struct trace*trace, char* main_filename) {
   pthread_mutex_init(&trace->lock, NULL);
 
   for(int i = 0; i<trace->nb_threads; i++) {
-    read_thread_trace(trace, i);
+    _htf_read_thread_trace(trace, i);
   }
 }

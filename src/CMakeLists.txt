@@ -13,7 +13,6 @@ add_library(htf
 set(HTF_HEADERS
     htf.h
     htf_timestamp.h
-    htf_storage.h
 )
 
 target_sources(

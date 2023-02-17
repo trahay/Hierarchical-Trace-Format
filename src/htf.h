@@ -107,7 +107,7 @@ struct thread_trace_reader {
 };
 
 /* Initialize a trace in write mode */
-void htf_write_init(struct trace* trace);
+void htf_write_init(struct trace *trace, const char* dirname);
 void htf_write_init_thread(struct trace* trace,
 			   struct thread_trace *thread_trace,
 			   int thread_rank);
@@ -117,15 +117,20 @@ void htf_record_event(struct thread_trace* thread_trace,
 		      int function_id);
 void htf_write_finalize(struct trace* trace);
 
+void htf_storage_init();
+
+void htf_storage_finalize(struct trace*trace);
 
 
-void htw_read_trace(struct trace* trace, char* filename);
 
-void thread_trace_reader_init(struct thread_trace_reader *reader,
-			      struct trace* trace,
-			      int thread_index);
+
+void htf_read_trace(struct trace* trace, char* filename);
+
+void htf_read_thread_iterator_init(struct thread_trace_reader *reader,
+				   struct trace* trace,
+				   int thread_index);
 
 /* return the next event in a thread. Return -1 in case of an error (such as the end of the trace) */
-int thread_trace_reader_next_event(struct thread_trace_reader *reader,
-				   struct event_occurence *e);
+int htf_read_thread_next_event(struct thread_trace_reader *reader,
+			       struct event_occurence *e);
 #endif /* EVENT_H */

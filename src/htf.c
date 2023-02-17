@@ -10,7 +10,6 @@
 
 #include "htf.h"
 #include "htf_timestamp.h"
-#include "htf_storage.h"
 
 #define NB_TOKEN_DEFAULT 1000000
 #define NB_EVENT_DEFAULT 1000
@@ -107,10 +106,10 @@ void htf_write_finalize(struct trace *trace) {
   if(!trace)
     return;
 
-  htf_write_trace(trace);
+  htf_storage_finalize(trace);
 }
 
-void htf_write_init(struct trace *trace) {
+void htf_write_init(struct trace *trace, const char* dirname) {
   if(recursion_shield)
     return;
   recursion_shield++;
@@ -123,7 +122,8 @@ void htf_write_init(struct trace *trace) {
   if(verbose_str)
     verbose = 1;
 
-  trace_storage_init();
+  htf_storage_init(dirname);
+
   recursion_shield--;
 }
 
@@ -170,10 +170,9 @@ void htf_write_init_thread(struct trace* trace,
 }
 
 
-
-void thread_trace_reader_init(struct thread_trace_reader *reader,
-			      struct trace* trace,
-			      int thread_index) {
+void htf_read_thread_iterator_init(struct thread_trace_reader *reader,
+				   struct trace* trace,
+				   int thread_index) {
   reader->trace = trace;
   assert(thread_index < trace->nb_threads);
   reader->thread_trace = trace->threads[thread_index];
@@ -181,8 +180,9 @@ void thread_trace_reader_init(struct thread_trace_reader *reader,
   reader->event_index = calloc(sizeof(int), trace->threads[thread_index]->nb_events);
 }
 
-int thread_trace_reader_next_event(struct thread_trace_reader *reader,
-				   struct event_occurence *e) {
+
+int htf_read_thread_next_event(struct thread_trace_reader *reader,
+			       struct event_occurence *e) {
   if(reader->next_event < 0)
     return -1;			/* TODO: return EOF */
 
@@ -193,12 +193,8 @@ int thread_trace_reader_next_event(struct thread_trace_reader *reader,
   switch(TOKEN_TYPE(t)) {
   case TYPE_EVENT:
     memcpy(&e->event, &reader->thread_trace->events[TOKEN_ID(t)].event, sizeof(e->event));
-#if 0
-    e->timestamp = 0;
-#else
     struct event_summary* es = &reader->thread_trace->events[TOKEN_ID(t)];
     e->timestamp = es->timestamps[reader->event_index[TOKEN_ID(t)]++];
-#endif
     break;
   case TYPE_SEQUENCE:
     fprintf(stderr, "SEQUENCE events not supported yet !\n");

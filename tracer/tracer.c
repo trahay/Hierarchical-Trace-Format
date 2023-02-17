@@ -54,7 +54,12 @@ static void _tracer_init(void) {
   if(verbose_str)
     verbose = 1;
 
-  htf_write_init(&trace);
+  char* base_dirname = getenv("TRACE_FILENAME");
+  if(! base_dirname) {
+    base_dirname=malloc(sizeof(char)*100);
+    snprintf(base_dirname, 100, "trace");
+  }
+  htf_write_init(&trace, base_dirname);
 
   initialized = 1;
 }
