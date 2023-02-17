@@ -193,6 +193,7 @@ void thread_trace_reader_init(struct thread_trace_reader *reader,
   assert(thread_index < trace->nb_threads);
   reader->thread_trace = trace->threads[thread_index];
   reader->next_event = 0;
+  reader->event_index = calloc(sizeof(int), trace->threads[thread_index]->nb_events);
 }
 
 int thread_trace_reader_next_event(struct thread_trace_reader *reader,
@@ -207,7 +208,12 @@ int thread_trace_reader_next_event(struct thread_trace_reader *reader,
   switch(TOKEN_TYPE(t)) {
   case TYPE_EVENT:
     memcpy(&e->event, &reader->thread_trace->events[TOKEN_ID(t)].event, sizeof(e->event));
+#if 0
     e->timestamp = 0;
+#else
+    struct event_summary* es = &reader->thread_trace->events[TOKEN_ID(t)];
+    e->timestamp = es->timestamps[reader->event_index[TOKEN_ID(t)]++];
+#endif
     break;
   case TYPE_SEQUENCE:
     fprintf(stderr, "SEQUENCE events not supported yet !\n");

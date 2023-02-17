@@ -103,6 +103,7 @@ struct thread_trace_reader {
   struct trace *trace;
   struct thread_trace *thread_trace;
   int next_event;		/* TODO: rename to next_token ? */
+  int *event_index;
 };
 
 void thread_trace_reader_init(struct thread_trace_reader *reader,

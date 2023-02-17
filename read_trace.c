@@ -53,7 +53,7 @@ struct event_data* get_data(event_data_id data_id) {
 		   'S'))
 void print_event(struct event_occurence *e) {
   int id = e->event.function_id;
-  printf("%llu\t%c\t%d (%s)\n", e->timestamp, ET2C(e->event.event_type), id, function_names[id]);
+  printf("%lf\t%c\t%d (%s)\n", e->timestamp/1e9, ET2C(e->event.event_type), id, function_names[id]);
 }
 
 void print_thread_trace(struct trace *trace, int thread_index) {
