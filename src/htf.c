@@ -181,8 +181,9 @@ void htf_read_thread_iterator_init(struct thread_trace_reader *reader,
 }
 
 
-int htf_read_thread_next_event(struct thread_trace_reader *reader,
-			       struct event_occurence *e) {
+int _htf_read_thread_next_event(struct thread_trace_reader *reader,
+				struct event_occurence *e,
+				int move) {
   if(reader->next_event < 0)
     return -1;			/* TODO: return EOF */
 
@@ -194,7 +195,10 @@ int htf_read_thread_next_event(struct thread_trace_reader *reader,
   case TYPE_EVENT:
     memcpy(&e->event, &reader->thread_trace->events[TOKEN_ID(t)].event, sizeof(e->event));
     struct event_summary* es = &reader->thread_trace->events[TOKEN_ID(t)];
-    e->timestamp = es->timestamps[reader->event_index[TOKEN_ID(t)]++];
+    e->timestamp = es->timestamps[reader->event_index[TOKEN_ID(t)]];
+
+    if(move)
+      reader->event_index[TOKEN_ID(t)]++;
     break;
   case TYPE_SEQUENCE:
     fprintf(stderr, "SEQUENCE events not supported yet !\n");
@@ -209,6 +213,18 @@ int htf_read_thread_next_event(struct thread_trace_reader *reader,
     abort();
     break;
   }
-  reader->next_event++;
+  if(move)
+    reader->next_event++;
   return 0;
+}
+
+int htf_read_thread_cur_event(struct thread_trace_reader *reader,
+			      struct event_occurence *e) {
+  return _htf_read_thread_next_event(reader, e, 0);
+}
+
+int htf_read_thread_next_event(struct thread_trace_reader *reader,
+			       struct event_occurence *e) {
+
+  return _htf_read_thread_next_event(reader, e, 1);
 }

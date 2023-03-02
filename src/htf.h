@@ -130,7 +130,14 @@ void htf_read_thread_iterator_init(struct thread_trace_reader *reader,
 				   struct trace* trace,
 				   int thread_index);
 
-/* return the next event in a thread. Return -1 in case of an error (such as the end of the trace) */
+/* return the current event in a thread and move to the next one.
+ * Return -1 in case of an error (such as the end of the trace)
+ */
 int htf_read_thread_next_event(struct thread_trace_reader *reader,
 			       struct event_occurence *e);
+/* return the current event in a thread.
+ * Return -1 in case of an error (such as the end of the trace)
+ */
+int htf_read_thread_cur_event(struct thread_trace_reader *reader,
+			      struct event_occurence *e);
 #endif /* EVENT_H */
