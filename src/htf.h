@@ -25,8 +25,9 @@ typedef int loop_id;
 typedef uint32_t token_t;
 #define TOKEN_TYPE(t) ( (t) >> 30)
 #define TOKEN_ID(t) ( (t) & (~(3<<30)))
-#define TOKENIZE(type, id) ((type)<<30 | (id))
+#define TOKENIZE(type, id) ((type)<<30 | TOKEN_ID(id))
 
+#define MAIN_SEQUENCE TOKENIZE(TYPE_SEQUENCE, EVENT_ID_INVALID)
 
 /*************************** Events **********************/
 
@@ -51,6 +52,12 @@ struct event {
 struct sequence {
   unsigned length;
   token_t *token;		/* TODO: don't use a pointer here! */
+};
+
+struct ongoing_sequence {
+  struct sequence seq;
+  int nb_allocated_tokens;
+  struct ongoing_sequence* enclosing_seq;  
 };
 
 /*************************** Loop **********************/
@@ -79,7 +86,8 @@ struct thread_trace {
   unsigned nb_allocated_tokens;
   unsigned nb_tokens;
 
-
+  struct ongoing_sequence *ongoing_sequence;
+  
   struct event_summary *events;
   unsigned nb_allocated_events;
   unsigned nb_events;
@@ -102,7 +110,11 @@ struct trace {
 struct thread_trace_reader {
   struct trace *trace;
   struct thread_trace *thread_trace;
-  int next_event;		/* TODO: rename to next_token ? */
+
+  token_t *callstack_sequence;	/* each entry contains the sequence/loop being read */
+  int     *callstack_index;	/* each entry contains the index in the sequence or the loop iteration */
+  int     callstack_depth;
+
   int *event_index;
 };
 
@@ -140,4 +152,5 @@ int htf_read_thread_next_event(struct thread_trace_reader *reader,
  */
 int htf_read_thread_cur_event(struct thread_trace_reader *reader,
 			      struct event_occurence *e);
+
 #endif /* EVENT_H */

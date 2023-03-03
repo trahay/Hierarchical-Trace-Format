@@ -82,6 +82,7 @@ static void _htf_store_sequence(struct sequence *s, int thread_index, int sequen
 static void _htf_read_sequence(struct sequence *s, int thread_index, int sequence_id) {
   FILE* file = _htf_get_sequence_file(thread_index, sequence_id, "r");
   fread(&s->length, sizeof(s->length), 1, file);
+  s->token = malloc(sizeof(token_t) * s->length);
   fread(s->token, sizeof(token_t), s->length, file);  
   fclose(file);
 }
@@ -117,6 +118,10 @@ static void _htf_store_thread_trace(struct trace *trace, int thread_index) {
   FILE* token_file = _htf_get_thread_file(thread_index, "w");
 
   struct thread_trace *th = trace->threads[thread_index];
+
+  printf("\tThread %d: {.nb_tokens=%d, .nb_events=%d, .nb_sequences=%d, .nb_loops=%d}\n",
+	 thread_index, th->nb_tokens, th->nb_events,  th->nb_sequences, th->nb_loops);
+
   fwrite(&th->nb_tokens, sizeof(th->nb_tokens), 1, token_file);
   fwrite(&th->nb_events, sizeof(th->nb_events), 1, token_file);
   fwrite(&th->nb_sequences, sizeof(th->nb_sequences), 1, token_file);

@@ -28,7 +28,7 @@ static void print_event(struct event_occurence *e, int thread_index) {
 
 /* Print all the events of a thread */
 static void print_thread_trace(struct trace *trace, int thread_index) {
-  printf("Events for thread %d:\n", thread_index);
+  printf("Reading events for thread %d:\n", thread_index);
 
   struct thread_trace_reader reader;
   htf_read_thread_iterator_init(&reader, trace, thread_index);
@@ -92,7 +92,7 @@ int main(int argc, char**argv) {
   int verbose = 0;
   int per_thread = 0;
   int nb_opts = 0;
-  const char* trace_name = NULL;
+  char* trace_name = NULL;
 
   for (int i = 1; i < argc; i++) {
     if (!strcmp(argv[i], "-v")) {
@@ -122,7 +122,7 @@ int main(int argc, char**argv) {
   htf_read_trace(&trace, trace_name);
 
   if(per_thread) {
-    for(int i=0; i<trace.nb_threads; i++) {
+    for(int i=1; i<trace.nb_threads; i++) {
       print_thread_trace(&trace, i);
     }
   } else {
