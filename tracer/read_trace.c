@@ -89,14 +89,13 @@ void usage(const char *prog_name) {
 }
 
 int main(int argc, char**argv) {
-  int verbose = 0;
   int per_thread = 0;
   int nb_opts = 0;
   char* trace_name = NULL;
 
   for (int i = 1; i < argc; i++) {
     if (!strcmp(argv[i], "-v")) {
-      verbose = 1;
+      htf_debug_level_set(dbg_lvl_verbose);
       nb_opts++;
     } else if (!strcmp(argv[i], "-T")) {
       per_thread = 1;

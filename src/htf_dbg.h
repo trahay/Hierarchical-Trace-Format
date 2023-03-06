@@ -14,28 +14,31 @@ enum htf_debug_level {
 extern enum htf_debug_level htf_debug_level;
 
 void htf_debug_level_init();
+void htf_debug_level_set(enum htf_debug_level  lvl);
 
 #define htf_abort() abort()
 
-#define htf_log(_debug_level_, format, ...)	\
+#define _htf_log(fd, _debug_level_, format, ...)	\
   do {						\
     if (htf_debug_level >= _debug_level_)	\
       printf("[HTF] "format, ##__VA_ARGS__);	\
   } while(0)
 
+#define htf_log(_debug_level_, format, ...) _htf_log(stdout, _debug_level_, format, ##__VA_ARGS__)
+
 #define htf_warn(format, ...)						\
   do {									\
-    htf_log(dbg_lvl_normal, "HTF warning in %s (%s:%d): "format,	\
-	    __func__, __FILE__, __LINE__,				\
-	    ##__VA_ARGS__);						\
+    _htf_log(stderr, dbg_lvl_normal, "HTF warning in %s (%s:%d): "format, \
+	     __func__, __FILE__, __LINE__,				\
+	     ##__VA_ARGS__);						\
   } while(0)
 
 #define htf_error(format, ...)					\
   do {								\
-    htf_log(dbg_lvl_error, "HTF error in %s (%s:%d): "format,	\
-	    __func__, __FILE__, __LINE__,			\
-	    ##__VA_ARGS__);					\
-    htf_abort();						\
+    _htf_log(stderr, dbg_lvl_error, "HTF error in %s (%s:%d): "format,	\
+	     __func__, __FILE__, __LINE__,				\
+	     ##__VA_ARGS__);						\
+    htf_abort();							\
   } while(0)
 
 #ifdef NDEBUG

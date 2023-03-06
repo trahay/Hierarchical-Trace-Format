@@ -8,6 +8,7 @@
 #include <pthread.h>
 
 #include "htf.h"
+#include "htf_dbg.h"
 #include "htf_timestamp.h"
 
 static char *base_dirname = NULL;
@@ -23,12 +24,11 @@ static void _htf_read_loop(struct loop *l, int thread_index, int loop_id);
 static void _htf_read_thread_trace(struct trace *trace, int thread_index);
 
 static FILE* _htf_file_open(char* filename, char* mode) {
-  printf("Open %s with mode %s\n", filename, mode);
+  htf_log(dbg_lvl_debug, "Open %s with mode %s\n", filename, mode);
 
   FILE* file = fopen(filename, mode);
   if(file == NULL) {
-    fprintf(stderr, "Cannot open %s: %s\n", filename, strerror(errno));
-    abort();
+    htf_error("Cannot open %s: %s\n", filename, strerror(errno));
   }
   return file;
 }
@@ -119,8 +119,8 @@ static void _htf_store_thread_trace(struct trace *trace, int thread_index) {
 
   struct thread_trace *th = trace->threads[thread_index];
 
-  printf("\tThread %d: {.nb_tokens=%d, .nb_events=%d, .nb_sequences=%d, .nb_loops=%d}\n",
-	 thread_index, th->nb_tokens, th->nb_events,  th->nb_sequences, th->nb_loops);
+  htf_log(dbg_lvl_verbose, "\tThread %d: {.nb_tokens=%d, .nb_events=%d, .nb_sequences=%d, .nb_loops=%d}\n",
+	  thread_index, th->nb_tokens, th->nb_events,  th->nb_sequences, th->nb_loops);
 
   fwrite(&th->nb_tokens, sizeof(th->nb_tokens), 1, token_file);
   fwrite(&th->nb_events, sizeof(th->nb_events), 1, token_file);
@@ -162,15 +162,15 @@ static void _htf_read_thread_trace(struct trace *trace, int thread_index) {
   fread(th->tokens, sizeof(token_t), th->nb_tokens, token_file);
   fclose(token_file);
 
-  printf("Reading %d events\n", th->nb_events);
+  htf_log(dbg_lvl_verbose, "Reading %d events\n", th->nb_events);
   for(int i=0; i<th->nb_events; i++)
     _htf_read_event(&th->events[i], thread_index, i);
 
-  printf("Reading %d sequences\n", th->nb_sequences);
+  htf_log(dbg_lvl_verbose, "Reading %d sequences\n", th->nb_sequences);
   for(int i=0; i<th->nb_sequences; i++)
     _htf_read_sequence(&th->sequences[i], thread_index, i);
 
-  printf("Reading %d loops\n", th->nb_loops);
+  htf_log(dbg_lvl_verbose, "Reading %d loops\n", th->nb_loops);
   for(int i=0; i<th->nb_loops; i++)
     _htf_read_loop(&th->loops[i], thread_index, i);
 }
@@ -181,6 +181,8 @@ void htf_storage_finalize(struct trace*trace) {
   if(! trace)
     return;
 
+  htf_log(dbg_lvl_verbose, "Write trace to path %s\n", base_dirname);
+  
   mkdir(base_dirname, 0777);
 
   char main_filename[1024];

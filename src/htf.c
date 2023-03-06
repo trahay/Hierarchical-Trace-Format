@@ -19,7 +19,6 @@
 #define SEQUENCE_SIZE_DEFAULT 1024
 #define CALLSTACK_DEPTH_DEFAULT 128
 
-static int verbose=0;
 static _Thread_local int recursion_shield = 0;
 
 static inline struct event* _htf_get_event(struct thread_trace *thread_trace,
@@ -32,25 +31,21 @@ static inline struct event* _htf_get_event(struct thread_trace *thread_trace,
 
 static inline event_id _htf_get_event_id(struct thread_trace *thread_trace,
 					 struct event *e) {
-  if(verbose)
-    printf("Searching for event {.func=%d, .event_type=%d}\n", e->function_id, e->event_type);
+  htf_log(dbg_lvl_debug, "Searching for event {.func=%d, .event_type=%d}\n", e->function_id, e->event_type);
 
   for(unsigned i = 0; i < thread_trace->nb_events; i++) {
     if(memcmp(e, &thread_trace->events[i].event, sizeof(struct event)) == 0) {
-      if(verbose)
-	printf("\t found with id=%u\n", i);
+      htf_log(dbg_lvl_debug, "\t found with id=%u\n", i);
       return (event_id) i;
     }
   }
 
   if(thread_trace->nb_events >= thread_trace->nb_allocated_events) {
-    fprintf(stderr, "error: too many event data!\n");
-    abort();
+    htf_error( "too many event data!\n");
   }
 
   event_id index = thread_trace->nb_events++;
-  if(verbose)
-    printf("\tNot found. Adding it with id=%u\n", index);
+  htf_log(dbg_lvl_debug, "\tNot found. Adding it with id=%u\n", index);
   struct event_summary *es = &thread_trace->events[index];
 
   memcpy(&es->event, e, sizeof(struct event));
@@ -81,25 +76,21 @@ static inline struct sequence* _htf_get_sequence(struct thread_trace *thread_tra
 
 static inline event_id _htf_get_sequence_id(struct thread_trace *thread_trace,
 					    struct ongoing_sequence *seq) {
-  if(verbose)
-    printf("Searching for sequence {.length=%d}\n", seq->seq.length);
+  htf_log(dbg_lvl_debug, "Searching for sequence {.length=%d}\n", seq->seq.length);
 
   for(unsigned i = 0; i < thread_trace->nb_sequences; i++) {
     if(_sequences_equal(&seq->seq, &thread_trace->sequences[i])) {
-      if(verbose)
-      	printf("\t found with id=%u\n", i);
+      htf_log(dbg_lvl_debug, "\t found with id=%u\n", i);
       return (sequence_id) i;
     }
   }
 
   if(thread_trace->nb_sequences >= thread_trace->nb_allocated_sequences) {
-    fprintf(stderr, "error: too many event data!\n");
-    abort();
+    htf_error("too many event data!\n");
   }
 
   sequence_id index = thread_trace->nb_sequences++;
-  if(verbose)
-    printf("\tNot found. Adding it with id=%u\n", index);
+  htf_log(dbg_lvl_debug, "\tNot found. Adding it with id=%u\n", index);
 
   struct sequence *s = &thread_trace->sequences[index];
   s->length = seq->seq.length;
@@ -119,7 +110,7 @@ void _htf_store_timestamp(struct thread_writer *thread_writer,
   assert(es);
 
   if(es->nb_timestamps >= es->nb_allocated_timestamps) {
-    fprintf(stderr, "Warning: realloc timestamps for event %u\n", e_id);
+    htf_warn("Warning: realloc timestamps for event %u\n", e_id);
     es->nb_allocated_timestamps *= 2;
     es->timestamps = realloc(es->timestamps, es->nb_allocated_timestamps * sizeof(timestamp_t));
   }
@@ -130,29 +121,26 @@ void _htf_store_timestamp(struct thread_writer *thread_writer,
 static void _htf_store_token(struct ongoing_sequence* seq,
 			     token_t t) {
   if(seq->seq.length >= seq->nb_allocated_tokens) {
-    fprintf(stderr, "Error: too many tokens\n");
-    abort();
+    htf_error( "too many tokens\n");
   }
-  if(verbose)
-    printf("store_token: (%d, %d)\n", TOKEN_TYPE(t), TOKEN_ID(t));
+
+  htf_log(dbg_lvl_debug, "store_token: (%d, %d)\n", TOKEN_TYPE(t), TOKEN_ID(t));
   seq->seq.token[seq->seq.length++] = t;
 }
 
 static void _htf_store_token_in_main_sequence(struct thread_writer *thread_writer,
 					      token_t t) {
   if(thread_writer->thread_trace.nb_tokens >= thread_writer->thread_trace.nb_allocated_tokens) {
-    fprintf(stderr, "Warning: realloc !\n");
+    htf_log(dbg_lvl_verbose, "Warning: realloc !\n");
     thread_writer->thread_trace.nb_allocated_tokens *= 2;
     void* ptr=realloc(thread_writer->thread_trace.tokens, sizeof(token_t) * thread_writer->thread_trace.nb_allocated_tokens);
     if(! ptr) {
-      fprintf(stderr, "Error: cannot allocate memory\n");
-      abort();
+      htf_error("cannot allocate memory\n");
     }
     thread_writer->thread_trace.tokens = ptr;    
   }
 
-  if(verbose)
-    printf("store_token: (%d, %d)\n", TOKEN_TYPE(t), TOKEN_ID(t));
+  htf_log(dbg_lvl_debug, "store_token: (%d, %d)\n", TOKEN_TYPE(t), TOKEN_ID(t));
   thread_writer->thread_trace.tokens[thread_writer->thread_trace.nb_tokens++] = t;
 }
 
@@ -165,7 +153,7 @@ static void _htf_store_event(struct thread_writer *thread_writer,
 void _htf_record_enter_function(struct thread_writer *thread_writer) {
     struct ongoing_sequence *new_seq = thread_writer->og_seq[thread_writer->cur_depth++];
     if(thread_writer->cur_depth >= thread_writer->max_depth) {
-      fprintf(stderr, "Error: depth = %d >= max_depth (%d) \n", thread_writer->cur_depth, thread_writer->max_depth);
+      htf_error("depth = %d >= max_depth (%d) \n", thread_writer->cur_depth, thread_writer->max_depth);
       abort();
     }
     new_seq->seq.length = 0;
@@ -177,8 +165,7 @@ void _htf_record_exit_function(struct thread_writer *thread_writer) {
   struct ongoing_sequence *cur_seq = thread_writer->thread_trace.ongoing_sequence;
 #if DEBUG
   if(thread_writer->cur_seq != thread_writer->og_seq[thread_writer->cur_depth-1]) {
-    fprintf(stderr, "error: cur_seq=%p, but og_seq[%d] = %p\n", thread_writer->cur_seq, thread_writer->cur_depth-1, thread_writer->og_seq[thread_writer->cur_depth-1]);
-    abort();
+    htf_error("cur_seq=%p, but og_seq[%d] = %p\n", thread_writer->cur_seq, thread_writer->cur_depth-1, thread_writer->og_seq[thread_writer->cur_depth-1]);
   }
 #endif
     
@@ -256,8 +243,7 @@ void htf_write_init_thread(struct trace* trace,
     return;
   recursion_shield++;
 
-  if(verbose)
-    printf("htf_write_init_thread\n");
+  htf_log(dbg_lvl_debug, "htf_write_init_thread\n");
 
   assert(thread_rank >= 0);
   assert(thread_rank >= trace->nb_threads);
@@ -311,8 +297,7 @@ void htf_write_init_thread(struct trace* trace,
 static token_t _get_token_in_main_sequence(struct thread_reader *reader,
 					   int index) {  
   if(index >= reader->thread_trace->nb_tokens) {
-    fprintf(stderr, "invalid index (%d) in main sequence\n", index);
-    abort();    
+    htf_error("invalid index (%d) in main sequence\n", index);  
   }
   return reader->thread_trace->tokens[index];
 }
@@ -321,13 +306,11 @@ static token_t _get_token_in_sequence(struct thread_reader *reader,
 				      sequence_id seq_id,
 				      int index) {  
   if(seq_id >= reader->thread_trace->nb_sequences) {
-    fprintf(stderr, "invalid sequence id: %d\n", seq_id);
-    abort();
+    htf_error("invalid sequence id: %d\n", seq_id);
   }
   struct sequence *s = &reader->thread_trace->sequences[seq_id];
   if(index >= s->length) {
-    fprintf(stderr, "invalid index (%d) in sequence #%d\n", index, seq_id);
-    abort();    
+    htf_error("invalid index (%d) in sequence #%d\n", index, seq_id);  
   }
   return s->token[index];
 }
@@ -336,13 +319,11 @@ static token_t _get_token_in_loop(struct thread_reader *reader,
 				  loop_id loop_id,
 				  int index) {
   if(loop_id >= reader->thread_trace->nb_loops) {
-    fprintf(stderr, "invalid loop id: %d\n", loop_id);
-    abort();
+    htf_error("invalid loop id: %d\n", loop_id);
   }
   struct loop *l = &reader->thread_trace->loops[loop_id];
   if(index >= l->nb_iterations) {
-    fprintf(stderr, "invalid index (%d) in loop #%d\n", index, loop_id);
-    abort();    
+    htf_error("invalid index (%d) in loop #%d\n", index, loop_id);  
   }
   return l->token;
 }
@@ -393,8 +374,7 @@ static token_t get_token(struct thread_reader *reader,
       break;
     }
   default:
-    fprintf(stderr, "invalid parameters\n");
-    abort();
+    htf_error("invalid parameters\n");
   }
 
 }
@@ -453,9 +433,9 @@ void htf_read_thread_iterator_init(struct thread_reader *reader,
   reader->callstack_sequence = calloc(sizeof(token_t), 100);
   reader->callstack_index = calloc(sizeof(int), 100);
 
-  if(verbose) {
-    printf("init callstack for thread %d\n", thread_index);
-    printf("The trace contains:\n");
+  if(htf_debug_level >= dbg_lvl_verbose) {
+    htf_log( dbg_lvl_verbose, "init callstack for thread %d\n", thread_index);
+    htf_log( dbg_lvl_verbose, "The trace contains:\n");
     print_token_list(reader);
   }
 
@@ -536,7 +516,7 @@ static void _get_next_event(struct thread_reader *reader) {
   if( cur_seq_id  == MAIN_SEQUENCE ) {
     /* we reached the end of trace */
     reader->callstack_depth = -1;
-    printf("End of trace !\n");
+    htf_log(dbg_lvl_verbose, "End of trace !\n");
     return;
   }
   /* we reached the end of the current sequence */
@@ -551,10 +531,6 @@ static int _htf_read_thread_next_event(struct thread_reader *reader,
     return -1;			/* TODO: return EOF */
 
   /* Get the current event */
-  //  int cur_frame = reader->callstack_depth - 1;
-  //  token_t cur_seq_id = reader->callstack_sequence[cur_frame];
-  //  assert(TOKEN_TYPE(cur_seq_id) == TYPE_SEQUENCE);
-
   token_t t = get_cur_token(reader);
 
   while(TOKEN_TYPE(t) == TYPE_SEQUENCE ||
