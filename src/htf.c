@@ -243,10 +243,7 @@ void htf_write_init(struct trace *trace, const char* dirname) {
   trace->nb_threads = 0;
   pthread_mutex_init(&trace->lock, NULL);
 
-  char* verbose_str = getenv("VERBOSE");
-  if(verbose_str)
-    verbose = 1;
-
+  htf_debug_level_init();
   htf_storage_init(dirname);
 
   recursion_shield--;

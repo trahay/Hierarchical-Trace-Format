@@ -4,6 +4,8 @@ prefix=$(dirname $(realpath $0))
 libdir="@INSTALL_LIBDIR@"
 
 debug=n
+verbose=
+
 usage()
 {
 cat << EOF
@@ -12,13 +14,21 @@ usage: $0 options
 OPTIONS:
    -?                               Show this message
    -d                               Run with gdb
+   -v                               Verbose mode
+   -V                               Ultra verbose mode
 EOF
 }
 
-while getopts 'd' OPTION; do
+while getopts 'dvV' OPTION; do
   case $OPTION in
   d)
 	debug=y
+       	;;
+  v)
+	verbose=verbose
+       	;;
+  V)
+        verbose=max
        	;;
   ?)	usage
 	exit 2
@@ -38,6 +48,9 @@ if [ x$debug = xy ]; then
 
    gdbinit_file=`mktemp`
    echo "set env @LD_PRELOAD_NAME@ $LD_PRELOAD" > $gdbinit_file
+   if [ -n "$verbose" ]; then
+       echo "set env VERBOSE $verbose" > $gdbinit_file
+   fi
    echo "echo \n" >> $gdbinit_file
    echo "echo trace.sh: hook loaded\n" >> $gdbinit_file
 
@@ -45,5 +58,8 @@ if [ x$debug = xy ]; then
    rm $gdbinit_file
 
 else
+    if [ -n "$verbose" ]; then
+	export VERBOSE=$verbose
+    fi
     @LD_PRELOAD_NAME@=$LD_PRELOAD $@
 fi   

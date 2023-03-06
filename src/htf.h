@@ -2,6 +2,7 @@
 #define HTF_H
 
 #include "htf_timestamp.h"
+#include "htf_dbg.h"
 
 /* A token is either:
    - an event

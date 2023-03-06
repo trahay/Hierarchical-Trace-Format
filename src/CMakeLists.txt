@@ -12,6 +12,7 @@ add_library(htf
 
 set(HTF_HEADERS
     htf.h
+    htf_dbg.h
     htf_timestamp.h
 )
 
@@ -20,6 +21,7 @@ target_sources(
 PRIVATE
     htf_timestamp.c
     htf_storage.c
+    htf_dbg.c
     htf.c
 PUBLIC
     ${HTF_HEADERS}
