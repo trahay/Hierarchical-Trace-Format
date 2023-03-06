@@ -6,7 +6,7 @@
 #include "tracer.h"
 
 static struct trace trace;
-static _Thread_local struct thread_trace* thread_trace = NULL;
+static _Thread_local struct thread_writer* thread_writer = NULL;
 static _Thread_local int thread_rank;
 static _Atomic int nb_threads = 0;
 static int verbose=0;
@@ -16,25 +16,25 @@ void _init_thread() {
   if(! initialized) return;
 
   thread_rank = nb_threads++;
-  thread_trace = malloc(sizeof(struct thread_trace));
+  thread_writer = malloc(sizeof(struct thread_writer));
   htf_write_init_thread(&trace,
-			thread_trace,
+			thread_writer,
 			thread_rank);    
 }
 
 void enter_function(enum intercepted_function f, void* ptr) {
   if(! initialized) return;
 
-  if(thread_trace == NULL)
+  if(thread_writer == NULL)
     _init_thread();
 
-  htf_record_event(thread_trace, function_entry, (int)f);
+  htf_record_event(thread_writer, function_entry, (int)f);
 }
 
 void leave_function(enum intercepted_function f, void* ptr) {
   if(! initialized) return;
 
-  htf_record_event(thread_trace, function_exit, (int)f);
+  htf_record_event(thread_writer, function_exit, (int)f);
 }
 
 void* get_callback(const char*fname){

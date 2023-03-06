@@ -107,7 +107,15 @@ struct trace {
   pthread_mutex_t lock;
 };
 
-struct thread_trace_reader {
+struct thread_writer {
+  struct thread_trace thread_trace;
+  struct ongoing_sequence **og_seq;
+  int cur_depth;
+  int max_depth;
+  int thread_rank;
+};
+
+struct thread_reader {
   struct trace *trace;
   struct thread_trace *thread_trace;
 
@@ -121,10 +129,10 @@ struct thread_trace_reader {
 /* Initialize a trace in write mode */
 void htf_write_init(struct trace *trace, const char* dirname);
 void htf_write_init_thread(struct trace* trace,
-			   struct thread_trace *thread_trace,
+			   struct thread_writer *thread_writer,
 			   int thread_rank);
 
-void htf_record_event(struct thread_trace* thread_trace,
+void htf_record_event(struct thread_writer* thread_writer,
 		      enum event_type event_type,
 		      int function_id);
 void htf_write_finalize(struct trace* trace);
@@ -138,19 +146,19 @@ void htf_storage_finalize(struct trace*trace);
 
 void htf_read_trace(struct trace* trace, char* filename);
 
-void htf_read_thread_iterator_init(struct thread_trace_reader *reader,
+void htf_read_thread_iterator_init(struct thread_reader *reader,
 				   struct trace* trace,
 				   int thread_index);
 
 /* return the current event in a thread and move to the next one.
  * Return -1 in case of an error (such as the end of the trace)
  */
-int htf_read_thread_next_event(struct thread_trace_reader *reader,
+int htf_read_thread_next_event(struct thread_reader *reader,
 			       struct event_occurence *e);
 /* return the current event in a thread.
  * Return -1 in case of an error (such as the end of the trace)
  */
-int htf_read_thread_cur_event(struct thread_trace_reader *reader,
+int htf_read_thread_cur_event(struct thread_reader *reader,
 			      struct event_occurence *e);
 
 #endif /* EVENT_H */
