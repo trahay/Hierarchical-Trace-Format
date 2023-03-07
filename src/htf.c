@@ -21,6 +21,10 @@
 
 static _Thread_local int recursion_shield = 0;
 
+static void print_token_array(struct thread_trace *thread_trace, token_t* token_array,
+			      int index_start, int index_stop);
+static void print_token(struct thread_trace *thread_trace, token_t token);
+
 static inline struct event* _htf_get_event(struct thread_trace *thread_trace,
 					   event_id evt_id) {
   struct event* evt = NULL;
@@ -31,11 +35,11 @@ static inline struct event* _htf_get_event(struct thread_trace *thread_trace,
 
 static inline event_id _htf_get_event_id(struct thread_trace *thread_trace,
 					 struct event *e) {
-  htf_log(dbg_lvl_debug, "Searching for event {.func=%d, .event_type=%d}\n", e->function_id, e->event_type);
+  htf_log(dbg_lvl_max, "Searching for event {.func=%d, .event_type=%d}\n", e->function_id, e->event_type);
 
   for(unsigned i = 0; i < thread_trace->nb_events; i++) {
     if(memcmp(e, &thread_trace->events[i].event, sizeof(struct event)) == 0) {
-      htf_log(dbg_lvl_debug, "\t found with id=%u\n", i);
+      htf_log(dbg_lvl_max, "\t found with id=%u\n", i);
       return (event_id) i;
     }
   }
@@ -45,7 +49,7 @@ static inline event_id _htf_get_event_id(struct thread_trace *thread_trace,
   }
 
   event_id index = thread_trace->nb_events++;
-  htf_log(dbg_lvl_debug, "\tNot found. Adding it with id=%u\n", index);
+  htf_log(dbg_lvl_max, "\tNot found. Adding it with id=%u\n", index);
   struct event_summary *es = &thread_trace->events[index];
 
   memcpy(&es->event, e, sizeof(struct event));
@@ -56,14 +60,20 @@ static inline event_id _htf_get_event_id(struct thread_trace *thread_trace,
   return index;
 }
 
+/* return 1 if array1 and array1 are equal */
+static inline int _arrays_equal(token_t *array1, int size1,
+				token_t* array2, int size2) {
+  if(size1 != size2)
+    return 0;
+  return memcmp(array1, array2, sizeof(token_t)*size1) == 0;
+}
+
 /* return 1 if s1 and s2 are equal */
 static inline int _sequences_equal(struct sequence *s1,
 				   struct sequence *s2) {
   if((!s1) || (!s2))
     return 0;
-  if(s1->length != s2->length)
-    return 0;
-  return memcmp(s1->token, s2->token, sizeof(token_t)*s1->length) == 0;
+  return _arrays_equal(s1->token, s1->length, s2->token, s2->length);
 }
 
 static inline struct sequence* _htf_get_sequence(struct thread_trace *thread_trace,
@@ -74,12 +84,15 @@ static inline struct sequence* _htf_get_sequence(struct thread_trace *thread_tra
   return seq;
 }
 
-static inline event_id _htf_get_sequence_id(struct thread_trace *thread_trace,
-					    struct ongoing_sequence *seq) {
-  htf_log(dbg_lvl_debug, "Searching for sequence {.length=%d}\n", seq->seq.length);
+static inline sequence_id _htf_get_sequence_id_from_array(struct thread_trace *thread_trace,
+						       token_t* token_array,
+						       int array_len) {
+  htf_log(dbg_lvl_debug, "Searching for sequence {.length=%d}\n", array_len);
 
   for(unsigned i = 0; i < thread_trace->nb_sequences; i++) {
-    if(_sequences_equal(&seq->seq, &thread_trace->sequences[i])) {
+    if(_arrays_equal(token_array,  array_len,
+		     thread_trace->sequences[i].token,
+		     thread_trace->sequences[i].length)) {
       htf_log(dbg_lvl_debug, "\t found with id=%u\n", i);
       return (sequence_id) i;
     }
@@ -93,9 +106,44 @@ static inline event_id _htf_get_sequence_id(struct thread_trace *thread_trace,
   htf_log(dbg_lvl_debug, "\tNot found. Adding it with id=%u\n", index);
 
   struct sequence *s = &thread_trace->sequences[index];
-  s->length = seq->seq.length;
+  s->length = array_len;
   s->token = malloc(sizeof(token_t)*s->length);
-  memcpy(s->token, seq->seq.token, sizeof(token_t)*seq->seq.length);
+  memcpy(s->token, token_array, sizeof(token_t)*array_len);
+
+  return index;
+}
+
+static inline sequence_id _htf_get_sequence_id(struct thread_trace *thread_trace,
+					       struct ongoing_sequence *seq) {
+  return _htf_get_sequence_id_from_array(thread_trace, seq->seq.token, seq->seq.length);
+}
+
+static inline struct loop* _htf_get_loop(struct thread_trace *thread_trace,
+					     loop_id loop_id) {
+  struct loop* loop = NULL;
+  if(loop_id < thread_trace->nb_loops)
+    loop = &thread_trace->loops[loop_id];
+  return loop;
+}
+
+static inline loop_id _htf_create_loop_id(struct thread_writer *thread_writer,
+					   int start_index,
+					   int loop_len) {
+
+  if(thread_writer->thread_trace.nb_loops >= thread_writer->thread_trace.nb_allocated_loops) {
+    htf_error("too many loops!\n");
+  }
+
+  loop_id index = thread_writer->thread_trace.nb_loops++;
+  htf_log(dbg_lvl_debug, "\tNot found. Adding it with id=%u\n", index);
+
+  sequence_id sid =  _htf_get_sequence_id_from_array(&thread_writer->thread_trace,
+						     &thread_writer->thread_trace.tokens[start_index],
+						     loop_len);
+  
+  struct loop *l = &thread_writer->thread_trace.loops[index];
+  l->nb_iterations = 1;
+  l->token = TOKENIZE(TYPE_SEQUENCE, sid);
 
   return index;
 }
@@ -128,6 +176,113 @@ static void _htf_store_token(struct ongoing_sequence* seq,
   seq->seq.token[seq->seq.length++] = t;
 }
 
+static void _htf_loop_add_iteration(struct thread_writer *thread_writer,
+				    loop_id l,
+				    sequence_id sid) {
+  struct loop* loop = _htf_get_loop(&thread_writer->thread_trace, l);
+
+  struct sequence *s1 = _htf_get_sequence(&thread_writer->thread_trace, sid);
+  struct sequence *s2 = _htf_get_sequence(&thread_writer->thread_trace,
+					  TOKEN_ID(loop->token));
+  htf_assert(_sequences_equal(s1, s2));
+  loop->nb_iterations++;
+}
+
+static void _htf_create_loop(struct thread_writer *thread_writer,
+			     int loop_len,
+			     int index_first_iteration,
+			     int index_second_iteration) {
+
+  if(index_first_iteration >  index_second_iteration) {
+    int tmp = index_second_iteration;
+    index_second_iteration = index_first_iteration;
+    index_first_iteration = tmp;
+  }
+
+  loop_id l =  _htf_create_loop_id(thread_writer,
+				   index_first_iteration,
+				   loop_len);
+
+  //  x x x e1 e2 e3 e4 e1 e2 e3 e4
+  //  x x x l1
+
+  thread_writer->thread_trace.tokens[index_first_iteration] = TOKENIZE(TYPE_LOOP, l);
+
+  sequence_id sid =  _htf_get_sequence_id_from_array(&thread_writer->thread_trace,
+						     &thread_writer->thread_trace.tokens[index_second_iteration],
+						     loop_len);
+
+  _htf_loop_add_iteration(thread_writer,
+			  l,
+			  sid);
+  thread_writer->thread_trace.nb_tokens = index_first_iteration + 1;
+}
+
+static void _htf_find_loop(struct thread_writer *thread_writer) {
+
+  int cur_index = thread_writer->thread_trace.nb_tokens-1;
+  int max_len = 10; 		/* TODO: don't hardcode this */
+
+  for(int loop_len=1; loop_len < max_len; loop_len++) {
+
+    /* search for a loop of loop_len tokens */
+  
+    int s1_start = cur_index+1 - loop_len;
+    int s2_start = cur_index+1 - 2*loop_len;
+
+    if(s1_start > 0) {
+      int loop_start = s1_start - 1;
+      /* first, check if there's a loop that start at loop_start*/
+      if(TOKEN_TYPE(thread_writer->thread_trace.tokens[loop_start]) == TYPE_LOOP) {
+	loop_id l = TOKEN_ID(thread_writer->thread_trace.tokens[loop_start]);
+	struct loop *loop = _htf_get_loop(&thread_writer->thread_trace, l);
+	htf_assert(loop);
+
+	struct sequence *seq = _htf_get_sequence(&thread_writer->thread_trace, TOKEN_ID(loop->token));
+	htf_assert(seq);
+	
+	if(_arrays_equal(&thread_writer->thread_trace.tokens[s1_start], loop_len,
+			 seq->token,  seq->length)) {
+
+	  /* the current sequence is just another iteration of the loop
+	   * remove the sequence, and increment the iteration count
+	   */
+	  sequence_id sid =  _htf_get_sequence_id_from_array(&thread_writer->thread_trace,
+							     &thread_writer->thread_trace.tokens[s1_start],
+							     loop_len);
+	  _htf_loop_add_iteration(thread_writer, l, sid);
+	  thread_writer->thread_trace.nb_tokens = s1_start;
+	  cur_index = thread_writer->thread_trace.nb_tokens-1;
+	  return;
+	}
+      }
+    }
+
+    if(s2_start >= 0) {
+      /* search for a loop of loop_len tokens */
+
+      int is_loop = 1;
+      /* search for new loops */
+      is_loop = _arrays_equal(&thread_writer->thread_trace.tokens[s1_start], loop_len,
+			      &thread_writer->thread_trace.tokens[s2_start], loop_len);      
+
+      if(is_loop) {
+	if(htf_debug_level >= dbg_lvl_debug) {
+	  printf("Found a loop of len %d:\n", loop_len);
+	  print_token_array(&thread_writer->thread_trace, thread_writer->thread_trace.tokens,
+			    s1_start, s1_start+loop_len);
+	  print_token_array(&thread_writer->thread_trace, thread_writer->thread_trace.tokens,
+			    s2_start, s2_start + loop_len);
+	  printf("\n");
+	}
+
+	_htf_create_loop(thread_writer, loop_len, s1_start, s2_start);
+      }    
+    }
+  }
+  
+}
+			   
 static void _htf_store_token_in_main_sequence(struct thread_writer *thread_writer,
 					      token_t t) {
   if(thread_writer->thread_trace.nb_tokens >= thread_writer->thread_trace.nb_allocated_tokens) {
@@ -142,6 +297,7 @@ static void _htf_store_token_in_main_sequence(struct thread_writer *thread_write
 
   htf_log(dbg_lvl_debug, "store_token: (%d, %d)\n", TOKEN_TYPE(t), TOKEN_ID(t));
   thread_writer->thread_trace.tokens[thread_writer->thread_trace.nb_tokens++] = t;
+  _htf_find_loop(thread_writer);
 }
 
 static void _htf_store_event(struct thread_writer *thread_writer,
@@ -328,7 +484,7 @@ static token_t _get_token_in_loop(struct thread_reader *reader,
   return l->token;
 }
 
-static void print_token(struct thread_reader *reader, token_t token) {
+static void print_token(struct thread_trace *thread_trace, token_t token) {
   switch(TOKEN_TYPE(token)) {
   case TYPE_EVENT:
     {
@@ -336,7 +492,7 @@ static void print_token(struct thread_reader *reader, token_t token) {
 		   (et)==function_exit? 'L':	\
 		   'S'))
 
-      struct event* e =  _htf_get_event(reader->thread_trace, TOKEN_ID(token));
+      struct event* e =  _htf_get_event(thread_trace, TOKEN_ID(token));
       printf("E_%d (%c %d)", TOKEN_ID(token), ET2C(e->event_type), e->function_id);
       break;
     }
@@ -379,6 +535,18 @@ static token_t get_token(struct thread_reader *reader,
 
 }
 
+static void print_token_array(struct thread_trace *thread_trace, token_t* token_array,
+			      int index_start, int index_stop) {
+  if(index_start < 0)
+    index_start=0;
+
+  for(int i=0; i<index_stop-index_start; i++) {
+    print_token(thread_trace, token_array[index_start+i]);
+    printf(" ");
+  }
+  printf("\n");
+}
+
 static void print_callstack(struct thread_reader *reader)  __attribute__((unused));
 static void print_callstack(struct thread_reader *reader) {
   printf("# Callstack (depth: %d) ------------\n",   reader->callstack_depth);
@@ -387,7 +555,7 @@ static void print_callstack(struct thread_reader *reader) {
     token_t sequence = reader->callstack_sequence[i];
     int index = reader->callstack_index[i];
     token_t t = get_token(reader, sequence, index);
-    print_token(reader, t);
+    print_token(reader->thread_trace, t);
     printf("\n");
   }
   
@@ -399,7 +567,7 @@ static void print_sequence(struct thread_reader *reader, sequence_id seq_id) {
 
   printf("#Sequence %d (%d tokens)-------------\n", seq_id, seq->length);
   for(int i=0; i<seq->length; i++) {
-    print_token(reader, seq->token[i]);
+    print_token(reader->thread_trace, seq->token[i]);
     printf(" ");
   }
   printf("\n");
@@ -408,7 +576,7 @@ static void print_sequence(struct thread_reader *reader, sequence_id seq_id) {
 static void print_token_list(struct thread_reader *reader) {
   printf("#Token list (%d tokens)-------------\n", reader->thread_trace->nb_tokens);
   for(int i=0; i<reader->thread_trace->nb_tokens; i++) {
-    print_token(reader, reader->thread_trace->tokens[i]);
+    print_token(reader->thread_trace, reader->thread_trace->tokens[i]);
     printf(" ");
   }
   printf("\n");
@@ -418,6 +586,7 @@ static void print_token_list(struct thread_reader *reader) {
 static void init_callstack(struct thread_reader *reader) {
   reader->callstack_depth = 1;
   reader->callstack_index[0] = 0;
+  reader->callstack_loop_iteration[0] = 0;
   reader->callstack_sequence[0] = MAIN_SEQUENCE;
 }
 
@@ -430,8 +599,10 @@ void htf_read_thread_iterator_init(struct thread_reader *reader,
 
   reader->event_index = calloc(sizeof(int), trace->threads[thread_index]->nb_events);
 
+  /* TODO: don't hardcode the max depth */
   reader->callstack_sequence = calloc(sizeof(token_t), 100);
   reader->callstack_index = calloc(sizeof(int), 100);
+  reader->callstack_loop_iteration = calloc(sizeof(int), 100);
 
   if(htf_debug_level >= dbg_lvl_verbose) {
     htf_log( dbg_lvl_verbose, "init callstack for thread %d\n", thread_index);
@@ -453,7 +624,7 @@ static token_t get_cur_token(struct thread_reader *reader) {
 static void print_current_event(struct thread_reader *reader) __attribute__((unused));
 static void print_current_event(struct thread_reader *reader) {
   token_t t = get_cur_token(reader);
-  print_token(reader, t);
+  print_token(reader->thread_trace, t);
 }
 
 /* enter a block (push a new frame in the callstack) */
@@ -467,18 +638,25 @@ static void enter_block(struct thread_reader *reader, token_t new_block) {
 
   cur_frame = reader->callstack_depth - 1;
   reader->callstack_index[cur_frame] = 0;
+  reader->callstack_loop_iteration[cur_frame] = 0;
   reader->callstack_sequence[cur_frame] = new_block;
 
 }
 
 static void leave_block(struct thread_reader *reader) {
+
   reader->callstack_depth--; // pop frame
+
+  if(reader->callstack_depth <= 0) {
+    reader->callstack_depth = -1;
+    return;
+  }
 }
 
 /* return 1 if there are more events in the current sequence */
-static int reached_end_of_sequence(struct thread_reader *reader,
-				   int cur_index,
-				   token_t seq_id) {
+static int end_of_a_sequence(struct thread_reader *reader,
+			int cur_index,
+			token_t seq_id) {
   if(seq_id == MAIN_SEQUENCE) {
     return cur_index >= reader->thread_trace->nb_tokens;
   }
@@ -488,6 +666,7 @@ static int reached_end_of_sequence(struct thread_reader *reader,
     struct sequence* s = _htf_get_sequence(reader->thread_trace, sequence);
     return cur_index >= s->length;
   }
+
   return 1;
 }
 
@@ -495,33 +674,59 @@ static void _get_next_event(struct thread_reader *reader) {
   int cur_frame = reader->callstack_depth - 1;
   int cur_index = reader->callstack_index[cur_frame];
   token_t cur_seq_id = reader->callstack_sequence[cur_frame];
-  assert(TOKEN_TYPE(cur_seq_id) == TYPE_SEQUENCE);
+  assert(TOKEN_TYPE(cur_seq_id) == TYPE_SEQUENCE ||
+	 TOKEN_TYPE(cur_seq_id) == TYPE_LOOP);
+  
+  while( end_of_a_sequence(reader, cur_index+1, cur_seq_id)) {
+    /* we reached the end of the current sequence */
 
-  if(! reached_end_of_sequence(reader, cur_index+1, cur_seq_id)) {
-    /* we are in the middle of a sequence */
+    leave_block(reader);
 
-    /* just move to the next event in the sequence */
-    reader->callstack_index[cur_frame]++;
+    /* Did we reach the end of the trace ?  */
+    if(reader->callstack_depth <= 0) {
+      reader->callstack_depth = -1;
+      return;
+    }
 
-    /* if it's a loop/sequence, find the first event */
+    /* Is the sequence in a loop ? */
     token_t t = get_cur_token(reader);
-    while(TOKEN_TYPE(t) == TYPE_SEQUENCE ||
-	  TOKEN_TYPE(t) == TYPE_LOOP) {
-      enter_block(reader, t);
+    while(TOKEN_TYPE(t) == TYPE_LOOP) {
+      /* if we are in the loop, increment the iteration count and
+       * check if we reached the end of the loop
+       */
+      cur_frame = reader->callstack_depth - 1;
+      reader->callstack_loop_iteration[cur_frame]++; // increment the iteration count
+
+      loop_id l = TOKEN_ID(t);
+      struct loop* loop = _htf_get_loop(reader->thread_trace, l);
+      if( reader->callstack_loop_iteration[cur_frame] < loop->nb_iterations) {
+	/* there are more iterations in the loop */
+	goto enter_sequence;
+      }
+
+      /* end of the loop */
+      leave_block(reader);
+      if(reader->callstack_depth <= 0) {
+	reader->callstack_depth = -1;
+	return;
+      }
       t = get_cur_token(reader);
-    }    
-    return;
+    }
   }
 
-  if( cur_seq_id  == MAIN_SEQUENCE ) {
-    /* we reached the end of trace */
-    reader->callstack_depth = -1;
-    htf_log(dbg_lvl_verbose, "End of trace !\n");
-    return;
-  }
-  /* we reached the end of the current sequence */
-  leave_block(reader);
-  _get_next_event(reader);
+  /* we are in the middle of a sequence */
+
+  /* just move to the next event in the sequence */
+  reader->callstack_index[cur_frame]++;
+
+ enter_sequence:
+  /* if it's a loop/sequence, find the first event */
+  token_t t = get_cur_token(reader);
+  while(TOKEN_TYPE(t) == TYPE_SEQUENCE ||
+	TOKEN_TYPE(t) == TYPE_LOOP) {
+    enter_block(reader, t);
+    t = get_cur_token(reader);
+  }    
 }
 
 static int _htf_read_thread_next_event(struct thread_reader *reader,

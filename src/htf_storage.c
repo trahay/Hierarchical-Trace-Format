@@ -47,6 +47,8 @@ static FILE* _htf_get_event_file(int thread_index, int event_id, char* mode) {
 static void _htf_store_event(struct event_summary *e, int thread_index, int event_id) {
   FILE* file = _htf_get_event_file(thread_index, event_id, "w");
 
+  htf_log(dbg_lvl_debug, "\tStore event %x {.nb_timestamps=%d}\n", event_id, e->nb_timestamps);
+
   fwrite(&e->event, sizeof(struct event), 1, file);
   fwrite(&e->nb_timestamps, sizeof(e->nb_timestamps), 1, file);
   fwrite(e->timestamps, sizeof(e->timestamps[0]), e->nb_timestamps, file);
@@ -61,7 +63,9 @@ static void _htf_read_event(struct event_summary *e, int thread_index, int event
   fread(&e->nb_timestamps, sizeof(e->nb_timestamps), 1, file);
   e->timestamps = malloc(e->nb_timestamps * sizeof(timestamp_t));
   fread(e->timestamps, sizeof(e->timestamps[0]), e->nb_timestamps, file);
-  
+
+  htf_log(dbg_lvl_debug, "\tLoad event %x {.nb_timestamps=%d}\n", event_id, e->nb_timestamps);
+
   fclose(file);
 }
 
@@ -74,6 +78,8 @@ static FILE* _htf_get_sequence_file(int thread_index, int sequence_id, char* mod
 
 static void _htf_store_sequence(struct sequence *s, int thread_index, int sequence_id) {
   FILE* file = _htf_get_sequence_file(thread_index, sequence_id, "w");
+  htf_log(dbg_lvl_debug, "\tStore sequence %x {.length=%d}\n", sequence_id, s->length);
+  
   fwrite(&s->length, sizeof(s->length), 1, file);
   fwrite(s->token, sizeof(s->token[0]), s->length, file);  
   fclose(file);
@@ -85,6 +91,8 @@ static void _htf_read_sequence(struct sequence *s, int thread_index, int sequenc
   s->token = malloc(sizeof(token_t) * s->length);
   fread(s->token, sizeof(token_t), s->length, file);  
   fclose(file);
+
+  htf_log(dbg_lvl_debug, "\tLoad sequence %x {.length=%d}\n", sequence_id, s->length);
 }
 
 
@@ -97,14 +105,21 @@ static FILE* _htf_get_loop_file(int thread_index, int loop_id, char* mode) {
 
 static void _htf_store_loop(struct loop *l, int thread_index, int loop_id) {
   FILE* file = _htf_get_loop_file(thread_index, loop_id, "w");
-  fwrite(&l, sizeof(l), 1, file);
+  htf_log(dbg_lvl_debug, "\tStore loop %x {.nb_iterations=%d, .token=%x}\n",
+	  loop_id, l->nb_iterations, l->token );
+
+  fwrite(&l->nb_iterations, sizeof(l->nb_iterations), 1, file);
+  fwrite(&l->token, sizeof(l->token), 1, file);
   fclose(file);
 }
 
 static void _htf_read_loop(struct loop *l, int thread_index, int loop_id) {
   FILE* file = _htf_get_loop_file(thread_index, loop_id, "r");
-  fread(&l, sizeof(l), 1, file);
+  fread(&l->nb_iterations, sizeof(l->nb_iterations), 1, file);
+  fread(&l->token, sizeof(l->token), 1, file);
   fclose(file);
+  htf_log(dbg_lvl_debug, "\tLoad loop %x {.nb_iterations=%d, .token=%x}\n",
+	  loop_id, l->nb_iterations, l->token );
 }
 
 

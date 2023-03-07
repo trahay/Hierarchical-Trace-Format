@@ -122,6 +122,8 @@ struct thread_reader {
 
   token_t *callstack_sequence;	/* each entry contains the sequence/loop being read */
   int     *callstack_index;	/* each entry contains the index in the sequence or the loop iteration */
+  int     *callstack_loop_iteration;	/* each entry contains the number of iteration of the loop at the corresponding frame */
+
   int     callstack_depth;
 
   int *event_index;

@@ -95,7 +95,7 @@ int main(int argc, char**argv) {
 
   for (int i = 1; i < argc; i++) {
     if (!strcmp(argv[i], "-v")) {
-      htf_debug_level_set(dbg_lvl_verbose);
+      htf_debug_level_set(dbg_lvl_debug);
       nb_opts++;
     } else if (!strcmp(argv[i], "-T")) {
       per_thread = 1;
