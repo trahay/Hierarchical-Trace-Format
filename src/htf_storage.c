@@ -78,21 +78,29 @@ static FILE* _htf_get_sequence_file(int thread_index, sequence_id_t sequence_id,
 
 static void _htf_store_sequence(struct sequence *s, int thread_index, sequence_id_t sequence_id) {
   FILE* file = _htf_get_sequence_file(thread_index, sequence_id, "w");
-  htf_log(dbg_lvl_debug, "\tStore sequence %x {.length=%d}\n", ID(sequence_id), s->length);
+  htf_log(dbg_lvl_debug, "\tStore sequence %x {.size=%d}\n", ID(sequence_id), s->size);
   
-  fwrite(&s->length, sizeof(s->length), 1, file);
-  fwrite(s->token, sizeof(s->token[0]), s->length, file);  
+  fwrite(&s->size, sizeof(s->size), 1, file);
+  fwrite(s->token, sizeof(s->token[0]), s->size, file);  
   fclose(file);
 }
 
 static void _htf_read_sequence(struct sequence *s, int thread_index, sequence_id_t sequence_id) {
   FILE* file = _htf_get_sequence_file(thread_index, sequence_id, "r");
-  fread(&s->length, sizeof(s->length), 1, file);
-  s->token = malloc(sizeof(token_t) * s->length);
-  fread(s->token, sizeof(token_t), s->length, file);  
+  fread(&s->size, sizeof(s->size), 1, file);
+  s->token = malloc(sizeof(token_t) * s->size);
+  s->allocated = s->size;
+  fread(s->token, sizeof(token_t), s->size, file);  
   fclose(file);
 
-  htf_log(dbg_lvl_debug, "\tLoad sequence %x {.length=%d}\n", ID(sequence_id), s->length);
+  htf_log(dbg_lvl_debug, "\tLoad sequence %x {.size=%d}\n", ID(sequence_id), s->size);
+
+  if(htf_debug_level >= dbg_lvl_debug) {
+    for(int i = 0; i<s->size && i< 15; i++) {
+      printf("{%x.%x} ", TOKEN_TYPE(s->token[i]), TOKEN_ID(s->token[i]));
+    }
+    printf("\n");
+  }
 }
 
 
@@ -134,15 +142,12 @@ static void _htf_store_thread_trace(struct trace *trace, int thread_index) {
 
   struct thread_trace *th = trace->threads[thread_index];
 
-  htf_log(dbg_lvl_verbose, "\tThread %d: {.nb_tokens=%d, .nb_events=%d, .nb_sequences=%d, .nb_loops=%d}\n",
-	  thread_index, th->nb_tokens, th->nb_events,  th->nb_sequences, th->nb_loops);
+  htf_log(dbg_lvl_verbose, "\tThread %d: {.nb_events=%d, .nb_sequences=%d, .nb_loops=%d}\n",
+	  thread_index, th->nb_events,  th->nb_sequences, th->nb_loops);
 
-  fwrite(&th->nb_tokens, sizeof(th->nb_tokens), 1, token_file);
   fwrite(&th->nb_events, sizeof(th->nb_events), 1, token_file);
   fwrite(&th->nb_sequences, sizeof(th->nb_sequences), 1, token_file);
   fwrite(&th->nb_loops, sizeof(th->nb_loops), 1, token_file);
-
-  fwrite(th->tokens, sizeof(token_t), th->nb_tokens, token_file);
   fclose(token_file);
 
   char dir_filename[1024];
@@ -164,17 +169,13 @@ static void _htf_read_thread_trace(struct trace *trace, int thread_index) {
 
   trace->threads[thread_index] = malloc(sizeof(struct thread_trace));
   struct thread_trace *th = trace->threads[thread_index];
-  fread(&th->nb_tokens, sizeof(th->nb_tokens), 1, token_file);
   fread(&th->nb_events, sizeof(th->nb_events), 1, token_file);
   fread(&th->nb_sequences, sizeof(th->nb_sequences), 1, token_file);
   fread(&th->nb_loops, sizeof(th->nb_loops), 1, token_file);
 
-  th->tokens = malloc(sizeof(token_t) * th->nb_tokens);
   th->events = malloc(sizeof(struct event_summary) * th->nb_events);
   th->sequences = malloc(sizeof(struct sequence) * th->nb_sequences);
   th->loops = malloc(sizeof(struct loop) * th->nb_loops);
-
-  fread(th->tokens, sizeof(token_t), th->nb_tokens, token_file);
   fclose(token_file);
 
   htf_log(dbg_lvl_verbose, "Reading %d events\n", th->nb_events);

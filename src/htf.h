@@ -39,7 +39,8 @@ typedef struct loop_id {
   token_id_t id : 30;
 } loop_id_t;
 
-#define TOKEN_ID_INVALID    0x3fffffff
+//#define TOKEN_ID_INVALID    0x3fffffff
+#define TOKEN_ID_INVALID    0x3deadbee
 #define EVENT_ID_INVALID    TOKEN_ID_INVALID
 #define SEQUENCE_ID_INVALID TOKEN_ID_INVALID
 #define LOOP_ID_INVALID     TOKEN_ID_INVALID
@@ -52,12 +53,16 @@ typedef struct loop_id {
 #define TOKEN_ID(t) ( (t).id)
 
 /* build a token */
-#define TOKENIZE(_type, _id) ((token_t) {.type=_type, .id=*(token_id_t*)(& _id )})
+static inline token_t TOKENIZE(token_type_t t, token_id_t id) { return (token_t) {.type=t, .id=id};} 
 
 /* convert an index to an event_id_t */
-#define EVENT_ID(_id)    ((event_id_t) {.id=*(token_id_t*)(& _id)})
-#define SEQUENCE_ID(_id) ((sequence_id_t) {.id=*(token_id_t*)(& _id)})
-#define LOOP_ID(_id)     ((loop_id_t) {.id=*(token_id_t*)(& _id)})
+static inline event_id_t EVENT_ID(int index) { return (event_id_t) {.id=index};}
+static inline sequence_id_t SEQUENCE_ID(int index) {return (sequence_id_t) {.id=index};}
+static inline loop_id_t LOOP_ID(int index) { return (loop_id_t) {.id=index};}
+
+static inline event_id_t TOKEN_TO_EVENT_ID(token_t t) { return (event_id_t) {.id=TOKEN_ID(t)};}
+static inline sequence_id_t TOKEN_TO_SEQUENCE_ID(token_t t) { return (sequence_id_t) {.id=TOKEN_ID(t)};}
+static inline loop_id_t TOKEN_TO_LOOP_ID(token_t t) { return (loop_id_t) {.id=TOKEN_ID(t)};}
 
 #define IS_MAIN_SEQUENCE(_s) (SEQUENCE_ID(_s).id == SEQUENCE_ID_INVALID)
 
@@ -82,14 +87,9 @@ struct event {
 /*************************** Sequence **********************/
 
 struct sequence {
-  unsigned length;
   token_t *token;		/* TODO: don't use a pointer here! */
-};
-
-struct ongoing_sequence {
-  struct sequence seq;
-  int nb_allocated_tokens;
-  struct ongoing_sequence* enclosing_seq;  
+  unsigned size;
+  unsigned allocated;
 };
 
 /*************************** Loop **********************/
@@ -114,12 +114,7 @@ struct event_summary {
 
 struct thread_trace {
   struct trace *trace;
-  token_t *tokens;
-  unsigned nb_allocated_tokens;
-  unsigned nb_tokens;
 
-  struct ongoing_sequence *ongoing_sequence;
-  
   struct event_summary *events;
   unsigned nb_allocated_events;
   unsigned nb_events;
@@ -141,7 +136,7 @@ struct trace {
 
 struct thread_writer {
   struct thread_trace thread_trace;
-  struct ongoing_sequence **og_seq;
+  struct sequence **og_seq;
   int cur_depth;
   int max_depth;
   int thread_rank;
@@ -155,7 +150,7 @@ struct thread_reader {
   int     *callstack_index;	/* each entry contains the index in the sequence or the loop iteration */
   int     *callstack_loop_iteration;	/* each entry contains the number of iteration of the loop at the corresponding frame */
 
-  int     callstack_depth;
+  int     current_frame;
 
   int *event_index;
 };

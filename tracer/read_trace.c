@@ -121,7 +121,7 @@ int main(int argc, char**argv) {
   htf_read_trace(&trace, trace_name);
 
   if(per_thread) {
-    for(int i=1; i<trace.nb_threads; i++) {
+    for(int i=0; i<trace.nb_threads; i++) {
       print_thread_trace(&trace, i);
     }
   } else {
