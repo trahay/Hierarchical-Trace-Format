@@ -10,25 +10,56 @@
    - a loop (a repetition of sequences)
 */
 
-typedef int event_id;
-typedef int sequence_id;
-typedef int loop_id;
-
-#define EVENT_ID_INVALID ((unsigned)-1)
 
 /* Token types */
-#define TYPE_INVALID  0
-#define TYPE_EVENT    1
-#define TYPE_SEQUENCE 2
-#define TYPE_LOOP     3
+typedef enum token_type {
+  TYPE_INVALID  = 0,
+  TYPE_EVENT    = 1,
+  TYPE_SEQUENCE = 2,
+  TYPE_LOOP     = 3
+} token_type_t;
 
-/* identify a token */
-typedef uint32_t token_t;
-#define TOKEN_TYPE(t) ( (t) >> 30)
-#define TOKEN_ID(t) ( (t) & (~(3<<30)))
-#define TOKENIZE(type, id) ((type)<<30 | TOKEN_ID(id))
+typedef uint32_t token_id_t;
 
-#define MAIN_SEQUENCE TOKENIZE(TYPE_SEQUENCE, EVENT_ID_INVALID)
+typedef struct token {
+  enum token_type type : 2;
+  token_id_t id : 30;
+} token_t;
+
+
+typedef struct event_id {
+  token_id_t id : 30;
+} event_id_t;
+
+typedef struct sequence_id {
+  token_id_t id : 30;
+} sequence_id_t;
+
+typedef struct loop_id {
+  token_id_t id : 30;
+} loop_id_t;
+
+#define TOKEN_ID_INVALID    0x3fffffff
+#define EVENT_ID_INVALID    TOKEN_ID_INVALID
+#define SEQUENCE_ID_INVALID TOKEN_ID_INVALID
+#define LOOP_ID_INVALID     TOKEN_ID_INVALID
+
+/* convert an id to and integer */
+#define ID(_id) ((_id).id)
+
+/* return the type/id of a token */
+#define TOKEN_TYPE(t) ( (t).type)
+#define TOKEN_ID(t) ( (t).id)
+
+/* build a token */
+#define TOKENIZE(_type, _id) ((token_t) {.type=_type, .id=*(token_id_t*)(& _id )})
+
+/* convert an index to an event_id_t */
+#define EVENT_ID(_id)    ((event_id_t) {.id=*(token_id_t*)(& _id)})
+#define SEQUENCE_ID(_id) ((sequence_id_t) {.id=*(token_id_t*)(& _id)})
+#define LOOP_ID(_id)     ((loop_id_t) {.id=*(token_id_t*)(& _id)})
+
+#define IS_MAIN_SEQUENCE(_s) (SEQUENCE_ID(_s).id == SEQUENCE_ID_INVALID)
 
 /*************************** Events **********************/
 
