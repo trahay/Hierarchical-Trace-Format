@@ -137,6 +137,7 @@ static inline loop_id _htf_create_loop_id(struct thread_writer *thread_writer,
   loop_id index = thread_writer->thread_trace.nb_loops++;
   htf_log(dbg_lvl_debug, "\tNot found. Adding it with id=%u\n", index);
 
+  /* TODO: this is specific to the main sequence. Make it generic */
   sequence_id sid =  _htf_get_sequence_id_from_array(&thread_writer->thread_trace,
 						     &thread_writer->thread_trace.tokens[start_index],
 						     loop_len);
@@ -208,6 +209,7 @@ static void _htf_create_loop(struct thread_writer *thread_writer,
 
   thread_writer->thread_trace.tokens[index_first_iteration] = TOKENIZE(TYPE_LOOP, l);
 
+  /* TODO: this is specific to the main sequence. Make it generic */
   sequence_id sid =  _htf_get_sequence_id_from_array(&thread_writer->thread_trace,
 						     &thread_writer->thread_trace.tokens[index_second_iteration],
 						     loop_len);
@@ -220,6 +222,7 @@ static void _htf_create_loop(struct thread_writer *thread_writer,
 
 static void _htf_find_loop(struct thread_writer *thread_writer) {
 
+  /* TODO: this is specific to the main sequence. Make it generic */
   int cur_index = thread_writer->thread_trace.nb_tokens-1;
   int max_len = 10; 		/* TODO: don't hardcode this */
 
@@ -282,7 +285,7 @@ static void _htf_find_loop(struct thread_writer *thread_writer) {
   }
   
 }
-			   
+/* TODO: this is specific to the main sequence. Make it generic */
 static void _htf_store_token_in_main_sequence(struct thread_writer *thread_writer,
 					      token_t t) {
   if(thread_writer->thread_trace.nb_tokens >= thread_writer->thread_trace.nb_allocated_tokens) {
