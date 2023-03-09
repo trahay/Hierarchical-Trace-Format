@@ -174,13 +174,15 @@ static void _get_next_event(struct thread_reader *reader) {
   reader->callstack_index[cur_frame]++;
 
  enter_sequence:
-  /* if it's a loop/sequence, find the first event */
-  token_t t = get_cur_token(reader);
-  while(TOKEN_TYPE(t) == TYPE_SEQUENCE ||
-	TOKEN_TYPE(t) == TYPE_LOOP) {
-    enter_block(reader, t);
-    t = get_cur_token(reader);
-  }    
+  {
+    /* if it's a loop/sequence, find the first event */
+    token_t t = get_cur_token(reader);
+    while(TOKEN_TYPE(t) == TYPE_SEQUENCE ||
+	  TOKEN_TYPE(t) == TYPE_LOOP) {
+      enter_block(reader, t);
+      t = get_cur_token(reader);
+    }
+  }
 }
 
 static int _htf_read_thread_next_event(struct thread_reader *reader,
