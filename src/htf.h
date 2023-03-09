@@ -130,6 +130,7 @@ struct thread_trace {
 
 struct trace {
   struct thread_trace **threads;
+  _Atomic int allocated_threads;
   _Atomic int nb_threads;
   pthread_mutex_t lock;
 };

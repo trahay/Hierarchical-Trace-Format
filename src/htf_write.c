@@ -347,6 +347,7 @@ void htf_write_init(struct trace *trace, const char* dirname) {
 
   trace->threads = NULL;
   trace->nb_threads = 0;
+  trace->allocated_threads = 0;
   pthread_mutex_init(&trace->lock, NULL);
 
   htf_debug_level_init();
@@ -405,11 +406,12 @@ void htf_write_init_thread(struct trace* trace,
   pthread_mutex_lock(&trace->lock);
   {
     trace->nb_threads++;
-    if(thread_rank > trace->nb_threads)
-      trace->nb_threads = thread_rank+1;
 
-    size_t size = sizeof(struct thread_trace *) * trace->nb_threads;
-    trace->threads = realloc(trace->threads, size);
+    if(thread_rank+1 > trace->allocated_threads) {
+      trace->allocated_threads = thread_rank+1;
+      size_t size = sizeof(struct thread_trace *) * trace->allocated_threads;
+      trace->threads = realloc(trace->threads, size);
+    }
     trace->threads[thread_rank] = &thread_writer->thread_trace;
   }
   pthread_mutex_unlock(&trace->lock);
