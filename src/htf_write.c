@@ -406,8 +406,10 @@ void htf_write_init_thread(struct trace* trace,
   {
     trace->nb_threads++;
     if(thread_rank > trace->nb_threads)
-      trace->nb_threads = thread_rank;
-    trace->threads = realloc(trace->threads, sizeof(struct thread_trace *) * trace->nb_threads);
+      trace->nb_threads = thread_rank+1;
+
+    size_t size = sizeof(struct thread_trace *) * trace->nb_threads;
+    trace->threads = realloc(trace->threads, size);
     trace->threads[thread_rank] = &thread_writer->thread_trace;
   }
   pthread_mutex_unlock(&trace->lock);
