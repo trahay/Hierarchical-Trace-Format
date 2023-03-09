@@ -33,6 +33,13 @@ static FILE* _htf_file_open(char* filename, char* mode) {
   return file;
 }
 
+static void _htf_mkdir(char* dirname, mode_t mode) {
+  if(mkdir(dirname, mode) != 0) {
+    if(errno != EEXIST)
+      htf_error("mkdir(%s) failed: %s\n", dirname, strerror(errno));
+  }
+}
+
 void htf_storage_init(const char* dirname) {
   base_dirname = malloc(sizeof(char)*(strlen(dirname)+1));
   strcpy(base_dirname, dirname);
@@ -152,7 +159,7 @@ static void _htf_store_thread_trace(struct trace *trace, int thread_index) {
 
   char dir_filename[1024];
   snprintf(dir_filename, 1024, "%s/%d", base_dirname, thread_index);
-  mkdir(dir_filename, 0777);
+  _htf_mkdir(dir_filename, 0777);
 
   for(int i=0; i<th->nb_events; i++)
     _htf_store_event(&th->events[i], thread_index, EVENT_ID(i));
@@ -199,7 +206,7 @@ void htf_storage_finalize(struct trace*trace) {
 
   htf_log(dbg_lvl_verbose, "Write trace to path %s\n", base_dirname);
   
-  mkdir(base_dirname, 0777);
+  _htf_mkdir(base_dirname, 0777);
 
   char main_filename[1024];
   snprintf(main_filename, 1024, "%s/main.htf", base_dirname);
