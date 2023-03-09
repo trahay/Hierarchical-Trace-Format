@@ -1,8 +1,10 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <assert.h>
 
 #include "htf.h"
+#include "htf_write.h"
 #include "tracer.h"
 
 static struct trace trace;

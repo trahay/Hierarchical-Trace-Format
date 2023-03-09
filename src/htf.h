@@ -1,6 +1,8 @@
 #ifndef HTF_H
 #define HTF_H
 
+#include <pthread.h>
+#include <string.h>
 #include "htf_timestamp.h"
 #include "htf_dbg.h"
 
@@ -134,37 +136,7 @@ struct trace {
   pthread_mutex_t lock;
 };
 
-struct thread_writer {
-  struct thread_trace thread_trace;
-  struct sequence **og_seq;
-  int cur_depth;
-  int max_depth;
-  int thread_rank;
-};
 
-struct thread_reader {
-  struct trace *trace;
-  struct thread_trace *thread_trace;
-
-  token_t *callstack_sequence;	/* each entry contains the sequence/loop being read */
-  int     *callstack_index;	/* each entry contains the index in the sequence or the loop iteration */
-  int     *callstack_loop_iteration;	/* each entry contains the number of iteration of the loop at the corresponding frame */
-
-  int     current_frame;
-
-  int *event_index;
-};
-
-/* Initialize a trace in write mode */
-void htf_write_init(struct trace *trace, const char* dirname);
-void htf_write_init_thread(struct trace* trace,
-			   struct thread_writer *thread_writer,
-			   int thread_rank);
-
-void htf_record_event(struct thread_writer* thread_writer,
-		      enum event_type event_type,
-		      int function_id);
-void htf_write_finalize(struct trace* trace);
 
 void htf_storage_init();
 
@@ -172,22 +144,62 @@ void htf_storage_finalize(struct trace*trace);
 
 
 
+/* Print the content of sequence seq_id */
+void htf_print_sequence(struct thread_trace *thread_trace,
+			sequence_id_t seq_id);
 
-void htf_read_trace(struct trace* trace, char* filename);
+/* Print the subset of a token array */
+void htf_print_token_array(struct thread_trace *thread_trace,
+		       token_t* token_array,
+		       int index_start,
+		       int index_stop);
 
-void htf_read_thread_iterator_init(struct thread_reader *reader,
-				   struct trace* trace,
-				   int thread_index);
+/* Print a token */
+void htf_print_token(struct thread_trace *thread_trace,
+		     token_t token);
 
-/* return the current event in a thread and move to the next one.
- * Return -1 in case of an error (such as the end of the trace)
+/* return the index_th token of a sequence/loop */
+token_t htf_get_token(struct thread_trace *trace,
+		  token_t sequence,
+		  int index);
+
+
+/* return the loop whose id is loop_id
+ * return NULL if loop_id is unknown
  */
-int htf_read_thread_next_event(struct thread_reader *reader,
-			       struct event_occurence *e);
-/* return the current event in a thread.
- * Return -1 in case of an error (such as the end of the trace)
+struct loop* htf_get_loop(struct thread_trace *thread_trace,
+			  loop_id_t loop_id);
+
+/* return the sequence whose id is sequence_id
+ * return NULL if sequence_id is unknown
  */
-int htf_read_thread_cur_event(struct thread_reader *reader,
-			      struct event_occurence *e);
+struct sequence* htf_get_sequence(struct thread_trace *thread_trace,
+				  sequence_id_t seq_id);
+
+/* return the event whose id is event_id
+ * return NULL if event_id is unknown
+ */
+struct event* htf_get_event(struct thread_trace *thread_trace,
+			    event_id_t evt_id);
+
+
+
+
+/* return 1 if array1 and array1 are equal */
+static inline int _htf_arrays_equal(token_t *array1, int size1,
+				    token_t* array2, int size2) {
+  if(size1 != size2)
+    return 0;
+  return memcmp(array1, array2, sizeof(token_t)*size1) == 0;
+}
+
+
+/* return 1 if s1 and s2 are equal */
+static inline int _htf_sequences_equal(struct sequence *s1,
+				   struct sequence *s2) {
+  if((!s1) || (!s2))
+    return 0;
+  return _htf_arrays_equal(s1->token, s1->size, s2->token, s2->size);
+}
 
 #endif /* EVENT_H */
