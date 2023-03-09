@@ -51,7 +51,7 @@ set(INSTALL_PKGCONFIG_DIR "${INSTALL_LIBDIR}/pkgconfig")
 # Subdirectory
 add_subdirectory (src)
 add_subdirectory (tracer)
-#add_subdirectory (test/)
+add_subdirectory (test)
 
 include(PrintOpts)
 
