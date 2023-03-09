@@ -3,8 +3,10 @@
 
 #include <pthread.h>
 #include <string.h>
+
 #include "htf_timestamp.h"
 #include "htf_dbg.h"
+#include "htf.h"
 
 /* A token is either:
    - an event
@@ -41,8 +43,7 @@ typedef struct loop_id {
   token_id_t id : 30;
 } loop_id_t;
 
-//#define TOKEN_ID_INVALID    0x3fffffff
-#define TOKEN_ID_INVALID    0x3deadbee
+#define TOKEN_ID_INVALID    0x3fffffff
 #define EVENT_ID_INVALID    TOKEN_ID_INVALID
 #define SEQUENCE_ID_INVALID TOKEN_ID_INVALID
 #define LOOP_ID_INVALID     TOKEN_ID_INVALID
@@ -62,14 +63,13 @@ static inline event_id_t EVENT_ID(int index) { return (event_id_t) {.id=index};}
 static inline sequence_id_t SEQUENCE_ID(int index) {return (sequence_id_t) {.id=index};}
 static inline loop_id_t LOOP_ID(int index) { return (loop_id_t) {.id=index};}
 
+/* convert a token_t to an event_id_t */
 static inline event_id_t TOKEN_TO_EVENT_ID(token_t t) { return (event_id_t) {.id=TOKEN_ID(t)};}
 static inline sequence_id_t TOKEN_TO_SEQUENCE_ID(token_t t) { return (sequence_id_t) {.id=TOKEN_ID(t)};}
 static inline loop_id_t TOKEN_TO_LOOP_ID(token_t t) { return (loop_id_t) {.id=TOKEN_ID(t)};}
 
-#define IS_MAIN_SEQUENCE(_s) (SEQUENCE_ID(_s).id == SEQUENCE_ID_INVALID)
 
 /*************************** Events **********************/
-
 enum event_type {
    function_entry,
    function_exit,
@@ -87,15 +87,13 @@ struct event {
 };
 
 /*************************** Sequence **********************/
-
 struct sequence {
-  token_t *token;		/* TODO: don't use a pointer here! */
+  token_t *token;
   unsigned size;
   unsigned allocated;
 };
 
 /*************************** Loop **********************/
-
 struct loop {
   unsigned nb_iterations;
   token_t token;
@@ -138,12 +136,6 @@ struct trace {
 
 
 
-void htf_storage_init();
-
-void htf_storage_finalize(struct trace*trace);
-
-
-
 /* Print the content of sequence seq_id */
 void htf_print_sequence(struct thread_trace *thread_trace,
 			sequence_id_t seq_id);
@@ -158,31 +150,30 @@ void htf_print_token_array(struct thread_trace *thread_trace,
 void htf_print_token(struct thread_trace *thread_trace,
 		     token_t token);
 
-/* return the index_th token of a sequence/loop */
-token_t htf_get_token(struct thread_trace *trace,
-		  token_t sequence,
-		  int index);
 
 
 /* return the loop whose id is loop_id
  * return NULL if loop_id is unknown
  */
-struct loop* htf_get_loop(struct thread_trace *thread_trace,
-			  loop_id_t loop_id);
+struct loop* htf_get_loop(struct thread_trace *thread_trace, loop_id_t loop_id);
 
 /* return the sequence whose id is sequence_id
  * return NULL if sequence_id is unknown
  */
-struct sequence* htf_get_sequence(struct thread_trace *thread_trace,
-				  sequence_id_t seq_id);
+struct sequence* htf_get_sequence(struct thread_trace *thread_trace, sequence_id_t seq_id);
 
 /* return the event whose id is event_id
  * return NULL if event_id is unknown
  */
-struct event* htf_get_event(struct thread_trace *thread_trace,
-			    event_id_t evt_id);
+struct event* htf_get_event(struct thread_trace *thread_trace, event_id_t evt_id);
 
 
+
+
+/* return the index_th token of a sequence/loop */
+token_t htf_get_token(struct thread_trace *trace,
+		      token_t sequence,
+		      int index);
 
 
 /* return 1 if array1 and array1 are equal */

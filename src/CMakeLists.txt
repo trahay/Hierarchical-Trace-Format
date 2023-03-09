@@ -16,6 +16,7 @@ set(HTF_HEADERS
     htf_write.h
     htf_dbg.h
     htf_timestamp.h
+    htf_storage.h
 )
 
 target_sources(

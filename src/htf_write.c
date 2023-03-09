@@ -5,6 +5,7 @@
 
 #include "htf.h"
 #include "htf_timestamp.h"
+#include "htf_storage.h"
 #include "htf_write.h"
 
 
