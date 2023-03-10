@@ -22,7 +22,12 @@ void _init_thread() {
   thread_writer = malloc(sizeof(struct thread_writer));
   htf_write_init_thread(&trace,
 			thread_writer,
-			thread_rank);    
+			thread_rank);
+
+  for(int i = 0; i<NB_FUNCTIONS; i++) {
+    htf_register_string(&thread_writer->thread_trace, i, function_names[i]);
+    htf_register_region(&thread_writer->thread_trace, i, i);
+  }
 }
 
 void enter_function(enum intercepted_function f, void* ptr) {

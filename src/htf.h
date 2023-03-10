@@ -179,6 +179,23 @@ struct event_summary {
   unsigned nb_timestamps;
 };
 
+
+typedef uint32_t string_ref_t;
+
+struct string {
+  string_ref_t string_ref;
+  char* str;
+  int length;
+};
+
+typedef uint32_t region_ref_t;
+
+struct region {
+  region_ref_t region_ref;
+  string_ref_t string_ref;
+  /* TODO: add other information (eg. file, line number, etc.)  */
+};
+
 struct thread_trace {
   struct trace *trace;
 
@@ -193,6 +210,14 @@ struct thread_trace {
   struct loop *loops;
   unsigned nb_allocated_loops;
   unsigned nb_loops;
+
+  struct string *strings;
+  int nb_strings;
+  int nb_allocated_strings;
+
+  struct region *regions;
+  int nb_regions;
+  int nb_allocated_regions;
 };
 
 struct trace {

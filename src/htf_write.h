@@ -25,6 +25,8 @@ void htf_store_event(struct thread_writer *thread_writer,
 #define NB_EVENT_DEFAULT 1000
 #define NB_SEQUENCE_DEFAULT 1000
 #define NB_LOOP_DEFAULT 1000
+#define NB_STRING_DEFAULT 100
+#define NB_REGION_DEFAULT 100
 #define NB_TIMESTAMP_DEFAULT 1000000
 #define SEQUENCE_SIZE_DEFAULT 1024
 #define CALLSTACK_DEPTH_DEFAULT 128

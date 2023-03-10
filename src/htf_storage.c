@@ -16,11 +16,17 @@ static char *base_dirname = NULL;
 static void _htf_store_event(struct event_summary *e, int thread_index, event_id_t event_id);
 static void _htf_store_sequence(struct sequence *s, int thread_index, sequence_id_t sequence_id);
 static void _htf_store_loop(struct loop *l, int thread_index, loop_id_t loop_id);
+static void _htf_store_string(struct string *l, int thread_index, int string_index);
+static void _htf_store_region(struct region *r, int thread_index, int region_index);
+
 static void _htf_store_thread_trace(struct trace *trace, int thread_index);
 
 static void _htf_read_event(struct event_summary *e, int thread_index, event_id_t event_id);
 static void _htf_read_sequence(struct sequence *s, int thread_index, sequence_id_t sequence_id);
 static void _htf_read_loop(struct loop *l, int thread_index, loop_id_t loop_id);
+static void _htf_read_string(struct string *l, int thread_index, int string_index);
+static void _htf_read_region(struct region *r, int thread_index, int region_index);
+
 static void _htf_read_thread_trace(struct trace *trace, int thread_index);
 
 static FILE* _htf_file_open(char* filename, char* mode) {
@@ -138,6 +144,71 @@ static void _htf_read_loop(struct loop *l, int thread_index, loop_id_t loop_id) 
 }
 
 
+static FILE* _htf_get_string_file(int thread_index, int string_index, char* mode) {
+  char filename[1024];
+  snprintf(filename, 1024, "%s/%d/string_%d", base_dirname, thread_index, string_index);
+  return _htf_file_open(filename, mode);
+}
+
+static void _htf_store_string(struct string *s, int thread_index, int string_index) {
+  FILE* file = _htf_get_string_file(thread_index, string_index, "w");
+
+  htf_log(dbg_lvl_debug, "\tStore String %d {.ref=%d, .length=%d, .str='%s'}\n",
+	  string_index, s->string_ref, s->length, s->str);
+
+  fwrite(&s->string_ref, sizeof(s->string_ref), 1, file);
+  fwrite(&s->length, sizeof(s->length), 1, file);
+  fwrite(s->str, sizeof(char), s->length, file);
+
+  fclose(file);
+}
+
+static void _htf_read_string(struct string *s, int thread_index, int string_index) {
+  FILE* file = _htf_get_string_file(thread_index, string_index, "r");
+
+  fread(&s->string_ref, sizeof(s->string_ref), 1, file);
+  fread(&s->length, sizeof(s->length), 1, file);
+  s->str = malloc(sizeof(char) * s->length);
+  htf_assert(s->str);
+  fread(s->str, sizeof(char), s->length, file);
+
+  fclose(file);
+
+  htf_log(dbg_lvl_debug, "\tLoad String %d {.ref=%d, .length=%d, .str='%s'}\n",
+	  string_index, s->string_ref, s->length, s->str);
+}
+
+
+static FILE* _htf_get_region_file(int thread_index, int region_index, char* mode) {
+  char filename[1024];
+  snprintf(filename, 1024, "%s/%d/region_%d", base_dirname, thread_index, region_index);
+  return _htf_file_open(filename, mode);
+}
+
+static void _htf_store_region(struct region *r, int thread_index, int region_index) {
+  FILE* file = _htf_get_region_file(thread_index, region_index, "w");
+
+  htf_log(dbg_lvl_debug, "\tStore Region %d {.ref=%d, .str=%d}\n",
+	  region_index, r->region_ref, r->string_ref);
+
+  fwrite(&r->region_ref, sizeof(r->region_ref), 1, file);
+  fwrite(&r->string_ref, sizeof(r->string_ref), 1, file);
+  fclose(file);
+}
+
+static void _htf_read_region(struct region *r, int thread_index, int region_index) {
+  FILE* file = _htf_get_region_file(thread_index, region_index, "r");
+
+  fread(&r->region_ref, sizeof(r->region_ref), 1, file);
+  fread(&r->string_ref, sizeof(r->string_ref), 1, file);
+
+  fclose(file);
+
+  htf_log(dbg_lvl_debug, "\tLoad Region %d {.ref=%d, .str=%d}\n",
+	  region_index, r->region_ref, r->string_ref);
+}
+
+
 static FILE* _htf_get_thread_file(int thread_index, char* mode) {
   char filename[1024];
   snprintf(filename, 1024, "%s/%d.tok", base_dirname, thread_index);
@@ -155,6 +226,8 @@ static void _htf_store_thread_trace(struct trace *trace, int thread_index) {
   fwrite(&th->nb_events, sizeof(th->nb_events), 1, token_file);
   fwrite(&th->nb_sequences, sizeof(th->nb_sequences), 1, token_file);
   fwrite(&th->nb_loops, sizeof(th->nb_loops), 1, token_file);
+  fwrite(&th->nb_strings, sizeof(th->nb_strings), 1, token_file);
+  fwrite(&th->nb_regions, sizeof(th->nb_regions), 1, token_file);
   fclose(token_file);
 
   char dir_filename[1024];
@@ -169,6 +242,12 @@ static void _htf_store_thread_trace(struct trace *trace, int thread_index) {
 
   for(int i=0; i<th->nb_loops; i++)
     _htf_store_loop(&th->loops[i], thread_index, LOOP_ID(i));
+
+  for(int i=0; i<th->nb_strings; i++)
+    _htf_store_string(&th->strings[i], thread_index, i);
+
+  for(int i=0; i<th->nb_regions; i++)
+    _htf_store_region(&th->regions[i], thread_index, i);
 }
 
 static void _htf_read_thread_trace(struct trace *trace, int thread_index) {
@@ -179,10 +258,14 @@ static void _htf_read_thread_trace(struct trace *trace, int thread_index) {
   fread(&th->nb_events, sizeof(th->nb_events), 1, token_file);
   fread(&th->nb_sequences, sizeof(th->nb_sequences), 1, token_file);
   fread(&th->nb_loops, sizeof(th->nb_loops), 1, token_file);
+  fread(&th->nb_strings, sizeof(th->nb_strings), 1, token_file);
+  fread(&th->nb_regions, sizeof(th->nb_regions), 1, token_file);
 
   th->events = malloc(sizeof(struct event_summary) * th->nb_events);
   th->sequences = malloc(sizeof(struct sequence) * th->nb_sequences);
   th->loops = malloc(sizeof(struct loop) * th->nb_loops);
+  th->strings = malloc(sizeof(struct string) * th->nb_strings);
+  th->regions = malloc(sizeof(struct region) * th->nb_regions);
   fclose(token_file);
 
   htf_log(dbg_lvl_verbose, "Reading %d events\n", th->nb_events);
@@ -196,6 +279,14 @@ static void _htf_read_thread_trace(struct trace *trace, int thread_index) {
   htf_log(dbg_lvl_verbose, "Reading %d loops\n", th->nb_loops);
   for(int i=0; i<th->nb_loops; i++)
     _htf_read_loop(&th->loops[i], thread_index, LOOP_ID(i));
+
+  htf_log(dbg_lvl_verbose, "Reading %d strings\n", th->nb_strings);
+  for(int i=0; i<th->nb_strings; i++)
+    _htf_read_string(&th->strings[i], thread_index, i);
+
+  htf_log(dbg_lvl_verbose, "Reading %d regions\n", th->nb_regions);
+  for(int i=0; i<th->nb_regions; i++)
+    _htf_read_region(&th->regions[i], thread_index, i);
 }
 
 

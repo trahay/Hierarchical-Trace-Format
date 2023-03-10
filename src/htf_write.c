@@ -360,6 +360,14 @@ void htf_write_init_thread(struct trace* trace,
   thread_writer->thread_trace.nb_allocated_loops = NB_LOOP_DEFAULT;
   thread_writer->thread_trace.nb_loops = 0;
 
+  thread_writer->thread_trace.strings = malloc(sizeof(struct string) * NB_STRING_DEFAULT);
+  thread_writer->thread_trace.nb_allocated_strings = NB_STRING_DEFAULT;
+  thread_writer->thread_trace.nb_strings = 0;
+
+  thread_writer->thread_trace.regions = malloc(sizeof(struct region) * NB_REGION_DEFAULT);
+  thread_writer->thread_trace.nb_allocated_regions = NB_REGION_DEFAULT;
+  thread_writer->thread_trace.nb_regions = 0;
+
   pthread_mutex_lock(&trace->lock);
   {
     trace->nb_threads++;
