@@ -11,15 +11,25 @@ struct thread_writer {
   int thread_rank;
 };
 
-/* Initialize a trace in write mode */
-void htf_write_init(struct trace *trace, const char* dirname);
-void htf_write_init_thread(struct trace* trace,
-			   struct thread_writer *thread_writer,
-			   int thread_rank);
 
-void htf_record_event(struct thread_writer* thread_writer,
-		      enum event_type event_type,
-		      int function_id);
-void htf_write_finalize(struct trace* trace);
+
+void htf_store_timestamp(struct thread_writer *thread_writer,
+			 event_id_t e_id,
+			 timestamp_t ts);
+void htf_store_event(struct thread_writer *thread_writer,
+		     enum event_type event_type,
+		     event_id_t id);
+
+
+
+#define NB_EVENT_DEFAULT 1000
+#define NB_SEQUENCE_DEFAULT 1000
+#define NB_LOOP_DEFAULT 1000
+#define NB_TIMESTAMP_DEFAULT 1000000
+#define SEQUENCE_SIZE_DEFAULT 1024
+#define CALLSTACK_DEPTH_DEFAULT 128
+
+extern _Thread_local int htf_recursion_shield;
+
 
 #endif /* HTF_WRITE_H */

@@ -66,16 +66,17 @@ static token_t _htf_get_token_in_loop(struct thread_trace *thread_trace,
   return l->token;
 }
 
+
 void htf_print_token(struct thread_trace *thread_trace, token_t token) {
   switch(TOKEN_TYPE(token)) {
   case TYPE_EVENT:
     {
-#define ET2C(et) (((et) == function_entry? 'E':	\
-		   (et)==function_exit? 'L':	\
+#define ET2C(et) (((et) == HTF_EVENT_ENTER? 'E':	\
+		   (et) == HTF_EVENT_LEAVE? 'L':	\
 		   'S'))
 
       struct event* e =  htf_get_event(thread_trace, TOKEN_TO_EVENT_ID(token)); 
-      printf("E_%d (%c %d)", TOKEN_ID(token), ET2C(e->event_type), e->function_id);
+      printf("E_%d (%c)", TOKEN_ID(token), ET2C(e->record));//, e->function_id);
       break;
     }
   case TYPE_SEQUENCE:

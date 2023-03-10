@@ -9,14 +9,8 @@
 #include "htf_write.h"
 
 
-#define NB_EVENT_DEFAULT 1000
-#define NB_SEQUENCE_DEFAULT 1000
-#define NB_LOOP_DEFAULT 1000
-#define NB_TIMESTAMP_DEFAULT 1000000
-#define SEQUENCE_SIZE_DEFAULT 1024
-#define CALLSTACK_DEPTH_DEFAULT 128
 
-static _Thread_local int recursion_shield = 0;
+_Thread_local int htf_recursion_shield = 0;
 
 static void _htf_find_loop(struct thread_writer *thread_writer);
 static inline sequence_id_t _htf_get_sequence_id_from_array(struct thread_trace *thread_trace,
@@ -39,32 +33,6 @@ static inline sequence_id_t _htf_get_sequence_id(struct thread_trace *thread_tra
   return _htf_get_sequence_id_from_array(thread_trace, seq->token, seq->size);
 }
 
-static inline event_id_t _htf_get_event_id(struct thread_trace *thread_trace,
-					   struct event *e) {
-  htf_log(dbg_lvl_max, "Searching for event {.func=%d, .event_type=%d}\n", e->function_id, e->event_type);
-
-  for(unsigned i = 0; i < thread_trace->nb_events; i++) {
-    if(memcmp(e, &thread_trace->events[i].event, sizeof(struct event)) == 0) {
-      htf_log(dbg_lvl_max, "\t found with id=%u\n", i);
-      return EVENT_ID(i);
-    }
-  }
-
-  if(thread_trace->nb_events >= thread_trace->nb_allocated_events) {
-    htf_error( "too many event data!\n");
-  }
-
-  int index = thread_trace->nb_events++;
-  htf_log(dbg_lvl_max, "\tNot found. Adding it with id=%x\n", index);
-  struct event_summary *es = &thread_trace->events[index];
-
-  memcpy(&es->event, e, sizeof(struct event));
-  es->timestamps = malloc(sizeof(timestamp_t)* NB_TIMESTAMP_DEFAULT);
-  es->nb_allocated_timestamps = NB_TIMESTAMP_DEFAULT;
-  es->nb_timestamps = 0;
-
-  return EVENT_ID(index);
-}
 
 
 /* search for a sequence_id that matches token_array
@@ -126,9 +94,9 @@ static inline loop_id_t _htf_create_loop_id(struct thread_writer *thread_writer,
 }
 
 
-void _htf_store_timestamp(struct thread_writer *thread_writer,
-			  event_id_t e_id,
-			  timestamp_t ts) {
+void htf_store_timestamp(struct thread_writer *thread_writer,
+			 event_id_t e_id,
+			 timestamp_t ts) {
   htf_assert(ID(e_id) < thread_writer->thread_trace.nb_allocated_events);
 
   struct event_summary *es = &thread_writer->thread_trace.events[ID(e_id)];
@@ -270,12 +238,6 @@ static void _htf_find_loop(struct thread_writer *thread_writer) {
   }
 }
 
-static void _htf_store_event(struct thread_writer *thread_writer,
-			     event_id_t id) {
-  token_t t = TOKENIZE(TYPE_EVENT, TOKEN_ID(id));
-  struct sequence *seq =  _htf_get_cur_sequence(thread_writer);
-  _htf_store_token(thread_writer, seq, t);
-}
 
 void _htf_record_enter_function(struct thread_writer *thread_writer) {
   thread_writer->cur_depth++;
@@ -309,29 +271,24 @@ void _htf_record_exit_function(struct thread_writer *thread_writer) {
   cur_seq->size = 0;
 }
 
-void htf_record_event(struct thread_writer *thread_writer,
-		      enum event_type event_type,
-		      int function_id) {
-  if(recursion_shield)
-    return;
-  recursion_shield++;
-
-  struct event e = {.function_id = function_id, .event_type = event_type};
-  event_id_t e_id = _htf_get_event_id(&thread_writer->thread_trace, &e);
-  _htf_store_timestamp(thread_writer, e_id, htf_get_timestamp());
+void htf_store_event(struct thread_writer *thread_writer,
+		     enum event_type event_type,
+		     event_id_t id) {
 
   if(event_type == function_entry) {
     _htf_record_enter_function(thread_writer);
   } 
 
-  _htf_store_event(thread_writer, e_id);
+  token_t t = TOKENIZE(TYPE_EVENT, TOKEN_ID(id));
+  struct sequence *seq =  _htf_get_cur_sequence(thread_writer);
+  _htf_store_token(thread_writer, seq, t);
 
   if(event_type == function_exit) {
     _htf_record_exit_function(thread_writer);
   }
-
-  recursion_shield--;
 }
+
+
 
 void htf_write_finalize(struct trace *trace) {
   if(!trace)
@@ -341,9 +298,9 @@ void htf_write_finalize(struct trace *trace) {
 }
 
 void htf_write_init(struct trace *trace, const char* dirname) {
-  if(recursion_shield)
+  if(htf_recursion_shield)
     return;
-  recursion_shield++;
+  htf_recursion_shield++;
 
   trace->threads = NULL;
   trace->nb_threads = 0;
@@ -353,16 +310,16 @@ void htf_write_init(struct trace *trace, const char* dirname) {
   htf_debug_level_init();
   htf_storage_init(dirname);
 
-  recursion_shield--;
+  htf_recursion_shield--;
 }
 
 
 void htf_write_init_thread(struct trace* trace,
 			   struct thread_writer *thread_writer,
 			   int thread_rank) {
-  if(recursion_shield)
+  if(htf_recursion_shield)
     return;
-  recursion_shield++;
+  htf_recursion_shield++;
 
   htf_log(dbg_lvl_debug, "htf_write_init_thread\n");
 
@@ -415,5 +372,5 @@ void htf_write_init_thread(struct trace* trace,
     trace->threads[thread_rank] = &thread_writer->thread_trace;
   }
   pthread_mutex_unlock(&trace->lock);
-  recursion_shield--;
+  htf_recursion_shield--;
 }

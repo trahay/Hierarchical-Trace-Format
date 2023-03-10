@@ -15,16 +15,18 @@
 		   'S'))
 
 /* Print one event */
-static void print_event(struct event_occurence *e, int thread_index) {
+static void print_event(struct thread_trace* thread_trace,
+			struct event_occurence *e,
+			int thread_index) {
   static int first_time = 1;
   
-  int id = e->event.function_id;
   if(first_time == 1) {
-    printf("#timestamp\tthread_index\tevent_type\tevent_id\tevent_name\n");
+    printf("#timestamp\tthread_index\tevent\n");
     first_time = 0;
   }
-  printf("%.9lf\t%d\t%c\t%d (%s)\n", e->timestamp/1e9, thread_index, ET2C(e->event.event_type),
-	 id, function_names[id]);
+  printf("%.9lf\t%d\t", e->timestamp/1e9, thread_index);
+  htf_print_event(thread_trace, &e->event);
+  printf("\n");
 }
 
 /* Print all the events of a thread */
@@ -36,7 +38,7 @@ static void print_thread_trace(struct trace *trace, int thread_index) {
   struct event_occurence e;
 
   while(htf_read_thread_next_event(&reader, &e) == 0) {
-    print_event(&e, thread_index);
+    print_event(reader.thread_trace, &e, thread_index);
   }
 }
 
@@ -78,7 +80,7 @@ void print_trace(struct trace *trace) {
   struct event_occurence e;
   int thread_index = -1;
   while((thread_index = get_next_event(readers, trace->nb_threads, &e)) >= 0) {
-    print_event(&e, thread_index);
+    print_event(trace->threads[thread_index], &e, thread_index);
   }
 }
 

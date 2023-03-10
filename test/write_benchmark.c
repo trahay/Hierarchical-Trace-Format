@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "htf.h"
+#include "htf_event.h"
 #include "htf_write.h"
 
 static struct trace trace;
@@ -45,8 +46,8 @@ void* worker(void* arg __attribute__((unused))) {
        * E_f1 L_f1 E_f2 L_f2 E_f3 L_f3 ...
        */
       for(int j = 0; j<nb_functions; j++) {
-	htf_record_event(thread_writer, function_entry, j);
-	htf_record_event(thread_writer, function_exit, j);
+	htf_record_enter(thread_writer, j);
+	htf_record_leave(thread_writer, j);
       }
       break;
 
@@ -55,10 +56,10 @@ void* worker(void* arg __attribute__((unused))) {
        * E_f1 E_f2 E_f3 ... L_f3 L_f2 L_f1
        */
       for(int j = 0; j<nb_functions; j++) {
-	htf_record_event(thread_writer, function_entry, j);
+	htf_record_enter(thread_writer, j);
       }
       for(int j = nb_functions-1; j>=0; j--) {
-	htf_record_event(thread_writer, function_exit, j);
+	htf_record_leave(thread_writer, j);
       }
       break;
     default:

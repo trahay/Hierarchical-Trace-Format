@@ -5,6 +5,7 @@
 
 #include "htf.h"
 #include "htf_write.h"
+#include "htf_event.h"
 #include "tracer.h"
 
 static struct trace trace;
@@ -30,13 +31,13 @@ void enter_function(enum intercepted_function f, void* ptr) {
   if(thread_writer == NULL)
     _init_thread();
 
-  htf_record_event(thread_writer, function_entry, (int)f);
+  htf_record_enter(thread_writer, (int)f);
 }
 
 void leave_function(enum intercepted_function f, void* ptr) {
   if(! initialized) return;
 
-  htf_record_event(thread_writer, function_exit, (int)f);
+  htf_record_leave(thread_writer, (int)f);
 }
 
 void* get_callback(const char*fname){
