@@ -8,8 +8,8 @@
 #include "htf_event.h"
 #include "tracer.h"
 
-static struct trace trace;
-static _Thread_local struct thread_writer* thread_writer = NULL;
+static struct htf_trace trace;
+static _Thread_local struct htf_thread_writer* thread_writer = NULL;
 static _Thread_local int thread_rank;
 static _Atomic int nb_threads = 0;
 static int verbose=0;
@@ -19,7 +19,7 @@ void _init_thread() {
   if(! initialized) return;
 
   thread_rank = nb_threads++;
-  thread_writer = malloc(sizeof(struct thread_writer));
+  thread_writer = malloc(sizeof(struct htf_thread_writer));
   htf_write_init_thread(&trace,
 			thread_writer,
 			thread_rank);
@@ -36,13 +36,13 @@ void enter_function(enum intercepted_function f, void* ptr) {
   if(thread_writer == NULL)
     _init_thread();
 
-  htf_record_enter(thread_writer, (int)f);
+  htf_record_enter(thread_writer, NULL, HTF_TIMESTAMP_INVALID, (int)f);
 }
 
 void leave_function(enum intercepted_function f, void* ptr) {
   if(! initialized) return;
 
-  htf_record_leave(thread_writer, (int)f);
+  htf_record_leave(thread_writer, NULL, HTF_TIMESTAMP_INVALID, (int)f);
 }
 
 void* get_callback(const char*fname){

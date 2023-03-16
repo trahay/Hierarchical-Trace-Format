@@ -3,9 +3,9 @@
 
 #include "htf.h"
 
-struct thread_writer {
-  struct thread_trace thread_trace;
-  struct sequence **og_seq;
+struct htf_thread_writer {
+  struct htf_thread_trace thread_trace;
+  struct htf_sequence **og_seq;
   int cur_depth;
   int max_depth;
   int thread_rank;
@@ -13,12 +13,12 @@ struct thread_writer {
 
 
 
-void htf_store_timestamp(struct thread_writer *thread_writer,
-			 event_id_t e_id,
-			 timestamp_t ts);
-void htf_store_event(struct thread_writer *thread_writer,
-		     enum event_type event_type,
-		     event_id_t id);
+void htf_store_timestamp(struct htf_thread_writer *thread_writer,
+			 htf_event_id_t e_id,
+			 htf_timestamp_t ts);
+void htf_store_event(struct htf_thread_writer *thread_writer,
+		     enum htf_event_type event_type,
+		     htf_event_id_t id);
 
 
 

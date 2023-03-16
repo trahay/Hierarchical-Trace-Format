@@ -16,64 +16,64 @@
 
 
 /* Token types */
-typedef enum token_type {
-  TYPE_INVALID  = 0,
-  TYPE_EVENT    = 1,
-  TYPE_SEQUENCE = 2,
-  TYPE_LOOP     = 3
-} token_type_t;
+typedef enum htf_token_type {
+  HTF_TYPE_INVALID  = 0,
+  HTF_TYPE_EVENT    = 1,
+  HTF_TYPE_SEQUENCE = 2,
+  HTF_TYPE_LOOP     = 3
+} htf_token_type_t;
 
-typedef uint32_t token_id_t;
+typedef uint32_t htf_token_id_t;
 
-typedef struct token {
-  enum token_type type : 2;
-  token_id_t id : 30;
-} token_t;
+typedef struct htf_token {
+  enum htf_token_type type : 2;
+  htf_token_id_t id : 30;
+} htf_token_t;
 
 
-typedef struct event_id {
-  token_id_t id : 30;
-} event_id_t;
+typedef struct htf_event_id {
+  htf_token_id_t id : 30;
+} htf_event_id_t;
 
-typedef struct sequence_id {
-  token_id_t id : 30;
-} sequence_id_t;
+typedef struct htf_sequence_id {
+  htf_token_id_t id : 30;
+} htf_sequence_id_t;
 
-typedef struct loop_id {
-  token_id_t id : 30;
-} loop_id_t;
+typedef struct htf_loop_id {
+  htf_token_id_t id : 30;
+} htf_loop_id_t;
 
-#define TOKEN_ID_INVALID    0x3fffffff
-#define EVENT_ID_INVALID    TOKEN_ID_INVALID
-#define SEQUENCE_ID_INVALID TOKEN_ID_INVALID
-#define LOOP_ID_INVALID     TOKEN_ID_INVALID
+#define HTF_TOKEN_ID_INVALID    0x3fffffff
+#define HTF_EVENT_ID_INVALID    HTF_TOKEN_ID_INVALID
+#define HTF_SEQUENCE_ID_INVALID HTF_TOKEN_ID_INVALID
+#define HTF_LOOP_ID_INVALID     HTF_TOKEN_ID_INVALID
 
 /* convert an id to and integer */
-#define ID(_id) ((_id).id)
+#define HTF_ID(_id) ((_id).id)
 
 /* return the type/id of a token */
-#define TOKEN_TYPE(t) ( (t).type)
-#define TOKEN_ID(t) ( (t).id)
+#define HTF_TOKEN_TYPE(t) ( (t).type)
+#define HTF_TOKEN_ID(t) ( (t).id)
 
 /* build a token */
-static inline token_t TOKENIZE(token_type_t t, token_id_t id) { return (token_t) {.type=t, .id=id};} 
+static inline htf_token_t HTF_TOKENIZE(htf_token_type_t t, htf_token_id_t id) { return (htf_token_t) {.type=t, .id=id};} 
 
 /* convert an index to an event_id_t */
-static inline event_id_t EVENT_ID(int index) { return (event_id_t) {.id=index};}
-static inline sequence_id_t SEQUENCE_ID(int index) {return (sequence_id_t) {.id=index};}
-static inline loop_id_t LOOP_ID(int index) { return (loop_id_t) {.id=index};}
+static inline htf_event_id_t HTF_EVENT_ID(int index) { return (htf_event_id_t) {.id=index};}
+static inline htf_sequence_id_t HTF_SEQUENCE_ID(int index) {return (htf_sequence_id_t) {.id=index};}
+static inline htf_loop_id_t HTF_LOOP_ID(int index) { return (htf_loop_id_t) {.id=index};}
 
 /* convert a token_t to an event_id_t */
-static inline event_id_t TOKEN_TO_EVENT_ID(token_t t) { return (event_id_t) {.id=TOKEN_ID(t)};}
-static inline sequence_id_t TOKEN_TO_SEQUENCE_ID(token_t t) { return (sequence_id_t) {.id=TOKEN_ID(t)};}
-static inline loop_id_t TOKEN_TO_LOOP_ID(token_t t) { return (loop_id_t) {.id=TOKEN_ID(t)};}
+static inline htf_event_id_t HTF_TOKEN_TO_EVENT_ID(htf_token_t t) { return (htf_event_id_t) {.id=HTF_TOKEN_ID(t)};}
+static inline htf_sequence_id_t HTF_TOKEN_TO_SEQUENCE_ID(htf_token_t t) { return (htf_sequence_id_t) {.id=HTF_TOKEN_ID(t)};}
+static inline htf_loop_id_t HTF_TOKEN_TO_LOOP_ID(htf_token_t t) { return (htf_loop_id_t) {.id=HTF_TOKEN_ID(t)};}
 
 
 /*************************** Events **********************/
-enum event_type {
-   function_entry, /* TODO: rename block_start */
-   function_exit,  /* TODO: rename block_end */
-   singleton,
+enum htf_event_type {
+   htf_function_entry, /* TODO: rename block_start */
+   htf_function_exit,  /* TODO: rename block_end */
+   htf_singleton,
 };
 
 enum htf_record {
@@ -139,7 +139,7 @@ enum htf_record {
     HTF_EVENT_MAX_ID
 };
 
-struct event {
+struct htf_event {
   //  enum event_type event_type;
   /* TODO: update the content of the event */
   uint8_t event_size;
@@ -154,74 +154,96 @@ struct event {
 } __attribute__((packed));
 
 /*************************** Sequence **********************/
-struct sequence {
-  token_t *token;
+struct htf_sequence {
+  htf_token_t *token;
   unsigned size;
   unsigned allocated;
 };
 
 /*************************** Loop **********************/
-struct loop {
+struct htf_loop {
   unsigned nb_iterations;
-  token_t token;
+  htf_token_t token;
 };
 
 
-struct event_occurence {
-  struct event event;
-  timestamp_t timestamp;
+struct htf_event_occurence {
+  struct htf_event event;
+  htf_timestamp_t timestamp;
 };
 
-struct event_summary {
-  struct event event;
-  timestamp_t *timestamps;
+struct htf_event_summary {
+  struct htf_event event;
+  htf_timestamp_t *timestamps;
   unsigned nb_allocated_timestamps;
   unsigned nb_timestamps;
 };
 
+#define HTF_UNDEFINED_UINT8  ( ( uint8_t )( ~( ( uint8_t )0u ) ) )
+#define HTF_UNDEFINED_INT8  ( ( int8_t )( ~( HTF_UNDEFINED_UINT8 >> 1 ) ) )
+#define HTF_UNDEFINED_UINT16 ( ( uint16_t )( ~( ( uint16_t )0u ) ) )
+#define HTF_UNDEFINED_INT16  ( ( int16_t )( ~( HTF_UNDEFINED_UINT16 >> 1 ) ) )
+#define HTF_UNDEFINED_UINT32 ( ( uint32_t )( ~( ( uint32_t )0u ) ) )
+#define HTF_UNDEFINED_INT32  ( ( int32_t )( ~( HTF_UNDEFINED_UINT32 >> 1 ) ) )
+#define HTF_UNDEFINED_UINT64 ( ( uint64_t )( ~( ( uint64_t )0u ) ) )
+#define HTF_UNDEFINED_INT64  ( ( int64_t )( ~( HTF_UNDEFINED_UINT64 >> 1 ) ) )
+#define HTF_UNDEFINED_TYPE HTF_UNDEFINED_UINT8
 
-typedef uint32_t string_ref_t;
+typedef uint32_t htf_string_ref_t;
+#define HTF_STRINGREF_INVALID ( ( htf_string_ref_t )HTF_UNDEFINED_UINT32 )
 
-struct string {
-  string_ref_t string_ref;
+struct htf_string {
+  htf_string_ref_t string_ref;
   char* str;
   int length;
 };
 
-typedef uint32_t region_ref_t;
+typedef uint32_t htf_region_ref_t;
+#define HTF_REGIONREF_INVALID ( ( htf_region_ref_t )HTF_UNDEFINED_UINT32 )
 
-struct region {
-  region_ref_t region_ref;
-  string_ref_t string_ref;
+struct htf_region {
+  htf_region_ref_t region_ref;
+  htf_string_ref_t string_ref;
   /* TODO: add other information (eg. file, line number, etc.)  */
 };
 
-struct thread_trace {
-  struct trace *trace;
+typedef uint32_t htf_type_t;
+typedef uint32_t htf_attribute_ref_t;
+typedef uint32_t htf_attribute_value_t;
 
-  struct event_summary *events;
+typedef struct htf_attribute_list {
+  htf_type_t type_id;
+  htf_attribute_ref_t attribute_ref;
+  htf_attribute_value_t value;
+  struct htf_attribute_list* next;
+} htf_attribute_list_t;
+
+struct htf_thread_trace {
+  struct htf_trace *trace;
+
+  struct htf_event_summary *events;
   unsigned nb_allocated_events;
   unsigned nb_events;
 
-  struct sequence *sequences;
+  struct htf_sequence *sequences;
   unsigned nb_allocated_sequences;
   unsigned nb_sequences;
 
-  struct loop *loops;
+  struct htf_loop *loops;
   unsigned nb_allocated_loops;
   unsigned nb_loops;
 
-  struct string *strings;
+  struct htf_string *strings;
   int nb_strings;
   int nb_allocated_strings;
 
-  struct region *regions;
+  struct htf_region *regions;
   int nb_regions;
   int nb_allocated_regions;
 };
 
-struct trace {
-  struct thread_trace **threads;
+struct htf_trace {
+  struct htf_thread_trace **threads;
   _Atomic int allocated_threads;
   _Atomic int nb_threads;
   pthread_mutex_t lock;
@@ -230,58 +252,59 @@ struct trace {
 
 
 /* Print the content of sequence seq_id */
-void htf_print_sequence(struct thread_trace *thread_trace,
-			sequence_id_t seq_id);
+void htf_print_sequence(struct htf_thread_trace *thread_trace,
+			htf_sequence_id_t seq_id);
 
 /* Print the subset of a token array */
-void htf_print_token_array(struct thread_trace *thread_trace,
-		       token_t* token_array,
-		       int index_start,
-		       int index_stop);
+void htf_print_token_array(struct htf_thread_trace *thread_trace,
+			   htf_token_t* token_array,
+			   int index_start,
+			   int index_stop);
 
 /* Print a token */
-void htf_print_token(struct thread_trace *thread_trace,
-		     token_t token);
+void htf_print_token(struct htf_thread_trace *thread_trace,
+		     htf_token_t token);
 
-void htf_print_event(struct thread_trace *thread_trace, struct event* e);
+void htf_print_event(struct htf_thread_trace *thread_trace,
+		     struct htf_event* e);
 
 
 /* return the loop whose id is loop_id
  * return NULL if loop_id is unknown
  */
-struct loop* htf_get_loop(struct thread_trace *thread_trace, loop_id_t loop_id);
+struct htf_loop* htf_get_loop(struct htf_thread_trace *thread_trace, htf_loop_id_t loop_id);
 
 /* return the sequence whose id is sequence_id
  * return NULL if sequence_id is unknown
  */
-struct sequence* htf_get_sequence(struct thread_trace *thread_trace, sequence_id_t seq_id);
+struct htf_sequence* htf_get_sequence(struct htf_thread_trace *thread_trace, htf_sequence_id_t seq_id);
 
 /* return the event whose id is event_id
  * return NULL if event_id is unknown
  */
-struct event* htf_get_event(struct thread_trace *thread_trace, event_id_t evt_id);
+struct htf_event* htf_get_event(struct htf_thread_trace *thread_trace, htf_event_id_t evt_id);
 
 
 
 
 /* return the index_th token of a sequence/loop */
-token_t htf_get_token(struct thread_trace *trace,
-		      token_t sequence,
-		      int index);
+htf_token_t htf_get_token(struct htf_thread_trace *trace,
+			  htf_token_t sequence,
+			  int index);
 
 
 /* return 1 if array1 and array1 are equal */
-static inline int _htf_arrays_equal(token_t *array1, int size1,
-				    token_t* array2, int size2) {
+static inline int _htf_arrays_equal(htf_token_t *array1, int size1,
+				    htf_token_t* array2, int size2) {
   if(size1 != size2)
     return 0;
-  return memcmp(array1, array2, sizeof(token_t)*size1) == 0;
+  return memcmp(array1, array2, sizeof(htf_token_t)*size1) == 0;
 }
 
 
 /* return 1 if s1 and s2 are equal */
-static inline int _htf_sequences_equal(struct sequence *s1,
-				   struct sequence *s2) {
+static inline int _htf_sequences_equal(struct htf_sequence *s1,
+				       struct htf_sequence *s2) {
   if((!s1) || (!s2))
     return 0;
   return _htf_arrays_equal(s1->token, s1->size, s2->token, s2->size);

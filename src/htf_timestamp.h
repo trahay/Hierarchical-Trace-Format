@@ -3,10 +3,15 @@
 
 #include <stdint.h>
 #include <limits.h>
-typedef  uint64_t timestamp_t;
 
-#define TIMESTAMP_INVALID UINT64_MAX
+typedef  uint64_t htf_timestamp_t;
 
-timestamp_t htf_get_timestamp();
+#define HTF_TIMESTAMP_INVALID UINT64_MAX
+
+/* return the current timestamp */
+htf_timestamp_t htf_get_timestamp();
+
+/* return t, or the current timestamp is t is invalid*/
+htf_timestamp_t htf_timestamp(htf_timestamp_t t);
 
 #endif /* TIMESTAMP_H */

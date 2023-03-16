@@ -6,7 +6,7 @@
 #include "htf_event.h"
 #include "htf_write.h"
 
-static struct trace trace;
+static struct htf_trace trace;
 
 static int nb_iter_default = 100000;
 static int nb_functions_default = 2;
@@ -18,7 +18,7 @@ static int nb_functions;
 static int nb_threads;
 static int pattern;
 
-struct thread_writer **thread_writers;
+struct htf_thread_writer **thread_writers;
 
 static pthread_barrier_t bench_start;
 static pthread_barrier_t bench_stop;
@@ -29,8 +29,8 @@ void* worker(void* arg __attribute__((unused))) {
   static _Atomic int nb_threads = 0;
   int my_rank = nb_threads++;
 
-  thread_writers[my_rank] =  malloc(sizeof(struct thread_writer));
-  struct thread_writer *thread_writer = thread_writers[my_rank];
+  thread_writers[my_rank] =  malloc(sizeof(struct htf_thread_writer));
+  struct htf_thread_writer *thread_writer = thread_writers[my_rank];
 
   htf_write_init_thread(&trace,
 			thread_writer,
@@ -46,8 +46,8 @@ void* worker(void* arg __attribute__((unused))) {
        * E_f1 L_f1 E_f2 L_f2 E_f3 L_f3 ...
        */
       for(int j = 0; j<nb_functions; j++) {
-	htf_record_enter(thread_writer, j);
-	htf_record_leave(thread_writer, j);
+	htf_record_enter(thread_writer, NULL, HTF_TIMESTAMP_INVALID, j);
+	htf_record_leave(thread_writer, NULL, HTF_TIMESTAMP_INVALID, j);
       }
       break;
 
@@ -56,10 +56,10 @@ void* worker(void* arg __attribute__((unused))) {
        * E_f1 E_f2 E_f3 ... L_f3 L_f2 L_f1
        */
       for(int j = 0; j<nb_functions; j++) {
-	htf_record_enter(thread_writer, j);
+	htf_record_enter(thread_writer, NULL, HTF_TIMESTAMP_INVALID, j);
       }
       for(int j = nb_functions-1; j>=0; j--) {
-	htf_record_leave(thread_writer, j);
+	htf_record_leave(thread_writer, NULL, HTF_TIMESTAMP_INVALID, j);
       }
       break;
     default:
@@ -125,7 +125,7 @@ int main(int argc, char**argv) {
   pthread_t tid[nb_threads];
   pthread_barrier_init(&bench_start, NULL, nb_threads+1);
   pthread_barrier_init(&bench_stop, NULL, nb_threads+1);
-  thread_writers = malloc(sizeof(struct thread_writer*) * nb_threads);
+  thread_writers = malloc(sizeof(struct htf_thread_writer*) * nb_threads);
 
   printf("nb_iter = %d\n", nb_iter);
   printf("nb_functions = %d\n", nb_functions);

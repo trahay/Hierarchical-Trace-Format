@@ -5,6 +5,6 @@
 
 void htf_storage_init();
 
-void htf_storage_finalize(struct trace* trace);
+void htf_storage_finalize(struct htf_trace* trace);
 
 #endif	/* HTF_STORAGE_H */

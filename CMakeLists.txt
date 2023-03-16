@@ -26,6 +26,8 @@ list (APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake_modules)
 option(ENABLE_PTHREAD  "Enable Pthread module"  ON)
 #option(ENABLE_OMPT     "Enable OMPT module"     OFF)
 
+option(ENABLE_OTF2     "Enable OTF2 compatibilit layer"     OFF)
+
 ####################################################
 # Some flags for compilation
 
@@ -50,6 +52,9 @@ set(INSTALL_PKGCONFIG_DIR "${INSTALL_LIBDIR}/pkgconfig")
 
 # Subdirectory
 add_subdirectory (src)
+if(ENABLE_OTF2)
+add_subdirectory (src/otf2)
+endif()
 add_subdirectory (tracer)
 add_subdirectory (test)
 
