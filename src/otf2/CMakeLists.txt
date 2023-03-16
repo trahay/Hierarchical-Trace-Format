@@ -93,19 +93,34 @@ set(OTF2_HEADERS
 target_sources(
     otf2
 PRIVATE
-otf2_archive.c
-otf2_attributelist.c
-otf2_attribute_value.c
-otf2.c
-otf2_defwriter.c
-otf2_error.c
-otf2_evt_reader.c
-otf2_evt_reader_callbacks.c
-otf2_globaldefreader.c
-otf2_global_snap_reader_callbacks.c
-otf2_id_map.c
-otf2_marker_writer.c
-otf2_snap_writer.c
+    otf2.c
+    OTF2_Archive.c
+    OTF2_AttributeList.c
+    OTF2_AttributeValue.c
+    OTF2_DefReaderCallbacks.c
+    OTF2_DefReader.c
+    OTF2_DefWriter.c
+    OTF2_ErrorCodes.c
+    OTF2_EventSizeEstimator.c
+    OTF2_EvtReaderCallbacks.c
+    OTF2_EvtReader.c
+    OTF2_EvtWriter.c
+    OTF2_GlobalDefReaderCallbacks.c
+    OTF2_GlobalDefReader.c
+    OTF2_GlobalDefWriter.c
+    OTF2_GlobalEvtReaderCallbacks.c
+    OTF2_GlobalEvtReader.c
+    OTF2_GlobalSnapReaderCallbacks.c
+    OTF2_GlobalSnapReader.c
+    OTF2_IdMap.c
+    OTF2_MarkerReaderCallbacks.c
+    OTF2_MarkerReader.c
+    OTF2_MarkerWriter.c
+    OTF2_Reader.c
+    OTF2_SnapReaderCallbacks.c
+    OTF2_SnapReader.c
+    OTF2_SnapWriter.c
+    OTF2_Thumbnail.c
 PUBLIC
     ${OTF2_HEADERS}
 )

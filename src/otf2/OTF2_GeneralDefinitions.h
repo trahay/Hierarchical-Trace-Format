@@ -96,6 +96,8 @@ extern "C" {
 #define OTF2_UNDEFINED_UINT64 ( ( uint64_t )( ~( ( uint64_t )0u ) ) )
 /** @brief Undefined value for type @a int64_t. */
 #define OTF2_UNDEFINED_INT64  ( ( int64_t )( ~( OTF2_UNDEFINED_UINT64 >> 1 ) ) )
+/** @brief Undefined value for type @a int. */
+#define OTF2_UNDEFINED_INT ( ( int )(INT_MAX  ))
 /** @} */
 
 

@@ -518,14 +518,14 @@ enum OTF2_CollectiveRoot_enum
 {
     /** @brief No root.
      */
-    OTF2_COLLECTIVE_ROOT_NONE       = OTF2_UNDEFINED_UINT32,
+    OTF2_COLLECTIVE_ROOT_NONE       = OTF2_UNDEFINED_INT,
 
     /** @brief This rank is the root of the collective operation.
      *
      *  This corresponds to @a MPI_ROOT when used in an collective operation
      *  on an inter-communicator.
      */
-    OTF2_COLLECTIVE_ROOT_SELF       = OTF2_UNDEFINED_UINT32 - 1,
+    OTF2_COLLECTIVE_ROOT_SELF       = OTF2_UNDEFINED_INT - 1,
 
     /** @brief The root is in the same group of an @eref{InterComm} as this rank
      *  itself.
@@ -533,7 +533,7 @@ enum OTF2_CollectiveRoot_enum
      *  This corresponds to @a MPI_PROC_NULL when used in an collective
      *  operation on an inter-communicator.
      */
-    OTF2_COLLECTIVE_ROOT_THIS_GROUP = OTF2_UNDEFINED_UINT32 - 2
+    OTF2_COLLECTIVE_ROOT_THIS_GROUP = OTF2_UNDEFINED_INT - 2
 };
 
 

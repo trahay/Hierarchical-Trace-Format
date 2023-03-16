@@ -41,6 +41,11 @@
 
 
 #include <otf2/OTF2_Reader.h>
+//#include <otf2/otf2_compiler.h>
+
+#ifndef __otf2_deprecated__
+  #define __otf2_deprecated__
+#endif
 
 
 #endif /* !OTF2_H */
