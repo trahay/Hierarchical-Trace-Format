@@ -7,7 +7,7 @@
 
 OTF2_AttributeList*
 OTF2_AttributeList_New( void ) {
-  NOT_IMPLEMENTED;
+  TO_BE_IMPLEMENTED;
 }
 
 OTF2_ErrorCode
@@ -20,7 +20,7 @@ OTF2_AttributeList_AddAttribute( OTF2_AttributeList* attributeList,
                                  OTF2_AttributeRef   attribute,
                                  OTF2_Type           type,
                                  OTF2_AttributeValue attributeValue ) {
-  NOT_IMPLEMENTED;
+  TO_BE_IMPLEMENTED;
 }
 
 OTF2_ErrorCode

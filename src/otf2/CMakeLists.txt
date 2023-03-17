@@ -132,7 +132,8 @@ target_compile_options(otf2
   PUBLIC
     -D_GNU_SOURCE
   PRIVATE
-    -Wall -Wextra -Wno-sign-compare
+-Wno-unused-parameter
+-Wall -Wextra -Wno-sign-compare
 )
 
 target_include_directories(otf2

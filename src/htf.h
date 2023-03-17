@@ -236,10 +236,12 @@ struct htf_thread_trace {
   struct htf_string *strings;
   int nb_strings;
   int nb_allocated_strings;
+  pthread_mutex_t strings_lock;
 
   struct htf_region *regions;
   int nb_regions;
   int nb_allocated_regions;
+  pthread_mutex_t regions_lock;
 };
 
 struct htf_trace {
@@ -247,6 +249,15 @@ struct htf_trace {
   _Atomic int allocated_threads;
   _Atomic int nb_threads;
   pthread_mutex_t lock;
+
+  struct htf_string *strings;
+  int nb_strings;
+  int nb_allocated_strings;
+
+  struct htf_region *regions;
+  int nb_regions;
+  int nb_allocated_regions;
+
 };
 
 

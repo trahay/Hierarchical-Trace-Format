@@ -61,6 +61,7 @@
 #include <otf2/OTF2_GeneralDefinitions.h>
 #include <otf2/OTF2_AttributeValue.h>
 #include <otf2/OTF2_Definitions.h>
+#include <otf2/OTF2_Archive.h>
 
 
 #ifdef __cplusplus

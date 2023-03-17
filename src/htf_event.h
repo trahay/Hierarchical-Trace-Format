@@ -14,11 +14,20 @@ void htf_write_finalize(struct htf_trace* trace);
 
 void htf_register_string(struct htf_thread_trace *thread_trace,
 			 htf_string_ref_t string_ref,
-			 char* string);
+			 const char* string);
 
 void htf_register_region(struct htf_thread_trace *thread_trace,
 			 htf_region_ref_t region_ref,
 			 htf_string_ref_t string_ref);
+
+void htf_register_global_string(struct htf_trace *trace,
+				htf_string_ref_t string_ref,
+				const char* string);
+
+void htf_register_global_region(struct htf_trace *trace,
+				htf_region_ref_t region_ref,
+				htf_string_ref_t string_ref);
+
 
 void htf_print_event(struct htf_thread_trace *thread_trace,
 		     struct htf_event* e);

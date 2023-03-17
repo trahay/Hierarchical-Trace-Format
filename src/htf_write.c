@@ -307,6 +307,14 @@ void htf_write_init(struct htf_trace *trace, const char* dirname) {
   trace->allocated_threads = 0;
   pthread_mutex_init(&trace->lock, NULL);
 
+  trace->strings = malloc(sizeof(struct htf_string) * NB_STRING_DEFAULT);
+  trace->nb_allocated_strings = NB_STRING_DEFAULT;
+  trace->nb_strings = 0;
+
+  trace->regions = malloc(sizeof(struct htf_region) * NB_REGION_DEFAULT);
+  trace->nb_allocated_regions = NB_REGION_DEFAULT;
+  trace->nb_regions = 0;
+
   htf_debug_level_init();
   htf_storage_init(dirname);
 

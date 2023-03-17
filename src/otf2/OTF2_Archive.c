@@ -2,12 +2,9 @@
 #include <stdio.h>
 
 #include "htf.h"
+#include "htf_event.h"
 #include "otf2.h"
 #include "OTF2_Archive.h"
-
-struct OTF2_Archive_struct {
-  struct htf_trace trace;
-};
 
 OTF2_Archive*
 OTF2_Archive_Open( const char*              archivePath,
@@ -17,12 +14,15 @@ OTF2_Archive_Open( const char*              archivePath,
                    const uint64_t           chunkSizeDefs,
                    const OTF2_FileSubstrate fileSubstrate,
                    const OTF2_Compression   compression ) {
-  NOT_IMPLEMENTED;
+  OTF2_Archive* archive = malloc(sizeof(OTF2_Archive));
+  htf_write_init(&archive->trace, archivePath);
+  return archive;
 }
 
 OTF2_ErrorCode
 OTF2_Archive_Close( OTF2_Archive* archive ) {
-  NOT_IMPLEMENTED;
+  htf_write_finalize(&archive->trace);
+  return OTF2_SUCCESS;
 }
 
 OTF2_ErrorCode
@@ -59,7 +59,10 @@ OTF2_ErrorCode
 OTF2_Archive_SetFlushCallbacks( OTF2_Archive*              archive,
                                 const OTF2_FlushCallbacks* flushCallbacks,
                                 void*                      flushData ) {
-  NOT_IMPLEMENTED;
+  archive->flushCallbacks.otf2_pre_flush = flushCallbacks->otf2_pre_flush;
+  archive->flushCallbacks.otf2_post_flush = flushCallbacks->otf2_post_flush;
+  archive->flushData = flushData;
+  return OTF2_SUCCESS;
 }
 
 OTF2_ErrorCode
@@ -80,7 +83,7 @@ OTF2_Archive_SetCollectiveCallbacks( OTF2_Archive*                   archive,
 
 OTF2_ErrorCode
 OTF2_Archive_SetSerialCollectiveCallbacks( OTF2_Archive* archive ) {
-  NOT_IMPLEMENTED;
+  return OTF2_SUCCESS;
 }
 
 OTF2_ErrorCode
@@ -99,7 +102,14 @@ OTF2_ErrorCode
 OTF2_Archive_SetLockingCallbacks( OTF2_Archive*                archive,
                                   const OTF2_LockingCallbacks* lockingCallbacks,
                                   void*                        lockingData ) {
-  NOT_IMPLEMENTED;
+  archive->lockingCallbacks.otf2_release = lockingCallbacks->otf2_release;
+  archive->lockingCallbacks.otf2_create  = lockingCallbacks->otf2_create;
+  archive->lockingCallbacks.otf2_destroy = lockingCallbacks->otf2_destroy;
+  archive->lockingCallbacks.otf2_lock    = lockingCallbacks->otf2_lock;
+  archive->lockingCallbacks.otf2_unlock  = lockingCallbacks->otf2_unlock;
+
+  archive->lockingData = lockingData;
+  return OTF2_SUCCESS;
 }
 
 OTF2_ErrorCode
@@ -202,21 +212,66 @@ OTF2_Archive_GetCompression( OTF2_Archive*     archive,
   NOT_IMPLEMENTED;
 }
 
+
+int new_location(OTF2_Archive* archive, OTF2_LocationRef location) {
+  int index = archive->nb_locations++;
+  archive->def_writers = realloc(archive->def_writers, sizeof(OTF2_DefWriter*) * archive->nb_locations);
+  archive->evt_writers = realloc(archive->evt_writers, sizeof(OTF2_EvtWriter*) * archive->nb_locations);
+
+  archive->def_writers[index] = malloc(sizeof(OTF2_DefWriter));
+  archive->def_writers[index]->locationRef = location;
+  archive->def_writers[index]->thread_writer = malloc(sizeof(struct htf_thread_writer));
+  htf_write_init_thread(&archive->trace,
+			archive->def_writers[index]->thread_writer,
+			index);
+
+  archive->evt_writers[index] = malloc(sizeof(OTF2_EvtWriter));
+  archive->evt_writers[index]->locationRef = location;
+  archive->evt_writers[index]->thread_writer = archive->def_writers[index]->thread_writer;
+  return index;
+}
+
 OTF2_EvtWriter*
 OTF2_Archive_GetEvtWriter( OTF2_Archive*    archive,
                            OTF2_LocationRef location ) {
-  NOT_IMPLEMENTED;
+  printf("OTF2_Archive_GetEvtWriter (%x)\n", location);
+  for(int i=0; i<archive->nb_locations; i++) {
+    if(archive->evt_writers[i]->locationRef == location) {
+      printf("\t->%d (.location=%x, .writer=%p)\n", i,
+	     archive->evt_writers[i]->locationRef,
+	     archive->evt_writers[i]->thread_writer);
+      return archive->evt_writers[i];
+    }
+  }
+
+  int index = new_location(archive, location);
+  
+  return archive->evt_writers[index];
 }
 
 OTF2_DefWriter*
 OTF2_Archive_GetDefWriter( OTF2_Archive*    archive,
                            OTF2_LocationRef location ) {
-  NOT_IMPLEMENTED;
+  for(int i=0; i<archive->nb_locations; i++) {
+    if(archive->def_writers[i]->locationRef == location)
+      return archive->def_writers[i];
+  }
+  int index = new_location(archive, location);
+
+  printf("New Defwriter (ref=%x, writer=%p)\n",
+	 archive->evt_writers[index]->locationRef,
+	 archive->evt_writers[index]->thread_writer);
+
+  return archive->def_writers[index];
 }
 
 OTF2_GlobalDefWriter*
 OTF2_Archive_GetGlobalDefWriter( OTF2_Archive* archive ) {
-  NOT_IMPLEMENTED;
+  if(!archive->globalDefWriter){
+    archive->globalDefWriter = malloc(sizeof(OTF2_GlobalDefWriter));
+    archive->globalDefWriter->archive = archive;
+  }
+  return archive->globalDefWriter;
 }
 
 OTF2_SnapWriter*
@@ -288,13 +343,15 @@ OTF2_Archive_GetMarkerReader( OTF2_Archive* archive ) {
 OTF2_ErrorCode
 OTF2_Archive_CloseEvtWriter( OTF2_Archive*   archive,
                              OTF2_EvtWriter* writer ) {
-  NOT_IMPLEMENTED;
+  //  NOT_IMPLEMENTED;
+  return OTF2_SUCCESS;
 }
 
 OTF2_ErrorCode
 OTF2_Archive_CloseDefWriter( OTF2_Archive*   archive,
                              OTF2_DefWriter* writer ) {
-  NOT_IMPLEMENTED;
+  //  NOT_IMPLEMENTED;
+  return OTF2_SUCCESS;
 }
 
 OTF2_ErrorCode
@@ -383,22 +440,24 @@ OTF2_Archive_GetNumberOfSnapshots( OTF2_Archive* archive,
 
 OTF2_ErrorCode
 OTF2_Archive_OpenEvtFiles( OTF2_Archive* archive ) {
-  NOT_IMPLEMENTED;
+  return OTF2_SUCCESS;
 }
 
 OTF2_ErrorCode
 OTF2_Archive_CloseEvtFiles( OTF2_Archive* archive ) {
-  NOT_IMPLEMENTED;
+  return OTF2_SUCCESS;
 }
 
 OTF2_ErrorCode
 OTF2_Archive_OpenDefFiles( OTF2_Archive* archive ) {
-  NOT_IMPLEMENTED;
+  //  NOT_IMPLEMENTED;
+  return OTF2_SUCCESS;
 }
 
 OTF2_ErrorCode
 OTF2_Archive_CloseDefFiles( OTF2_Archive* archive ) {
-  NOT_IMPLEMENTED;
+  //  NOT_IMPLEMENTED;
+  return OTF2_SUCCESS;
 }
 
 OTF2_ErrorCode

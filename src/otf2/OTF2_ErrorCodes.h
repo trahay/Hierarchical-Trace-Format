@@ -53,7 +53,12 @@ extern "C" {
 	    __FUNCTION__, __FILE__, __LINE__);			\
     abort();							\
   } while(0)
-  
+
+#define TO_BE_IMPLEMENTED do {					\
+    fprintf(stderr, "Warning in %s (%s:%d): Not implemented yet\n",	\
+	    __FUNCTION__, __FILE__, __LINE__);			\
+  } while(0)
+
 /**
  * This is the list of error codes for OTF2.
  */

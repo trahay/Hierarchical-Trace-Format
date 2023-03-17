@@ -5,6 +5,7 @@
 #include "otf2.h"
 #include "OTF2_GlobalDefWriter.h"
 
+
 OTF2_ErrorCode
 OTF2_GlobalDefWriter_GetNumberOfDefinitions( OTF2_GlobalDefWriter* writerHandle,
                                              uint64_t*             numberOfDefinitions ) {
@@ -23,7 +24,8 @@ OTF2_GlobalDefWriter_WriteClockProperties( OTF2_GlobalDefWriter* writerHandle,
                                            uint64_t              globalOffset,
                                            uint64_t              traceLength,
                                            uint64_t              realtimeTimestamp ) {
-  NOT_IMPLEMENTED;
+  TO_BE_IMPLEMENTED;
+  return OTF2_SUCCESS;
 }
 
 OTF2_ErrorCode
@@ -61,7 +63,9 @@ OTF2_ErrorCode
 OTF2_GlobalDefWriter_WriteString( OTF2_GlobalDefWriter* writerHandle,
                                   OTF2_StringRef        self,
                                   const char*           string ) {
-  NOT_IMPLEMENTED;
+  //  NOT_IMPLEMENTED;
+  htf_register_global_string(&writerHandle->archive->trace, self, string);
+  return OTF2_SUCCESS;
 }
 
 OTF2_ErrorCode
@@ -70,7 +74,10 @@ OTF2_GlobalDefWriter_WriteAttribute( OTF2_GlobalDefWriter* writerHandle,
                                      OTF2_StringRef        name,
                                      OTF2_StringRef        description,
                                      OTF2_Type             type ) {
-  NOT_IMPLEMENTED;
+  //  NOT_IMPLEMENTED;
+  TO_BE_IMPLEMENTED;
+  /* TODO: implement me ! */
+  return OTF2_SUCCESS;
 }
 
 OTF2_ErrorCode
@@ -79,7 +86,8 @@ OTF2_GlobalDefWriter_WriteSystemTreeNode( OTF2_GlobalDefWriter*  writerHandle,
                                           OTF2_StringRef         name,
                                           OTF2_StringRef         className,
                                           OTF2_SystemTreeNodeRef parent ) {
-  NOT_IMPLEMENTED;
+  //  NOT_IMPLEMENTED;
+  return OTF2_SUCCESS;
 }
 
 OTF2_ErrorCode
@@ -89,7 +97,8 @@ OTF2_GlobalDefWriter_WriteLocationGroup( OTF2_GlobalDefWriter*  writerHandle,
                                          OTF2_LocationGroupType locationGroupType,
                                          OTF2_SystemTreeNodeRef systemTreeParent,
                                          OTF2_LocationGroupRef  creatingLocationGroup ) {
-  NOT_IMPLEMENTED;
+  //  NOT_IMPLEMENTED;
+  return OTF2_SUCCESS;
 }
 
 OTF2_ErrorCode
@@ -99,7 +108,8 @@ OTF2_GlobalDefWriter_WriteLocation( OTF2_GlobalDefWriter* writerHandle,
                                     OTF2_LocationType     locationType,
                                     uint64_t              numberOfEvents,
                                     OTF2_LocationGroupRef locationGroup ) {
-  NOT_IMPLEMENTED;
+  return OTF2_SUCCESS;
+  //  NOT_IMPLEMENTED;
 }
 
 OTF2_ErrorCode
@@ -114,7 +124,13 @@ OTF2_GlobalDefWriter_WriteRegion( OTF2_GlobalDefWriter* writerHandle,
                                   OTF2_StringRef        sourceFile,
                                   uint32_t              beginLineNumber,
                                   uint32_t              endLineNumber ) {
-  NOT_IMPLEMENTED;
+  /* TODO (in HTF)
+   * - add a global writeRegion function
+   * - uppon thread creation, copy the write region to the new thread regions
+   * - when creating a global region, add it to the existing threads region
+   */
+  htf_register_global_region(&writerHandle->archive->trace, self, name);
+  return OTF2_SUCCESS;
 }
 
 OTF2_ErrorCode
@@ -144,7 +160,8 @@ OTF2_GlobalDefWriter_WriteGroup( OTF2_GlobalDefWriter* writerHandle,
                                  OTF2_GroupFlag        groupFlags,
                                  uint32_t              numberOfMembers,
                                  const uint64_t*       members ) {
-  NOT_IMPLEMENTED;
+  //NOT_IMPLEMENTED;
+  return OTF2_SUCCESS;
 }
 
 OTF2_ErrorCode
@@ -188,7 +205,8 @@ OTF2_GlobalDefWriter_WriteComm( OTF2_GlobalDefWriter* writerHandle,
                                 OTF2_GroupRef         group,
                                 OTF2_CommRef          parent,
                                 OTF2_CommFlag         flags ) {
-  NOT_IMPLEMENTED;
+  //  NOT_IMPLEMENTED;
+  return OTF2_SUCCESS;
 }
 
 OTF2_ErrorCode
