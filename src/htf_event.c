@@ -69,32 +69,8 @@ static inline htf_event_id_t _htf_get_event_id(struct htf_thread_trace *thread_t
   return HTF_EVENT_ID(index);
 }
 
-struct htf_string* htf_get_string(struct htf_thread_trace *thread_trace,
+struct htf_string* htf_get_string(struct htf_trace *trace,
 				  htf_string_ref_t string_ref) {
-  /* TODO: race condition here ? when adding a region, there may be a realloc so we may have to hold the mutex */
-  for(int i = 0; i< thread_trace->nb_strings; i++) {
-    struct htf_string* s = &thread_trace->strings[i];
-    if(s->string_ref == string_ref) {
-      return s;
-    }
-  }
-  return NULL;
-}
-
-struct htf_region* htf_get_region(struct htf_thread_trace *thread_trace,
-				  htf_region_ref_t region_ref) {
-  /* TODO: race condition here ? when adding a region, there may be a realloc so we may have to hold the mutex */
-  for(int i = 0; i< thread_trace->nb_regions; i++) {
-    struct htf_region* s = &thread_trace->regions[i];
-    if(s->region_ref == region_ref) {
-      return s;
-    }
-  }
-  return NULL;
-}
-
-struct htf_string* htf_get_global_string(struct htf_trace *trace,
-					 htf_string_ref_t string_ref) {
   /* TODO: race condition here ? when adding a region, there may be a realloc so we may have to hold the mutex */
   for(int i = 0; i< trace->nb_strings; i++) {
     struct htf_string* s = &trace->strings[i];
@@ -105,8 +81,8 @@ struct htf_string* htf_get_global_string(struct htf_trace *trace,
   return NULL;
 }
 
-struct htf_region* htf_get_global_region(struct htf_trace *trace,
-					 htf_region_ref_t region_ref) {
+struct htf_region* htf_get_region(struct htf_trace *trace,
+				  htf_region_ref_t region_ref) {
   /* TODO: race condition here ? when adding a region, there may be a realloc so we may have to hold the mutex */
   for(int i = 0; i< trace->nb_regions; i++) {
     struct htf_region* s = &trace->regions[i];
@@ -125,9 +101,9 @@ void htf_print_event(struct htf_thread_trace *thread_trace, struct htf_event* e)
       void*cursor = NULL;
       htf_region_ref_t region_ref;
       pop_data(e, &region_ref, sizeof(region_ref), &cursor);
-      struct htf_region* region = htf_get_region(thread_trace, region_ref);
+      struct htf_region* region = htf_get_region(thread_trace->trace, region_ref);
       htf_assert(region);
-      printf("Enter %d (%s)", region_ref, htf_get_string(thread_trace, region->string_ref)->str);
+      printf("Enter %d (%s)", region_ref, htf_get_string(thread_trace->trace, region->string_ref)->str);
       break;
     }
   case HTF_EVENT_LEAVE:
@@ -135,9 +111,9 @@ void htf_print_event(struct htf_thread_trace *thread_trace, struct htf_event* e)
       void*cursor = NULL;
       htf_region_ref_t region_ref;
       pop_data(e, &region_ref, sizeof(region_ref), &cursor);
-      struct htf_region* region = htf_get_region(thread_trace, region_ref);
+      struct htf_region* region = htf_get_region(thread_trace->trace, region_ref);
       htf_assert(region);
-      printf("Leave %d (%s)", region_ref, htf_get_string(thread_trace, region->string_ref)->str);
+      printf("Leave %d (%s)", region_ref, htf_get_string(thread_trace->trace, region->string_ref)->str);
       break;
     }
   default:
@@ -145,35 +121,9 @@ void htf_print_event(struct htf_thread_trace *thread_trace, struct htf_event* e)
   }
 }
 
-
-void htf_register_string(struct htf_thread_trace *thread_trace,
+void htf_register_string(struct htf_trace *trace,
 			 htf_string_ref_t string_ref,
 			 const char* string) {
-  pthread_mutex_lock(&thread_trace->strings_lock);
-  if(thread_trace->nb_strings + 1 >= thread_trace->nb_allocated_strings) {
-    thread_trace->nb_allocated_strings *= 2;
-    thread_trace->strings = realloc(thread_trace->strings, thread_trace->nb_allocated_strings * sizeof(struct htf_string));
-    if(thread_trace->strings == NULL) {
-      htf_error("Failed to allocate memory\n");
-    }
-  }
-
-  int index = thread_trace->nb_strings++;
-  struct htf_string *s = &thread_trace->strings[index];
-  s->string_ref = string_ref;
-  s->length = strlen(string)+1;
-  s->str = malloc(sizeof(char) * s->length);
-  strncpy(s->str, string, s->length);
-
-  htf_log(htf_dbg_lvl_verbose, "Register string #%d{.ref=%x, .length=%d, .str='%s'}\n",
-	  index, s->string_ref, s->length, s->str);
-  pthread_mutex_unlock(&thread_trace->strings_lock);
-}
-
-
-void htf_register_global_string(struct htf_trace *trace,
-				htf_string_ref_t string_ref,
-				const char* string) {
   pthread_mutex_lock(&trace->lock);
   if(trace->nb_strings + 1 >= trace->nb_allocated_strings) {
     trace->nb_allocated_strings *= 2;
@@ -190,41 +140,14 @@ void htf_register_global_string(struct htf_trace *trace,
   s->str = malloc(sizeof(char) * s->length);
   strncpy(s->str, string, s->length);
 
-  for(int i =0; i<trace->nb_threads; i++) {
-    htf_register_string(trace->threads[i], string_ref, string);
-  }
-
   htf_log(htf_dbg_lvl_verbose, "Register global string #%d{.ref=%x, .length=%d, .str='%s'}\n",
 	  index, s->string_ref, s->length, s->str);
   pthread_mutex_unlock(&trace->lock);
 }
 
-void htf_register_region(struct htf_thread_trace *thread_trace,
+void htf_register_region(struct htf_trace *trace,
 			 htf_region_ref_t region_ref,
 			 htf_string_ref_t string_ref) {
-
-  pthread_mutex_lock(&thread_trace->regions_lock);
-  if(thread_trace->nb_regions + 1 >= thread_trace->nb_allocated_regions) {
-    thread_trace->nb_allocated_regions *= 2;
-    thread_trace->regions = realloc(thread_trace->regions, thread_trace->nb_allocated_regions * sizeof(struct htf_region));
-    if(thread_trace->regions == NULL) {
-      htf_error("Failed to allocate memory\n");
-    }
-  }
-
-  int index = thread_trace->nb_regions++;
-  struct htf_region *r = &thread_trace->regions[index];
-  r->region_ref = region_ref;
-  r->string_ref = string_ref;
-
-  htf_log(htf_dbg_lvl_verbose, "Register region #%d{.ref=%x, .str=%d ('%s')}\n",
-	  index, r->region_ref, r->string_ref, htf_get_string(thread_trace, r->string_ref)->str);
-  pthread_mutex_unlock(&thread_trace->regions_lock);
-}
-
-void htf_register_global_region(struct htf_trace *trace,
-				htf_region_ref_t region_ref,
-				htf_string_ref_t string_ref) {
   pthread_mutex_lock(&trace->lock);
   if(trace->nb_regions + 1 >= trace->nb_allocated_regions) {
     trace->nb_allocated_regions *= 2;
@@ -239,12 +162,8 @@ void htf_register_global_region(struct htf_trace *trace,
   r->region_ref = region_ref;
   r->string_ref = string_ref;
 
-  for(int i =0; i<trace->nb_threads; i++) {
-    htf_register_region(trace->threads[i], region_ref, string_ref);
-  }
-
   htf_log(htf_dbg_lvl_verbose, "Register Global region #%d{.ref=%x, .str=%d ('%s')}\n",
-	  index, r->region_ref, r->string_ref, htf_get_global_string(trace, r->string_ref)->str);
+	  index, r->region_ref, r->string_ref, htf_get_string(trace, r->string_ref)->str);
   pthread_mutex_unlock(&trace->lock);
 }
 
