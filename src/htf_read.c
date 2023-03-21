@@ -117,9 +117,23 @@ static int end_of_a_sequence(struct htf_thread_reader *reader,
 }
 
 static void _get_next_event(struct htf_thread_reader *reader) {
-  int cur_frame = reader->current_frame;
-  int cur_index = reader->callstack_index[cur_frame];
-  htf_token_t cur_seq_id = reader->callstack_sequence[cur_frame];
+  int cur_frame;
+  int cur_index;
+  htf_token_t cur_seq_id;
+
+#define UPDATE_POSITION() do {						\
+    cur_frame = reader->current_frame;					\
+    cur_index = reader->callstack_index[cur_frame];			\
+    cur_seq_id = reader->callstack_sequence[cur_frame];			\
+    /* Did we reach the end of the trace ?  */				\
+    if(reader->current_frame < 0) {					\
+      htf_log(htf_dbg_lvl_debug, "End of trace %d!\n", __LINE__);	\
+      reader->current_frame = -1;					\
+      return;								\
+    }									\
+  } while(0)
+
+  UPDATE_POSITION();
   htf_assert(HTF_TOKEN_TYPE(cur_seq_id) == HTF_TYPE_SEQUENCE ||
 	     HTF_TOKEN_TYPE(cur_seq_id) == HTF_TYPE_LOOP);
   
@@ -127,16 +141,7 @@ static void _get_next_event(struct htf_thread_reader *reader) {
     /* we reached the end of the current sequence */
 
     leave_block(reader);
-    cur_frame = reader->current_frame;
-    cur_index = reader->callstack_index[cur_frame];
-    cur_seq_id = reader->callstack_sequence[cur_frame];
-
-    /* Did we reach the end of the trace ?  */
-    if(reader->current_frame < 0) {
-      htf_log(htf_dbg_lvl_debug, "End of trace %d!\n", __LINE__);
-      reader->current_frame = -1;
-      return;
-    }
+    UPDATE_POSITION();
 
     /* Is the sequence in a loop ? */
     htf_token_t t = get_cur_token(reader);
@@ -156,10 +161,8 @@ static void _get_next_event(struct htf_thread_reader *reader) {
 
       /* end of the loop */
       leave_block(reader);
-      if(reader->current_frame < 0) {
-	reader->current_frame = -1;
-	return;
-      }
+      UPDATE_POSITION();
+
       t = get_cur_token(reader);
     }
   }
@@ -167,11 +170,8 @@ static void _get_next_event(struct htf_thread_reader *reader) {
   /* we are in the middle of a sequence */
 
   /* just move to the next event in the sequence */
-  cur_frame = reader->current_frame;
-  cur_index = reader->callstack_index[cur_frame];
-  cur_seq_id = reader->callstack_sequence[cur_frame];
-
   reader->callstack_index[cur_frame]++;
+  UPDATE_POSITION();
 
  enter_sequence:
   {
