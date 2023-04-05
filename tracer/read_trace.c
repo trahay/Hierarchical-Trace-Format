@@ -93,8 +93,6 @@ void print_trace(struct htf_archive *trace) {
   int nb_threads = 0;
   populate(trace, &nb_threads, &readers);
 
-  printf("There are %d threads\n", nb_threads);
-
   struct htf_event_occurence e;
   int thread_index = -1;
   while((thread_index = get_next_event(readers, nb_threads, &e)) >= 0) {
