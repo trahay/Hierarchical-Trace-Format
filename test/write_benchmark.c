@@ -169,7 +169,7 @@ int main(int argc, char**argv) {
 
   htf_write_archive_open(&trace,
 			 "write_benchmark_trace",
-			 "main.htf",
+			 "main",
 			 0);
 
   process_id = _new_container();

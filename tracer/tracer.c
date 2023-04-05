@@ -119,7 +119,7 @@ static void _tracer_init(void) {
   
   htf_write_archive_open(&trace,
 			 program_name,
-			 "main.htf",
+			 "main",
 			 0);
 
   process_id = _new_container();
