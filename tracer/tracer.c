@@ -90,6 +90,14 @@ void* get_callback(const char*fname){
 }
 
 
+static void _get_trace_name(char* buffer) {
+  char tmp_buffer[1024];
+  FILE* f = fopen("/proc/self/cmdline", "r");
+  fscanf(f, "%s", tmp_buffer);
+  fclose(f);
+  sprintf(buffer, "%s_trace", basename(tmp_buffer));
+}
+
 static void _tracer_init(void) __attribute__((constructor));
 static void _tracer_init(void) {
   printf("[TRACER] initializing\n");
@@ -106,8 +114,11 @@ static void _tracer_init(void) {
 
   pthread_mutex_init(&lock, NULL);
 
+  char program_name[1024];
+  _get_trace_name(program_name);
+  
   htf_write_archive_open(&trace,
-			 ".",
+			 program_name,
 			 "main.htf",
 			 0);
 

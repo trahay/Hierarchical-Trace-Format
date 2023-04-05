@@ -396,7 +396,6 @@ void htf_storage_finalize(struct htf_archive *archive) {
   _htf_fwrite(&archive->definitions.nb_regions, sizeof(int), 1, f);
   _htf_fwrite(&archive->nb_containers, sizeof(int), 1, f);
   _htf_fwrite(&archive->nb_threads, sizeof(int), 1, f);
-  printf("there are %d threads\n", archive->nb_threads);
   _htf_fwrite(archive->thread_ids, sizeof(htf_thread_id_t), archive->nb_threads, f);
 
   _htf_fwrite(&archive->nb_archives, sizeof(int), 1, f);

@@ -25,4 +25,23 @@ target_link_libraries(write_benchmark
     htf
 )
 
+add_executable(dummy_thread
+  dummy_thread.c
+)
+
+target_compile_options(dummy_thread
+  PRIVATE
+    -Wall -Wextra -Wpedantic
+)
+
+target_include_directories(dummy_thread
+  PRIVATE
+  ${CMAKE_SOURCE_DIR}/src/
+  )
+
+target_link_libraries(dummy_thread
+  PRIVATE
+    htf
+)
+
 add_test(NAME write_benchmark COMMAND write_benchmark)
