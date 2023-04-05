@@ -382,7 +382,7 @@ void htf_storage_finalize(struct htf_archive *archive) {
   if(! archive)
     return;
 
-  int fullpath_len = strlen(archive->dir_name)+strlen(archive->trace_name)+6;
+  int fullpath_len = strlen(archive->dir_name)+strlen(archive->trace_name)+20;
   char* fullpath = malloc(fullpath_len * sizeof(char));
   if(archive->id == 0)
     snprintf(fullpath, fullpath_len, "%s/%s.htf", archive->dir_name, archive->trace_name);
@@ -392,6 +392,7 @@ void htf_storage_finalize(struct htf_archive *archive) {
 
   FILE* f = _htf_file_open(fullpath, "w");
   free(fullpath);
+  _htf_fwrite(&archive->id, sizeof(htf_archive_id_t), 1, f);
   _htf_fwrite(&archive->definitions.nb_strings, sizeof(int), 1, f);
   _htf_fwrite(&archive->definitions.nb_regions, sizeof(int), 1, f);
   _htf_fwrite(&archive->nb_containers, sizeof(int), 1, f);
@@ -412,7 +413,7 @@ void htf_storage_finalize(struct htf_archive *archive) {
     _htf_store_thread(archive->threads[i]);
   }
 
-  _htf_fwrite(&archive->sub_archives, sizeof(htf_archive_id_t), archive->nb_archives, f);
+  _htf_fwrite(archive->sub_archives, sizeof(htf_archive_id_t), archive->nb_archives, f);
 
   fclose(f);
 
@@ -425,7 +426,7 @@ static char* _sub_archive_filename(struct htf_archive* main_archive,
 				   htf_archive_id_t    id) {
   
   int tracename_len = strlen(main_archive->trace_name)+1;
-  int extension_index = tracename_len - 4;
+  int extension_index = tracename_len - 5;
   htf_assert(strcmp(&main_archive->trace_name[extension_index], ".htf")==0);
 
   char trace_basename[tracename_len];
@@ -473,11 +474,16 @@ static void _htf_read_archive(struct htf_archive* main_archive,
   archive->trace_name = strdup(trace_name);
   archive->main_archive = main_archive;
 
+  printf("archive {.dir_name='%s', .trace='%s'}\n", archive->dir_name, archive->trace_name);
+
   FILE* f = _htf_file_open(archive->fullpath, "r");
+
+  _htf_fread(&archive->id, sizeof(htf_archive_id_t), 1, f);
   _htf_fread(&archive->definitions.nb_strings, sizeof(int), 1, f);
   _htf_fread(&archive->definitions.nb_regions, sizeof(int), 1, f);
   _htf_fread(&archive->nb_containers, sizeof(int), 1, f);
   _htf_fread(&archive->nb_threads, sizeof(int), 1, f);
+  
   archive->thread_ids = malloc(sizeof(htf_thread_id_t) * archive->nb_threads);
   _htf_fread(archive->thread_ids, sizeof(htf_thread_id_t), archive->nb_threads, f);
   _htf_fread(&archive->nb_archives, sizeof(int), 1, f);
@@ -485,6 +491,8 @@ static void _htf_read_archive(struct htf_archive* main_archive,
   archive->definitions.nb_allocated_strings = archive->definitions.nb_strings;
   archive->definitions.strings = malloc(sizeof(struct htf_string) * archive->definitions.nb_allocated_strings);
   for(int i =0; i<archive->definitions.nb_strings; i++) {
+    htf_assert(strcmp( archive->dir_name, dir_name) == 0);
+
     _htf_read_string(archive, &archive->definitions.strings[i], i);
   }
 
@@ -503,15 +511,16 @@ static void _htf_read_archive(struct htf_archive* main_archive,
 
   archive->nb_allocated_archives = archive->nb_archives;
   archive->sub_archives = malloc(sizeof(htf_archive_id_t*)*archive->nb_allocated_archives);
-  _htf_fread(&archive->sub_archives, sizeof(htf_archive_id_t), archive->nb_allocated_archives, f);
+  _htf_fread(archive->sub_archives, sizeof(htf_archive_id_t), archive->nb_allocated_archives, f);
   fclose(f);
 
   
   if(archive->nb_allocated_archives > 0) {
-    struct htf_archive*sub_archives = malloc(sizeof(struct htf_archive_t*) * archive->nb_allocated_archives);
+    struct htf_archive *sub_archives = malloc(sizeof(struct htf_archive) * archive->nb_allocated_archives);
     for(int i=0; i<archive->nb_allocated_archives; i++) {
       char* filename = _sub_archive_filename(main_archive, archive->sub_archives[i]);
       _htf_read_archive(main_archive, &sub_archives[i], main_archive->dir_name, filename);
+      htf_assert(sub_archives[i].id == archive->sub_archives[i]);
       _push_archive(main_archive, &sub_archives[i]);
       free(filename);
     }

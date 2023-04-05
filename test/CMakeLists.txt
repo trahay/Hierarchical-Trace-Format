@@ -2,46 +2,14 @@ cmake_minimum_required(VERSION 3.1)
 
 enable_testing()
 
+add_compile_options(-Wall -Wextra -Wpedantic)
+include_directories(${CMAKE_SOURCE_DIR}/src/ )
+link_libraries(htf)
 
 #####################################################
 # write_benchmark
 
-add_executable(write_benchmark
-  write_benchmark.c
-)
-
-target_compile_options(write_benchmark
-  PRIVATE
-    -Wall -Wextra -Wpedantic
-)
-
-target_include_directories(write_benchmark
-  PRIVATE
-  ${CMAKE_SOURCE_DIR}/src/
-  )
-
-target_link_libraries(write_benchmark
-  PRIVATE
-    htf
-)
-
-add_executable(dummy_thread
-  dummy_thread.c
-)
-
-target_compile_options(dummy_thread
-  PRIVATE
-    -Wall -Wextra -Wpedantic
-)
-
-target_include_directories(dummy_thread
-  PRIVATE
-  ${CMAKE_SOURCE_DIR}/src/
-  )
-
-target_link_libraries(dummy_thread
-  PRIVATE
-    htf
-)
-
+add_executable(write_benchmark write_benchmark.c)
+add_executable(dummy_thread dummy_thread.c)
 add_test(NAME write_benchmark COMMAND write_benchmark)
+

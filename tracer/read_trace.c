@@ -72,16 +72,32 @@ static int get_next_event(struct htf_thread_reader *readers,
 }
 
 
+void populate(struct htf_archive *trace,
+	      int *nb_threads,
+	      struct htf_thread_reader **readers) {
+
+  int start_index = *nb_threads;
+  *nb_threads = trace->nb_threads + *nb_threads;
+  *readers = realloc(*readers, sizeof(struct htf_thread_reader) * (*nb_threads));
+  for(int i=0; i<trace->nb_threads; i++) {
+    htf_read_thread_iterator_init(trace, &(*readers)[start_index + i], trace->thread_ids[i]);
+  }
+
+  if(trace->next)
+    populate(trace->next, nb_threads, readers);
+}
+
 /* Print all the events of all the threads sorted by timestamp */
 void print_trace(struct htf_archive *trace) {
-  struct htf_thread_reader *readers = malloc(sizeof(struct htf_thread_reader) * trace->nb_threads);
-  for(int i=0; i<trace->nb_threads; i++) {
-    htf_read_thread_iterator_init(trace, &readers[i], trace->thread_ids[i]);
-  }
-  
+  struct htf_thread_reader *readers = NULL;
+  int nb_threads = 0;
+  populate(trace, &nb_threads, &readers);
+
+  printf("There are %d threads\n", nb_threads);
+
   struct htf_event_occurence e;
   int thread_index = -1;
-  while((thread_index = get_next_event(readers, trace->nb_threads, &e)) >= 0) {
+  while((thread_index = get_next_event(readers, nb_threads, &e)) >= 0) {
     print_event(readers[thread_index].thread_trace, &e);
   }
 }

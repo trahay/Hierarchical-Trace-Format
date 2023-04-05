@@ -313,6 +313,20 @@ static void _init_definition(struct htf_definition* d) {
 }
 
 
+void htf_write_add_subarchive(struct htf_archive* archive,
+			      htf_archive_id_t subarchive) {
+  pthread_mutex_lock(&archive->lock);
+
+  int index = archive->nb_archives++;
+  if(archive->nb_archives >  archive->nb_allocated_archives) {
+    archive->nb_allocated_archives *= 2;
+    archive->sub_archives = realloc(archive->sub_archives, sizeof(htf_archive_id_t) * archive->nb_allocated_archives);
+  }
+
+  archive->sub_archives[index] = subarchive;
+  pthread_mutex_unlock(&archive->lock);
+}
+
 void htf_write_archive_open(struct htf_archive *archive,
 			    const char* dirname,
 			    const char* trace_name,
