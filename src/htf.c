@@ -11,7 +11,7 @@
 #include "htf.h"
 #include "htf_timestamp.h"
 
-struct htf_event* htf_get_event(struct htf_thread_trace *thread_trace,
+struct htf_event* htf_get_event(struct htf_thread *thread_trace,
 				htf_event_id_t evt_id) {
   struct htf_event* evt = NULL;
   if(HTF_ID(evt_id) < thread_trace->nb_events)
@@ -20,7 +20,7 @@ struct htf_event* htf_get_event(struct htf_thread_trace *thread_trace,
 }
 
 
-struct htf_sequence* htf_get_sequence(struct htf_thread_trace *thread_trace,
+struct htf_sequence* htf_get_sequence(struct htf_thread *thread_trace,
 				      htf_sequence_id_t seq_id) {
   struct htf_sequence* seq = NULL;
   if(HTF_ID(seq_id) < thread_trace->nb_sequences)
@@ -28,7 +28,7 @@ struct htf_sequence* htf_get_sequence(struct htf_thread_trace *thread_trace,
   return seq;
 }
 
-struct htf_loop* htf_get_loop(struct htf_thread_trace *thread_trace,
+struct htf_loop* htf_get_loop(struct htf_thread *thread_trace,
 			      htf_loop_id_t loop_id) {
   struct htf_loop* loop = NULL;
   if(HTF_ID(loop_id) < thread_trace->nb_loops)
@@ -37,7 +37,7 @@ struct htf_loop* htf_get_loop(struct htf_thread_trace *thread_trace,
 }
 
 
-static htf_token_t _htf_get_token_in_sequence(struct htf_thread_trace *thread_trace,
+static htf_token_t _htf_get_token_in_sequence(struct htf_thread *thread_trace,
 					      htf_sequence_id_t seq_id,
 					      int index) {  
   int seq_index = HTF_ID(seq_id);
@@ -52,7 +52,7 @@ static htf_token_t _htf_get_token_in_sequence(struct htf_thread_trace *thread_tr
   return s->token[index];
 }
 
-static htf_token_t _htf_get_token_in_loop(struct htf_thread_trace *thread_trace,
+static htf_token_t _htf_get_token_in_loop(struct htf_thread *thread_trace,
 					  htf_loop_id_t loop_id,
 					  int index) {
   struct htf_loop *l = htf_get_loop(thread_trace, loop_id);
@@ -67,7 +67,7 @@ static htf_token_t _htf_get_token_in_loop(struct htf_thread_trace *thread_trace,
 }
 
 
-void htf_print_token(struct htf_thread_trace *thread_trace, htf_token_t token) {
+void htf_print_token(struct htf_thread *thread_trace, htf_token_t token) {
   switch(HTF_TOKEN_TYPE(token)) {
   case HTF_TYPE_EVENT:
     {
@@ -91,7 +91,7 @@ void htf_print_token(struct htf_thread_trace *thread_trace, htf_token_t token) {
   }
 }
 
-htf_token_t htf_get_token(struct htf_thread_trace *trace,
+htf_token_t htf_get_token(struct htf_thread *trace,
 			  htf_token_t sequence,
 			  int index) {
   switch(HTF_TOKEN_TYPE(sequence)){
@@ -113,7 +113,7 @@ htf_token_t htf_get_token(struct htf_thread_trace *trace,
 
 }
 
-void htf_print_token_array(struct htf_thread_trace *thread_trace,
+void htf_print_token_array(struct htf_thread *thread_trace,
 			   htf_token_t* token_array,
 			   int index_start,
 			   int index_stop) {
@@ -127,14 +127,37 @@ void htf_print_token_array(struct htf_thread_trace *thread_trace,
   printf("\n");
 }
 
-void htf_print_sequence(struct htf_thread_trace *thread_trace, htf_sequence_id_t seq_id) {
-  struct htf_sequence* seq = htf_get_sequence(thread_trace, seq_id);
+void htf_print_sequence(struct htf_thread *thread, htf_sequence_id_t seq_id) {
+  struct htf_sequence* seq = htf_get_sequence(thread, seq_id);
 
   printf("#Sequence %d (%d tokens)-------------\n", HTF_ID(seq_id), seq->size);
   for(int i=0; i<seq->size; i++) {
-    htf_print_token(thread_trace, seq->token[i]);
+    htf_print_token(thread, seq->token[i]);
     printf(" ");
   }
   printf("\n");
 }
 
+struct htf_thread* htf_archive_get_thread(struct htf_archive* archive,
+					  htf_thread_id_t thread_id) {
+  for(int i = 0; i<archive->nb_threads; i++) {
+    if(archive->threads[i]->id == thread_id)
+      return archive->threads[i];
+  }
+  return NULL;
+}
+
+struct htf_container* htf_archive_get_container(struct htf_archive* archive,
+						htf_container_id_t container_id) {
+  for(int i = 0; i<archive->nb_containers; i++) {
+    if(archive->containers[i].id == container_id)
+      return &archive->containers[i];
+  }
+  return NULL;  
+}
+
+const char* htf_get_thread_name(struct htf_thread* thread) {
+  struct htf_archive* archive = thread->archive;
+  struct htf_container* container = htf_archive_get_container(archive,thread->container);
+  return htf_archive_get_string(archive, container->name)->str;
+}

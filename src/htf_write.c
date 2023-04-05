@@ -6,6 +6,7 @@
 #include "htf.h"
 #include "htf_timestamp.h"
 #include "htf_storage.h"
+#include "htf_event.h"
 #include "htf_write.h"
 
 
@@ -13,7 +14,7 @@
 _Thread_local int htf_recursion_shield = 0;
 
 static void _htf_find_loop(struct htf_thread_writer *thread_writer);
-static inline htf_sequence_id_t _htf_get_sequence_id_from_array(struct htf_thread_trace *thread_trace,
+static inline htf_sequence_id_t _htf_get_sequence_id_from_array(struct htf_thread *thread_trace,
 								htf_token_t* token_array,
 								int array_len);
 
@@ -25,7 +26,7 @@ static inline struct htf_sequence* _htf_get_cur_sequence(struct htf_thread_write
 /* search for a sequence_id that matches seq
  * if none of the registered sequence match, register a new sequence
  */
-static inline htf_sequence_id_t _htf_get_sequence_id(struct htf_thread_trace *thread_trace,
+static inline htf_sequence_id_t _htf_get_sequence_id(struct htf_thread *thread_trace,
 						     struct htf_sequence *seq) {
   /* TODO: this could be speed up by storing the sequence_id in the sequence structure.
    * if seq_id == seq_invalid, then search for a matching sequence.
@@ -38,7 +39,7 @@ static inline htf_sequence_id_t _htf_get_sequence_id(struct htf_thread_trace *th
 /* search for a sequence_id that matches token_array
  * if none of the registered sequence match, register a new sequence
  */
-static inline htf_sequence_id_t _htf_get_sequence_id_from_array(struct htf_thread_trace *thread_trace,
+static inline htf_sequence_id_t _htf_get_sequence_id_from_array(struct htf_thread *thread_trace,
 								htf_token_t* token_array,
 								int array_len) {
   htf_log(htf_dbg_lvl_debug, "Searching for sequence {.size=%d}\n", array_len);
@@ -289,61 +290,254 @@ void htf_store_event(struct htf_thread_writer *thread_writer,
 }
 
 
-
-void htf_write_finalize(struct htf_trace *trace) {
-  if(!trace)
-    return;
-
-  htf_storage_finalize(trace);
+void htf_write_thread_close(struct htf_thread_writer* thread_writer) {
+  htf_storage_finalize_thread(&thread_writer->thread_trace);
 }
 
-void htf_write_init(struct htf_trace *trace, const char* dirname) {
+/* only called by the main process */
+void htf_write_archive_close(struct htf_archive* archive) {
+  if(!archive)
+    return;
+
+  htf_storage_finalize(archive);
+}
+
+static void _init_definition(struct htf_definition* d) {
+
+  pthread_mutex_init(&d->lock, NULL);
+
+  d->strings = malloc(sizeof(struct htf_string) * NB_STRING_DEFAULT);
+  d->nb_allocated_strings = NB_STRING_DEFAULT;
+  d->nb_strings = 0;
+
+  d->regions = malloc(sizeof(struct htf_region) * NB_REGION_DEFAULT);
+  d->nb_allocated_regions = NB_REGION_DEFAULT;
+  d->nb_regions = 0;
+}
+
+
+void htf_write_archive_open(struct htf_archive *archive,
+			    const char* dirname,
+			    const char* trace_name,
+			    htf_archive_id_t archive_id) {
+
   if(htf_recursion_shield)
     return;
   htf_recursion_shield++;
 
-  trace->threads = NULL;
-  trace->nb_threads = 0;
-  trace->allocated_threads = 0;
-  pthread_mutex_init(&trace->lock, NULL);
-
-  trace->strings = malloc(sizeof(struct htf_string) * NB_STRING_DEFAULT);
-  trace->nb_allocated_strings = NB_STRING_DEFAULT;
-  trace->nb_strings = 0;
-
-  trace->regions = malloc(sizeof(struct htf_region) * NB_REGION_DEFAULT);
-  trace->nb_allocated_regions = NB_REGION_DEFAULT;
-  trace->nb_regions = 0;
-
   htf_debug_level_init();
-  htf_storage_init(dirname);
+
+  archive->dir_name = strdup(dirname);
+  archive->trace_name = strdup(trace_name);
+  archive->fullpath = htf_archive_fullpath(archive->dir_name, archive->trace_name);
+  archive->id = archive_id;
+
+  _init_definition(&archive->definitions);
+
+  archive->nb_allocated_containers = NB_CONTAINERS_DEFAULT;
+  archive->nb_containers = 0;
+  archive->containers = malloc(sizeof(struct htf_container) * archive->nb_allocated_containers);
+
+  archive->nb_allocated_threads = NB_THREADS_DEFAULT;
+  archive->nb_threads = 0;
+  archive->threads = malloc(sizeof(struct htf_thread*) * archive->nb_allocated_threads);
+
+  archive->nb_allocated_archives = NB_ARCHIVES_DEFAULT;
+  archive->nb_archives = 0;
+  archive->sub_archives = malloc(sizeof(htf_archive_id_t) * archive->nb_allocated_archives);
+
+  archive->next = NULL;
+  archive->main_archive = archive;
+
+  htf_storage_init(archive);
 
   htf_recursion_shield--;
 }
 
+#if 0
+void _add_container(struct htf_container *parent,
+		    struct htf_container *c) {
+  c->parent_id = parent->id;
 
-void htf_write_init_thread(struct htf_trace* trace,
-			   struct htf_thread_writer *thread_writer,
-			   int thread_rank) {
+  pthread_mutex_lock(&parent->lock);
+  {
+    parent->nb_containers++;
+
+    if(parent->nb_containers >= parent->allocated_containers) {
+      parent->allocated_containers *= 2;
+      if(parent->allocated_containers == 0) parent->allocated_containers = 1;
+      size_t size = sizeof(struct htf_container *) * parent->allocated_containers;
+      parent->containers = realloc(parent->containers, size);
+    }
+    parent->containers[parent->nb_containers - 1] = c;
+  }
+  pthread_mutex_unlock(&parent->lock);
+}
+
+static void _add_root_container(struct htf_trace *trace,
+				struct htf_container *c) {
+  c->parent_id = HTF_CONTAINER_INVALID;
+  trace->nb_containers++;
+
+  if(trace->nb_containers >= trace->nb_allocated_containers) {
+    trace->nb_allocated_containers *= 2;
+    if(trace->nb_allocated_containers == 0) trace->nb_allocated_containers = 1;
+    size_t size = sizeof(struct htf_container **) * trace->nb_allocated_containers;
+    trace->root_containers = realloc(trace->root_containers, size);
+  }
+  trace->root_containers[trace->nb_containers - 1] = c;
+}
+
+static struct htf_container * _htf_get_container(struct htf_archive *c,
+						 htf_container_id_t id) {
+  if(c) {
+    if(c->id == id)
+      return c;
+
+    struct htf_container *ret = NULL;
+    for(int i=0; i<c->nb_containers; i++) {
+      ret = _htf_get_container(c->containers[i], id);
+      if(ret) return ret;
+    }
+  }
+  return NULL;
+}
+
+
+void htf_write_define_container(struct htf_trace *trace,
+				struct htf_container *c,
+				htf_container_id_t id,
+				htf_string_ref_t       name,
+				htf_container_id_t parent_id) {
+  _init_container(trace, c);
+  c->id = id;
+  c->name = name;
+  struct htf_container *parent_container = htf_get_container(trace, parent_id);
+  if(parent_container) {
+    _add_container(parent_container, c);
+  } else {
+    _add_root_container(trace, c);
+  }
+}
+
+
+#endif
+
+struct htf_container * htf_get_container(struct htf_archive *archive,
+					 htf_container_id_t id) {
+  for(int i=0; i<archive->nb_containers; i++) {
+    if(archive->containers[i].id == id)
+      return &archive->containers[i];
+  }
+  return NULL;
+}
+
+static void _init_thread(struct htf_archive *archive,
+			 struct htf_thread* t,
+			 htf_thread_id_t thread_id) {
+  t->archive = archive;
+  t->id = thread_id;
+  t->container = HTF_CONTAINER_ID_INVALID;
+
+  t->nb_allocated_events = NB_EVENT_DEFAULT;
+  t->events = malloc(sizeof(struct htf_event_summary) * t->nb_allocated_events);
+  t->nb_events = 0;
+
+  t->nb_allocated_sequences = NB_SEQUENCE_DEFAULT;
+  t->sequences = malloc(sizeof(struct htf_sequence) * t->nb_allocated_sequences);
+  t->nb_sequences = 0;
+
+  t->nb_allocated_loops = NB_LOOP_DEFAULT;
+  t->loops = malloc(sizeof(struct htf_loop) * t->nb_allocated_loops);
+  t->nb_loops = 0;
+}
+
+void htf_write_thread_open(struct htf_archive* archive,
+			   struct htf_thread_writer* thread_writer,
+			   htf_thread_id_t thread_id) {
   if(htf_recursion_shield)
     return;
   htf_recursion_shield++;
 
+  htf_assert(htf_archive_get_thread(archive, thread_id) == NULL);
+
+  htf_log(htf_dbg_lvl_debug, "htf_write_init_thread(%ux)\n", thread_id);
+
+  _init_thread(archive, &thread_writer->thread_trace, thread_id);
+
+  thread_writer->max_depth = CALLSTACK_DEPTH_DEFAULT;
+  thread_writer->og_seq = malloc(sizeof(struct htf_sequence*) * thread_writer->max_depth);
+
+#define _init_sequence(s) do {						\
+    s->token = malloc(sizeof(htf_token_t) * SEQUENCE_SIZE_DEFAULT);	\
+    s->size = 0;							\
+    s->allocated = SEQUENCE_SIZE_DEFAULT;				\
+  } while(0)
+
+  // the main sequence is in sequences[0]
+  thread_writer->og_seq[0] = &thread_writer->thread_trace.sequences[0];
+  thread_writer->thread_trace.nb_sequences = 1;
+  _init_sequence(thread_writer->og_seq[0]);
+
+  for(int i = 1; i<thread_writer->max_depth; i++) {
+    thread_writer->og_seq[i] = malloc(sizeof(struct htf_sequence));
+    _init_sequence(thread_writer->og_seq[i]);
+  }
+  thread_writer->cur_depth = 0;
+
+  htf_recursion_shield--;
+}
+
+void htf_write_define_container(struct htf_archive *archive,
+				htf_container_id_t id,
+				htf_string_ref_t name,
+				htf_container_id_t parent,
+				htf_thread_id_t thread) {
+  htf_assert(htf_archive_get_container(archive, id) == NULL);
+
+  while(archive->nb_containers >= archive->nb_allocated_containers) {
+    archive->nb_allocated_containers *=2 ;
+    archive->containers = realloc(archive->containers, sizeof(struct htf_container) * archive->nb_allocated_containers);
+    htf_assert(archive->containers);
+  }
+
+  int index = archive->nb_containers++;
+  struct htf_container*c = &archive->containers[index];
+  c->id = id;
+  c->name = name;
+  c->parent = parent;
+  c->thread_id = thread;
+}
+
+#if 0
+
+void htf_write_init_thread(struct htf_trace *trace,
+			   struct htf_thread_writer *thread_writer,
+			   htf_container_id_t container_id,
+			   htf_string_ref_t   name,
+			   htf_container_id_t parent_id) {
+  if(htf_recursion_shield)
+    return;
+  htf_recursion_shield++;
+
+
   htf_log(htf_dbg_lvl_debug, "htf_write_init_thread\n");
 
-  htf_assert(thread_rank >= 0);
-  htf_assert(thread_rank >= trace->nb_threads);
-  thread_writer->thread_rank = thread_rank;
+  struct htf_container*c = malloc(sizeof(struct htf_container));
 
-  thread_writer->thread_trace.trace = trace;
-  
-  thread_writer->thread_trace.events = malloc(sizeof(struct htf_event_summary) * NB_EVENT_DEFAULT);
-  thread_writer->thread_trace.nb_allocated_events = NB_EVENT_DEFAULT;
-  thread_writer->thread_trace.nb_events = 0;
+  htf_write_define_container(trace,
+			     c,
+			     container_id,
+			     name,
+			     parent_id);
 
-  thread_writer->thread_trace.sequences = malloc(sizeof(struct htf_sequence) * NB_SEQUENCE_DEFAULT);
-  thread_writer->thread_trace.nb_allocated_sequences = NB_SEQUENCE_DEFAULT;
+  //thread_writer->thread_trace.container = c;
+  //  _init_container(c);
+  //  c->parent_container = parent_container;
+  c->thread = &thread_writer->thread_trace;
 
+  _init_thread(c->thread);
+  thread_writer->thread_trace.container = c;
   thread_writer->max_depth = CALLSTACK_DEPTH_DEFAULT;
   thread_writer->og_seq = malloc(sizeof(struct htf_sequence*) * thread_writer->max_depth);
 
@@ -364,21 +558,18 @@ void htf_write_init_thread(struct htf_trace* trace,
   }
   thread_writer->cur_depth = 0;
 
-  thread_writer->thread_trace.loops = malloc(sizeof(struct htf_loop) * NB_LOOP_DEFAULT);
-  thread_writer->thread_trace.nb_allocated_loops = NB_LOOP_DEFAULT;
-  thread_writer->thread_trace.nb_loops = 0;
-
-  pthread_mutex_lock(&trace->lock);
-  {
-    trace->nb_threads++;
-
-    if(thread_rank+1 > trace->allocated_threads) {
-      trace->allocated_threads = thread_rank+1;
-      size_t size = sizeof(struct htf_thread_trace *) * trace->allocated_threads;
-      trace->threads = realloc(trace->threads, size);
-    }
-    trace->threads[thread_rank] = &thread_writer->thread_trace;
-  }
-  pthread_mutex_unlock(&trace->lock);
+//  pthread_mutex_lock(&c->lock);
+//  {
+//    c->nb_containers++;
+//
+//    if(thread_rank+1 > c->allocated_containers) {
+//      c->allocated_containers = thread_rank+1;
+//      size_t size = sizeof(struct htf_container *) * c->allocated_containers;
+//      c->containers = realloc(c->containers, size);
+//    }
+//    c->containers[thread_rank] = c;
+//  }
+//  pthread_mutex_unlock(&c->lock);
   htf_recursion_shield--;
 }
+#endif

@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "htf_read.h"
+#include "htf_event.h"
 
 static void init_callstack(struct htf_thread_reader *reader) {
   reader->current_frame = 0;
@@ -12,22 +13,22 @@ static void init_callstack(struct htf_thread_reader *reader) {
   reader->callstack_sequence[0].id = 0;
 }
 
-void htf_read_thread_iterator_init(struct htf_thread_reader *reader,
-				   struct htf_trace* trace,
-				   int thread_index) {
-  reader->trace = trace;
-  htf_assert(thread_index < trace->nb_threads);
-  reader->thread_trace = trace->threads[thread_index];
-
-  reader->event_index = calloc(sizeof(int), trace->threads[thread_index]->nb_events);
+void htf_read_thread_iterator_init(struct htf_archive *archive,
+				   struct htf_thread_reader *reader,
+				   htf_thread_id_t thread_id) {
+  htf_assert(thread_id != HTF_THREAD_ID_INVALID);
+  reader->archive = archive;
+  reader->thread_trace = htf_archive_get_thread(archive, thread_id);
+  htf_assert(reader->thread_trace != NULL);
 
   /* TODO: don't hardcode the max depth */
   reader->callstack_sequence = calloc(sizeof(htf_token_t), 100);
   reader->callstack_index = calloc(sizeof(int), 100);
-  reader->callstack_loop_iteration = calloc(sizeof(int), 100);
+  reader->callstack_loop_iteration = calloc(sizeof(int), 100); 
+  reader->event_index = calloc(sizeof(int), reader->thread_trace->nb_events);
 
   if(htf_debug_level >= htf_dbg_lvl_verbose) {
-    htf_log( htf_dbg_lvl_verbose, "init callstack for thread %d\n", thread_index);
+    htf_log( htf_dbg_lvl_verbose, "init callstack for thread %s\n", htf_get_thread_name(reader->thread_trace));
     htf_log( htf_dbg_lvl_verbose, "The trace contains:\n");
     htf_print_sequence(reader->thread_trace, HTF_SEQUENCE_ID(0));
   }

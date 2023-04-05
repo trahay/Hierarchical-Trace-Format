@@ -6,7 +6,9 @@
 #include "htf_event.h"
 #include "htf_write.h"
 
-static struct htf_trace trace;
+static struct htf_archive   trace;
+static htf_container_id_t   process_id;
+static htf_string_ref_t     process_name;
 
 static int nb_iter_default = 100000;
 static int nb_functions_default = 2;
@@ -19,11 +21,33 @@ static int nb_threads;
 static int pattern;
 
 struct htf_thread_writer **thread_writers;
+static htf_region_ref_t *regions;
+static htf_string_ref_t *strings;
 
 static pthread_barrier_t bench_start;
 static pthread_barrier_t bench_stop;
 
 #define TIME_DIFF(t1, t2) (((t2).tv_sec-(t1).tv_sec) + ((t2).tv_nsec-(t1).tv_nsec)/1e9)
+
+static htf_string_ref_t _register_string(char* str) {
+  static htf_string_ref_t next_ref = 0;
+  htf_string_ref_t ref = next_ref++;
+
+  htf_archive_register_string(&trace, ref, str);
+  return ref;
+}
+
+static htf_container_id_t _new_container() {
+  static _Atomic htf_container_id_t next_id = 0;
+  htf_container_id_t id = next_id++;
+  return id;
+}
+
+static htf_thread_id_t _new_thread() {
+  static _Atomic htf_thread_id_t next_id = 0;
+  htf_thread_id_t id = next_id++;
+  return id;
+}
 
 void* worker(void* arg __attribute__((unused))) {
   static _Atomic int nb_threads = 0;
@@ -31,10 +55,19 @@ void* worker(void* arg __attribute__((unused))) {
 
   thread_writers[my_rank] =  malloc(sizeof(struct htf_thread_writer));
   struct htf_thread_writer *thread_writer = thread_writers[my_rank];
+  char thread_name[20];
+  snprintf(thread_name, 20, "thread_%d", my_rank);
+  htf_string_ref_t thread_name_id = _register_string(thread_name);
 
-  htf_write_init_thread(&trace,
-			thread_writer,
-			my_rank);    
+  htf_container_id_t thread_container_id = _new_container();
+  htf_thread_id_t thread_id = _new_thread();
+  htf_write_define_container(&trace,
+			     thread_container_id,
+			     thread_name_id,
+			     process_id,
+			     thread_id);
+
+  htf_write_thread_open(&trace, thread_writer, thread_id);
  
   struct timespec t1, t2;
   pthread_barrier_wait(&bench_start);
@@ -46,8 +79,8 @@ void* worker(void* arg __attribute__((unused))) {
        * E_f1 L_f1 E_f2 L_f2 E_f3 L_f3 ...
        */
       for(int j = 0; j<nb_functions; j++) {
-	htf_record_enter(thread_writer, NULL, HTF_TIMESTAMP_INVALID, j);
-	htf_record_leave(thread_writer, NULL, HTF_TIMESTAMP_INVALID, j);
+	htf_record_enter(thread_writer, NULL, HTF_TIMESTAMP_INVALID, regions[j]);
+	htf_record_leave(thread_writer, NULL, HTF_TIMESTAMP_INVALID, regions[j]);
       }
       break;
 
@@ -56,10 +89,10 @@ void* worker(void* arg __attribute__((unused))) {
        * E_f1 E_f2 E_f3 ... L_f3 L_f2 L_f1
        */
       for(int j = 0; j<nb_functions; j++) {
-	htf_record_enter(thread_writer, NULL, HTF_TIMESTAMP_INVALID, j);
+	htf_record_enter(thread_writer, NULL, HTF_TIMESTAMP_INVALID, regions[j]);
       }
       for(int j = nb_functions-1; j>=0; j--) {
-	htf_record_leave(thread_writer, NULL, HTF_TIMESTAMP_INVALID, j);
+	htf_record_leave(thread_writer, NULL, HTF_TIMESTAMP_INVALID, regions[j]);
       }
       break;
     default:
@@ -78,6 +111,7 @@ void* worker(void* arg __attribute__((unused))) {
   printf("T#%d: %d events in %lf s -> %lf ns per event\n",
 	 my_rank, nb_events, duration, duration_per_event * 1e9);
 
+  htf_write_thread_close(thread_writer);
   return NULL;
 }
 
@@ -133,9 +167,28 @@ int main(int argc, char**argv) {
   printf("pattern = %d\n", pattern);
   printf("---------------------\n");
 
-  
-  htf_write_init(&trace, "write_benchmark_trace");
+  htf_write_archive_open(&trace,
+			 "write_benchmark_trace",
+			 "main.htf",
+			 0);
 
+  process_id = _new_container();
+  process_name = _register_string("Process"),
+  htf_write_define_container(&trace,
+			     process_id,
+			     process_name,
+			     HTF_CONTAINER_ID_INVALID,
+			     HTF_THREAD_ID_INVALID);
+
+  regions = malloc(sizeof(htf_region_ref_t) * nb_functions);
+  strings = malloc(sizeof(htf_string_ref_t) * nb_functions);
+  for(int i=0; i<nb_functions; i++) {
+    char str[50];
+    snprintf(str, 50, "function_%d", i);
+    strings[i] = _register_string(str);
+    regions[i] = strings[i];
+    htf_archive_register_region(&trace, regions[i], strings[i]);
+  }
   
   for(int i=0; i<nb_threads; i++)
     pthread_create(&tid[i], NULL, worker, NULL);
@@ -158,7 +211,6 @@ int main(int argc, char**argv) {
   printf("TOTAL: %d events in %lf s -> %lf Me/s \n",
 	 nb_events, duration, events_per_second/1e6);
 
-  htf_write_finalize(&trace);
-
+  htf_write_archive_close(&trace);
   return EXIT_SUCCESS;
 }

@@ -57,8 +57,8 @@ OTF2_EvtWriter_Enter( OTF2_EvtWriter*     writer,
                       OTF2_TimeStamp      time,
                       OTF2_RegionRef      region ) {
 
-  printf("enter(%p {.locationRef=%x, .writer=%p}, %d)\n", writer, writer->locationRef, writer->thread_writer, region);
-  htf_assert(writer->locationRef < 10);
+  printf("enter(%p {.locationRef=%lu, .writer=%p}, %d)\n", writer, writer->locationRef, writer->thread_writer, region);
+  //  htf_assert(writer->locationRef < 10);
   htf_record_enter(writer->thread_writer,
 		   NULL, // TO_BE_IMPLEMENTED
 		   time,
@@ -72,7 +72,7 @@ OTF2_EvtWriter_Leave( OTF2_EvtWriter*     writer,
                       OTF2_AttributeList* attributeList,
                       OTF2_TimeStamp      time,
                       OTF2_RegionRef      region ) {
-  printf("leave(%p {.locationRef=%x, .writer=%p}, %d)\n", writer, writer->locationRef, writer->thread_writer, region);
+  printf("leave(%p {.locationRef=%lu, .writer=%p}, %d)\n", writer, writer->locationRef, writer->thread_writer, region);
  htf_assert(writer->locationRef < 10);
  htf_record_leave(writer->thread_writer,
 		   NULL, // TO_BE_IMPLEMENTED

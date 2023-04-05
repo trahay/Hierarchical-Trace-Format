@@ -64,6 +64,7 @@ OTF2_GlobalDefWriter_WriteString( OTF2_GlobalDefWriter* writerHandle,
                                   OTF2_StringRef        self,
                                   const char*           string ) {
   //  NOT_IMPLEMENTED;
+  TO_BE_IMPLEMENTED;
   htf_register_string(&writerHandle->archive->trace, self, string);
   return OTF2_SUCCESS;
 }

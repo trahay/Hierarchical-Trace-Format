@@ -58,7 +58,16 @@ OTF2_DefWriter_WriteLocationGroup( OTF2_DefWriter*        writer,
                                    OTF2_LocationGroupType locationGroupType,
                                    OTF2_SystemTreeNodeRef systemTreeParent,
                                    OTF2_LocationGroupRef  creatingLocationGroup ) {
-  NOT_IMPLEMENTED;
+ // todo: should we keep that pointer ? 
+  struct htf_container *c = malloc(sizeof(struct htf_container));
+
+  htf_write_define_container(writer->thread_writer->container.trace,
+			     c,
+			     self,
+			     name,
+			     creatingLocationGroup);
+
+  return OTF2_SUCCESS;
 }
 
 OTF2_ErrorCode
@@ -68,7 +77,13 @@ OTF2_DefWriter_WriteLocation( OTF2_DefWriter*       writer,
                               OTF2_LocationType     locationType,
                               uint64_t              numberOfEvents,
                               OTF2_LocationGroupRef locationGroup ) {
-  NOT_IMPLEMENTED;
+  printf("defwriter\n");
+  htf_write_init_thread(writer->thread_writer->container.trace,
+			writer->thread_writer,
+			self,
+			name,
+			locationGroup);
+  return OTF2_SUCCESS;
 }
 
 OTF2_ErrorCode

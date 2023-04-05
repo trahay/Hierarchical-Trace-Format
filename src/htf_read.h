@@ -3,26 +3,27 @@
 
 #include "htf.h"
 
-
 struct htf_thread_reader {
-  struct htf_trace *trace;
-  struct htf_thread_trace *thread_trace;
+  struct htf_archive* archive;
+  struct htf_thread *thread_trace;
 
-  htf_token_t *callstack_sequence;	/* each entry contains the sequence/loop being read */
-  int     *callstack_index;	/* each entry contains the index in the sequence or the loop iteration */
-  int     *callstack_loop_iteration;	/* each entry contains the number of iteration of the loop at the corresponding frame */
+  htf_token_t* callstack_sequence;	/* each entry contains the sequence/loop being read */
+  int*         callstack_index;	/* each entry contains the index in the sequence or the loop iteration */
+  int*         callstack_loop_iteration;	/* each entry contains the number of iteration of the loop at the corresponding frame */
 
-  int     current_frame;
+  int          current_frame;
 
-  int *event_index;
+  int*         event_index;
 };
 
 
-void htf_read_trace(struct htf_trace* trace, char* filename);
+void htf_read_archive(struct htf_archive* archive, char* filename);
 
-void htf_read_thread_iterator_init(struct htf_thread_reader *reader,
-				   struct htf_trace* trace,
-				   int thread_index);
+//void htf_read_trace(struct htf_trace* trace, char* filename);
+
+void htf_read_thread_iterator_init(struct htf_archive *archive,
+				   struct htf_thread_reader *reader,
+				   htf_thread_id_t thread_id);
 
 /* return the current event in a thread and move to the next one.
  * Return -1 in case of an error (such as the end of the trace)

@@ -140,17 +140,10 @@ enum htf_record {
 };
 
 struct htf_event {
-  //  enum event_type event_type;
-  /* TODO: update the content of the event */
   uint8_t event_size;
   enum htf_record record;
   
   uint8_t event_data[256]; // todo: align on 256
-
-  //  int function_id;
-  //uintptr_t ptr;
-  //  pthread_t tid;
-  //  enum intercepted_function function;
 } __attribute__((packed));
 
 /*************************** Sequence **********************/
@@ -218,8 +211,25 @@ typedef struct htf_attribute_list {
   struct htf_attribute_list* next;
 } htf_attribute_list_t;
 
-struct htf_thread_trace {
-  struct htf_trace *trace;
+
+typedef uint32_t htf_thread_id_t;
+#define HTF_THREAD_ID_INVALID ( ( htf_thread_id_t )HTF_UNDEFINED_UINT32 )
+
+typedef uint32_t htf_container_id_t;
+#define HTF_CONTAINER_ID_INVALID ( ( htf_container_id_t )HTF_UNDEFINED_UINT32 )
+
+typedef uint32_t htf_archive_id_t;
+#define HTF_ARCHIVE_ID_INVALID ( ( htf_archive_id_t )HTF_UNDEFINED_UINT32 )
+
+/* A thread contains streams of events.
+ * It can be a regular thread (eg. a pthread), or a GPU stream
+ */
+struct htf_thread {
+  struct htf_archive *archive;
+  htf_thread_id_t id;
+
+  /* container that contains the thread (eg. the process) */
+  htf_container_id_t container;
 
   struct htf_event_summary *events;
   unsigned nb_allocated_events;
@@ -234,10 +244,25 @@ struct htf_thread_trace {
   unsigned nb_loops;
 };
 
-struct htf_trace {
-  struct htf_thread_trace **threads;
-  _Atomic int allocated_threads;
-  _Atomic int nb_threads;
+
+/* a container can be a thread, a process, a machine, etc. */
+struct htf_container {
+  htf_container_id_t id;
+  htf_string_ref_t   name;
+  htf_container_id_t parent;
+
+  /* id of the corresponding thread (if any) */
+  htf_thread_id_t thread_id;
+
+#if 0
+  /* todo: pas besoin ? on peut retrouver ces infos à partir de la
+     liste de conteneurs et leurs parent */
+  htf_container_id_t *children;
+  int nb_children;
+#endif
+};
+
+struct htf_definition {
   pthread_mutex_t lock;
 
   struct htf_string *strings;
@@ -247,49 +272,97 @@ struct htf_trace {
   struct htf_region *regions;
   int nb_regions;
   int nb_allocated_regions;
+};
 
+struct htf_archive {
+  char* dir_name;
+  char* trace_name;
+  char* fullpath;
+
+  htf_archive_id_t id;
+
+  struct htf_definition definitions;
+  struct htf_container* containers;
+  int nb_containers;
+  int nb_allocated_containers;
+
+  /* a list of threads */
+  struct htf_thread **threads;
+  int nb_threads;
+  int nb_allocated_threads;
+
+  htf_archive_id_t *sub_archives;
+  int nb_archives;
+  int nb_allocated_archives;
+
+  struct htf_archive *main_archive;
+  struct htf_archive *next;
 };
 
 
+struct htf_thread* htf_archive_get_thread(struct htf_archive* archive,
+					  htf_thread_id_t thread_id);
+
+struct htf_container* htf_archive_get_container(struct htf_archive* archive,
+						htf_container_id_t container_id);
+
+
+void htf_archive_register_string(struct htf_archive *archive,
+				 htf_string_ref_t string_ref,
+				 const char* string);
+
+void htf_archive_register_region(struct htf_archive *archive,
+				 htf_region_ref_t region_ref,
+				 htf_string_ref_t string_ref);
+
+
+
+struct htf_string* htf_archive_get_string(struct htf_archive *archive,
+					  htf_string_ref_t string_ref);
+
+struct htf_region* htf_archive_get_region(struct htf_archive *archive,
+					  htf_region_ref_t region_ref);
+
+const char* htf_get_thread_name(struct htf_thread* thread);
 
 /* Print the content of sequence seq_id */
-void htf_print_sequence(struct htf_thread_trace *thread_trace,
+void htf_print_sequence(struct htf_thread *thread,
 			htf_sequence_id_t seq_id);
 
 /* Print the subset of a token array */
-void htf_print_token_array(struct htf_thread_trace *thread_trace,
+void htf_print_token_array(struct htf_thread *thread,
 			   htf_token_t* token_array,
 			   int index_start,
 			   int index_stop);
 
 /* Print a token */
-void htf_print_token(struct htf_thread_trace *thread_trace,
+void htf_print_token(struct htf_thread *thread,
 		     htf_token_t token);
 
-void htf_print_event(struct htf_thread_trace *thread_trace,
+void htf_print_event(struct htf_thread *thread,
 		     struct htf_event* e);
 
 
 /* return the loop whose id is loop_id
  * return NULL if loop_id is unknown
  */
-struct htf_loop* htf_get_loop(struct htf_thread_trace *thread_trace, htf_loop_id_t loop_id);
+struct htf_loop* htf_get_loop(struct htf_thread *thread_trace, htf_loop_id_t loop_id);
 
 /* return the sequence whose id is sequence_id
  * return NULL if sequence_id is unknown
  */
-struct htf_sequence* htf_get_sequence(struct htf_thread_trace *thread_trace, htf_sequence_id_t seq_id);
+struct htf_sequence* htf_get_sequence(struct htf_thread *thread_trace, htf_sequence_id_t seq_id);
 
 /* return the event whose id is event_id
  * return NULL if event_id is unknown
  */
-struct htf_event* htf_get_event(struct htf_thread_trace *thread_trace, htf_event_id_t evt_id);
+struct htf_event* htf_get_event(struct htf_thread *thread_trace, htf_event_id_t evt_id);
 
 
 
 
 /* return the index_th token of a sequence/loop */
-htf_token_t htf_get_token(struct htf_thread_trace *trace,
+htf_token_t htf_get_token(struct htf_thread *trace,
 			  htf_token_t sequence,
 			  int index);
 

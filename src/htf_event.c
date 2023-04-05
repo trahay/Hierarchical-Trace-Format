@@ -35,7 +35,7 @@ static inline  void pop_data(struct htf_event *e, void* data, size_t data_size, 
   *cursor += data_size;
 }
 
-static inline htf_event_id_t _htf_get_event_id(struct htf_thread_trace *thread_trace,
+static inline htf_event_id_t _htf_get_event_id(struct htf_thread *thread_trace,
 					   struct htf_event *e) {
   htf_log(htf_dbg_lvl_max, "Searching for event {.event_type=%d}\n", e->record);
 
@@ -69,31 +69,48 @@ static inline htf_event_id_t _htf_get_event_id(struct htf_thread_trace *thread_t
   return HTF_EVENT_ID(index);
 }
 
-struct htf_string* htf_get_string(struct htf_trace *trace,
-				  htf_string_ref_t string_ref) {
+struct htf_string* htf_archive_get_string(struct htf_archive *archive,
+					  htf_string_ref_t string_ref) {
+  /* todo: move to htf_archive.c */
+  
   /* TODO: race condition here ? when adding a region, there may be a realloc so we may have to hold the mutex */
-  for(int i = 0; i< trace->nb_strings; i++) {
-    struct htf_string* s = &trace->strings[i];
+  for(int i = 0; i< archive->definitions.nb_strings; i++) {
+    struct htf_string* s = &archive->definitions.strings[i];
     if(s->string_ref == string_ref) {
       return s;
     }
   }
+
+#if 0
+  /* If not found, search in the parent process */
+  if(container->parent_id != HTF_CONTAINER_INVALID) {
+    struct htf_container *parent = htf_get_container(container->trace, container->parent_id);
+    return htf_get_string(parent, string_ref);
+  }
+#endif
   return NULL;
 }
 
-struct htf_region* htf_get_region(struct htf_trace *trace,
-				  htf_region_ref_t region_ref) {
+struct htf_region* htf_archive_get_region(struct htf_archive *archive,
+					  htf_region_ref_t region_ref) {
   /* TODO: race condition here ? when adding a region, there may be a realloc so we may have to hold the mutex */
-  for(int i = 0; i< trace->nb_regions; i++) {
-    struct htf_region* s = &trace->regions[i];
+  for(int i = 0; i< archive->definitions.nb_regions; i++) {
+    struct htf_region* s = &archive->definitions.regions[i];
     if(s->region_ref == region_ref) {
       return s;
     }
   }
+#if 0
+  /* If not found, search in the parent process */
+  if(container->parent_id != HTF_CONTAINER_INVALID) {
+    struct htf_container *parent = htf_get_container(container->trace, container->parent_id);
+    return htf_get_region(parent, region_ref);
+  }
+#endif
   return NULL;
 }
 
-void htf_print_event(struct htf_thread_trace *thread_trace, struct htf_event* e) {
+void htf_print_event(struct htf_thread *t, struct htf_event* e) {
 
   switch(e->record) {
   case HTF_EVENT_ENTER:
@@ -101,9 +118,9 @@ void htf_print_event(struct htf_thread_trace *thread_trace, struct htf_event* e)
       void*cursor = NULL;
       htf_region_ref_t region_ref;
       pop_data(e, &region_ref, sizeof(region_ref), &cursor);
-      struct htf_region* region = htf_get_region(thread_trace->trace, region_ref);
+      struct htf_region* region = htf_archive_get_region(t->archive, region_ref);
       htf_assert(region);
-      printf("Enter %d (%s)", region_ref, htf_get_string(thread_trace->trace, region->string_ref)->str);
+      printf("Enter %d (%s)", region_ref, htf_archive_get_string(t->archive, region->string_ref)->str);
       break;
     }
   case HTF_EVENT_LEAVE:
@@ -111,9 +128,9 @@ void htf_print_event(struct htf_thread_trace *thread_trace, struct htf_event* e)
       void*cursor = NULL;
       htf_region_ref_t region_ref;
       pop_data(e, &region_ref, sizeof(region_ref), &cursor);
-      struct htf_region* region = htf_get_region(thread_trace->trace, region_ref);
+      struct htf_region* region = htf_archive_get_region(t->archive, region_ref);
       htf_assert(region);
-      printf("Leave %d (%s)", region_ref, htf_get_string(thread_trace->trace, region->string_ref)->str);
+      printf("Leave %d (%s)", region_ref, htf_archive_get_string(t->archive, region->string_ref)->str);
       break;
     }
   default:
@@ -121,59 +138,62 @@ void htf_print_event(struct htf_thread_trace *thread_trace, struct htf_event* e)
   }
 }
 
-void htf_register_string(struct htf_trace *trace,
-			 htf_string_ref_t string_ref,
-			 const char* string) {
-  pthread_mutex_lock(&trace->lock);
-  if(trace->nb_strings + 1 >= trace->nb_allocated_strings) {
-    trace->nb_allocated_strings *= 2;
-    trace->strings = realloc(trace->strings, trace->nb_allocated_strings * sizeof(struct htf_string));
-    if(trace->strings == NULL) {
+void htf_archive_register_string(struct htf_archive *archive,
+				 htf_string_ref_t string_ref,
+				 const char* string) {
+  //  pthread_mutex_lock(&container->lock);
+  if(archive->definitions.nb_strings + 1 >= archive->definitions.nb_allocated_strings) {
+    archive->definitions.nb_allocated_strings *= 2;
+    archive->definitions.strings = realloc(archive->definitions.strings, archive->definitions.nb_allocated_strings * sizeof(struct htf_string));
+    if(archive->definitions.strings == NULL) {
       htf_error("Failed to allocate memory\n");
     }
   }
 
-  int index = trace->nb_strings++;
-  struct htf_string *s = &trace->strings[index];
+  int index = archive->definitions.nb_strings++;
+  struct htf_string *s = &archive->definitions.strings[index];
   s->string_ref = string_ref;
   s->length = strlen(string)+1;
   s->str = malloc(sizeof(char) * s->length);
   strncpy(s->str, string, s->length);
 
-  htf_log(htf_dbg_lvl_verbose, "Register global string #%d{.ref=%x, .length=%d, .str='%s'}\n",
+  htf_log(htf_dbg_lvl_verbose, "Register string #%d{.ref=%x, .length=%d, .str='%s'}\n",
 	  index, s->string_ref, s->length, s->str);
-  pthread_mutex_unlock(&trace->lock);
+  //  pthread_mutex_unlock(&container->lock);
 }
 
-void htf_register_region(struct htf_trace *trace,
-			 htf_region_ref_t region_ref,
-			 htf_string_ref_t string_ref) {
-  pthread_mutex_lock(&trace->lock);
-  if(trace->nb_regions + 1 >= trace->nb_allocated_regions) {
-    trace->nb_allocated_regions *= 2;
-    trace->regions = realloc(trace->regions, trace->nb_allocated_regions * sizeof(struct htf_region));
-    if(trace->regions == NULL) {
+void htf_archive_register_region(struct htf_archive *archive,
+				 htf_region_ref_t region_ref,
+				 htf_string_ref_t string_ref) {
+  pthread_mutex_lock(&archive->definitions.lock);
+  if(archive->definitions.nb_regions + 1 >= archive->definitions.nb_allocated_regions) {
+    archive->definitions.nb_allocated_regions *= 2;
+    archive->definitions.regions = realloc(archive->definitions.regions, archive->definitions.nb_allocated_regions * sizeof(struct htf_region));
+    if(archive->definitions.regions == NULL) {
       htf_error("Failed to allocate memory\n");
     }
   }
 
-  int index = trace->nb_regions++;
-  struct htf_region *r = &trace->regions[index];
+  int index = archive->definitions.nb_regions++;
+  struct htf_region *r = &archive->definitions.regions[index];
   r->region_ref = region_ref;
   r->string_ref = string_ref;
 
-  htf_log(htf_dbg_lvl_verbose, "Register Global region #%d{.ref=%x, .str=%d ('%s')}\n",
-	  index, r->region_ref, r->string_ref, htf_get_string(trace, r->string_ref)->str);
-  pthread_mutex_unlock(&trace->lock);
+  htf_log(htf_dbg_lvl_verbose, "Register region #%d{.ref=%x, .str=%d ('%s')}\n",
+	  index, r->region_ref, r->string_ref, htf_archive_get_string(archive, r->string_ref)->str);
+  pthread_mutex_unlock(&archive->definitions.lock);
 }
 
 void htf_record_enter(struct htf_thread_writer *thread_writer,
-		      htf_attribute_list_t* attributeList,
+		      htf_attribute_list_t* attributeList __attribute__((unused)),
 		      htf_timestamp_t       time,
 		      htf_region_ref_t          region_ref ) {
   if(htf_recursion_shield)
     return;
   htf_recursion_shield++;
+
+  htf_assert(thread_writer->thread_trace.container);
+  htf_assert(htf_archive_get_region(thread_writer->thread_trace.archive, region_ref) != NULL);
 
   struct htf_event e;
   init_event(&e, HTF_EVENT_ENTER);
@@ -188,7 +208,7 @@ void htf_record_enter(struct htf_thread_writer *thread_writer,
 }
 
 void htf_record_leave(struct htf_thread_writer *thread_writer,
-		      htf_attribute_list_t* attributeList,
+		      htf_attribute_list_t* attributeList __attribute__((unused)),
 		      htf_timestamp_t       time,
 		      htf_region_ref_t          region_ref ) {
   if(htf_recursion_shield)
