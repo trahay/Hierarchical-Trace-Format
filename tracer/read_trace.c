@@ -76,7 +76,7 @@ static int get_next_event(struct htf_thread_reader *readers,
 void print_trace(struct htf_archive *trace) {
   struct htf_thread_reader *readers = malloc(sizeof(struct htf_thread_reader) * trace->nb_threads);
   for(int i=0; i<trace->nb_threads; i++) {
-    htf_read_thread_iterator_init(trace, &readers[i], trace->threads[i]->id);
+    htf_read_thread_iterator_init(trace, &readers[i], trace->thread_ids[i]);
   }
   
   struct htf_event_occurence e;
@@ -125,11 +125,13 @@ int main(int argc, char**argv) {
   struct htf_archive trace;
   htf_read_archive(&trace, trace_name);
 
-//  if(per_thread) {
-//    print_container(&trace);
-//  } else {
-  print_trace(&trace);
-    //  }
+  if(per_thread) {
+    for(int i=0; i< trace.nb_threads; i++) {
+      print_thread(&trace, trace.thread_ids[i]);
+    }
+  } else {
+    print_trace(&trace);
+  }
 
   return EXIT_SUCCESS;
 }

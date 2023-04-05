@@ -44,7 +44,8 @@ struct htf_thread_writer {
 
 void htf_write_thread_open(struct htf_archive* archive,
 			   struct htf_thread_writer* thread_writer,
-			   htf_thread_id_t thread_id);
+			   htf_thread_id_t thread_id,
+			   htf_container_id_t container_id);
 
 void htf_write_thread_close(struct htf_thread_writer* thread_writer);
 

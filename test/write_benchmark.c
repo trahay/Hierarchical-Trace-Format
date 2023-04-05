@@ -67,7 +67,7 @@ void* worker(void* arg __attribute__((unused))) {
 			     process_id,
 			     thread_id);
 
-  htf_write_thread_open(&trace, thread_writer, thread_id);
+  htf_write_thread_open(&trace, thread_writer, thread_id, thread_container_id);
  
   struct timespec t1, t2;
   pthread_barrier_wait(&bench_start);

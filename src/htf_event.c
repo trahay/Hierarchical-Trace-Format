@@ -141,7 +141,7 @@ void htf_print_event(struct htf_thread *t, struct htf_event* e) {
 void htf_archive_register_string(struct htf_archive *archive,
 				 htf_string_ref_t string_ref,
 				 const char* string) {
-  //  pthread_mutex_lock(&container->lock);
+  pthread_mutex_lock(&archive->lock);
   if(archive->definitions.nb_strings + 1 >= archive->definitions.nb_allocated_strings) {
     archive->definitions.nb_allocated_strings *= 2;
     archive->definitions.strings = realloc(archive->definitions.strings, archive->definitions.nb_allocated_strings * sizeof(struct htf_string));
@@ -159,13 +159,13 @@ void htf_archive_register_string(struct htf_archive *archive,
 
   htf_log(htf_dbg_lvl_verbose, "Register string #%d{.ref=%x, .length=%d, .str='%s'}\n",
 	  index, s->string_ref, s->length, s->str);
-  //  pthread_mutex_unlock(&container->lock);
+  pthread_mutex_unlock(&archive->lock);
 }
 
 void htf_archive_register_region(struct htf_archive *archive,
 				 htf_region_ref_t region_ref,
 				 htf_string_ref_t string_ref) {
-  pthread_mutex_lock(&archive->definitions.lock);
+  pthread_mutex_lock(&archive->lock);
   if(archive->definitions.nb_regions + 1 >= archive->definitions.nb_allocated_regions) {
     archive->definitions.nb_allocated_regions *= 2;
     archive->definitions.regions = realloc(archive->definitions.regions, archive->definitions.nb_allocated_regions * sizeof(struct htf_region));
@@ -181,7 +181,7 @@ void htf_archive_register_region(struct htf_archive *archive,
 
   htf_log(htf_dbg_lvl_verbose, "Register region #%d{.ref=%x, .str=%d ('%s')}\n",
 	  index, r->region_ref, r->string_ref, htf_archive_get_string(archive, r->string_ref)->str);
-  pthread_mutex_unlock(&archive->definitions.lock);
+  pthread_mutex_unlock(&archive->lock);
 }
 
 void htf_record_enter(struct htf_thread_writer *thread_writer,

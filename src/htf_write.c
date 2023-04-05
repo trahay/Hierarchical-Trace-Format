@@ -303,9 +303,6 @@ void htf_write_archive_close(struct htf_archive* archive) {
 }
 
 static void _init_definition(struct htf_definition* d) {
-
-  pthread_mutex_init(&d->lock, NULL);
-
   d->strings = malloc(sizeof(struct htf_string) * NB_STRING_DEFAULT);
   d->nb_allocated_strings = NB_STRING_DEFAULT;
   d->nb_strings = 0;
@@ -332,6 +329,7 @@ void htf_write_archive_open(struct htf_archive *archive,
   archive->fullpath = htf_archive_fullpath(archive->dir_name, archive->trace_name);
   archive->id = archive_id;
 
+  pthread_mutex_init(&archive->lock, NULL);
   _init_definition(&archive->definitions);
 
   archive->nb_allocated_containers = NB_CONTAINERS_DEFAULT;
@@ -341,6 +339,7 @@ void htf_write_archive_open(struct htf_archive *archive,
   archive->nb_allocated_threads = NB_THREADS_DEFAULT;
   archive->nb_threads = 0;
   archive->threads = malloc(sizeof(struct htf_thread*) * archive->nb_allocated_threads);
+  archive->thread_ids = malloc(sizeof(htf_thread_id_t) * archive->nb_allocated_threads);
 
   archive->nb_allocated_archives = NB_ARCHIVES_DEFAULT;
   archive->nb_archives = 0;
@@ -434,10 +433,11 @@ struct htf_container * htf_get_container(struct htf_archive *archive,
 
 static void _init_thread(struct htf_archive *archive,
 			 struct htf_thread* t,
-			 htf_thread_id_t thread_id) {
+			 htf_thread_id_t thread_id,
+			 htf_container_id_t container_id) {
   t->archive = archive;
   t->id = thread_id;
-  t->container = HTF_CONTAINER_ID_INVALID;
+  t->container = container_id;
 
   t->nb_allocated_events = NB_EVENT_DEFAULT;
   t->events = malloc(sizeof(struct htf_event_summary) * t->nb_allocated_events);
@@ -450,11 +450,25 @@ static void _init_thread(struct htf_archive *archive,
   t->nb_allocated_loops = NB_LOOP_DEFAULT;
   t->loops = malloc(sizeof(struct htf_loop) * t->nb_allocated_loops);
   t->nb_loops = 0;
+
+  pthread_mutex_lock(&t->archive->lock);
+  int index = t->archive->nb_threads++;
+  if(t->archive->nb_threads > t->archive->nb_allocated_threads) {
+    t->archive->nb_allocated_threads *=2;
+    t->archive->threads = realloc(t->archive->threads,
+				  t->archive->nb_allocated_threads * sizeof(struct htf_thread*));
+    t->archive->thread_ids = realloc(t->archive->thread_ids,
+				     t->archive->nb_allocated_threads * sizeof(htf_thread_id_t));
+  }
+  t->archive->threads[index] = t;
+  t->archive->thread_ids[index] = thread_id;
+  pthread_mutex_unlock(&t->archive->lock);
 }
 
 void htf_write_thread_open(struct htf_archive* archive,
 			   struct htf_thread_writer* thread_writer,
-			   htf_thread_id_t thread_id) {
+			   htf_thread_id_t thread_id,
+			   htf_container_id_t container_id) {
   if(htf_recursion_shield)
     return;
   htf_recursion_shield++;
@@ -463,7 +477,7 @@ void htf_write_thread_open(struct htf_archive* archive,
 
   htf_log(htf_dbg_lvl_debug, "htf_write_init_thread(%ux)\n", thread_id);
 
-  _init_thread(archive, &thread_writer->thread_trace, thread_id);
+  _init_thread(archive, &thread_writer->thread_trace, thread_id, container_id);
 
   thread_writer->max_depth = CALLSTACK_DEPTH_DEFAULT;
   thread_writer->og_seq = malloc(sizeof(struct htf_sequence*) * thread_writer->max_depth);

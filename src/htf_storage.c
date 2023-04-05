@@ -298,18 +298,21 @@ static void _htf_read_containers(struct htf_archive *a) {
   htf_log(htf_dbg_lvl_debug, "\tLoad %d containers\n", a->nb_containers);
 }
 
-static FILE* _htf_get_thread(struct htf_thread *t, char* mode) {
+static FILE* _htf_get_thread(struct htf_archive *archive,
+			     htf_thread_id_t thread_id,
+			     char* mode) {
   char filename[1024];
-  snprintf(filename, 1024, "%s/thread_%u.dat", base_dirname_t(t), t->id);
+  snprintf(filename, 1024, "%s/thread_%u.dat", base_dirname(archive), thread_id);
   return _htf_file_open(filename, mode);
 }
 
 static void _htf_store_thread(struct htf_thread *th) {
-  FILE* token_file = _htf_get_thread(th, "w");
+  FILE* token_file = _htf_get_thread(th->archive, th->id, "w");
  
   htf_log(htf_dbg_lvl_verbose, "\tThread %u {.nb_events=%d, .nb_sequences=%d, .nb_loops=%d}\n",
 	  th->id, th->nb_events,  th->nb_sequences, th->nb_loops);
 
+  _htf_fwrite(&th->id, sizeof(th->id), 1, token_file);
   _htf_fwrite(&th->container, sizeof(th->container), 1, token_file);
 
   _htf_fwrite(&th->nb_events, sizeof(th->nb_events), 1, token_file);
@@ -328,14 +331,17 @@ static void _htf_store_thread(struct htf_thread *th) {
     _htf_store_loop(th, &th->loops[i], HTF_LOOP_ID(i));
 }
 
-static void _htf_read_thread(struct htf_thread *th) {
+static void _htf_read_thread(struct htf_archive *archive,
+			     struct htf_thread *th,
+			     htf_thread_id_t thread_id) {
    
-  FILE* token_file = _htf_get_thread(th, "r");
+  FILE* token_file = _htf_get_thread(archive, thread_id, "r");
 
+  th->archive = archive;
+  _htf_fread(&th->id, sizeof(th->id), 1, token_file);
   _htf_fread(&th->container, sizeof(th->container), 1, token_file);
 
   _htf_fread(&th->nb_events, sizeof(th->nb_events), 1, token_file);
-
   th->nb_allocated_events = th->nb_events;
   th->events = malloc(sizeof(struct htf_event_summary) * th->nb_allocated_events);
 
@@ -390,6 +396,9 @@ void htf_storage_finalize(struct htf_archive *archive) {
   _htf_fwrite(&archive->definitions.nb_regions, sizeof(int), 1, f);
   _htf_fwrite(&archive->nb_containers, sizeof(int), 1, f);
   _htf_fwrite(&archive->nb_threads, sizeof(int), 1, f);
+  printf("there are %d threads\n", archive->nb_threads);
+  _htf_fwrite(archive->thread_ids, sizeof(htf_thread_id_t), archive->nb_threads, f);
+
   _htf_fwrite(&archive->nb_archives, sizeof(int), 1, f);
 
   for(int i =0; i<archive->definitions.nb_strings; i++) {
@@ -470,8 +479,12 @@ static void _htf_read_archive(struct htf_archive* main_archive,
   _htf_fread(&archive->definitions.nb_regions, sizeof(int), 1, f);
   _htf_fread(&archive->nb_containers, sizeof(int), 1, f);
   _htf_fread(&archive->nb_threads, sizeof(int), 1, f);
+  archive->thread_ids = malloc(sizeof(htf_thread_id_t) * archive->nb_threads);
+  _htf_fread(archive->thread_ids, sizeof(htf_thread_id_t), archive->nb_threads, f);
   _htf_fread(&archive->nb_archives, sizeof(int), 1, f);
 
+  archive->definitions.nb_allocated_strings = archive->definitions.nb_strings;
+  archive->definitions.strings = malloc(sizeof(struct htf_string) * archive->definitions.nb_allocated_strings);
   for(int i =0; i<archive->definitions.nb_strings; i++) {
     _htf_read_string(archive, &archive->definitions.strings[i], i);
   }
@@ -486,7 +499,7 @@ static void _htf_read_archive(struct htf_archive* main_archive,
   archive->threads = malloc(sizeof(struct htf_thread*)*archive->nb_allocated_threads);
   for(int i =0; i<archive->nb_threads; i++) {
     archive->threads[i] = malloc(sizeof(struct htf_thread));
-    _htf_read_thread(archive->threads[i]);
+    _htf_read_thread(archive, archive->threads[i], archive->thread_ids[i]);
   }
 
   archive->nb_allocated_archives = archive->nb_archives;
@@ -540,9 +553,8 @@ static void _htf_read_archive(struct htf_archive* main_archive,
 }
 
 void htf_read_archive(struct htf_archive* archive, char* main_filename) {
-  char* filename = strdup(main_filename);
-  char* dir_name = dirname(filename);
-  char* trace_name = basename(filename);
+  char* dir_name = dirname(strdup(main_filename));
+  char* trace_name = basename(strdup(main_filename));
 
   _htf_read_archive(archive, archive, dir_name, trace_name);
 

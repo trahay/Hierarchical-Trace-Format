@@ -263,8 +263,6 @@ struct htf_container {
 };
 
 struct htf_definition {
-  pthread_mutex_t lock;
-
   struct htf_string *strings;
   int nb_strings;
   int nb_allocated_strings;
@@ -281,6 +279,8 @@ struct htf_archive {
 
   htf_archive_id_t id;
 
+  pthread_mutex_t lock;
+
   struct htf_definition definitions;
   struct htf_container* containers;
   int nb_containers;
@@ -288,6 +288,7 @@ struct htf_archive {
 
   /* a list of threads */
   struct htf_thread **threads;
+  htf_thread_id_t *thread_ids;
   int nb_threads;
   int nb_allocated_threads;
 

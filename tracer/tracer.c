@@ -63,7 +63,7 @@ void _init_thread() {
 			     process_id,
 			     thread_id);
 
-  htf_write_thread_open(&trace, thread_writer, thread_id);
+  htf_write_thread_open(&trace, thread_writer, thread_id, thread_container_id);
 }
 
 void enter_function(enum intercepted_function f, void* ptr) {
