@@ -244,6 +244,16 @@ int main(int argc, char**argv) {
 
   htf_write_archive_close(&trace);
 
+  if(mpi_rank==0) {
+    struct htf_global_archive global_archive;
+    htf_write_global_archive_open(&global_archive,
+				  "mpi_benchmark_trace",
+				  "main");
+    for(int i =0; i<mpi_comm_size; i++)
+      htf_write_global_add_subarchive(&global_archive, i);
+    htf_write_global_archive_close(&global_archive);   
+  }
+
   MPI_Finalize();
   return EXIT_SUCCESS;
 }

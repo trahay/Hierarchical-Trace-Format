@@ -11,36 +11,23 @@ struct htf_thread_writer {
   int thread_rank;
 };
 
-//struct container {
-//  htf_container_id_t id;
-//  htf_string_ref_t   name;
-//  htf_container_id_t parent;
-//
-//  /* todo: pas besoin ? on peut retrouver ces infos à partir de la
-//     liste de conteneurs et leurs parent */
-//  htf_container_id_t *children;
-//  int nb_children;
-//};
-//
 
-//struct htf_archive {
-//  htf_archive_id_t id;
-//  struct htf_string *strings;
-//  int nb_strings;
-//  int nb_allocated_strings;
-//
-//  struct htf_regions *regions;
-//  int nb_regions;
-//  int nb_allocated_regions;
-//
-//  htf_archive_id_t *sub_archives;
-//  int nb_archives;
-//  int nb_allocated_archives;
-//
-//  struct container *containers;
-//  int nb_containers;
-//  int nb_allocated_containers;
-//};
+void htf_write_global_archive_open(struct htf_global_archive* archive,
+				   const char* dir_name,
+				   const char* trace_name);
+void htf_write_global_archive_close(struct htf_global_archive* archive);
+
+void htf_write_global_define_container(struct htf_global_archive *archive,
+				       htf_container_id_t id,
+				       htf_string_ref_t name,
+				       htf_container_id_t parent,
+				       htf_thread_id_t thread);
+
+void htf_write_global_add_subarchive(struct htf_global_archive* archive,
+				     htf_archive_id_t subarchive);
+
+
+
 
 void htf_write_thread_open(struct htf_archive* archive,
 			   struct htf_thread_writer* thread_writer,
@@ -56,10 +43,9 @@ void htf_write_define_container(struct htf_archive *archive,
 				htf_thread_id_t thread);
 
 
- 
 void htf_write_archive_open(struct htf_archive* archive,
-			    const char* trace_name,
 			    const char* dir_name,
+			    const char* trace_name,
 			    htf_archive_id_t archive_id);
 
 void htf_write_add_subarchive(struct htf_archive* archive,

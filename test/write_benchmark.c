@@ -167,18 +167,25 @@ int main(int argc, char**argv) {
   printf("pattern = %d\n", pattern);
   printf("---------------------\n");
 
+  struct htf_global_archive global_archive;
+  htf_write_global_archive_open(&global_archive,
+				"write_benchmark_trace",
+				"main");
+  
   htf_write_archive_open(&trace,
 			 "write_benchmark_trace",
 			 "main",
 			 0);
+  htf_write_global_add_subarchive(&global_archive, 0);
 
   process_id = _new_container();
   process_name = _register_string("Process"),
-  htf_write_define_container(&trace,
-			     process_id,
-			     process_name,
-			     HTF_CONTAINER_ID_INVALID,
-			     HTF_THREAD_ID_INVALID);
+
+  htf_write_global_define_container(&global_archive,
+				    process_id,
+				    process_name,
+				    HTF_CONTAINER_ID_INVALID,
+				    HTF_THREAD_ID_INVALID);
 
   regions = malloc(sizeof(htf_region_ref_t) * nb_functions);
   strings = malloc(sizeof(htf_string_ref_t) * nb_functions);
@@ -212,5 +219,6 @@ int main(int argc, char**argv) {
 	 nb_events, duration, events_per_second/1e6);
 
   htf_write_archive_close(&trace);
+  htf_write_global_archive_close(&global_archive);
   return EXIT_SUCCESS;
 }

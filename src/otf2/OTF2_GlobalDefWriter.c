@@ -64,8 +64,7 @@ OTF2_GlobalDefWriter_WriteString( OTF2_GlobalDefWriter* writerHandle,
                                   OTF2_StringRef        self,
                                   const char*           string ) {
   //  NOT_IMPLEMENTED;
-  TO_BE_IMPLEMENTED;
-  htf_register_string(&writerHandle->archive->trace, self, string);
+  htf_global_archive_register_string(writerHandle->archive, self, string);
   return OTF2_SUCCESS;
 }
 
@@ -130,7 +129,7 @@ OTF2_GlobalDefWriter_WriteRegion( OTF2_GlobalDefWriter* writerHandle,
    * - uppon thread creation, copy the write region to the new thread regions
    * - when creating a global region, add it to the existing threads region
    */
-  htf_register_region(&writerHandle->archive->trace, self, name);
+  htf_global_archive_register_region(writerHandle->archive, self, name);
   return OTF2_SUCCESS;
 }
 

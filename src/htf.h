@@ -183,7 +183,7 @@ struct htf_event_summary {
 #define HTF_UNDEFINED_TYPE HTF_UNDEFINED_UINT8
 
 typedef uint32_t htf_string_ref_t;
-#define HTF_STRINGREF_INVALID ( ( htf_string_ref_t )HTF_UNDEFINED_UINT32 )
+#define HTF_STRING_REF_INVALID ( ( htf_string_ref_t )HTF_UNDEFINED_UINT32 )
 
 struct htf_string {
   htf_string_ref_t string_ref;
@@ -278,6 +278,7 @@ struct htf_archive {
   char* fullpath;
 
   htf_archive_id_t id;
+  struct htf_global_archive* global_archive;
 
   pthread_mutex_t lock;
 
@@ -296,10 +297,26 @@ struct htf_archive {
   int nb_archives;
   int nb_allocated_archives;
 
-  struct htf_archive *main_archive;
-  struct htf_archive *next;
+  //struct htf_archive *main_archive;
+  //struct htf_archive *next;
 };
 
+struct htf_global_archive {
+  char* dir_name;
+  char* trace_name;
+  char* fullpath;
+
+  struct htf_definition definitions;
+
+  struct htf_container* containers;
+  int nb_containers;
+  int nb_allocated_containers;
+
+  htf_archive_id_t *archive_ids;
+  struct htf_archive *archives;
+  int nb_archives;
+  int nb_allocated_archives;
+};
 
 struct htf_thread* htf_archive_get_thread(struct htf_archive* archive,
 					  htf_thread_id_t thread_id);
@@ -315,6 +332,15 @@ void htf_archive_register_string(struct htf_archive *archive,
 void htf_archive_register_region(struct htf_archive *archive,
 				 htf_region_ref_t region_ref,
 				 htf_string_ref_t string_ref);
+
+
+void htf_global_archive_register_string(struct htf_global_archive *archive,
+					htf_string_ref_t string_ref,
+					const char* string);
+
+void htf_global_archive_register_region(struct htf_global_archive *archive,
+					htf_region_ref_t region_ref,
+					htf_string_ref_t string_ref);
 
 
 

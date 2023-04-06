@@ -82,16 +82,15 @@ void populate(struct htf_archive *trace,
   for(int i=0; i<trace->nb_threads; i++) {
     htf_read_thread_iterator_init(trace, &(*readers)[start_index + i], trace->thread_ids[i]);
   }
-
-  if(trace->next)
-    populate(trace->next, nb_threads, readers);
 }
 
 /* Print all the events of all the threads sorted by timestamp */
-void print_trace(struct htf_archive *trace) {
+void print_trace(struct htf_global_archive *trace) {
   struct htf_thread_reader *readers = NULL;
   int nb_threads = 0;
-  populate(trace, &nb_threads, &readers);
+  for(int i =0; i< trace->nb_archives; i++) {
+    populate(&trace->archives[i], &nb_threads, &readers);
+  }
 
   struct htf_event_occurence e;
   int thread_index = -1;
@@ -136,13 +135,13 @@ int main(int argc, char**argv) {
     return EXIT_SUCCESS;
   }
 
-  struct htf_archive trace;
-  htf_read_archive(&trace, trace_name);
+  struct htf_global_archive trace;
+  htf_read_global_archive(&trace, trace_name);
 
   if(per_thread) {
-    for(int i=0; i< trace.nb_threads; i++) {
-      print_thread(&trace, trace.thread_ids[i]);
-    }
+    //for(int i=0; i< trace.nb_threads; i++) {
+    //  print_thread(&trace, trace.thread_ids[i]);
+    //}
   } else {
     print_trace(&trace);
   }

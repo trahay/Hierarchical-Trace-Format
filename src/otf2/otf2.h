@@ -52,22 +52,25 @@
 #include "htf_event.h"
 
 struct OTF2_GlobalDefWriter_struct {
-  OTF2_Archive* archive;
+  struct htf_global_archive* archive;
 };
 
 
 struct OTF2_DefWriter_struct {
   OTF2_LocationRef locationRef;
+  struct htf_archive *archive;
+
   struct htf_thread_writer* thread_writer;
 };
 
 struct OTF2_EvtWriter_struct {
   OTF2_LocationRef locationRef;
+  struct htf_archive *archive;
   struct htf_thread_writer* thread_writer;
 };
 
 struct OTF2_Archive_struct {
-  struct htf_trace trace;
+  struct htf_archive archive;
 
   OTF2_GlobalDefWriter* globalDefWriter;
 

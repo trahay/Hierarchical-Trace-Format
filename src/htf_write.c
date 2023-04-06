@@ -342,6 +342,7 @@ void htf_write_archive_open(struct htf_archive *archive,
   archive->trace_name = strdup(trace_name);
   archive->fullpath = htf_archive_fullpath(archive->dir_name, archive->trace_name);
   archive->id = archive_id;
+  archive->global_archive = NULL;
 
   pthread_mutex_init(&archive->lock, NULL);
   _init_definition(&archive->definitions);
@@ -358,9 +359,6 @@ void htf_write_archive_open(struct htf_archive *archive,
   archive->nb_allocated_archives = NB_ARCHIVES_DEFAULT;
   archive->nb_archives = 0;
   archive->sub_archives = malloc(sizeof(htf_archive_id_t) * archive->nb_allocated_archives);
-
-  archive->next = NULL;
-  archive->main_archive = archive;
 
   htf_storage_init(archive);
 
@@ -537,67 +535,60 @@ void htf_write_define_container(struct htf_archive *archive,
   c->thread_id = thread;
 }
 
-#if 0
 
-void htf_write_init_thread(struct htf_trace *trace,
-			   struct htf_thread_writer *thread_writer,
-			   htf_container_id_t container_id,
-			   htf_string_ref_t   name,
-			   htf_container_id_t parent_id) {
-  if(htf_recursion_shield)
-    return;
-  htf_recursion_shield++;
+void htf_write_global_archive_open(struct htf_global_archive* archive,
+				   const char* dir_name,
+				   const char* trace_name) {
+  archive->dir_name = strdup(dir_name);
+  archive->trace_name = strdup(trace_name);
+  archive->fullpath = htf_archive_fullpath(archive->dir_name, archive->trace_name);
 
+  _init_definition(&archive->definitions);
 
-  htf_log(htf_dbg_lvl_debug, "htf_write_init_thread\n");
+  archive->nb_allocated_containers = NB_CONTAINERS_DEFAULT;
+  archive->nb_containers = 0;
+  archive->containers = malloc(sizeof(struct htf_container) * archive->nb_allocated_containers);
 
-  struct htf_container*c = malloc(sizeof(struct htf_container));
-
-  htf_write_define_container(trace,
-			     c,
-			     container_id,
-			     name,
-			     parent_id);
-
-  //thread_writer->thread_trace.container = c;
-  //  _init_container(c);
-  //  c->parent_container = parent_container;
-  c->thread = &thread_writer->thread_trace;
-
-  _init_thread(c->thread);
-  thread_writer->thread_trace.container = c;
-  thread_writer->max_depth = CALLSTACK_DEPTH_DEFAULT;
-  thread_writer->og_seq = malloc(sizeof(struct htf_sequence*) * thread_writer->max_depth);
-
-#define _init_sequence(s) do {				\
-    s->token = malloc(sizeof(htf_token_t) * SEQUENCE_SIZE_DEFAULT); \
-    s->size = 0;						\
-    s->allocated = SEQUENCE_SIZE_DEFAULT;			\
-  } while(0)
-
-  // the main sequence is in sequences[0]
-  thread_writer->og_seq[0] = &thread_writer->thread_trace.sequences[0];
-  thread_writer->thread_trace.nb_sequences = 1;
-  _init_sequence(thread_writer->og_seq[0]);
-
-  for(int i = 1; i<thread_writer->max_depth; i++) {
-    thread_writer->og_seq[i] = malloc(sizeof(struct htf_sequence));
-    _init_sequence(thread_writer->og_seq[i]);
-  }
-  thread_writer->cur_depth = 0;
-
-//  pthread_mutex_lock(&c->lock);
-//  {
-//    c->nb_containers++;
-//
-//    if(thread_rank+1 > c->allocated_containers) {
-//      c->allocated_containers = thread_rank+1;
-//      size_t size = sizeof(struct htf_container *) * c->allocated_containers;
-//      c->containers = realloc(c->containers, size);
-//    }
-//    c->containers[thread_rank] = c;
-//  }
-//  pthread_mutex_unlock(&c->lock);
-  htf_recursion_shield--;
+  archive->nb_allocated_archives = NB_ARCHIVES_DEFAULT;
+  archive->nb_archives = 0;
+  archive->archive_ids = malloc(sizeof(htf_archive_id_t) * archive->nb_allocated_archives);
+  archive->archives = malloc(sizeof(struct htf_archive) * archive->nb_allocated_archives);
 }
-#endif
+
+
+void htf_write_global_archive_close(struct htf_global_archive* archive) {
+  if(!archive)
+    return;
+
+  htf_storage_finalize_global(archive);
+}
+
+
+void htf_write_global_define_container(struct htf_global_archive *archive,
+				       htf_container_id_t id,
+				       htf_string_ref_t name,
+				       htf_container_id_t parent,
+				       htf_thread_id_t thread) {
+  int index = archive->nb_containers++;
+  if(archive->nb_containers >  archive->nb_allocated_containers) {
+    archive->nb_allocated_containers *= 2;
+    archive->containers = realloc(archive->containers, sizeof(struct htf_container) * archive->nb_allocated_containers);
+  }
+
+  archive->containers[index].id = id;
+  archive->containers[index].name = name;
+  archive->containers[index].parent = parent;
+  archive->containers[index].thread_id = thread;
+}
+
+void htf_write_global_add_subarchive(struct htf_global_archive* archive,
+				     htf_archive_id_t subarchive) {
+  int index = archive->nb_archives++;
+  if(archive->nb_archives >  archive->nb_allocated_archives) {
+    archive->nb_allocated_archives *= 2;
+    archive->archive_ids = realloc(archive->archive_ids, sizeof(htf_archive_id_t) * archive->nb_allocated_archives);
+    archive->archives = realloc(archive->archives, sizeof(struct htf_archive) * archive->nb_allocated_archives);
+  }
+
+  archive->archive_ids[index] = subarchive;
+}
