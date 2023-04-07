@@ -153,6 +153,12 @@ struct htf_container* htf_archive_get_container(struct htf_archive* archive,
     if(archive->containers[i].id == container_id)
       return &archive->containers[i];
   }
+
+  for(int i = 0; i<archive->global_archive->nb_containers; i++) {
+    if(archive->global_archive->containers[i].id == container_id)
+      return &archive->global_archive->containers[i];
+  }
+
   return NULL;  
 }
 

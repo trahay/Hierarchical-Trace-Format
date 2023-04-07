@@ -90,6 +90,80 @@ OTF2_GlobalDefWriter_WriteSystemTreeNode( OTF2_GlobalDefWriter*  writerHandle,
   return OTF2_SUCCESS;
 }
 
+
+struct location_group_map {
+  htf_container_id_t container;
+  OTF2_LocationGroupRef location_group;
+};
+
+struct location_group_map *location_group_map = NULL;
+int nb_location_group = 0;
+
+htf_container_id_t next_container_id(int ref) {
+  static htf_container_id_t next_id = HTF_CONTAINER_ID_INVALID; // todo: pb with MPI ?
+  if(next_id == HTF_CONTAINER_ID_INVALID) next_id = ref;
+  return next_id++;
+}
+
+htf_thread_id_t next_thread_id(int ref) {
+  static htf_thread_id_t next_id = HTF_THREAD_ID_INVALID; // todo: pb with MPI ?
+  if(next_id == HTF_THREAD_ID_INVALID) next_id = ref;
+  return next_id++;
+}
+
+htf_container_id_t _otf_location_group_to_container_id(OTF2_LocationGroupRef ref) {
+  for(int i=0; i<nb_location_group; i++) {
+    if(location_group_map[i].location_group == ref)
+      return location_group_map[i].container;
+  }
+  return HTF_CONTAINER_ID_INVALID;
+}
+
+htf_container_id_t _otf_register_location_group(OTF2_LocationGroupRef ref) {
+  htf_assert(_otf_location_group_to_container_id(ref) ==  HTF_CONTAINER_ID_INVALID);
+  int index = nb_location_group++;
+  location_group_map = realloc(location_group_map, sizeof(struct location_group_map) * nb_location_group);
+  location_group_map[index].container = next_container_id(ref);
+  location_group_map[index].location_group = ref;
+  return location_group_map[index].container;
+}
+
+struct location_map {
+  htf_container_id_t container;
+  htf_thread_id_t thread_id;
+  OTF2_LocationRef location;
+};
+
+struct location_map *location_map = NULL;
+int nb_location = 0;
+
+htf_container_id_t _otf_location_to_container_id(OTF2_LocationRef ref) {
+  for(int i=0; i<nb_location; i++) {
+    if(location_map[i].location == ref)
+      return location_map[i].container;
+  }
+  return HTF_CONTAINER_ID_INVALID;
+}
+
+htf_thread_id_t _otf_location_to_thread_id(OTF2_LocationRef ref) {
+  for(int i=0; i<nb_location; i++) {
+    if(location_map[i].location == ref)
+      return location_map[i].thread_id;
+  }
+  return HTF_THREAD_ID_INVALID;
+}
+
+htf_container_id_t _otf_register_location(OTF2_LocationRef ref) {
+  htf_assert(_otf_location_to_container_id(ref) ==  HTF_CONTAINER_ID_INVALID);
+  int index = nb_location++;
+  location_map = realloc(location_map, sizeof(struct location_map) * nb_location);
+  location_map[index].container = next_container_id(ref);
+  location_map[index].thread_id = next_thread_id(ref);
+  location_map[index].location = ref;
+  return location_map[index].container;  
+}
+
+
 OTF2_ErrorCode
 OTF2_GlobalDefWriter_WriteLocationGroup( OTF2_GlobalDefWriter*  writerHandle,
                                          OTF2_LocationGroupRef  self,
@@ -97,8 +171,18 @@ OTF2_GlobalDefWriter_WriteLocationGroup( OTF2_GlobalDefWriter*  writerHandle,
                                          OTF2_LocationGroupType locationGroupType,
                                          OTF2_SystemTreeNodeRef systemTreeParent,
                                          OTF2_LocationGroupRef  creatingLocationGroup ) {
-  //  NOT_IMPLEMENTED;
-  return OTF2_SUCCESS;
+
+  htf_container_id_t container_id = _otf_register_location_group(self);
+  htf_container_id_t parent_id = _otf_location_group_to_container_id(creatingLocationGroup);
+
+  htf_write_global_add_subarchive(&writerHandle->archive, container_id);
+  htf_write_global_define_container(&writerHandle->archive,
+				    container_id,
+				    name,
+				    parent_id,
+				    HTF_THREAD_ID_INVALID);
+
+ return OTF2_SUCCESS;
 }
 
 OTF2_ErrorCode
@@ -108,6 +192,17 @@ OTF2_GlobalDefWriter_WriteLocation( OTF2_GlobalDefWriter* writerHandle,
                                     OTF2_LocationType     locationType,
                                     uint64_t              numberOfEvents,
                                     OTF2_LocationGroupRef locationGroup ) {
+
+  htf_container_id_t container_id = _otf_register_location(self);
+  htf_thread_id_t thread_id = _otf_location_to_thread_id(self);
+  htf_container_id_t parent_id = _otf_location_group_to_container_id(locationGroup);
+
+  htf_write_global_define_container(&writerHandle->archive,
+				    container_id,
+				    name,
+				    parent_id,
+				    thread_id);
+
   return OTF2_SUCCESS;
   //  NOT_IMPLEMENTED;
 }

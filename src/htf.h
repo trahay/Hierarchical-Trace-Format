@@ -344,6 +344,12 @@ void htf_global_archive_register_region(struct htf_global_archive *archive,
 
 
 
+struct htf_string* htf_global_archive_get_string(struct htf_global_archive *archive,
+						 htf_string_ref_t string_ref);
+
+struct htf_region* htf_global_archive_get_region(struct htf_global_archive *archive,
+						 htf_region_ref_t region_ref);
+
 struct htf_string* htf_archive_get_string(struct htf_archive *archive,
 					  htf_string_ref_t string_ref);
 

@@ -51,6 +51,13 @@ OTF2_DefWriter_WriteSystemTreeNode( OTF2_DefWriter*        writer,
   NOT_IMPLEMENTED;
 }
 
+htf_container_id_t _otf_register_location(OTF2_LocationRef ref);
+htf_thread_id_t _otf_location_to_thread_id(OTF2_LocationRef ref);
+htf_container_id_t _otf_location_to_container_id(OTF2_LocationRef ref);
+htf_container_id_t _otf_register_location_group(OTF2_LocationGroupRef ref);
+htf_container_id_t _otf_location_group_to_container_id(OTF2_LocationGroupRef ref);
+
+
 OTF2_ErrorCode
 OTF2_DefWriter_WriteLocationGroup( OTF2_DefWriter*        writer,
                                    OTF2_LocationGroupRef  self,
@@ -58,10 +65,15 @@ OTF2_DefWriter_WriteLocationGroup( OTF2_DefWriter*        writer,
                                    OTF2_LocationGroupType locationGroupType,
                                    OTF2_SystemTreeNodeRef systemTreeParent,
                                    OTF2_LocationGroupRef  creatingLocationGroup ) {
+
+  htf_container_id_t container_id = _otf_register_location_group(self);
+  htf_container_id_t parent_id = _otf_location_group_to_container_id(creatingLocationGroup);
+
+  htf_write_add_subarchive(writer->archive, container_id);
   htf_write_define_container(writer->archive,
-			     self,
+			     container_id,
 			     name,
-			     creatingLocationGroup,
+			     parent_id,
 			     HTF_THREAD_ID_INVALID);
 
   return OTF2_SUCCESS;
@@ -78,12 +90,17 @@ OTF2_DefWriter_WriteLocation( OTF2_DefWriter*       writer,
      lead to conflicts !
      a solution could be to define a map [locationRef, container_id]
   */
-  
+
+  htf_container_id_t container_id = _otf_register_location(self);
+  htf_thread_id_t thread_id = _otf_location_to_thread_id(self);
+  htf_container_id_t parent_id = _otf_location_group_to_container_id(locationGroup);
+
   htf_write_define_container(writer->archive,
-			     self,
+			     container_id,
 			     name,
-			     locationGroup,
-			     self);
+			     parent_id,
+			     thread_id);
+  
   return OTF2_SUCCESS;
 }
 

@@ -311,8 +311,9 @@ static void _htf_read_regions_generic(FILE* file, struct htf_definition *d) {
 
   printf( "\tLoad %d regions\n", d->nb_regions);
 
-  d->regions = malloc(sizeof(struct htf_region)* d->nb_regions);
-  _htf_fread(d->regions, sizeof(struct htf_region), d->nb_regions, file);
+  d->nb_allocated_regions = d->nb_regions;
+  d->regions = malloc(sizeof(struct htf_region)* d->nb_allocated_regions);
+  _htf_fread(d->regions, sizeof(struct htf_region), d->nb_allocated_regions, file);
 
   htf_log(htf_dbg_lvl_debug, "\tLoad %d regions\n", d->nb_regions);
 }
