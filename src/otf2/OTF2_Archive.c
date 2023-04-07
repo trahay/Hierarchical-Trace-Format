@@ -298,7 +298,8 @@ OTF2_GlobalDefWriter*
 OTF2_Archive_GetGlobalDefWriter( OTF2_Archive* archive ) {
   if(!archive->globalDefWriter){
     archive->globalDefWriter = malloc(sizeof(OTF2_GlobalDefWriter));
-    htf_write_global_archive_open(archive->globalDefWriter->archive,
+
+    htf_write_global_archive_open(&archive->globalDefWriter->archive,
 				  archive->archive.dir_name,
 				  archive->archive.trace_name);
   }
@@ -400,7 +401,9 @@ OTF2_Archive_CloseSnapWriter( OTF2_Archive*    archive,
 OTF2_ErrorCode
 OTF2_Archive_CloseGlobalDefWriter( OTF2_Archive*         archive,
                                    OTF2_GlobalDefWriter* writer ) {
-  NOT_IMPLEMENTED;
+
+  htf_write_global_archive_close(&writer->archive);
+  return OTF2_SUCCESS;
 }
 
 OTF2_ErrorCode

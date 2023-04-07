@@ -61,11 +61,11 @@ static inline htf_event_id_t _htf_get_event_id(struct htf_thread *thread_trace,
   es->nb_allocated_timestamps = NB_TIMESTAMP_DEFAULT;
   es->nb_timestamps = 0;
 
-  if(htf_debug_level >= htf_dbg_lvl_verbose) {
-    htf_log(htf_dbg_lvl_verbose, "New event: ");
-    htf_print_event(thread_trace, &es->event);
-    printf("\n");
-  }
+//  if(htf_debug_level >= htf_dbg_lvl_verbose) {
+//    htf_log(htf_dbg_lvl_verbose, "New event: ");
+//    htf_print_event(thread_trace, &es->event);
+//    printf("\n");
+//  }
   return HTF_EVENT_ID(index);
 }
 
@@ -224,8 +224,8 @@ void htf_record_enter(struct htf_thread_writer *thread_writer,
     return;
   htf_recursion_shield++;
 
-  htf_assert(thread_writer->thread_trace.container);
-  htf_assert(htf_archive_get_region(thread_writer->thread_trace.archive, region_ref) != NULL);
+  //htf_assert(thread_writer->thread_trace.container);
+  //  htf_assert(htf_archive_get_region(thread_writer->thread_trace.archive, region_ref) != NULL);
 
   struct htf_event e;
   init_event(&e, HTF_EVENT_ENTER);
