@@ -1,6 +1,8 @@
 #ifndef HTF_DBG_H
 #define HTF_DBG_H
 
+#include <stdio.h>
+
 enum htf_debug_level {
   htf_dbg_lvl_error,   // only print errors
   htf_dbg_lvl_quiet,   // only print important messages

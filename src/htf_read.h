@@ -21,8 +21,6 @@ void htf_read_global_archive(struct htf_archive* archive, char* main_filename);
 
 void htf_read_archive(struct htf_archive* archive, char* filename);
 
-//void htf_read_trace(struct htf_trace* trace, char* filename);
-
 void htf_read_thread_iterator_init(struct htf_archive *archive,
 				   struct htf_thread_reader *reader,
 				   htf_thread_id_t thread_id);

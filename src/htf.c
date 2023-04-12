@@ -9,6 +9,7 @@
 #include <sys/stat.h>
 
 #include "htf.h"
+#include "htf_archive.h"
 #include "htf_timestamp.h"
 
 struct htf_event* htf_get_event(struct htf_thread *thread_trace,

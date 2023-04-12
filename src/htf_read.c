@@ -3,7 +3,7 @@
 #include <string.h>
 
 #include "htf_read.h"
-#include "htf_event.h"
+#include "htf_archive.h"
 
 static void init_callstack(struct htf_thread_reader *reader) {
   reader->current_frame = 0;

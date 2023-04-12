@@ -14,7 +14,7 @@ set(HTF_HEADERS
     htf.h
     htf_read.h
     htf_write.h
-    htf_event.h
+    htf_archive.h
     htf_dbg.h
     htf_timestamp.h
     htf_storage.h
@@ -25,7 +25,7 @@ target_sources(
 PRIVATE
     htf_read.c
     htf_write.c
-    htf_event.c
+    htf_archive.c
     htf_timestamp.c
     htf_storage.c
     htf_dbg.c

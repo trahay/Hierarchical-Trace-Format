@@ -8,7 +8,7 @@
 #include "tracer.h"
 #include "htf.h"
 #include "htf_read.h"
-#include "htf_event.h"
+#include "htf_archive.h"
 
 
 #define ET2C(et) (((et) == function_entry? 'E':	\

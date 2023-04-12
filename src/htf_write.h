@@ -12,6 +12,8 @@ struct htf_thread_writer {
 };
 
 
+
+
 void htf_write_global_archive_open(struct htf_archive* archive,
 				   const char* dir_name,
 				   const char* trace_name);
@@ -27,7 +29,6 @@ void htf_write_global_define_location(struct htf_archive *archive,
 				      htf_thread_id_t id,
 				      htf_string_ref_t name,
 				      htf_location_group_id_t parent);
-
 
 
 void htf_write_thread_open(struct htf_archive* archive,

@@ -11,7 +11,6 @@
 #include "htf.h"
 #include "htf_dbg.h"
 #include "htf_timestamp.h"
-#include "htf_event.h"
 
 static void _htf_store_event(const char* base_dirname,
 			     struct htf_thread* th,
@@ -80,13 +79,13 @@ static FILE* _htf_file_open(char* filename, char* mode) {
 
 #define _htf_fread(ptr, size, nmemb, stream) do {	\
     size_t  ret = fread(ptr, size, nmemb, stream);	\
-    if(ret != nmemb) htf_error("fread failed\n");		\
+    if(ret != nmemb) htf_error("fread failed\n");	\
   } while(0)
 
 
 #define _htf_fwrite(ptr, size, nmemb, stream) do {	\
     size_t  ret = fwrite(ptr, size, nmemb, stream);	\
-    if(ret != nmemb) htf_error("fwrite failed\n");		\
+    if(ret != nmemb) htf_error("fwrite failed\n");	\
   } while(0)
 
 void htf_storage_init(struct htf_archive* archive) {
@@ -497,10 +496,6 @@ void htf_storage_finalize(struct htf_archive *archive) {
 
   _htf_store_location_groups(archive);
   _htf_store_locations(archive);
-
-  //for(int i =0; i<archive->nb_threads; i++) {
-  //  _htf_store_thread(archive->dir_name, archive->threads[i]);
-  //}
 
   fclose(f);
 }

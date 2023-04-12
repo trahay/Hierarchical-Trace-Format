@@ -1,7 +1,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+
 #include "htf_dbg.h"
+#include "htf.h"
 
 enum htf_debug_level htf_debug_level = htf_dbg_lvl_normal;
 

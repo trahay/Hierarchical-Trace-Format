@@ -4,7 +4,7 @@
 #include <mpi.h>
 
 #include "htf.h"
-#include "htf_event.h"
+#include "htf_archive.h"
 #include "htf_write.h"
 
 static struct htf_archive   trace;

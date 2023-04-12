@@ -49,7 +49,8 @@
 
 
 #include "htf.h"
-#include "htf_event.h"
+#include "htf_archive.h"
+#include "htf_write.h"
 
 struct OTF2_GlobalDefWriter_struct {
   struct htf_archive archive;

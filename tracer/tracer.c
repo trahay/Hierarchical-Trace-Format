@@ -5,7 +5,7 @@
 
 #include "htf.h"
 #include "htf_write.h"
-#include "htf_event.h"
+#include "htf_archive.h"
 #include "tracer.h"
 
 static struct htf_archive trace;
