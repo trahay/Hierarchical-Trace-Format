@@ -64,7 +64,7 @@ OTF2_GlobalDefWriter_WriteString( OTF2_GlobalDefWriter* writerHandle,
                                   OTF2_StringRef        self,
                                   const char*           string ) {
   //  NOT_IMPLEMENTED;
-  htf_global_archive_register_string(&writerHandle->archive, self, string);
+  htf_archive_register_string(&writerHandle->archive, self, string);
   return OTF2_SUCCESS;
 }
 
@@ -100,12 +100,16 @@ struct location_group_map *location_group_map = NULL;
 int nb_location_group = 0;
 
 htf_location_group_id_t next_location_group_id(int ref) {
+  /* TODO: buggy ?  */
+  return ref;
   static htf_location_group_id_t next_id = HTF_LOCATION_GROUP_ID_INVALID; // todo: pb with MPI ?
   if(next_id == HTF_LOCATION_GROUP_ID_INVALID) next_id = ref;
   return next_id++;
 }
 
 htf_thread_id_t next_thread_id(int ref) {
+  /* TODO: buggy ?  */
+  return ref;
   static htf_thread_id_t next_id = HTF_THREAD_ID_INVALID; // todo: pb with MPI ?
   if(next_id == HTF_THREAD_ID_INVALID) next_id = ref;
   return next_id++;
@@ -162,14 +166,14 @@ OTF2_GlobalDefWriter_WriteLocationGroup( OTF2_GlobalDefWriter*  writerHandle,
                                          OTF2_SystemTreeNodeRef systemTreeParent,
                                          OTF2_LocationGroupRef  creatingLocationGroup ) {
 
-  htf_location_group_id_t container_id = _otf_register_location_group(self);
+  htf_location_group_id_t lg_id = _otf_register_location_group(self);
   htf_location_group_id_t parent_id = _otf_get_location_group_id(creatingLocationGroup);
 
   //  htf_write_global_add_subarchive(&writerHandle->archive, self);
-  htf_write_global_define_location_group(&writerHandle->archive,
-					 container_id,
-					 name,
-					 parent_id);
+  htf_write_define_location_group(&writerHandle->archive,
+				  lg_id,
+				  name,
+				  parent_id);
 
  return OTF2_SUCCESS;
 }
@@ -182,13 +186,13 @@ OTF2_GlobalDefWriter_WriteLocation( OTF2_GlobalDefWriter* writerHandle,
                                     uint64_t              numberOfEvents,
                                     OTF2_LocationGroupRef locationGroup ) {
 
-  htf_thread_id_t thread_id = _otf_get_location_id(self);
+  htf_thread_id_t thread_id = _otf_register_location(self);
   htf_location_group_id_t parent_id = _otf_get_location_group_id(locationGroup);
 
-  htf_write_global_define_location(&writerHandle->archive,
-				   thread_id,
-				   name,
-				   parent_id);
+  htf_write_define_location(&writerHandle->archive,
+			    thread_id,
+			    name,
+			    parent_id);
 
   return OTF2_SUCCESS;
   //  NOT_IMPLEMENTED;
@@ -211,7 +215,7 @@ OTF2_GlobalDefWriter_WriteRegion( OTF2_GlobalDefWriter* writerHandle,
    * - uppon thread creation, copy the write region to the new thread regions
    * - when creating a global region, add it to the existing threads region
    */
-  htf_global_archive_register_region(&writerHandle->archive, self, name);
+  htf_archive_register_region(&writerHandle->archive, self, name);
   return OTF2_SUCCESS;
 }
 

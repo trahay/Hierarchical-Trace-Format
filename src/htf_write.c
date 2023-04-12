@@ -466,6 +466,7 @@ void htf_write_define_location(struct htf_archive *archive,
   int index = archive->nb_locations++;
   struct htf_location* l = &archive->locations[index];
   l->id = id;
+  htf_assert(l->id != HTF_THREAD_ID_INVALID);
   l->name = name;
   l->parent = parent;
 }

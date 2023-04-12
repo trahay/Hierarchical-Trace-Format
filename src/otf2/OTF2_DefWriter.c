@@ -65,17 +65,14 @@ OTF2_DefWriter_WriteLocationGroup( OTF2_DefWriter*        writer,
                                    OTF2_SystemTreeNodeRef systemTreeParent,
                                    OTF2_LocationGroupRef  creatingLocationGroup ) {
   NOT_IMPLEMENTED;
-#if 0
-  htf_container_id_t container_id = _otf_register_location_group(self);
-  htf_container_id_t parent_id = _otf_location_group_to_container_id(creatingLocationGroup);
+  htf_location_group_id_t lg_id = _otf_register_location_group(self);
+  htf_location_group_id_t parent_id = _otf_get_location_group_id(creatingLocationGroup);
 
-  //  htf_write_add_subarchive(writer->archive, container_id);
-  htf_write_define_container(writer->archive,
-			     container_id,
-			     name,
-			     parent_id,
-			     HTF_THREAD_ID_INVALID);
-#endif
+  htf_write_define_location_group(writer->archive,
+				  lg_id,
+				  name,
+				  parent_id);
+
   return OTF2_SUCCESS;
 }
 
@@ -86,14 +83,15 @@ OTF2_DefWriter_WriteLocation( OTF2_DefWriter*       writer,
                               OTF2_LocationType     locationType,
                               uint64_t              numberOfEvents,
                               OTF2_LocationGroupRef locationGroup ) {
-  /* TODO: we use both locationRef and LocationGroupRef as container_id. This will probably
-     lead to conflicts !
-     a solution could be to define a map [locationRef, container_id]
-  */
 
   htf_thread_id_t thread_id = _otf_register_location(self);
   htf_location_group_id_t parent_id = _otf_get_location_group_id(locationGroup);
 
+  static int first_call = 1;
+  if(first_call) {
+    if(writer->archive->id == 0)
+      writer->archive->id = parent_id;
+  }
   htf_write_define_location(writer->archive,
 			    thread_id,
 			    name,

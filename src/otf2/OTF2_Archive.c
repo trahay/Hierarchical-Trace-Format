@@ -21,11 +21,7 @@ OTF2_Archive_Open( const char*              archivePath,
 			 archiveName,
 			 0); /* TODO: add missing archive_id_t */
 
-  archive->globalDefWriter = malloc(sizeof(OTF2_GlobalDefWriter));
-
-  htf_write_global_archive_open(&archive->globalDefWriter->archive,
-				archive->archive.dir_name,
-				archive->archive.trace_name);
+  archive->globalDefWriter = NULL;
 
   archive->def_writers = NULL;
   archive->evt_writers = NULL;
@@ -301,6 +297,14 @@ OTF2_Archive_GetDefWriter( OTF2_Archive*    archive,
 
 OTF2_GlobalDefWriter*
 OTF2_Archive_GetGlobalDefWriter( OTF2_Archive* archive ) {
+  if(!archive->globalDefWriter) {
+    archive->globalDefWriter = malloc(sizeof(OTF2_GlobalDefWriter));
+
+    htf_write_global_archive_open(&archive->globalDefWriter->archive,
+				  archive->archive.dir_name,
+				  archive->archive.trace_name);
+
+  }
   return archive->globalDefWriter;
 }
 
@@ -374,6 +378,7 @@ OTF2_ErrorCode
 OTF2_Archive_CloseEvtWriter( OTF2_Archive*   archive,
                              OTF2_EvtWriter* writer ) {
   //  NOT_IMPLEMENTED;
+  htf_write_thread_close(writer->thread_writer);
   return OTF2_SUCCESS;
 }
 
@@ -381,6 +386,8 @@ OTF2_ErrorCode
 OTF2_Archive_CloseDefWriter( OTF2_Archive*   archive,
                              OTF2_DefWriter* writer ) {
   //  NOT_IMPLEMENTED;
+  //TODO: something like this ?
+
   return OTF2_SUCCESS;
 }
 

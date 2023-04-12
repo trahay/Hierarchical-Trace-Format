@@ -52,7 +52,7 @@
 #include "htf_event.h"
 
 struct OTF2_GlobalDefWriter_struct {
-  struct htf_global_archive archive;
+  struct htf_archive archive;
 };
 
 
