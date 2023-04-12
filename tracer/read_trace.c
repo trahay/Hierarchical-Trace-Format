@@ -80,7 +80,7 @@ void populate(struct htf_archive *trace,
   *nb_threads = trace->nb_threads + *nb_threads;
   *readers = realloc(*readers, sizeof(struct htf_thread_reader) * (*nb_threads));
   for(int i=0; i<trace->nb_threads; i++) {
-    htf_read_thread_iterator_init(trace, &(*readers)[start_index + i], trace->thread_ids[i]);
+    htf_read_thread_iterator_init(trace, &(*readers)[start_index + i], trace->threads[i]->id);
   }
 }
 
@@ -88,8 +88,11 @@ void populate(struct htf_archive *trace,
 void print_trace(struct htf_global_archive *trace) {
   struct htf_thread_reader *readers = NULL;
   int nb_threads = 0;
-  for(int i =0; i< trace->nb_archives; i++) {
-    populate(&trace->archives[i], &nb_threads, &readers);
+ 
+  for(struct htf_archive *arch = trace->archive_list;
+      arch;
+      arch = arch->next) {
+    populate(arch, &nb_threads, &readers);
   }
 
   struct htf_event_occurence e;

@@ -147,23 +147,40 @@ struct htf_thread* htf_archive_get_thread(struct htf_archive* archive,
   return NULL;
 }
 
-struct htf_container* htf_archive_get_container(struct htf_archive* archive,
-						htf_container_id_t container_id) {
-  for(int i = 0; i<archive->nb_containers; i++) {
-    if(archive->containers[i].id == container_id)
-      return &archive->containers[i];
+struct htf_location_group* htf_archive_get_location_group(struct htf_archive* archive,
+						htf_location_group_id_t location_group_id) {
+  for(int i = 0; i<archive->nb_location_groups; i++) {
+    if(archive->location_groups[i].id == location_group_id)
+      return &archive->location_groups[i];
   }
 
-  for(int i = 0; i<archive->global_archive->nb_containers; i++) {
-    if(archive->global_archive->containers[i].id == container_id)
-      return &archive->global_archive->containers[i];
+  if(archive->global_archive)
+    for(int i = 0; i<archive->global_archive->nb_location_groups; i++) {
+      if(archive->global_archive->location_groups[i].id == location_group_id)
+	return &archive->global_archive->location_groups[i];
+    }
+
+  return NULL;  
+}
+
+struct htf_location* htf_archive_get_location(struct htf_archive* archive,
+					      htf_thread_id_t id) {
+  for(int i = 0; i<archive->nb_locations; i++) {
+    if(archive->locations[i].id == id)
+      return &archive->locations[i];
   }
+
+  if(archive->global_archive)
+    for(int i = 0; i<archive->global_archive->nb_locations; i++) {
+      if(archive->global_archive->locations[i].id == id)
+	return &archive->global_archive->locations[i];
+    }
 
   return NULL;  
 }
 
 const char* htf_get_thread_name(struct htf_thread* thread) {
   struct htf_archive* archive = thread->archive;
-  struct htf_container* container = htf_archive_get_container(archive,thread->container);
-  return htf_archive_get_string(archive, container->name)->str;
+  struct htf_location* location = htf_archive_get_location(archive,thread->id);
+  return htf_archive_get_string(archive, location->name)->str;
 }

@@ -17,11 +17,16 @@ void htf_write_global_archive_open(struct htf_global_archive* archive,
 				   const char* trace_name);
 void htf_write_global_archive_close(struct htf_global_archive* archive);
 
-void htf_write_global_define_container(struct htf_global_archive *archive,
-				       htf_container_id_t id,
-				       htf_string_ref_t name,
-				       htf_container_id_t parent,
-				       htf_thread_id_t thread);
+
+void htf_write_global_define_location_group(struct htf_global_archive *archive,
+					    htf_location_group_id_t id,
+					    htf_string_ref_t name,
+					    htf_location_group_id_t parent);
+
+void htf_write_global_define_location(struct htf_global_archive *archive,
+				      htf_thread_id_t id,
+				      htf_string_ref_t name,
+				      htf_location_group_id_t parent);
 
 void htf_write_global_add_subarchive(struct htf_global_archive* archive,
 				     htf_archive_id_t subarchive);
@@ -31,25 +36,25 @@ void htf_write_global_add_subarchive(struct htf_global_archive* archive,
 
 void htf_write_thread_open(struct htf_archive* archive,
 			   struct htf_thread_writer* thread_writer,
-			   htf_thread_id_t thread_id,
-			   htf_container_id_t container_id);
+			   htf_thread_id_t thread_id);
 
 void htf_write_thread_close(struct htf_thread_writer* thread_writer);
 
-void htf_write_define_container(struct htf_archive *archive,
-				htf_container_id_t id,
-				htf_string_ref_t name,
-				htf_container_id_t parent,
-				htf_thread_id_t thread);
+void htf_write_define_location_group(struct htf_archive *archive,
+				     htf_location_group_id_t id,
+				     htf_string_ref_t name,
+				     htf_location_group_id_t parent);
+
+void htf_write_define_location(struct htf_archive *archive,
+			       htf_thread_id_t id,
+			       htf_string_ref_t name,
+			       htf_location_group_id_t parent);
 
 
 void htf_write_archive_open(struct htf_archive* archive,
 			    const char* dir_name,
 			    const char* trace_name,
 			    htf_archive_id_t archive_id);
-
-void htf_write_add_subarchive(struct htf_archive* archive,
-			      htf_archive_id_t subarchive);
 
 void htf_write_archive_close(struct htf_archive* archive);
 
@@ -84,8 +89,9 @@ void htf_record_leave(struct htf_thread_writer *thread_writer,
 #define SEQUENCE_SIZE_DEFAULT 1024
 #define CALLSTACK_DEPTH_DEFAULT 128
 #define NB_ARCHIVES_DEFAULT 1
-#define NB_CONTAINERS_DEFAULT 16
 #define NB_THREADS_DEFAULT 16
+#define NB_LOCATION_GROUPS_DEFAULT 16
+#define NB_LOCATIONS_DEFAULT NB_THREADS_DEFAULT
 
 extern _Thread_local int htf_recursion_shield;
 

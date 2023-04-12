@@ -9,9 +9,8 @@
 #include "tracer.h"
 
 static struct htf_archive trace;
-static htf_container_id_t process_id;
+static htf_location_group_id_t process_id;
 static _Thread_local struct htf_thread_writer* thread_writer = NULL;
-static _Thread_local htf_container_id_t thread_container_id;
 static _Thread_local htf_thread_id_t thread_id;
 static _Thread_local int thread_rank;
 static _Atomic int nb_threads = 0;
@@ -29,9 +28,9 @@ static htf_string_ref_t _register_string(char* str) {
   return ref;
 }
 
-static htf_container_id_t _new_container() {
-  static _Atomic htf_container_id_t next_id = 0;
-  htf_container_id_t id = next_id++;
+static htf_location_group_id_t _new_location_group() {
+  static _Atomic htf_location_group_id_t next_id = 0;
+  htf_location_group_id_t id = next_id++;
   return id;
 }
 
@@ -55,15 +54,13 @@ void _init_thread() {
   snprintf(thread_name, 20, "thread_%d", thread_rank);
   htf_string_ref_t thread_name_id = _register_string(thread_name);
 
-  thread_container_id = _new_container();
   thread_id = _new_thread();
-  htf_write_define_container(&trace,
-			     thread_container_id,
-			     thread_name_id,
-			     process_id,
-			     thread_id);
+  htf_write_define_location(&trace,
+			    thread_id,
+			    thread_name_id,
+			    process_id);
 
-  htf_write_thread_open(&trace, thread_writer, thread_id, thread_container_id);
+  htf_write_thread_open(&trace, thread_writer, thread_id);
 }
 
 void enter_function(enum intercepted_function f, void* ptr) {
@@ -122,12 +119,11 @@ static void _tracer_init(void) {
 			 "main",
 			 0);
 
-  process_id = _new_container();
-  htf_write_define_container(&trace,
-			     process_id,
-			     _register_string("Process"),
-			     HTF_CONTAINER_ID_INVALID,
-			     HTF_THREAD_ID_INVALID);
+  process_id = _new_location_group();
+  htf_write_define_location_group(&trace,
+				  process_id,
+				  _register_string("Process"),
+				  HTF_LOCATION_GROUP_ID_INVALID);
   
   for(int i = 0; i<NB_FUNCTIONS; i++) {
     htf_string_ref_t string_ref = _register_string(function_names[i]);

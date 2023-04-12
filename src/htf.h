@@ -215,8 +215,8 @@ typedef struct htf_attribute_list {
 typedef uint32_t htf_thread_id_t;
 #define HTF_THREAD_ID_INVALID ( ( htf_thread_id_t )HTF_UNDEFINED_UINT32 )
 
-typedef uint32_t htf_container_id_t;
-#define HTF_CONTAINER_ID_INVALID ( ( htf_container_id_t )HTF_UNDEFINED_UINT32 )
+typedef uint32_t htf_location_group_id_t;
+#define HTF_LOCATION_GROUP_ID_INVALID ( ( htf_location_group_id_t )HTF_UNDEFINED_UINT32 )
 
 typedef uint32_t htf_archive_id_t;
 #define HTF_ARCHIVE_ID_INVALID ( ( htf_archive_id_t )HTF_UNDEFINED_UINT32 )
@@ -227,9 +227,6 @@ typedef uint32_t htf_archive_id_t;
 struct htf_thread {
   struct htf_archive *archive;
   htf_thread_id_t id;
-
-  /* container that contains the thread (eg. the process) */
-  htf_container_id_t container;
 
   struct htf_event_summary *events;
   unsigned nb_allocated_events;
@@ -245,21 +242,18 @@ struct htf_thread {
 };
 
 
-/* a container can be a thread, a process, a machine, etc. */
-struct htf_container {
-  htf_container_id_t id;
-  htf_string_ref_t   name;
-  htf_container_id_t parent;
+/* a location_group can be a process, a machine, etc. */
+struct htf_location_group {
+  htf_location_group_id_t id;
+  htf_string_ref_t        name;
+  htf_location_group_id_t parent;
+};
 
-  /* id of the corresponding thread (if any) */
-  htf_thread_id_t thread_id;
-
-#if 0
-  /* todo: pas besoin ? on peut retrouver ces infos à partir de la
-     liste de conteneurs et leurs parent */
-  htf_container_id_t *children;
-  int nb_children;
-#endif
+/* a location is basically a thread (or GPU stream) */
+struct htf_location {
+  htf_thread_id_t         id;
+  htf_string_ref_t        name;
+  htf_location_group_id_t parent;
 };
 
 struct htf_definition {
@@ -283,24 +277,25 @@ struct htf_archive {
   pthread_mutex_t lock;
 
   struct htf_definition definitions;
-  struct htf_container* containers;
-  int nb_containers;
-  int nb_allocated_containers;
+
+  struct htf_location_group* location_groups;
+  int nb_location_groups;
+  int nb_allocated_location_groups;
+
+  struct htf_location* locations;
+  int nb_locations;
+  int nb_allocated_locations;
 
   /* a list of threads */
   struct htf_thread **threads;
-  htf_thread_id_t *thread_ids;
   int nb_threads;
   int nb_allocated_threads;
 
-  htf_archive_id_t *sub_archives;
-  int nb_archives;
-  int nb_allocated_archives;
-
   //struct htf_archive *main_archive;
-  //struct htf_archive *next;
+  struct htf_archive *next;
 };
 
+/* todo: there's no need for a global archive and an archive. Merge them. */
 struct htf_global_archive {
   char* dir_name;
   char* trace_name;
@@ -308,21 +303,28 @@ struct htf_global_archive {
 
   struct htf_definition definitions;
 
-  struct htf_container* containers;
-  int nb_containers;
-  int nb_allocated_containers;
+  struct htf_location_group* location_groups;
+  int nb_location_groups;
+  int nb_allocated_location_groups;
 
-  htf_archive_id_t *archive_ids;
-  struct htf_archive *archives;
+  struct htf_location* locations;
+  int nb_locations;
+  int nb_allocated_locations;
+
+  struct htf_thread *threads;
+  int nb_threads;
+
+  struct htf_archive *archive_list;
   int nb_archives;
-  int nb_allocated_archives;
 };
 
 struct htf_thread* htf_archive_get_thread(struct htf_archive* archive,
-					  htf_thread_id_t thread_id);
+					  htf_thread_id_t     thread_id);
 
-struct htf_container* htf_archive_get_container(struct htf_archive* archive,
-						htf_container_id_t container_id);
+struct htf_location_group* htf_archive_get_location_group(struct htf_archive*     archive,
+							  htf_location_group_id_t location_group);
+struct htf_location* htf_archive_get_location(struct htf_archive* archive,
+					      htf_thread_id_t     thread_id);
 
 
 void htf_archive_register_string(struct htf_archive *archive,

@@ -6,8 +6,9 @@
 #include "htf_event.h"
 #include "htf_write.h"
 
+static struct htf_global_archive global_archive;
 static struct htf_archive   trace;
-static htf_container_id_t   process_id;
+static htf_location_group_id_t   process_id;
 static htf_string_ref_t     process_name;
 
 static int nb_iter_default = 100000;
@@ -37,9 +38,9 @@ static htf_string_ref_t _register_string(char* str) {
   return ref;
 }
 
-static htf_container_id_t _new_container() {
-  static _Atomic htf_container_id_t next_id = 0;
-  htf_container_id_t id = next_id++;
+static htf_location_group_id_t _new_location_group() {
+  static _Atomic htf_location_group_id_t next_id = 0;
+  htf_location_group_id_t id = next_id++;
   return id;
 }
 
@@ -59,15 +60,13 @@ void* worker(void* arg __attribute__((unused))) {
   snprintf(thread_name, 20, "thread_%d", my_rank);
   htf_string_ref_t thread_name_id = _register_string(thread_name);
 
-  htf_container_id_t thread_container_id = _new_container();
   htf_thread_id_t thread_id = _new_thread();
-  htf_write_define_container(&trace,
-			     thread_container_id,
-			     thread_name_id,
-			     process_id,
-			     thread_id);
+  htf_write_global_define_location(&global_archive,
+				   thread_id,
+				   thread_name_id,
+				   process_id);
 
-  htf_write_thread_open(&trace, thread_writer, thread_id, thread_container_id);
+  htf_write_thread_open(&trace, thread_writer, thread_id);
  
   struct timespec t1, t2;
   pthread_barrier_wait(&bench_start);
@@ -167,7 +166,6 @@ int main(int argc, char**argv) {
   printf("pattern = %d\n", pattern);
   printf("---------------------\n");
 
-  struct htf_global_archive global_archive;
   htf_write_global_archive_open(&global_archive,
 				"write_benchmark_trace",
 				"main");
@@ -176,16 +174,14 @@ int main(int argc, char**argv) {
 			 "write_benchmark_trace",
 			 "main",
 			 0);
-  htf_write_global_add_subarchive(&global_archive, 0);
 
-  process_id = _new_container();
+  process_id = _new_location_group();
   process_name = _register_string("Process"),
 
-  htf_write_global_define_container(&global_archive,
-				    process_id,
-				    process_name,
-				    HTF_CONTAINER_ID_INVALID,
-				    HTF_THREAD_ID_INVALID);
+  htf_write_global_define_location_group(&global_archive,
+					 process_id,
+					 process_name,
+					 HTF_LOCATION_GROUP_ID_INVALID);
 
   regions = malloc(sizeof(htf_region_ref_t) * nb_functions);
   strings = malloc(sizeof(htf_string_ref_t) * nb_functions);

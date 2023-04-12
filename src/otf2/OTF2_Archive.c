@@ -21,6 +21,12 @@ OTF2_Archive_Open( const char*              archivePath,
 			 archiveName,
 			 0); /* TODO: add missing archive_id_t */
 
+  archive->globalDefWriter = malloc(sizeof(OTF2_GlobalDefWriter));
+
+  htf_write_global_archive_open(&archive->globalDefWriter->archive,
+				archive->archive.dir_name,
+				archive->archive.trace_name);
+
   archive->def_writers = NULL;
   archive->evt_writers = NULL;
   archive->nb_locations = 0;
@@ -240,7 +246,6 @@ int new_location(OTF2_Archive* archive, OTF2_LocationRef location) {
 
   htf_write_thread_open(&archive->archive,
 			archive->def_writers[index]->thread_writer,
-			location,
 			location);
   
 #if 0
@@ -296,13 +301,6 @@ OTF2_Archive_GetDefWriter( OTF2_Archive*    archive,
 
 OTF2_GlobalDefWriter*
 OTF2_Archive_GetGlobalDefWriter( OTF2_Archive* archive ) {
-  if(!archive->globalDefWriter){
-    archive->globalDefWriter = malloc(sizeof(OTF2_GlobalDefWriter));
-
-    htf_write_global_archive_open(&archive->globalDefWriter->archive,
-				  archive->archive.dir_name,
-				  archive->archive.trace_name);
-  }
   return archive->globalDefWriter;
 }
 

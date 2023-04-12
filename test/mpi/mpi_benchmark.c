@@ -8,8 +8,7 @@
 #include "htf_write.h"
 
 static struct htf_archive   trace;
-static htf_container_id_t   process_id;
-static htf_string_ref_t     process_name;
+static htf_location_group_id_t   process_id;
 
 static int nb_iter_default = 100000;
 static int nb_functions_default = 2;
@@ -32,18 +31,12 @@ static pthread_barrier_t bench_stop;
 
 static htf_region_ref_t next_region_ref = 0;
 static htf_string_ref_t next_string_ref = 0;
-static _Atomic htf_container_id_t next_container_id = 0;
 static _Atomic htf_thread_id_t next_thread_id = 0;
 
 static htf_string_ref_t _register_string(char* str) {
   htf_string_ref_t ref = next_string_ref++;
   htf_archive_register_string(&trace, ref, str);
   return ref;
-}
-
-static htf_container_id_t _new_container() {
-  htf_container_id_t id = next_container_id++;
-  return id;
 }
 
 static htf_region_ref_t _register_region(htf_string_ref_t string_ref) {
@@ -70,15 +63,13 @@ void* worker(void* arg __attribute__((unused))) {
   snprintf(thread_name, 20, "P#%dT#%d", mpi_rank, my_rank);
   htf_string_ref_t thread_name_id = _register_string(thread_name);
 
-  htf_container_id_t thread_container_id = _new_container();
   htf_thread_id_t thread_id = _new_thread();
-  htf_write_define_container(&trace,
-			     thread_container_id,
-			     thread_name_id,
-			     process_id,
-			     thread_id);
+  htf_write_define_location(&trace,
+			    thread_id,
+			    thread_name_id,
+			    process_id);
 
-  htf_write_thread_open(&trace, thread_writer, thread_id, thread_container_id);
+  htf_write_thread_open(&trace, thread_writer, thread_id);
  
   struct timespec t1, t2;
   pthread_barrier_wait(&bench_start);
@@ -174,11 +165,11 @@ int main(int argc, char**argv) {
 
   printf("Hello from %d/%d\n", mpi_rank, mpi_comm_size);
 
+  process_id = mpi_rank;
 
-  int chunk_size = 1000;
+  int chunk_size = mpi_comm_size * 100;
   next_region_ref = mpi_rank * chunk_size;
   next_string_ref = mpi_rank * chunk_size;
-  next_container_id = mpi_rank * chunk_size;
   next_thread_id = mpi_rank * chunk_size;
 
   
@@ -197,20 +188,6 @@ int main(int argc, char**argv) {
 			 "mpi_benchmark_trace",
 			 "main",
 			 mpi_rank);
-
-  process_id = _new_container();
-  process_name = _register_string("Process"),
-  htf_write_define_container(&trace,
-			     process_id,
-			     process_name,
-			     HTF_CONTAINER_ID_INVALID,
-			     HTF_THREAD_ID_INVALID);
-
-  if(mpi_rank == 0) { 
-    for(int i=1; i<mpi_comm_size; i++) {
-      htf_write_add_subarchive(&trace, i);
-    }
-  }
 
   regions = malloc(sizeof(htf_region_ref_t) * nb_functions);
   strings = malloc(sizeof(htf_string_ref_t) * nb_functions);
@@ -249,8 +226,17 @@ int main(int argc, char**argv) {
     htf_write_global_archive_open(&global_archive,
 				  "mpi_benchmark_trace",
 				  "main");
-    for(int i =0; i<mpi_comm_size; i++)
-      htf_write_global_add_subarchive(&global_archive, i);
+
+    for(int i = 0; i< mpi_comm_size; i++) {
+      char rank_name_str[100];
+      snprintf(rank_name_str, 100, "Rank#%d", i);
+      htf_string_ref_t rank_name = _register_string(rank_name_str);
+      htf_write_define_location_group(&trace,
+				      i,
+				      rank_name,
+				      HTF_LOCATION_GROUP_ID_INVALID);
+    }
+
     htf_write_global_archive_close(&global_archive);   
   }
 

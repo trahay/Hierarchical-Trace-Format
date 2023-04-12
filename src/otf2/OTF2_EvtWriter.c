@@ -57,8 +57,8 @@ OTF2_EvtWriter_Enter( OTF2_EvtWriter*     writer,
                       OTF2_TimeStamp      time,
                       OTF2_RegionRef      region ) {
 
-  printf("enter(%p {.locationRef=%lu, .writer=%p}, %d)\n", writer, writer->locationRef, writer->thread_writer, region);
-  //  htf_assert(writer->locationRef < 10);
+  htf_log(htf_dbg_lvl_debug, "enter(%p {.locationRef=%lu, .writer=%p}, %d)\n",
+	  writer, writer->locationRef, writer->thread_writer, region);
   htf_record_enter(writer->thread_writer,
 		   NULL, // TO_BE_IMPLEMENTED
 		   time,
@@ -72,8 +72,8 @@ OTF2_EvtWriter_Leave( OTF2_EvtWriter*     writer,
                       OTF2_AttributeList* attributeList,
                       OTF2_TimeStamp      time,
                       OTF2_RegionRef      region ) {
-  printf("leave(%p {.locationRef=%lu, .writer=%p}, %d)\n", writer, writer->locationRef, writer->thread_writer, region);
- htf_assert(writer->locationRef < 10);
+  htf_log(htf_dbg_lvl_debug, "leave(%p {.locationRef=%lu, .writer=%p}, %d)\n",
+	  writer, writer->locationRef, writer->thread_writer, region);
  htf_record_leave(writer->thread_writer,
 		   NULL, // TO_BE_IMPLEMENTED
 		   time,
@@ -89,7 +89,8 @@ OTF2_EvtWriter_MpiSend( OTF2_EvtWriter*     writer,
                         OTF2_CommRef        communicator,
                         uint32_t            msgTag,
                         uint64_t            msgLength ) {
-   NOT_IMPLEMENTED;
+  TO_BE_IMPLEMENTED;
+  return OTF2_SUCCESS;
 }
 
 OTF2_ErrorCode
@@ -101,7 +102,8 @@ OTF2_EvtWriter_MpiIsend( OTF2_EvtWriter*     writer,
                          uint32_t            msgTag,
                          uint64_t            msgLength,
                          uint64_t            requestID ) {
-  NOT_IMPLEMENTED;
+  TO_BE_IMPLEMENTED;
+  return OTF2_SUCCESS;
 }
 
 OTF2_ErrorCode
@@ -109,7 +111,8 @@ OTF2_EvtWriter_MpiIsendComplete( OTF2_EvtWriter*     writer,
                                  OTF2_AttributeList* attributeList,
                                  OTF2_TimeStamp      time,
                                  uint64_t            requestID ) {
-  NOT_IMPLEMENTED;
+  TO_BE_IMPLEMENTED;
+  return OTF2_SUCCESS;
 }
 
 
@@ -119,6 +122,7 @@ OTF2_EvtWriter_MpiIrecvRequest( OTF2_EvtWriter*     writer,
                                 OTF2_TimeStamp      time,
                                 uint64_t            requestID ) {
    NOT_IMPLEMENTED;
+  return OTF2_SUCCESS;
 }
 
 OTF2_ErrorCode
@@ -129,7 +133,8 @@ OTF2_EvtWriter_MpiRecv( OTF2_EvtWriter*     writer,
                         OTF2_CommRef        communicator,
                         uint32_t            msgTag,
                         uint64_t            msgLength ) {
-   NOT_IMPLEMENTED;
+  TO_BE_IMPLEMENTED;
+  return OTF2_SUCCESS;
 }
 OTF2_ErrorCode
 OTF2_EvtWriter_MpiIrecv( OTF2_EvtWriter*     writer,
@@ -140,8 +145,9 @@ OTF2_EvtWriter_MpiIrecv( OTF2_EvtWriter*     writer,
                          uint32_t            msgTag,
                          uint64_t            msgLength,
                          uint64_t            requestID ) {
-   NOT_IMPLEMENTED;
-     }
+  TO_BE_IMPLEMENTED;
+  return OTF2_SUCCESS;
+}
 
 OTF2_ErrorCode
 OTF2_EvtWriter_MpiRequestTest( OTF2_EvtWriter*     writer,
@@ -163,7 +169,8 @@ OTF2_ErrorCode
 OTF2_EvtWriter_MpiCollectiveBegin( OTF2_EvtWriter*     writer,
                                    OTF2_AttributeList* attributeList,
                                    OTF2_TimeStamp      time ) {
-   NOT_IMPLEMENTED;
+  TO_BE_IMPLEMENTED;
+  return OTF2_SUCCESS;
 }
 
 OTF2_ErrorCode
@@ -175,7 +182,8 @@ OTF2_EvtWriter_MpiCollectiveEnd( OTF2_EvtWriter*     writer,
                                  uint32_t            root,
                                  uint64_t            sizeSent,
                                  uint64_t            sizeReceived ) {
-   NOT_IMPLEMENTED;
+   TO_BE_IMPLEMENTED;
+  return OTF2_SUCCESS;
 }
 
 OTF2_ErrorCode
