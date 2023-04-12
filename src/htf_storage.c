@@ -94,7 +94,6 @@ void htf_storage_init(struct htf_archive* archive) {
 }
 
 static const char* base_dirname(struct htf_archive *a) { return a->dir_name;}
-static const char* base_dirname_t(struct htf_thread *th) { return base_dirname(th->archive); }
 
 static FILE* _htf_get_event_file(const char* base_dirname,
 				 struct htf_thread *th,

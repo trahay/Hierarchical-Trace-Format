@@ -30,12 +30,11 @@ static void print_event(struct htf_thread* t,
 }
 
 /* Print all the events of a thread */
-static void print_thread(struct htf_archive *trace, htf_thread_id_t thread_id) {
-  struct htf_thread* thread = htf_archive_get_thread(trace, thread_id);
-  printf("Reading events for thread %u (%s):\n", thread_id, htf_get_thread_name(thread));
+static void print_thread(struct htf_archive *trace, struct htf_thread* thread) {
+  printf("Reading events for thread %u (%s):\n", thread->id, htf_get_thread_name(thread));
 
   struct htf_thread_reader reader;
-  htf_read_thread_iterator_init(trace, &reader, thread_id);
+  htf_read_thread_iterator_init(trace, &reader, thread->id);
 
   struct htf_event_occurence e;
   while(htf_read_thread_next_event(&reader, &e) == 0) {
@@ -71,24 +70,13 @@ static int get_next_event(struct htf_thread_reader *readers,
   return  min_index;
 }
 
-
-void populate(struct htf_archive *trace,
-	      int *nb_threads,
-	      struct htf_thread_reader **readers) {
-
-  int start_index = *nb_threads;
-  *nb_threads = trace->nb_threads + *nb_threads;
-  *readers = realloc(*readers, sizeof(struct htf_thread_reader) * (*nb_threads));
-  for(int i=0; i<trace->nb_threads; i++) {
-    htf_read_thread_iterator_init(trace, &(*readers)[start_index + i], trace->threads[i]->id);
-  }
-}
-
 /* Print all the events of all the threads sorted by timestamp */
 void print_trace(struct htf_archive *trace) {
-  struct htf_thread_reader *readers = NULL;
-  int nb_threads = 0;
-  populate(trace, &nb_threads, &readers);
+  int nb_threads = trace->nb_threads;
+  struct htf_thread_reader *readers =  malloc(sizeof(struct htf_thread_reader) * (nb_threads));
+  for(int i=0; i<trace->nb_threads; i++) {
+    htf_read_thread_iterator_init(trace, &readers[i], i);
+  }
 
   struct htf_event_occurence e;
   int thread_index = -1;
@@ -137,9 +125,9 @@ int main(int argc, char**argv) {
   htf_read_archive(&trace, trace_name);
 
   if(per_thread) {
-    //for(int i=0; i< trace.nb_threads; i++) {
-    //  print_thread(&trace, trace.thread_ids[i]);
-    //}
+    for(int i=0; i< trace.nb_threads; i++) {
+      print_thread(&trace, trace.threads[i]);
+    }
   } else {
     print_trace(&trace);
   }
