@@ -17,7 +17,7 @@ struct htf_thread_reader {
 };
 
 
-void htf_read_global_archive(struct htf_global_archive* archive, char* main_filename);
+void htf_read_global_archive(struct htf_archive* archive, char* main_filename);
 
 void htf_read_archive(struct htf_archive* archive, char* filename);
 

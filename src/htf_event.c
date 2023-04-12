@@ -83,18 +83,12 @@ static struct htf_string* _htf_archive_get_string_generic(struct htf_definition 
   return NULL;
 }
 
-struct htf_string* htf_global_archive_get_string(struct htf_global_archive *archive,
-						 htf_string_ref_t string_ref) {
-  /* todo: move to htf_archive.c */
-  return _htf_archive_get_string_generic(&archive->definitions, string_ref);
-}
-
 struct htf_string* htf_archive_get_string(struct htf_archive *archive,
 					  htf_string_ref_t string_ref) {
   /* todo: move to htf_archive.c */
   struct htf_string* res = _htf_archive_get_string_generic(&archive->definitions, string_ref);
-  if(!res)
-    res = htf_global_archive_get_string(archive->global_archive, string_ref);
+  if(!res && archive->global_archive)
+    res = htf_archive_get_string(archive->global_archive, string_ref);
   return res;
 }
 
@@ -110,16 +104,11 @@ static struct htf_region* _htf_archive_get_region_generic(struct htf_definition 
   return NULL;
 }
 
-struct htf_region* htf_global_archive_get_region(struct htf_global_archive *archive,
-						 htf_region_ref_t region_ref) {
-  return _htf_archive_get_region_generic(&archive->definitions, region_ref);
-}
-
 struct htf_region* htf_archive_get_region(struct htf_archive *archive,
 					  htf_region_ref_t region_ref) {
   struct htf_region* res = _htf_archive_get_region_generic(&archive->definitions, region_ref);
-  if(!res)
-    res = htf_global_archive_get_region(archive->global_archive, region_ref);
+  if(!res && archive->global_archive)
+    res = htf_archive_get_region(archive->global_archive, region_ref);
   return res;
 }
 
@@ -182,15 +171,6 @@ void htf_archive_register_string(struct htf_archive *archive,
   pthread_mutex_unlock(&archive->lock);
 }
 
-void htf_global_archive_register_string(struct htf_global_archive *archive,
-					htf_string_ref_t string_ref,
-					const char* string) {
-  /* TODO: add a lock */
-  //  pthread_mutex_lock(&archive->lock);
-  htf_archive_register_string_generic(&archive->definitions, string_ref, string);
-  //  pthread_mutex_unlock(&archive->lock);
-}
-
 void htf_archive_register_region_generic(struct htf_definition *d,
 					 htf_region_ref_t region_ref,
 					 htf_string_ref_t string_ref) {
@@ -218,15 +198,6 @@ void htf_archive_register_region(struct htf_archive *archive,
   pthread_mutex_lock(&archive->lock);
   htf_archive_register_region_generic(&archive->definitions, region_ref, string_ref);
   pthread_mutex_unlock(&archive->lock);
-}
-
-void htf_global_archive_register_region(struct htf_global_archive *archive,
-					htf_region_ref_t region_ref,
-					htf_string_ref_t string_ref) {
-  /* TODO: add a lock ?  */
-  //  pthread_mutex_lock(&archive->lock); 
-  htf_archive_register_region_generic(&archive->definitions, region_ref, string_ref);
-  //  pthread_mutex_unlock(&archive->lock);
 }
 
 void htf_record_enter(struct htf_thread_writer *thread_writer,

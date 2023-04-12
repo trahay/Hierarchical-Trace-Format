@@ -222,7 +222,7 @@ int main(int argc, char**argv) {
   htf_write_archive_close(&trace);
 
   if(mpi_rank==0) {
-    struct htf_global_archive global_archive;
+    struct htf_archive global_archive;
     htf_write_global_archive_open(&global_archive,
 				  "mpi_benchmark_trace",
 				  "main");
@@ -231,7 +231,7 @@ int main(int argc, char**argv) {
       char rank_name_str[100];
       snprintf(rank_name_str, 100, "Rank#%d", i);
       htf_string_ref_t rank_name = _register_string(rank_name_str);
-      htf_write_define_location_group(&trace,
+      htf_write_define_location_group(&global_archive,
 				      i,
 				      rank_name,
 				      HTF_LOCATION_GROUP_ID_INVALID);

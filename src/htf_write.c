@@ -316,7 +316,7 @@ static void _init_definition(struct htf_definition* d) {
 void htf_write_archive_open(struct htf_archive *archive,
 			    const char* dirname,
 			    const char* trace_name,
-			    htf_archive_id_t archive_id) {
+			    htf_location_group_id_t archive_id) {
 
   if(htf_recursion_shield)
     return;
@@ -349,75 +349,6 @@ void htf_write_archive_open(struct htf_archive *archive,
 
   htf_recursion_shield--;
 }
-
-#if 0
-void _add_container(struct htf_container *parent,
-		    struct htf_container *c) {
-  c->parent_id = parent->id;
-
-  pthread_mutex_lock(&parent->lock);
-  {
-    parent->nb_containers++;
-
-    if(parent->nb_containers >= parent->allocated_containers) {
-      parent->allocated_containers *= 2;
-      if(parent->allocated_containers == 0) parent->allocated_containers = 1;
-      size_t size = sizeof(struct htf_container *) * parent->allocated_containers;
-      parent->containers = realloc(parent->containers, size);
-    }
-    parent->containers[parent->nb_containers - 1] = c;
-  }
-  pthread_mutex_unlock(&parent->lock);
-}
-
-static void _add_root_container(struct htf_trace *trace,
-				struct htf_container *c) {
-  c->parent_id = HTF_CONTAINER_INVALID;
-  trace->nb_containers++;
-
-  if(trace->nb_containers >= trace->nb_allocated_containers) {
-    trace->nb_allocated_containers *= 2;
-    if(trace->nb_allocated_containers == 0) trace->nb_allocated_containers = 1;
-    size_t size = sizeof(struct htf_container **) * trace->nb_allocated_containers;
-    trace->root_containers = realloc(trace->root_containers, size);
-  }
-  trace->root_containers[trace->nb_containers - 1] = c;
-}
-
-static struct htf_container * _htf_get_container(struct htf_archive *c,
-						 htf_container_id_t id) {
-  if(c) {
-    if(c->id == id)
-      return c;
-
-    struct htf_container *ret = NULL;
-    for(int i=0; i<c->nb_containers; i++) {
-      ret = _htf_get_container(c->containers[i], id);
-      if(ret) return ret;
-    }
-  }
-  return NULL;
-}
-
-
-void htf_write_define_container(struct htf_trace *trace,
-				struct htf_container *c,
-				htf_container_id_t id,
-				htf_string_ref_t       name,
-				htf_container_id_t parent_id) {
-  _init_container(trace, c);
-  c->id = id;
-  c->name = name;
-  struct htf_container *parent_container = htf_get_container(trace, parent_id);
-  if(parent_container) {
-    _add_container(parent_container, c);
-  } else {
-    _add_root_container(trace, c);
-  }
-}
-
-
-#endif
 
 struct htf_location_group * htf_get_location_group(struct htf_archive *archive,
 						   htf_location_group_id_t location_group) {
@@ -540,69 +471,17 @@ void htf_write_define_location(struct htf_archive *archive,
 }
 
 
-void htf_write_global_define_location_group(struct htf_global_archive *archive,
-					    htf_location_group_id_t id,
-					    htf_string_ref_t name,
-					    htf_location_group_id_t parent) {
-
-  while(archive->nb_location_groups >= archive->nb_allocated_location_groups) {
-    archive->nb_allocated_location_groups *= 2 ;
-    archive->location_groups = realloc(archive->location_groups, sizeof(struct htf_location_group) * archive->nb_allocated_location_groups);
-    htf_assert(archive->location_groups);
-  }
-
-  int index = archive->nb_location_groups++;
-  struct htf_location_group *l = &archive->location_groups[index];
-  l->id = id;
-  l->name = name;
-  l->parent = parent;
-}
-
-
-void htf_write_global_define_location(struct htf_global_archive *archive,
-				      htf_thread_id_t id,
-				      htf_string_ref_t name,
-				      htf_location_group_id_t parent) {
-
-  while(archive->nb_locations >= archive->nb_allocated_locations) {
-    archive->nb_allocated_locations *= 2 ;
-    archive->locations = realloc(archive->locations, sizeof(struct htf_location) * archive->nb_allocated_locations);
-    htf_assert(archive->locations);
-  }
-
-  int index = archive->nb_locations++;
-  struct htf_location* l = &archive->locations[index];
-  l->id = id;
-  l->name = name;
-  l->parent = parent;
-}
-
-
-void htf_write_global_archive_open(struct htf_global_archive* archive,
+void htf_write_global_archive_open(struct htf_archive* archive,
 				   const char* dir_name,
 				   const char* trace_name) {
-  archive->dir_name = strdup(dir_name);
-  archive->trace_name = strdup(trace_name);
-  archive->fullpath = htf_archive_fullpath(archive->dir_name, archive->trace_name);
 
-  _init_definition(&archive->definitions);
-
-  archive->nb_allocated_location_groups = NB_LOCATION_GROUPS_DEFAULT;
-  archive->nb_location_groups = 0;
-  archive->location_groups = malloc(sizeof(struct htf_location_group) * archive->nb_allocated_location_groups);
-
-  archive->nb_allocated_locations = NB_LOCATIONS_DEFAULT;
-  archive->nb_locations = 0;
-  archive->locations = malloc(sizeof(struct htf_location) * archive->nb_allocated_locations);
-
-  archive->nb_archives = 0;
-  archive->archive_list = NULL;
+  htf_write_archive_open(archive, dir_name, trace_name, HTF_MAIN_LOCATION_GROUP_ID);
 }
 
 
-void htf_write_global_archive_close(struct htf_global_archive* archive) {
+void htf_write_global_archive_close(struct htf_archive* archive) {
   if(!archive)
     return;
 
-  htf_storage_finalize_global(archive);
+  htf_storage_finalize(archive);
 }

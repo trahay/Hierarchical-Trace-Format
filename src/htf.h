@@ -217,9 +217,7 @@ typedef uint32_t htf_thread_id_t;
 
 typedef uint32_t htf_location_group_id_t;
 #define HTF_LOCATION_GROUP_ID_INVALID ( ( htf_location_group_id_t )HTF_UNDEFINED_UINT32 )
-
-typedef uint32_t htf_archive_id_t;
-#define HTF_ARCHIVE_ID_INVALID ( ( htf_archive_id_t )HTF_UNDEFINED_UINT32 )
+#define HTF_MAIN_LOCATION_GROUP_ID ( ( htf_location_group_id_t ) HTF_LOCATION_GROUP_ID_INVALID - 1 )
 
 /* A thread contains streams of events.
  * It can be a regular thread (eg. a pthread), or a GPU stream
@@ -271,8 +269,8 @@ struct htf_archive {
   char* trace_name;
   char* fullpath;
 
-  htf_archive_id_t id;
-  struct htf_global_archive* global_archive;
+  htf_location_group_id_t id;
+  struct htf_archive* global_archive;
 
   pthread_mutex_t lock;
 
@@ -291,30 +289,7 @@ struct htf_archive {
   int nb_threads;
   int nb_allocated_threads;
 
-  //struct htf_archive *main_archive;
-  struct htf_archive *next;
-};
-
-/* todo: there's no need for a global archive and an archive. Merge them. */
-struct htf_global_archive {
-  char* dir_name;
-  char* trace_name;
-  char* fullpath;
-
-  struct htf_definition definitions;
-
-  struct htf_location_group* location_groups;
-  int nb_location_groups;
-  int nb_allocated_location_groups;
-
-  struct htf_location* locations;
-  int nb_locations;
-  int nb_allocated_locations;
-
-  struct htf_thread *threads;
-  int nb_threads;
-
-  struct htf_archive *archive_list;
+  struct htf_archive **archive_list;
   int nb_archives;
 };
 
@@ -334,23 +309,6 @@ void htf_archive_register_string(struct htf_archive *archive,
 void htf_archive_register_region(struct htf_archive *archive,
 				 htf_region_ref_t region_ref,
 				 htf_string_ref_t string_ref);
-
-
-void htf_global_archive_register_string(struct htf_global_archive *archive,
-					htf_string_ref_t string_ref,
-					const char* string);
-
-void htf_global_archive_register_region(struct htf_global_archive *archive,
-					htf_region_ref_t region_ref,
-					htf_string_ref_t string_ref);
-
-
-
-struct htf_string* htf_global_archive_get_string(struct htf_global_archive *archive,
-						 htf_string_ref_t string_ref);
-
-struct htf_region* htf_global_archive_get_region(struct htf_global_archive *archive,
-						 htf_region_ref_t region_ref);
 
 struct htf_string* htf_archive_get_string(struct htf_archive *archive,
 					  htf_string_ref_t string_ref);
