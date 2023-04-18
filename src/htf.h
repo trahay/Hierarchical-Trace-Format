@@ -23,6 +23,11 @@ typedef enum htf_token_type {
   HTF_TYPE_LOOP     = 3
 } htf_token_type_t;
 
+#define HTF_TOKEN_TYPE_C(t) (HTF_TOKEN_TYPE(t))==HTF_TYPE_INVALID? 'I':	\
+    (HTF_TOKEN_TYPE(t))==HTF_TYPE_EVENT? 'E':				\
+    (HTF_TOKEN_TYPE(t))==HTF_TYPE_SEQUENCE? 'S':			\
+    (HTF_TOKEN_TYPE(t))==HTF_TYPE_LOOP? 'L':'U'
+
 typedef uint32_t htf_token_id_t;
 
 typedef struct htf_token {
