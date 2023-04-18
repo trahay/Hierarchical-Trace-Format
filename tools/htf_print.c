@@ -4,16 +4,11 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <string.h>
+#include <stdlib.h>
 
-#include "tracer.h"
 #include "htf.h"
 #include "htf_read.h"
 #include "htf_archive.h"
-
-
-#define ET2C(et) (((et) == function_entry? 'E':	\
-		   (et)==function_exit? 'L':	\
-		   'S'))
 
 /* Print one event */
 static void print_event(struct htf_thread* t,

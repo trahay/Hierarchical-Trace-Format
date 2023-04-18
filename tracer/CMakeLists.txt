@@ -38,40 +38,9 @@ target_link_libraries(htf-trace
     htf
 )
 
-#####################################################
-# read_trace
-
-add_executable(read_trace
-read_trace.c
-)
-
-target_compile_options(read_trace
-  PRIVATE
-    -Wall -Wextra -Wpedantic
-)
-
-target_include_directories(read_trace
-  PRIVATE
-  ${CMAKE_SOURCE_DIR}/src/
-  )
-
-target_link_libraries(read_trace
-  PRIVATE
-    htf
-)
-
-
-
 install(PROGRAMS ${SCRIPTS} DESTINATION ${INSTALL_BINDIR})
 
 install(
   TARGETS htf-trace
   LIBRARY DESTINATION ${INSTALL_LIBDIR}
-)
-
-install(
-  TARGETS read_trace
-  LIBRARY DESTINATION ${INSTALL_LIBDIR}
-  RUNTIME DESTINATION ${INSTALL_BINDIR}
-  INCLUDES DESTINATION ${INSTALL_INCLUDEDIR}
 )
