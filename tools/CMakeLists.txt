@@ -1,29 +1,14 @@
 cmake_minimum_required(VERSION 3.1)
 
-#####################################################
-# htf_print
+add_compile_options(-Wall -Wextra -Wpedantic)
+include_directories(${CMAKE_SOURCE_DIR}/src/ )
+link_libraries(htf)
 
-add_executable(htf_print
-htf_print.c
-)
-
-target_compile_options(htf_print
-  PRIVATE
-    -Wall -Wextra -Wpedantic
-)
-
-target_include_directories(htf_print
-  PRIVATE
-  ${CMAKE_SOURCE_DIR}/src/
-  )
-
-target_link_libraries(htf_print
-  PRIVATE
-    htf
-)
+add_executable(htf_print htf_print.c )
+add_executable(htf_info htf_info.c )
 
 install(
-  TARGETS htf_print
+  TARGETS htf_print htf_info
   LIBRARY DESTINATION ${INSTALL_LIBDIR}
   RUNTIME DESTINATION ${INSTALL_BINDIR}
   INCLUDES DESTINATION ${INSTALL_INCLUDEDIR}

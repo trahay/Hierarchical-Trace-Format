@@ -96,7 +96,6 @@ static inline htf_loop_id_t _htf_create_loop_id(struct htf_thread_writer *thread
   return HTF_LOOP_ID(index);
 }
 
-
 void htf_store_timestamp(struct htf_thread_writer *thread_writer,
 			 htf_event_id_t e_id,
 			 htf_timestamp_t ts) {
@@ -111,7 +110,7 @@ void htf_store_timestamp(struct htf_thread_writer *thread_writer,
     es->timestamps = realloc(es->timestamps, es->nb_allocated_timestamps * sizeof(htf_timestamp_t));
   }
 
-  es->timestamps[es->nb_timestamps++] = ts;  
+  es->timestamps[es->nb_timestamps++] = ts; 
 }
 
 static void _htf_store_token(struct htf_thread_writer *thread_writer,
