@@ -48,7 +48,7 @@ typedef struct htf_loop_id {
 #define HTF_SEQUENCE_ID_INVALID HTF_TOKEN_ID_INVALID
 #define HTF_LOOP_ID_INVALID     HTF_TOKEN_ID_INVALID
 
-/* convert an id to and integer */
+/* convert an id to an integer */
 #define HTF_ID(_id) ((_id).id)
 
 /* return the type/id of a token */
