@@ -75,7 +75,7 @@ void print_trace(struct htf_archive *trace) {
   int nb_threads = trace->nb_threads;
   struct htf_thread_reader *readers =  malloc(sizeof(struct htf_thread_reader) * (nb_threads));
   for(int i=0; i<trace->nb_threads; i++) {
-    htf_read_thread_iterator_init(trace, &readers[i], i);
+    htf_read_thread_iterator_init(trace, &readers[i], trace->threads[i]->id);
   }
 
   struct htf_event_occurence e;
