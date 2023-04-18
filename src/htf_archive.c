@@ -4,7 +4,7 @@
 #include "htf_dbg.h"
 #include "htf_archive.h"
 
-/* Returns the first htf_string corresponding to the given string_ref in the definition group.
+/** Returns the first htf_string corresponding to the given string_ref in the definition group.
  * Returns NULL if the ref does not have a match.
  */
 static struct htf_string* _htf_archive_get_string_generic(struct htf_definition *d,
@@ -19,7 +19,7 @@ static struct htf_string* _htf_archive_get_string_generic(struct htf_definition 
   return NULL;
 }
 
-/* Returns the first htf_string corresponding to the given string_ref in the archive.
+/** Returns the first htf_string corresponding to the given string_ref in the archive.
  * If the ref does not match, checks the global archive.
  * Returns NULL if the ref does not have a match.
  */
@@ -31,7 +31,7 @@ struct htf_string* htf_archive_get_string(struct htf_archive *archive,
   return res;
 }
 
-/* Returns the first htf_region corresponding to the given region_ref in the definition group.
+/** Returns the first htf_region corresponding to the given region_ref in the definition group.
  * Returns NULL if the ref does not have a match.
  */
 static struct htf_region* _htf_archive_get_region_generic(struct htf_definition *d,
@@ -46,7 +46,7 @@ static struct htf_region* _htf_archive_get_region_generic(struct htf_definition 
   return NULL;
 }
 
-/* Returns the first htf_region corresponding to the given region_ref in the archive.
+/** Returns the first htf_region corresponding to the given region_ref in the archive.
  * If the ref does not match, checks the global archive.
  * Returns NULL if the ref does not have a match.
  */
@@ -58,7 +58,7 @@ struct htf_region* htf_archive_get_region(struct htf_archive *archive,
   return res;
 }
 
-/* Adds the given string to the given definition and sets its ref.
+/** Adds the given string to the given definition and sets its ref.
  * Error is raised if htf_string_ref is already in the definition or malloc fails.
  */
 void htf_archive_register_string_generic(struct htf_definition *d,
@@ -91,7 +91,7 @@ void htf_archive_register_string_generic(struct htf_definition *d,
 	        s->str);
 }
 
-/* Adds the given string to the given archive and sets its ref. */
+/** Adds the given string to the given archive and sets its ref. */
 void htf_archive_register_string(struct htf_archive *archive,
 				 htf_string_ref_t string_ref,
 				 const char* string) {
@@ -100,7 +100,7 @@ void htf_archive_register_string(struct htf_archive *archive,
   pthread_mutex_unlock(&archive->lock);
 }
 
-/* Adds the given region to the given definition and sets its ref.
+/** Adds the given region to the given definition and sets its ref.
  * Error is raised if htf_region_ref is already in the definition or malloc fails.
  */
 void htf_archive_register_region_generic(struct htf_definition *d,
@@ -128,7 +128,7 @@ void htf_archive_register_region_generic(struct htf_definition *d,
 	  index, r->region_ref, r->string_ref);
 }
 
-/* Adds the given region to the given archive and sets its ref. */
+/** Adds the given region to the given archive and sets its ref. */
 void htf_archive_register_region(struct htf_archive *archive,
 				 htf_region_ref_t region_ref,
 				 htf_string_ref_t string_ref) {
