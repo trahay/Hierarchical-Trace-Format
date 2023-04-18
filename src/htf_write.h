@@ -122,6 +122,18 @@ void htf_record_mpi_irecv(struct htf_thread_writer *thread_writer,
 			  uint64_t                  requestID );
 
 
+void htf_record_mpi_collective_begin( struct htf_thread_writer *thread_writer,
+				      htf_attribute_list_t*     attribute_list,
+				      htf_timestamp_t           time);
+
+void htf_record_mpi_collective_end(struct htf_thread_writer *thread_writer,
+				   htf_attribute_list_t*     attribute_list,
+				   htf_timestamp_t           time,
+				   uint32_t                  collectiveOp,
+				   uint32_t                  communicator,
+				   uint32_t                  root,
+				   uint64_t                  sizeSent,
+				   uint64_t                  sizeReceived);
 
 
 

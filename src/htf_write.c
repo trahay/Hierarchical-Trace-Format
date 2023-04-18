@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stddef.h>
+#include <inttypes.h>
 
 
 #include "htf.h"
@@ -551,7 +552,7 @@ void htf_print_event(struct htf_thread *t, struct htf_event* e) {
       pop_data(e, &communicator, sizeof(communicator), &cursor);
       pop_data(e, &msgTag, sizeof(msgTag), &cursor);
       pop_data(e, &msgLength, sizeof(msgLength), &cursor);
-      printf("MPI_SEND(dest=%d, comm=%x, tag=%x, len=%llu)", receiver, communicator, msgTag, msgLength);
+      printf("MPI_SEND(dest=%d, comm=%x, tag=%x, len=%"PRIu64")", receiver, communicator, msgTag, msgLength);
       break;
     }
   case HTF_EVENT_MPI_ISEND:
@@ -568,7 +569,7 @@ void htf_print_event(struct htf_thread *t, struct htf_event* e) {
       pop_data(e, &msgTag, sizeof(msgTag), &cursor);
       pop_data(e, &msgLength, sizeof(msgLength), &cursor);
       pop_data(e, &requestID, sizeof(requestID), &cursor);
-      printf("MPI_ISEND(dest=%d, comm=%x, tag=%x, len=%llu, req=%llx)", receiver, communicator, msgTag, msgLength, requestID);
+      printf("MPI_ISEND(dest=%d, comm=%x, tag=%x, len=%"PRIu64", req=%"PRIx64")", receiver, communicator, msgTag, msgLength, requestID);
       break;
     }
   case HTF_EVENT_MPI_ISEND_COMPLETE:
@@ -576,7 +577,7 @@ void htf_print_event(struct htf_thread *t, struct htf_event* e) {
       void*cursor = NULL;
       uint64_t                  requestID;
       pop_data(e, &requestID, sizeof(requestID), &cursor);
-      printf("MPI_ISEND_COMPLETE(req=%llx)", requestID);
+      printf("MPI_ISEND_COMPLETE(req=%"PRIx64")", requestID);
       break;
     }
   case HTF_EVENT_MPI_IRECV_REQUEST:
@@ -584,7 +585,7 @@ void htf_print_event(struct htf_thread *t, struct htf_event* e) {
       void*cursor = NULL;
       uint64_t                  requestID;
       pop_data(e, &requestID, sizeof(requestID), &cursor);
-      printf("MPI_IRECV_REQUEST(req=%llx)", requestID);
+      printf("MPI_IRECV_REQUEST(req=%"PRIx64")", requestID);
       break;
     }
   case HTF_EVENT_MPI_RECV:
@@ -600,7 +601,7 @@ void htf_print_event(struct htf_thread *t, struct htf_event* e) {
       pop_data(e, &msgTag, sizeof(msgTag), &cursor);
       pop_data(e, &msgLength, sizeof(msgLength), &cursor);
 
-      printf("MPI_RECV(src=%d, comm=%x, tag=%x, len=%llu)", sender, communicator, msgTag, msgLength);
+      printf("MPI_RECV(src=%d, comm=%x, tag=%x, len=%"PRIu64")", sender, communicator, msgTag, msgLength);
       break;
     }
   case HTF_EVENT_MPI_IRECV:
@@ -617,7 +618,7 @@ void htf_print_event(struct htf_thread *t, struct htf_event* e) {
       pop_data(e, &msgLength, sizeof(msgLength), &cursor);
       pop_data(e, &requestID, sizeof(requestID), &cursor);
 
-      printf("MPI_IRECV(src=%d, comm=%x, tag=%x, len=%llu, req=%llu)", sender, communicator, msgTag, msgLength, requestID);
+      printf("MPI_IRECV(src=%d, comm=%x, tag=%x, len=%"PRIu64", req=%"PRIu64")", sender, communicator, msgTag, msgLength, requestID);
       break;
     }
   case HTF_EVENT_MPI_COLLECTIVE_BEGIN:
@@ -640,7 +641,7 @@ void htf_print_event(struct htf_thread *t, struct htf_event* e) {
       pop_data(e, &sizeSent, sizeof(sizeSent), &cursor);
       pop_data(e, &sizeReceived, sizeof(sizeReceived), &cursor);
 
-      printf("MPI_COLLECTIVE_END(op=%x, comm=%x, root=%d, sent=%llu, recved=%llu)",
+      printf("MPI_COLLECTIVE_END(op=%x, comm=%x, root=%d, sent=%"PRIu64", recved=%"PRIu64")",
 	     collectiveOp,
 	     communicator,
 	     root,
