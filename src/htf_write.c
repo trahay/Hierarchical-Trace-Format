@@ -539,7 +539,116 @@ void htf_print_event(struct htf_thread *t, struct htf_event* e) {
       printf("Leave %d (%s)", region_ref, htf_archive_get_string(t->archive, region->string_ref)->str);
       break;
     }
-  default:
+  case HTF_EVENT_MPI_SEND:
+    {
+      void*cursor = NULL;
+      uint32_t                  receiver;
+      uint32_t                  communicator;
+      uint32_t                  msgTag;
+      uint64_t                  msgLength;
+
+      pop_data(e, &receiver, sizeof(receiver), &cursor);
+      pop_data(e, &communicator, sizeof(communicator), &cursor);
+      pop_data(e, &msgTag, sizeof(msgTag), &cursor);
+      pop_data(e, &msgLength, sizeof(msgLength), &cursor);
+      printf("MPI_SEND(dest=%d, comm=%x, tag=%x, len=%llu)", receiver, communicator, msgTag, msgLength);
+      break;
+    }
+  case HTF_EVENT_MPI_ISEND:
+    {
+      void*cursor = NULL;
+      uint32_t                  receiver;
+      uint32_t                  communicator;
+      uint32_t                  msgTag;
+      uint64_t                  msgLength;
+      uint64_t                  requestID;
+
+      pop_data(e, &receiver, sizeof(receiver), &cursor);
+      pop_data(e, &communicator, sizeof(communicator), &cursor);
+      pop_data(e, &msgTag, sizeof(msgTag), &cursor);
+      pop_data(e, &msgLength, sizeof(msgLength), &cursor);
+      pop_data(e, &requestID, sizeof(requestID), &cursor);
+      printf("MPI_ISEND(dest=%d, comm=%x, tag=%x, len=%llu, req=%llx)", receiver, communicator, msgTag, msgLength, requestID);
+      break;
+    }
+  case HTF_EVENT_MPI_ISEND_COMPLETE:
+    {
+      void*cursor = NULL;
+      uint64_t                  requestID;
+      pop_data(e, &requestID, sizeof(requestID), &cursor);
+      printf("MPI_ISEND_COMPLETE(req=%llx)", requestID);
+      break;
+    }
+  case HTF_EVENT_MPI_IRECV_REQUEST:
+    {
+      void*cursor = NULL;
+      uint64_t                  requestID;
+      pop_data(e, &requestID, sizeof(requestID), &cursor);
+      printf("MPI_IRECV_REQUEST(req=%llx)", requestID);
+      break;
+    }
+  case HTF_EVENT_MPI_RECV:
+    {
+      void*cursor = NULL;
+      uint32_t              sender;
+      uint32_t              communicator;
+      uint32_t              msgTag;
+      uint64_t              msgLength;
+
+      pop_data(e, &sender, sizeof(sender), &cursor);
+      pop_data(e, &communicator, sizeof(communicator), &cursor);
+      pop_data(e, &msgTag, sizeof(msgTag), &cursor);
+      pop_data(e, &msgLength, sizeof(msgLength), &cursor);
+
+      printf("MPI_RECV(src=%d, comm=%x, tag=%x, len=%llu)", sender, communicator, msgTag, msgLength);
+      break;
+    }
+  case HTF_EVENT_MPI_IRECV:
+    {
+      void*cursor = NULL;
+      uint32_t              sender;
+      uint32_t              communicator;
+      uint32_t              msgTag;
+      uint64_t              msgLength;
+      uint64_t              requestID;
+      pop_data(e, &sender, sizeof(sender), &cursor);
+      pop_data(e, &communicator, sizeof(communicator), &cursor);
+      pop_data(e, &msgTag, sizeof(msgTag), &cursor);
+      pop_data(e, &msgLength, sizeof(msgLength), &cursor);
+      pop_data(e, &requestID, sizeof(requestID), &cursor);
+
+      printf("MPI_IRECV(src=%d, comm=%x, tag=%x, len=%llu, req=%llu)", sender, communicator, msgTag, msgLength, requestID);
+      break;
+    }
+  case HTF_EVENT_MPI_COLLECTIVE_BEGIN:
+    {
+      printf("MPI_COLLECTIVE_BEGIN()");
+      break;
+    }
+  case HTF_EVENT_MPI_COLLECTIVE_END:
+    {
+      void*cursor = NULL;
+      uint32_t collectiveOp;
+      uint32_t communicator;
+      uint32_t root;
+      uint64_t sizeSent;
+      uint64_t sizeReceived;
+
+      pop_data(e, &collectiveOp, sizeof(collectiveOp), &cursor);
+      pop_data(e, &communicator, sizeof(communicator), &cursor);
+      pop_data(e, &root, sizeof(root), &cursor);
+      pop_data(e, &sizeSent, sizeof(sizeSent), &cursor);
+      pop_data(e, &sizeReceived, sizeof(sizeReceived), &cursor);
+
+      printf("MPI_COLLECTIVE_END(op=%x, comm=%x, root=%d, sent=%llu, recved=%llu)",
+	     collectiveOp,
+	     communicator,
+	     root,
+	     sizeSent,
+	     sizeReceived);
+      break;
+    }
+default:
     printf("{.record: %x, .size:%x}", e->record, e->event_size);
   }
 }
@@ -609,6 +718,213 @@ void htf_record_leave(struct htf_thread_writer *thread_writer,
   htf_event_id_t e_id = _htf_get_event_id(&thread_writer->thread_trace, &e);
   htf_store_timestamp(thread_writer, e_id, htf_timestamp(time));
   htf_store_event(thread_writer, htf_function_exit, e_id);
+
+  htf_recursion_shield--;
+}
+
+
+
+void htf_record_mpi_send(struct htf_thread_writer *thread_writer,
+			 htf_attribute_list_t*     attributeList __attribute__((unused)),
+			 htf_timestamp_t           time,
+			 uint32_t                  receiver,
+			 uint32_t                  communicator,
+			 uint32_t                  msgTag,
+			 uint64_t                  msgLength ) {
+  if(htf_recursion_shield)
+    return;
+  htf_recursion_shield++;
+
+  struct htf_event e;
+  init_event(&e, HTF_EVENT_MPI_SEND);
+
+  push_data(&e, &receiver, sizeof(receiver));
+  push_data(&e, &communicator, sizeof(communicator));
+  push_data(&e, &msgTag, sizeof(msgTag));
+  push_data(&e, &msgLength, sizeof(msgLength));
+
+  htf_event_id_t e_id = _htf_get_event_id(&thread_writer->thread_trace, &e);
+  htf_store_timestamp(thread_writer, e_id, htf_timestamp(time));
+  htf_store_event(thread_writer, htf_singleton, e_id);
+
+  htf_recursion_shield--;
+  return;
+}
+
+void htf_record_mpi_isend(struct htf_thread_writer *thread_writer,
+			  htf_attribute_list_t*     attribute_list __attribute__((unused)),
+			  htf_timestamp_t           time,
+			  uint32_t                  receiver,
+			  uint32_t                  communicator,
+			  uint32_t                  msgTag,
+			  uint64_t                  msgLength,
+			  uint64_t                  requestID ) {
+  if(htf_recursion_shield)
+    return;
+  htf_recursion_shield++;
+
+  struct htf_event e;
+  init_event(&e, HTF_EVENT_MPI_ISEND);
+
+  push_data(&e, &receiver, sizeof(receiver));
+  push_data(&e, &communicator, sizeof(communicator));
+  push_data(&e, &msgTag, sizeof(msgTag));
+  push_data(&e, &msgLength, sizeof(msgLength));
+  push_data(&e, &requestID, sizeof(requestID));
+
+  htf_event_id_t e_id = _htf_get_event_id(&thread_writer->thread_trace, &e);
+  htf_store_timestamp(thread_writer, e_id, htf_timestamp(time));
+  htf_store_event(thread_writer, htf_singleton, e_id);
+
+  htf_recursion_shield--;
+  return;
+}
+
+void htf_record_mpi_isend_complete(struct htf_thread_writer *thread_writer,
+				   htf_attribute_list_t*     attribute_list __attribute__((unused)),
+				   htf_timestamp_t           time,
+				   uint64_t                  requestID ) {
+  if(htf_recursion_shield)
+    return;
+  htf_recursion_shield++;
+
+  struct htf_event e;
+  init_event(&e, HTF_EVENT_MPI_ISEND_COMPLETE);
+
+  push_data(&e, &requestID, sizeof(requestID));
+
+  htf_event_id_t e_id = _htf_get_event_id(&thread_writer->thread_trace, &e);
+  htf_store_timestamp(thread_writer, e_id, htf_timestamp(time));
+  htf_store_event(thread_writer, htf_singleton, e_id);
+
+  htf_recursion_shield--;
+  return;
+}
+
+
+void htf_record_mpi_irecv_request(struct htf_thread_writer *thread_writer,
+				  htf_attribute_list_t*     attribute_list __attribute__((unused)),
+				  htf_timestamp_t           time,
+				  uint64_t                  requestID ) {
+  if(htf_recursion_shield)
+    return;
+  htf_recursion_shield++;
+
+  struct htf_event e;
+  init_event(&e, HTF_EVENT_MPI_IRECV_REQUEST);
+
+  push_data(&e, &requestID, sizeof(requestID));
+
+  htf_event_id_t e_id = _htf_get_event_id(&thread_writer->thread_trace, &e);
+  htf_store_timestamp(thread_writer, e_id, htf_timestamp(time));
+  htf_store_event(thread_writer, htf_singleton, e_id);
+
+  htf_recursion_shield--;
+  return;
+}
+
+void htf_record_mpi_recv(struct htf_thread_writer *thread_writer,
+			 htf_attribute_list_t* attributeList __attribute__((unused)),
+			 htf_timestamp_t       time,
+			 uint32_t              sender,
+			 uint32_t              communicator,
+			 uint32_t              msgTag,
+			 uint64_t              msgLength ) {
+
+  if(htf_recursion_shield)
+    return;
+  htf_recursion_shield++;
+
+  struct htf_event e;
+  init_event(&e, HTF_EVENT_MPI_RECV);
+
+  push_data(&e, &sender, sizeof(sender));
+  push_data(&e, &communicator, sizeof(communicator));
+  push_data(&e, &msgTag, sizeof(msgTag));
+  push_data(&e, &msgLength, sizeof(msgLength));
+
+  htf_event_id_t e_id = _htf_get_event_id(&thread_writer->thread_trace, &e);
+  htf_store_timestamp(thread_writer, e_id, htf_timestamp(time));
+  htf_store_event(thread_writer, htf_singleton, e_id);
+
+  htf_recursion_shield--;
+  return;
+}
+
+void htf_record_mpi_irecv(struct htf_thread_writer *thread_writer,
+			  htf_attribute_list_t*     attribute_list __attribute__((unused)),
+			  htf_timestamp_t           time,
+			  uint32_t                  sender,
+			  uint32_t                  communicator,
+			  uint32_t                  msgTag,
+			  uint64_t                  msgLength,
+			  uint64_t                  requestID ) {
+  if(htf_recursion_shield)
+    return;
+  htf_recursion_shield++;
+
+  struct htf_event e;
+  init_event(&e, HTF_EVENT_MPI_IRECV);
+
+  push_data(&e, &sender, sizeof(sender));
+  push_data(&e, &communicator, sizeof(communicator));
+  push_data(&e, &msgTag, sizeof(msgTag));
+  push_data(&e, &msgLength, sizeof(msgLength));
+  push_data(&e, &requestID, sizeof(requestID));
+
+  htf_event_id_t e_id = _htf_get_event_id(&thread_writer->thread_trace, &e);
+  htf_store_timestamp(thread_writer, e_id, htf_timestamp(time));
+  htf_store_event(thread_writer, htf_singleton, e_id);
+
+  htf_recursion_shield--;
+  return ;
+}
+
+void
+htf_record_mpi_collective_begin( struct htf_thread_writer *thread_writer,
+				 htf_attribute_list_t*     attribute_list __attribute__((unused)),
+				 htf_timestamp_t           time) {
+ if(htf_recursion_shield)
+    return;
+  htf_recursion_shield++;
+
+  struct htf_event e;
+  init_event(&e, HTF_EVENT_MPI_COLLECTIVE_BEGIN);
+
+  htf_event_id_t e_id = _htf_get_event_id(&thread_writer->thread_trace, &e);
+  htf_store_timestamp(thread_writer, e_id, htf_timestamp(time));
+  htf_store_event(thread_writer, htf_singleton, e_id);
+
+  htf_recursion_shield--;
+  return ;
+}
+
+void
+htf_record_mpi_collective_end(struct htf_thread_writer *thread_writer,
+			      htf_attribute_list_t*     attribute_list __attribute__((unused)),
+			      htf_timestamp_t           time,
+			      uint32_t                  collectiveOp,
+			      uint32_t                  communicator,
+			      uint32_t                  root,
+			      uint64_t                  sizeSent,
+			      uint64_t                  sizeReceived ) {
+
+  if(htf_recursion_shield)
+    return;
+  htf_recursion_shield++;
+
+  struct htf_event e;
+  init_event(&e, HTF_EVENT_MPI_COLLECTIVE_END);
+
+  push_data(&e, &collectiveOp, sizeof(collectiveOp));
+  push_data(&e, &communicator, sizeof(communicator));
+  push_data(&e, &root,	 sizeof(root));
+  push_data(&e, &sizeSent, sizeof(sizeSent));
+  push_data(&e, &sizeReceived,  sizeof(sizeReceived));
+  
+  htf_event_id_t e_id = _htf_get_event_id(&thread_writer->thread_trace, &e);
+  htf_store_timestamp(thread_writer, e_id, htf_timestamp(time));
+  htf_store_event(thread_writer, htf_singleton, e_id);
 
   htf_recursion_shield--;
 }

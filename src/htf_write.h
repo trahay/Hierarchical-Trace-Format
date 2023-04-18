@@ -77,6 +77,54 @@ void htf_record_leave(struct htf_thread_writer *thread_writer,
 		      htf_timestamp_t       time,
 		      htf_region_ref_t      region_ref );
 
+void htf_record_mpi_send(struct htf_thread_writer *thread_writer,
+			 htf_attribute_list_t*     attributeList __attribute__((unused)),
+			 htf_timestamp_t           time,
+			 uint32_t                  receiver,
+			 uint32_t                  communicator,
+			 uint32_t                  msgTag,
+			 uint64_t                  msgLength );
+
+void htf_record_mpi_isend(struct htf_thread_writer *thread_writer,
+			  htf_attribute_list_t*     attribute_list __attribute__((unused)),
+			  htf_timestamp_t           time,
+			  uint32_t                  receiver,
+			  uint32_t                  communicator,
+			  uint32_t                  msgTag,
+			  uint64_t                  msgLength,
+			  uint64_t                  requestID );
+
+void htf_record_mpi_isend_complete(struct htf_thread_writer *thread_writer,
+				   htf_attribute_list_t*     attribute_list __attribute__((unused)),
+				   htf_timestamp_t           time,
+				   uint64_t                  requestID );
+
+void htf_record_mpi_irecv_request(struct htf_thread_writer *thread_writer,
+				  htf_attribute_list_t*     attribute_list __attribute__((unused)),
+				  htf_timestamp_t           time,
+				  uint64_t                  requestID );
+
+void htf_record_mpi_recv(struct htf_thread_writer *thread_writer,
+			 htf_attribute_list_t* attributeList __attribute__((unused)),
+			 htf_timestamp_t       time,
+			 uint32_t              sender,
+			 uint32_t              communicator,
+			 uint32_t              msgTag,
+			 uint64_t              msgLength );
+
+void htf_record_mpi_irecv(struct htf_thread_writer *thread_writer,
+			  htf_attribute_list_t*     attribute_list __attribute__((unused)),
+			  htf_timestamp_t           time,
+			  uint32_t                  sender,
+			  uint32_t                  communicator,
+			  uint32_t                  msgTag,
+			  uint64_t                  msgLength,
+			  uint64_t                  requestID );
+
+
+
+
+
 #define NB_EVENT_DEFAULT 1000
 #define NB_SEQUENCE_DEFAULT 1000
 #define NB_LOOP_DEFAULT 1000
