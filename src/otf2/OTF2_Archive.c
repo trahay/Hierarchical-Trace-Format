@@ -234,6 +234,7 @@ int new_location(OTF2_Archive* archive, OTF2_LocationRef location) {
     archive->archive.id = location;
   }
 
+	// TODO Kind of dangerous do realloc but hey whatevs
   archive->def_writers = realloc(archive->def_writers, sizeof(OTF2_DefWriter*) * archive->nb_locations);
   archive->evt_writers = realloc(archive->evt_writers, sizeof(OTF2_EvtWriter*) * archive->nb_locations);
 
@@ -242,9 +243,7 @@ int new_location(OTF2_Archive* archive, OTF2_LocationRef location) {
   archive->def_writers[index]->archive = &archive->archive;
   archive->def_writers[index]->thread_writer = malloc(sizeof(struct htf_thread_writer));
 
-  htf_write_thread_open(&archive->archive,
-			archive->def_writers[index]->thread_writer,
-			location);
+  htf_write_thread_open(&archive->archive, archive->def_writers[index]->thread_writer, location);
   
 #if 0
   htf_write_init_thread(&archive->trace,

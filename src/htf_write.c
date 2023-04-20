@@ -37,7 +37,6 @@ static inline htf_sequence_id_t _htf_get_sequence_id(struct htf_thread *thread_t
 }
 
 
-
 /* search for a sequence_id that matches token_array
  * if none of the registered sequence match, register a new sequence
  */
@@ -55,17 +54,9 @@ static inline htf_sequence_id_t _htf_get_sequence_id_from_array(struct htf_threa
     }
   }
 
-	if (thread_trace->nb_events >= thread_trace->nb_allocated_events) {
-//		htf_error( "too many event data!\n");
-		htf_warn("realloc events for thread trace %p\n", thread_trace);
-		thread_trace->nb_allocated_events *= 2;
-		thread_trace->events = realloc(thread_trace->events,
-		                               thread_trace->nb_allocated_events *
-																	 sizeof(struct htf_event_summary)
-																			 );
-		if (thread_trace->events == NULL) {
-			htf_error("Error when reallocating memory for events\n");
-		}
+	if (thread_trace->nb_sequences >= thread_trace->nb_allocated_sequences) {
+		htf_warn("Doubling mem space of sequence for thread trace %p\n", thread_trace);
+		DOUBLE_MEMORY_SPACE(thread_trace->sequences, thread_trace->nb_allocated_sequences, struct htf_sequence);
 	}
 
   int index = thread_trace->nb_sequences++;
@@ -81,22 +72,15 @@ static inline htf_sequence_id_t _htf_get_sequence_id_from_array(struct htf_threa
   return sid;
 }
 
-
 static inline htf_loop_id_t _htf_create_loop_id(struct htf_thread_writer *thread_writer,
 						int start_index,
 						int loop_len) {
 
 	if (thread_writer->thread_trace.nb_loops >= thread_writer->thread_trace.nb_allocated_loops) {
-//		htf_error("too many loops!\n");
-		htf_warn("realloc loops for thread writer %p's thread trace %p\n", thread_writer, &thread_writer->thread_trace);
-		thread_writer->thread_trace.nb_allocated_events *= 2;
-		thread_writer->thread_trace.events = realloc(
-				thread_writer->thread_trace.events,
-				thread_writer->thread_trace.nb_allocated_events *
-				sizeof(struct htf_event_summary));
-		if (thread_writer->thread_trace.events == NULL) {
-			htf_error("Error when reallocating memory for loops\n");
-		}
+		htf_warn("Doubling mem space of loops for thread writer %p's thread trace, %d not enough.\n", thread_writer, thread_writer->thread_trace.nb_allocated_loops);
+		DOUBLE_MEMORY_SPACE(thread_writer->thread_trace.loops,
+												 thread_writer->thread_trace.nb_allocated_loops,
+												 struct htf_loop);
 	}
 
   int index = thread_writer->thread_trace.nb_loops++;
@@ -123,13 +107,8 @@ void htf_store_timestamp(struct htf_thread_writer *thread_writer,
   htf_assert(es);
 
   if(es->nb_timestamps >= es->nb_allocated_timestamps) {
-    htf_warn("realloc timestamps for event %u\n", HTF_ID(e_id));
-    es->nb_allocated_timestamps *= 2;
-    es->timestamps = realloc(es->timestamps,
-														 es->nb_allocated_timestamps * sizeof(htf_timestamp_t));
-		if (es->timestamps == NULL) {
-			htf_error("Error when reallocating memory for timestamps\n");
-		}
+    htf_warn("Doubling mem space of timestamps for event %u\n", HTF_ID(e_id));
+	  DOUBLE_MEMORY_SPACE(es->timestamps, es->nb_allocated_timestamps, htf_timestamp_t);
   }
 
   es->timestamps[es->nb_timestamps++] = ts; 
@@ -140,12 +119,8 @@ static void _htf_store_token(struct htf_thread_writer *thread_writer,
 			     htf_token_t t) {
   if(seq->size >= seq->allocated) {
 //    htf_error( "too many tokens\n");
-	  htf_warn("realloc tokens for sequence %p\n", seq);
-	  seq->allocated *= 2;
-	  seq->token = realloc(seq->token, seq->allocated * sizeof(htf_token_t));
-		if (seq->token == NULL) {
-			htf_error("Error when reallocating memory for tokens\n");
-		}
+	  htf_warn("Doubling mem space of tokens for sequence %p\n", seq);
+	  DOUBLE_MEMORY_SPACE(seq->token, seq->allocated, htf_token_t);
   }
 
   htf_log(htf_dbg_lvl_debug, "store_token: (%x.%x) in %p (size: %d)\n", HTF_TOKEN_TYPE(t), HTF_TOKEN_ID(t), seq, seq->size+1);
@@ -416,12 +391,7 @@ static void _init_thread(struct htf_archive *archive,
 
   pthread_mutex_lock(&t->archive->lock);
   if(t->archive->nb_threads > t->archive->nb_allocated_threads) {
-    t->archive->nb_allocated_threads *=2;
-    t->archive->threads = realloc(t->archive->threads,
-				  t->archive->nb_allocated_threads * sizeof(struct htf_thread*));
-		if (t->archive->threads == NULL) {
-			htf_error("Error when reallocating memory for threads.\n");
-		}
+	  DOUBLE_MEMORY_SPACE(t->archive->threads, t->archive->nb_allocated_threads, struct htf_thread*);
   }
   t->archive->threads[t->archive->nb_threads++] = t;
   pthread_mutex_unlock(&t->archive->lock);
@@ -468,13 +438,8 @@ void htf_write_define_location_group(struct htf_archive *archive,
 				     htf_location_group_id_t parent) {
 
   while(archive->nb_location_groups >= archive->nb_allocated_location_groups) {
-	  htf_warn("realloc location groups for archive %p\n", archive);
-    archive->nb_allocated_location_groups *= 2 ;
-    archive->location_groups = realloc(archive->location_groups,
-																			 archive->nb_allocated_location_groups * sizeof(struct htf_location_group));
-	  if (archive->location_groups == NULL) {
-		  htf_error("Error when reallocating memory for location groups.\n");
-	  }
+	  htf_warn("Doubling mem space of location groups for archive %p\n", archive);
+	  DOUBLE_MEMORY_SPACE(archive->location_groups, archive->nb_allocated_location_groups, struct htf_location_group);
   }
 
   int index = archive->nb_location_groups++;
@@ -491,14 +456,8 @@ void htf_write_define_location(struct htf_archive *archive,
 			       htf_location_group_id_t parent) {
 
   while(archive->nb_locations >= archive->nb_allocated_locations) {
-	  htf_warn("realloc location for archive %p\n", archive);
-    archive->nb_allocated_locations *= 2 ;
-    archive->locations = realloc(archive->locations,
-																 archive->nb_allocated_locations * sizeof(struct htf_location));
-	  if (archive->locations == NULL) {
-		  htf_error("Error when reallocating memory for locations.\n");
-	  }
-
+	  htf_warn("Doubling mem space of location for archive %p\n", archive);
+	  DOUBLE_MEMORY_SPACE(archive->locations, archive->nb_allocated_locations, struct htf_location);
   }
 
   int index = archive->nb_locations++;
@@ -706,13 +665,8 @@ static inline htf_event_id_t _htf_get_event_id(
 
 	if (thread_trace->nb_events >= thread_trace->nb_allocated_events) {
 //		htf_error( "too many event data!\n");
-		htf_warn("realloc events for thread trace %p\n", thread_trace);
-		thread_trace->nb_allocated_events *= 2;
-		thread_trace->events = realloc(thread_trace->events,
-		                               thread_trace->nb_allocated_events * sizeof(struct htf_event_summary));
-		if (thread_trace->events == NULL) {
-			htf_error("Error when reallocating memory for events\n");
-		}
+		htf_warn("Doubling mem space of events for thread trace %p\n", thread_trace);
+		DOUBLE_MEMORY_SPACE(thread_trace->events, thread_trace->nb_allocated_events, struct htf_event_summary);
 	}
 
 	int index = thread_trace->nb_events++;

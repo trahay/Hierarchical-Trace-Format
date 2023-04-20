@@ -296,6 +296,7 @@ struct htf_archive {
 
   struct htf_archive **archive_list;
   int nb_archives;
+	int nb_allocated_archives;
 };
 
 
@@ -359,5 +360,21 @@ static inline int _htf_sequences_equal(struct htf_sequence *s1,
     return 0;
   return _htf_arrays_equal(s1->token, s1->size, s2->token, s2->size);
 }
+
+/**
+ * Given a buffer, a counter that indicates the number of object it holds, and this object's datatype,
+ * doubles the size of the buffer using memmove, and frees the old buffer.
+ * This is better than a realloc because it moves the data around, but it is also slower.
+ * Checks for error at malloc.
+ */
+#define DOUBLE_MEMORY_SPACE(buffer, counter, datatype) \
+	datatype * new_buffer = malloc(counter * sizeof(datatype) * 2); \
+  if (new_buffer == NULL) { \
+    htf_error("Failed to allocate memory\n"); \
+	}\
+	memmove(new_buffer, buffer, counter * sizeof(datatype)); \
+	counter *= 2; \
+	free(buffer); \
+	buffer = new_buffer
 
 #endif /* EVENT_H */

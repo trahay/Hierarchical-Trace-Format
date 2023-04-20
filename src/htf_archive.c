@@ -68,12 +68,8 @@ void htf_archive_register_string_generic(struct htf_definition *d,
 		htf_error("Given string_ref was already in use.\n");
 	}
 	// Check if the definition set has enough allocated strings
-  if(d->nb_strings + 1 >= d->nb_allocated_strings) {
-    d->nb_allocated_strings *= 2;
-    d->strings = realloc(d->strings, d->nb_allocated_strings * sizeof(struct htf_string));
-    if(d->strings == NULL) {
-      htf_error("Failed to allocate memory\n");
-    }
+  if(d->nb_strings >= d->nb_allocated_strings) {
+	  DOUBLE_MEMORY_SPACE(d->strings, d->nb_allocated_strings, struct htf_string);
   }
 
 	int index = d->nb_strings++;
@@ -111,12 +107,8 @@ void htf_archive_register_region_generic(struct htf_definition *d,
 		htf_error("Given region_ref was already in use.\n");
 	}
 
-  if(d->nb_regions + 1 >= d->nb_allocated_regions) {
-    d->nb_allocated_regions *= 2;
-    d->regions = realloc(d->regions, d->nb_allocated_regions * sizeof(struct htf_region));
-    if(d->regions == NULL) {
-      htf_error("Failed to allocate memory\n");
-    }
+  if(d->nb_regions >= d->nb_allocated_regions) {
+	  DOUBLE_MEMORY_SPACE(d->regions, d->nb_allocated_regions, struct htf_region);
   }
 
   int index = d->nb_regions++;
