@@ -55,9 +55,18 @@ static inline htf_sequence_id_t _htf_get_sequence_id_from_array(struct htf_threa
     }
   }
 
-  if(thread_trace->nb_sequences >= thread_trace->nb_allocated_sequences) {
-    htf_error("too many event data!\n");
-  }
+	if (thread_trace->nb_events >= thread_trace->nb_allocated_events) {
+//		htf_error( "too many event data!\n");
+		htf_warn("realloc events for thread trace %p\n", thread_trace);
+		thread_trace->nb_allocated_events *= 2;
+		thread_trace->events = realloc(thread_trace->events,
+		                               thread_trace->nb_allocated_events *
+																	 sizeof(struct htf_event_summary)
+																			 );
+		if (thread_trace->events == NULL) {
+			htf_error("Error when reallocating memory for events\n");
+		}
+	}
 
   int index = thread_trace->nb_sequences++;
   htf_sequence_id_t sid = HTF_SEQUENCE_ID(index);
@@ -77,9 +86,18 @@ static inline htf_loop_id_t _htf_create_loop_id(struct htf_thread_writer *thread
 						int start_index,
 						int loop_len) {
 
-  if(thread_writer->thread_trace.nb_loops >= thread_writer->thread_trace.nb_allocated_loops) {
-    htf_error("too many loops!\n");
-  }
+	if (thread_writer->thread_trace.nb_loops >= thread_writer->thread_trace.nb_allocated_loops) {
+//		htf_error("too many loops!\n");
+		htf_warn("realloc loops for thread writer %p's thread trace %p\n", thread_writer, &thread_writer->thread_trace);
+		thread_writer->thread_trace.nb_allocated_events *= 2;
+		thread_writer->thread_trace.events = realloc(
+				thread_writer->thread_trace.events,
+				thread_writer->thread_trace.nb_allocated_events *
+				sizeof(struct htf_event_summary));
+		if (thread_writer->thread_trace.events == NULL) {
+			htf_error("Error when reallocating memory for loops\n");
+		}
+	}
 
   int index = thread_writer->thread_trace.nb_loops++;
   htf_log(htf_dbg_lvl_debug, "\tNot found. Adding it with id=%u\n", index);
@@ -105,9 +123,13 @@ void htf_store_timestamp(struct htf_thread_writer *thread_writer,
   htf_assert(es);
 
   if(es->nb_timestamps >= es->nb_allocated_timestamps) {
-    htf_warn("Warning: realloc timestamps for event %u\n", HTF_ID(e_id));
+    htf_warn("realloc timestamps for event %u\n", HTF_ID(e_id));
     es->nb_allocated_timestamps *= 2;
-    es->timestamps = realloc(es->timestamps, es->nb_allocated_timestamps * sizeof(htf_timestamp_t));
+    es->timestamps = realloc(es->timestamps,
+														 es->nb_allocated_timestamps * sizeof(htf_timestamp_t));
+		if (es->timestamps == NULL) {
+			htf_error("Error when reallocating memory for timestamps\n");
+		}
   }
 
   es->timestamps[es->nb_timestamps++] = ts; 
@@ -117,7 +139,13 @@ static void _htf_store_token(struct htf_thread_writer *thread_writer,
 			     struct htf_sequence* seq,
 			     htf_token_t t) {
   if(seq->size >= seq->allocated) {
-    htf_error( "too many tokens\n");
+//    htf_error( "too many tokens\n");
+	  htf_warn("realloc tokens for sequence %p\n", seq);
+	  seq->allocated *= 2;
+	  seq->token = realloc(seq->token, seq->allocated * sizeof(htf_token_t));
+		if (seq->token == NULL) {
+			htf_error("Error when reallocating memory for tokens\n");
+		}
   }
 
   htf_log(htf_dbg_lvl_debug, "store_token: (%x.%x) in %p (size: %d)\n", HTF_TOKEN_TYPE(t), HTF_TOKEN_ID(t), seq, seq->size+1);
@@ -183,7 +211,6 @@ static void _htf_find_loop(struct htf_thread_writer *thread_writer) {
   }
 
   for(int loop_len=1; loop_len < max_len; loop_len++) {
-
     /* search for a loop of loop_len tokens */
     int s1_start = cur_index+1 - loop_len;
     int s2_start = cur_index+1 - 2*loop_len;
@@ -192,27 +219,27 @@ static void _htf_find_loop(struct htf_thread_writer *thread_writer) {
       int loop_start = s1_start - 1;
       /* first, check if there's a loop that start at loop_start*/
       if(HTF_TOKEN_TYPE(cur_seq->token[loop_start]) == HTF_TYPE_LOOP) {
-	htf_loop_id_t l = HTF_TOKEN_TO_LOOP_ID(cur_seq->token[loop_start]);
-	struct htf_loop *loop = htf_get_loop(&thread_writer->thread_trace, l);
-	htf_assert(loop);
+				htf_loop_id_t l = HTF_TOKEN_TO_LOOP_ID(cur_seq->token[loop_start]);
+				struct htf_loop *loop = htf_get_loop(&thread_writer->thread_trace, l);
+				htf_assert(loop);
 
-	struct htf_sequence *seq = htf_get_sequence(&thread_writer->thread_trace,
-						HTF_TOKEN_TO_SEQUENCE_ID(loop->token));
-	htf_assert(seq);
-	
-	if(_htf_arrays_equal(&cur_seq->token[s1_start], loop_len, seq->token,  seq->size)) {
+				struct htf_sequence *seq = htf_get_sequence(&thread_writer->thread_trace,
+									HTF_TOKEN_TO_SEQUENCE_ID(loop->token));
+				htf_assert(seq);
 
-	  /* the current sequence is just another iteration of the loop
-	   * remove the sequence, and increment the iteration count
-	   */
-	  htf_sequence_id_t sid =  _htf_get_sequence_id_from_array(&thread_writer->thread_trace,
-							       &cur_seq->token[s1_start],
-							       loop_len);
-	  _htf_loop_add_iteration(thread_writer, l, sid);
-	  cur_seq->size = s1_start;
-	  cur_index = cur_seq->size-1;
-	  return;
-	}
+				if(_htf_arrays_equal(&cur_seq->token[s1_start], loop_len, seq->token,  seq->size)) {
+
+				  /* the current sequence is just another iteration of the loop
+				   * remove the sequence, and increment the iteration count
+				   */
+				  htf_sequence_id_t sid =  _htf_get_sequence_id_from_array(&thread_writer->thread_trace,
+										       &cur_seq->token[s1_start],
+										       loop_len);
+				  _htf_loop_add_iteration(thread_writer, l, sid);
+				  cur_seq->size = s1_start;
+				  cur_index = cur_seq->size-1;
+				  return;
+				}
       }
     }
 
@@ -225,16 +252,16 @@ static void _htf_find_loop(struct htf_thread_writer *thread_writer) {
 			      &cur_seq->token[s2_start], loop_len);      
 
       if(is_loop) {
-	if(htf_debug_level >= htf_dbg_lvl_debug) {
-	  printf("Found a loop of len %d:\n", loop_len);
-	  htf_print_token_array(&thread_writer->thread_trace, cur_seq->token,
-			    s1_start, s1_start+loop_len);
-	  htf_print_token_array(&thread_writer->thread_trace, cur_seq->token,
-			    s2_start, s2_start + loop_len);
-	  printf("\n");
-	}
+				if(htf_debug_level >= htf_dbg_lvl_debug) {
+				  printf("Found a loop of len %d:\n", loop_len);
+				  htf_print_token_array(&thread_writer->thread_trace, cur_seq->token,
+						    s1_start, s1_start+loop_len);
+				  htf_print_token_array(&thread_writer->thread_trace, cur_seq->token,
+						    s2_start, s2_start + loop_len);
+				  printf("\n");
+				}
 
-	_htf_create_loop(thread_writer, loop_len, s1_start, s2_start);
+				_htf_create_loop(thread_writer, loop_len, s1_start, s2_start);
       }    
     }
   }
@@ -245,7 +272,6 @@ void _htf_record_enter_function(struct htf_thread_writer *thread_writer) {
   thread_writer->cur_depth++;
   if(thread_writer->cur_depth >= thread_writer->max_depth) {
     htf_error("depth = %d >= max_depth (%d) \n", thread_writer->cur_depth, thread_writer->max_depth);
-    abort();
   }
   struct htf_sequence *seq =  _htf_get_cur_sequence(thread_writer);
   seq->size = 0;
@@ -387,16 +413,25 @@ static void _init_thread(struct htf_archive *archive,
   t->loops = malloc(sizeof(struct htf_loop) * t->nb_allocated_loops);
   t->nb_loops = 0;
 
+
   pthread_mutex_lock(&t->archive->lock);
-  int index = t->archive->nb_threads++;
   if(t->archive->nb_threads > t->archive->nb_allocated_threads) {
     t->archive->nb_allocated_threads *=2;
     t->archive->threads = realloc(t->archive->threads,
 				  t->archive->nb_allocated_threads * sizeof(struct htf_thread*));
+		if (t->archive->threads == NULL) {
+			htf_error("Error when reallocating memory for threads.\n");
+		}
   }
-  t->archive->threads[index] = t;
+  t->archive->threads[t->archive->nb_threads++] = t;
   pthread_mutex_unlock(&t->archive->lock);
 }
+
+#define _init_sequence(s) do {						\
+    s->token = malloc(sizeof(htf_token_t) * SEQUENCE_SIZE_DEFAULT);	\
+    s->size = 0;							\
+    s->allocated = SEQUENCE_SIZE_DEFAULT;				\
+  } while(0)
 
 void htf_write_thread_open(struct htf_archive* archive,
 			   struct htf_thread_writer* thread_writer,
@@ -410,15 +445,8 @@ void htf_write_thread_open(struct htf_archive* archive,
   htf_log(htf_dbg_lvl_debug, "htf_write_init_thread(%ux)\n", thread_id);
 
   _init_thread(archive, &thread_writer->thread_trace, thread_id);
-
   thread_writer->max_depth = CALLSTACK_DEPTH_DEFAULT;
   thread_writer->og_seq = malloc(sizeof(struct htf_sequence*) * thread_writer->max_depth);
-
-#define _init_sequence(s) do {						\
-    s->token = malloc(sizeof(htf_token_t) * SEQUENCE_SIZE_DEFAULT);	\
-    s->size = 0;							\
-    s->allocated = SEQUENCE_SIZE_DEFAULT;				\
-  } while(0)
 
   // the main sequence is in sequences[0]
   thread_writer->og_seq[0] = &thread_writer->thread_trace.sequences[0];
@@ -440,9 +468,13 @@ void htf_write_define_location_group(struct htf_archive *archive,
 				     htf_location_group_id_t parent) {
 
   while(archive->nb_location_groups >= archive->nb_allocated_location_groups) {
+	  htf_warn("realloc location groups for archive %p\n", archive);
     archive->nb_allocated_location_groups *= 2 ;
-    archive->location_groups = realloc(archive->location_groups, sizeof(struct htf_location_group) * archive->nb_allocated_location_groups);
-    htf_assert(archive->location_groups);
+    archive->location_groups = realloc(archive->location_groups,
+																			 archive->nb_allocated_location_groups * sizeof(struct htf_location_group));
+	  if (archive->location_groups == NULL) {
+		  htf_error("Error when reallocating memory for location groups.\n");
+	  }
   }
 
   int index = archive->nb_location_groups++;
@@ -459,9 +491,14 @@ void htf_write_define_location(struct htf_archive *archive,
 			       htf_location_group_id_t parent) {
 
   while(archive->nb_locations >= archive->nb_allocated_locations) {
+	  htf_warn("realloc location for archive %p\n", archive);
     archive->nb_allocated_locations *= 2 ;
-    archive->locations = realloc(archive->locations, sizeof(struct htf_location) * archive->nb_allocated_locations);
-    htf_assert(archive->locations);
+    archive->locations = realloc(archive->locations,
+																 archive->nb_allocated_locations * sizeof(struct htf_location));
+	  if (archive->locations == NULL) {
+		  htf_error("Error when reallocating memory for locations.\n");
+	  }
+
   }
 
   int index = archive->nb_locations++;
@@ -653,33 +690,41 @@ default:
   }
 }
 
-static inline htf_event_id_t _htf_get_event_id(struct htf_thread *thread_trace,
-					   struct htf_event *e) {
-  htf_log(htf_dbg_lvl_max, "Searching for event {.event_type=%d}\n", e->record);
+static inline htf_event_id_t _htf_get_event_id(
+		struct htf_thread *thread_trace,
+		struct htf_event *e) {
+	htf_log(htf_dbg_lvl_max, "Searching for event {.event_type=%d}\n", e->record);
 
-  htf_assert(e->event_size < 256);
+	htf_assert(e->event_size < 256);
 
-  for(unsigned i = 0; i < thread_trace->nb_events; i++) {
-    if(memcmp(e, &thread_trace->events[i].event, e->event_size) == 0) {
-      htf_log(htf_dbg_lvl_max, "\t found with id=%u\n", i);
-      return HTF_EVENT_ID(i);
-    }
-  }
+	for (unsigned i = 0; i < thread_trace->nb_events; i++) {
+		if (memcmp(e, &thread_trace->events[i].event, e->event_size) == 0) {
+			htf_log(htf_dbg_lvl_max, "\t found with id=%u\n", i);
+			return HTF_EVENT_ID(i);
+		}
+	}
 
-  if(thread_trace->nb_events >= thread_trace->nb_allocated_events) {
-    htf_error( "too many event data!\n");
-  }
+	if (thread_trace->nb_events >= thread_trace->nb_allocated_events) {
+//		htf_error( "too many event data!\n");
+		htf_warn("realloc events for thread trace %p\n", thread_trace);
+		thread_trace->nb_allocated_events *= 2;
+		thread_trace->events = realloc(thread_trace->events,
+		                               thread_trace->nb_allocated_events * sizeof(struct htf_event_summary));
+		if (thread_trace->events == NULL) {
+			htf_error("Error when reallocating memory for events\n");
+		}
+	}
 
-  int index = thread_trace->nb_events++;
-  htf_log(htf_dbg_lvl_max, "\tNot found. Adding it with id=%x\n", index);
-  struct htf_event_summary *es = &thread_trace->events[index];
+	int index = thread_trace->nb_events++;
+	htf_log(htf_dbg_lvl_max, "\tNot found. Adding it with id=%x\n", index);
+	struct htf_event_summary *es = &thread_trace->events[index];
 
-  memcpy(&es->event, e, e->event_size);
-  es->timestamps = malloc(sizeof(htf_timestamp_t)* NB_TIMESTAMP_DEFAULT);
-  es->nb_allocated_timestamps = NB_TIMESTAMP_DEFAULT;
-  es->nb_timestamps = 0;
+	memcpy(&es->event, e, e->event_size);
+	es->timestamps = malloc(sizeof(htf_timestamp_t) * NB_TIMESTAMP_DEFAULT);
+	es->nb_allocated_timestamps = NB_TIMESTAMP_DEFAULT;
+	es->nb_timestamps = 0;
 
-  return HTF_EVENT_ID(index);
+	return HTF_EVENT_ID(index);
 }
 
 void htf_record_enter(struct htf_thread_writer *thread_writer,
