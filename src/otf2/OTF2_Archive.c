@@ -27,6 +27,7 @@ OTF2_Archive_Open( const char*              archivePath,
   archive->def_writers = NULL;
   archive->evt_writers = NULL;
   archive->nb_locations = 0;
+	pthread_mutex_init(&archive->lock, NULL);
 
   return archive;
 }
@@ -262,6 +263,7 @@ int new_location(OTF2_Archive* archive, OTF2_LocationRef location) {
 OTF2_EvtWriter*
 OTF2_Archive_GetEvtWriter( OTF2_Archive*    archive,
                            OTF2_LocationRef location ) {
+	pthread_mutex_lock(&archive->lock);
   printf("OTF2_Archive_GetEvtWriter (%lu)\n", location);
   for(int i=0; i<archive->nb_locations; i++) {
     if(archive->evt_writers[i]->locationRef == location) {
@@ -270,29 +272,38 @@ OTF2_Archive_GetEvtWriter( OTF2_Archive*    archive,
 	     archive->evt_writers[i]->thread_writer);
 
       //      htf_assert(archive->evt_writers[i]->thread_writer->thread_trace.container);
+	    pthread_mutex_unlock(&archive->lock);
       return archive->evt_writers[i];
     }
   }
 
   int index = new_location(archive, location);
+
+	printf("New EvtWriter (ref=%lu, writer=%p)\n",
+	       archive->evt_writers[index]->locationRef,
+	       archive->evt_writers[index]->thread_writer);
   
   //  htf_assert(archive->evt_writers[index]->thread_writer->thread_trace.container);
+	pthread_mutex_unlock(&archive->lock);
   return archive->evt_writers[index];
 }
 
 OTF2_DefWriter*
 OTF2_Archive_GetDefWriter( OTF2_Archive*    archive,
                            OTF2_LocationRef location ) {
+	pthread_mutex_lock(&archive->lock);
   for(int i=0; i<archive->nb_locations; i++) {
-    if(archive->def_writers[i]->locationRef == location)
-      return archive->def_writers[i];
+    if(archive->def_writers[i]->locationRef == location) {
+	    pthread_mutex_unlock(&archive->lock);
+	    return archive->def_writers[i];
+    }
   }
   int index = new_location(archive, location);
 
-  printf("New Defwriter (ref=%lu, writer=%p)\n",
+  printf("New DefWriter (ref=%lu, writer=%p)\n",
 	 archive->evt_writers[index]->locationRef,
 	 archive->evt_writers[index]->thread_writer);
-
+	pthread_mutex_unlock(&archive->lock);
   return archive->def_writers[index];
 }
 
