@@ -53,7 +53,7 @@ typedef struct htf_loop_id {
 #define HTF_SEQUENCE_ID_INVALID HTF_TOKEN_ID_INVALID
 #define HTF_LOOP_ID_INVALID     HTF_TOKEN_ID_INVALID
 
-/* convert an id to and integer */
+/* convert an id to an integer */
 #define HTF_ID(_id) ((_id).id)
 
 /* return the type/id of a token */
@@ -296,6 +296,7 @@ struct htf_archive {
 
   struct htf_archive **archive_list;
   int nb_archives;
+	int nb_allocated_archives;
 };
 
 
@@ -359,5 +360,37 @@ static inline int _htf_sequences_equal(struct htf_sequence *s1,
     return 0;
   return _htf_arrays_equal(s1->token, s1->size, s2->token, s2->size);
 }
+
+/**
+ * Given a buffer, a counter that indicates the number of object it holds, and this object's datatype,
+ * doubles the size of the buffer using realloc, or if it fails, malloc and memmove then frees the old buffer.
+ * This is better than a realloc because it moves the data around, but it is also slower.
+ * Checks for error at malloc.
+ */
+#define DOUBLE_MEMORY_SPACE(buffer, counter, datatype)                    \
+  datatype * new_buffer = realloc(buffer, 2 * counter * sizeof(datatype));\
+  if (new_buffer == NULL) {                                               \
+    new_buffer = malloc(counter * sizeof(datatype) * 2);                  \
+    if (new_buffer == NULL) {                                             \
+      htf_error("Failed to allocate memory using realloc AND malloc\n");  \
+    }                                                                     \
+    memmove(new_buffer, buffer, counter * sizeof(datatype));              \
+    free(buffer);                                                         \
+  }                                                                       \
+	buffer = new_buffer;                                                    \
+  counter *= 2
+
+#define INCREMENT_MEMORY_SPACE(buffer, counter, datatype) \
+	datatype * new_buffer = realloc(buffer, (counter + 1) * sizeof(datatype));\
+  if (new_buffer == NULL) {                                               \
+    new_buffer = malloc((counter + 1) * sizeof(datatype));                \
+    if (new_buffer == NULL) {                                             \
+      htf_error("Failed to allocate memory using realloc AND malloc\n");  \
+    }                                                                     \
+    memmove(new_buffer, buffer, counter * sizeof(datatype));              \
+    free(buffer);                                                         \
+  }                                                                       \
+	buffer = new_buffer;                                                    \
+  counter++
 
 #endif /* EVENT_H */

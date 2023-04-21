@@ -84,6 +84,8 @@ struct OTF2_Archive_struct {
 
   struct OTF2_FlushCallbacks flushCallbacks;
   void*                      flushData;
+
+	pthread_mutex_t lock;
 };
 
 #endif /* !OTF2_H */

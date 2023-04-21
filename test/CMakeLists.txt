@@ -10,6 +10,5 @@ link_libraries(htf)
 # write_benchmark
 
 add_executable(write_benchmark write_benchmark.c)
-add_executable(dummy_thread dummy_thread.c)
 add_test(NAME write_benchmark COMMAND write_benchmark)
 

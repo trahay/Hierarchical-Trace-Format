@@ -393,7 +393,6 @@ static void _htf_store_thread(const char* dir_name, struct htf_thread *th) {
     htf_log(htf_dbg_lvl_verbose, "\tSkipping Thread %u {.nb_events=%d, .nb_sequences=%d, .nb_loops=%d}\n",
 	    th->id, th->nb_events,  th->nb_sequences, th->nb_loops);
     abort();
-    return;
   }
 
   FILE* token_file = _htf_get_thread(dir_name, th->id, "w");
@@ -410,6 +409,10 @@ static void _htf_store_thread(const char* dir_name, struct htf_thread *th) {
   _htf_fwrite(&th->nb_loops, sizeof(th->nb_loops), 1, token_file);
 
   fclose(token_file);
+
+	// TODO Save timestamps and events separately
+	// TODO Save events timestamps as delta w/ sequence timestamp
+	// TODO Use ZSTD to compress
 
   for(int i=0; i<th->nb_events; i++)
     _htf_store_event(dir_name, th, &th->events[i], HTF_EVENT_ID(i));
@@ -537,6 +540,11 @@ static void _htf_read_archive(struct htf_archive* global_archive,
   archive->trace_name = strdup(trace_name);
   archive->global_archive = global_archive;
   archive->nb_archives = 0;
+	archive->nb_allocated_archives = 1;
+	archive->archive_list = malloc(sizeof(struct htf_archive*));
+	if (archive->archive_list == NULL) {
+		htf_error("Failed to allocate memory\n");
+	}
 
   htf_log(htf_dbg_lvl_debug, "Reading archive {.dir_name='%s', .trace='%s'}\n", archive->dir_name, archive->trace_name);
 
@@ -606,9 +614,11 @@ static struct htf_archive * _htf_get_archive(struct htf_archive* global_archive,
 
   _htf_read_archive(global_archive, arch, global_archive->dir_name, filename);
 
+	while (global_archive->nb_archives >= global_archive->nb_allocated_archives) {
+		INCREMENT_MEMORY_SPACE(global_archive->archive_list, global_archive->nb_allocated_archives, struct htf_archive*);
+	}
+
   int index = global_archive->nb_archives++;
-  global_archive->archive_list = realloc(global_archive->archive_list,
-					 sizeof(struct htf_archive*) * global_archive->nb_archives);
   global_archive->archive_list[index] = arch;
 
   return arch;
@@ -621,18 +631,12 @@ void htf_read_thread(struct htf_archive* archive, htf_thread_id_t thread_id) {
       return;
     }
   }
-  
-  int index = archive->nb_threads++;
 
-  while(archive->nb_threads > archive->nb_allocated_threads) {
-    if(archive->nb_allocated_threads == 0)
-      archive->nb_allocated_threads = 16;
-    else
-      archive->nb_allocated_threads *= 2;
-
-    archive->threads = realloc(archive->threads, sizeof(struct htf_thread*)*archive->nb_allocated_threads);
+  while (archive->nb_threads >= archive->nb_allocated_threads) {
+		INCREMENT_MEMORY_SPACE(archive->threads, archive->nb_allocated_threads, struct htf_thread*);
   }
-  
+
+	int index = archive->nb_threads++;
   archive->threads[index] = malloc(sizeof(struct htf_thread));
   _htf_read_thread(archive, archive->threads[index], thread_id);
   htf_assert(archive->threads[index]->nb_events > 0);
