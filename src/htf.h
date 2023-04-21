@@ -376,9 +376,9 @@ static inline int _htf_sequences_equal(struct htf_sequence *s1,
     }                                                                     \
     memmove(new_buffer, buffer, counter * sizeof(datatype));              \
     free(buffer);                                                         \
-    buffer = new_buffer                                                   \
+    buffer = new_buffer;                                                  \
   }                                                                       \
-  counter *= 2;
+  counter *= 2
 
 
 #endif /* EVENT_H */
