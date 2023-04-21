@@ -368,7 +368,7 @@ static inline int _htf_sequences_equal(struct htf_sequence *s1,
  * Checks for error at malloc.
  */
 #define DOUBLE_MEMORY_SPACE(buffer, counter, datatype)                    \
-  datatype * new_buffer = realloc(buffer, 2 * counter * sizeof(datatype)) \
+  datatype * new_buffer = realloc(buffer, 2 * counter * sizeof(datatype));\
   if (new_buffer == NULL) {                                               \
     new_buffer = malloc(counter * sizeof(datatype) * 2);                  \
     if (new_buffer == NULL) {                                             \
