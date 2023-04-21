@@ -26,11 +26,6 @@ void print_sequence(struct htf_thread* t, struct htf_sequence *s, int id) {
   printf("}\n");
 }
 
-void print_thread(struct htf_thread *t) {
-
-
-}
-
 void info_event(struct htf_thread *t, struct htf_event_summary *e) {
   htf_print_event(t, &e->event);
   printf("\t{.nb_timestamps: %d, .nb_allocated_timestamps: %d}\n", e->nb_timestamps, e->nb_allocated_timestamps);

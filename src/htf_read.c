@@ -161,22 +161,18 @@ static int end_of_a_loop(struct htf_thread_reader *reader,
 }
 
 static void leave_block(struct htf_thread_reader *reader) {
-  int cur_frame;
-  int cur_index;
-  htf_token_t cur_seq_id;
-  cur_frame = reader->current_frame;
-  cur_index = reader->callstack_index[cur_frame];
-  cur_seq_id = reader->callstack_sequence[cur_frame];
-
   if(htf_debug_level >= htf_dbg_lvl_debug) {
     htf_log( htf_dbg_lvl_debug, "[%d] Leave ", reader->current_frame);
     print_current_sequence(reader);
     printf("\n");
   }
-  
-  reader->callstack_index[cur_frame] = 999;
-  reader->callstack_sequence[cur_frame] = HTF_TOKENIZE(HTF_TYPE_INVALID, HTF_TOKEN_ID_INVALID);
-  reader->callstack_loop_iteration[cur_frame] = 99999;
+
+  int cur_frame = reader->current_frame;
+  if(htf_debug_level >= htf_dbg_lvl_debug) {
+    reader->callstack_index[cur_frame] = INT_MAX;
+    reader->callstack_sequence[cur_frame] = HTF_TOKENIZE(HTF_TYPE_INVALID, HTF_TOKEN_ID_INVALID);
+    reader->callstack_loop_iteration[cur_frame] = INT_MAX;
+  }
 
   reader->current_frame--; // pop frame
 
