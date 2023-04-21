@@ -376,9 +376,21 @@ static inline int _htf_sequences_equal(struct htf_sequence *s1,
     }                                                                     \
     memmove(new_buffer, buffer, counter * sizeof(datatype));              \
     free(buffer);                                                         \
-    buffer = new_buffer;                                                  \
   }                                                                       \
+	buffer = new_buffer;                                                    \
   counter *= 2
 
+#define INCREMENT_MEMORY_SPACE(buffer, counter, datatype) \
+	datatype * new_buffer = realloc(buffer, (counter + 1) * sizeof(datatype));\
+  if (new_buffer == NULL) {                                               \
+    new_buffer = malloc((counter + 1) * sizeof(datatype));                \
+    if (new_buffer == NULL) {                                             \
+      htf_error("Failed to allocate memory using realloc AND malloc\n");  \
+    }                                                                     \
+    memmove(new_buffer, buffer, counter * sizeof(datatype));              \
+    free(buffer);                                                         \
+  }                                                                       \
+	buffer = new_buffer;                                                    \
+  counter++
 
 #endif /* EVENT_H */
