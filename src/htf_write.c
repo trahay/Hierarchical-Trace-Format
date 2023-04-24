@@ -20,8 +20,22 @@ static inline htf_sequence_id_t _htf_get_sequence_id_from_array(struct htf_threa
 								htf_token_t* token_array,
 								int array_len);
 
+#define _init_sequence(s) do {						\
+    s->token = calloc(sizeof(htf_token_t), SEQUENCE_SIZE_DEFAULT);	\
+    s->size = 0;							\
+    s->allocated = SEQUENCE_SIZE_DEFAULT;				\
+  } while(0)
+
 static inline struct htf_sequence* _htf_get_cur_sequence(struct htf_thread_writer *thread_writer) {
   struct htf_sequence *seq = thread_writer->og_seq[thread_writer->cur_depth];
+	//FIXME This is very hacky !!!
+	//      Basically sometimes there are these sequences that don't seem to have been correctly init ???
+	//      But allocated starts as a power of 2, and is only ever doubled, so it should stay that way.
+	//      This is only on AMG BTW
+	if ((seq->allocated & (seq->allocated - 1)) != 0) {
+		htf_warn("Sequence %p wasn't correctly initiated (allocated=0x%x) (TW %p->og_seq[%d])\n", seq, seq->allocated, thread_writer, thread_writer->cur_depth);
+		_init_sequence(seq);
+	}
   return seq;
 }
 
@@ -77,7 +91,7 @@ static inline htf_loop_id_t _htf_create_loop_id(struct htf_thread_writer *thread
 						int loop_len) {
 
 	if (thread_writer->thread_trace.nb_loops >= thread_writer->thread_trace.nb_allocated_loops) {
-		htf_warn("Doubling mem space of loops for thread writer %p's thread trace, %d not enough.\n", thread_writer, thread_writer->thread_trace.nb_allocated_loops);
+		htf_warn("Doubling mem space of loops for thread writer %p's thread trace, cur=%d\n", thread_writer, thread_writer->thread_trace.nb_allocated_loops);
 		DOUBLE_MEMORY_SPACE(thread_writer->thread_trace.loops,
 												 thread_writer->thread_trace.nb_allocated_loops,
 												 struct htf_loop);
@@ -117,13 +131,13 @@ void htf_store_timestamp(struct htf_thread_writer *thread_writer,
 static void _htf_store_token(struct htf_thread_writer *thread_writer,
 			     struct htf_sequence* seq,
 			     htf_token_t t) {
-  if(seq->size >= seq->allocated) {
+  while(seq->size >= seq->allocated) {
 //    htf_error( "too many tokens\n");
-	  htf_warn("Doubling mem space of tokens for sequence %p\n", seq);
+	  htf_warn("Doubling mem space of tokens for sequence %p, cur=%u, size=%u\n", seq, seq->allocated, seq->size);
 	  DOUBLE_MEMORY_SPACE(seq->token, seq->allocated, htf_token_t);
   }
 
-  htf_log(htf_dbg_lvl_debug, "store_token: (%x.%x) in %p (size: %d)\n", HTF_TOKEN_TYPE(t), HTF_TOKEN_ID(t), seq, seq->size+1);
+  htf_log(htf_dbg_lvl_debug, "store_token: (%x.%x) in %p (size: %u)\n", HTF_TOKEN_TYPE(t), HTF_TOKEN_ID(t), seq, seq->size+1);
   seq->token[seq->size++] = t;
   _htf_find_loop(thread_writer);
 }
@@ -377,31 +391,25 @@ static void _init_thread(struct htf_archive *archive,
   t->id = thread_id;
 
   t->nb_allocated_events = NB_EVENT_DEFAULT;
-  t->events = malloc(sizeof(struct htf_event_summary) * t->nb_allocated_events);
+  t->events = calloc(t->nb_allocated_events, sizeof(struct htf_event_summary));
   t->nb_events = 0;
 
   t->nb_allocated_sequences = NB_SEQUENCE_DEFAULT;
-  t->sequences = malloc(sizeof(struct htf_sequence) * t->nb_allocated_sequences);
+  t->sequences = calloc(t->nb_allocated_sequences, sizeof(struct htf_sequence));
   t->nb_sequences = 0;
 
   t->nb_allocated_loops = NB_LOOP_DEFAULT;
-  t->loops = malloc(sizeof(struct htf_loop) * t->nb_allocated_loops);
+  t->loops = calloc(t->nb_allocated_loops, sizeof(struct htf_loop));
   t->nb_loops = 0;
 
 
   pthread_mutex_lock(&t->archive->lock);
-  if(t->archive->nb_threads > t->archive->nb_allocated_threads) {
+  while (t->archive->nb_threads > t->archive->nb_allocated_threads) {
 	  DOUBLE_MEMORY_SPACE(t->archive->threads, t->archive->nb_allocated_threads, struct htf_thread*);
   }
   t->archive->threads[t->archive->nb_threads++] = t;
   pthread_mutex_unlock(&t->archive->lock);
 }
-
-#define _init_sequence(s) do {						\
-    s->token = malloc(sizeof(htf_token_t) * SEQUENCE_SIZE_DEFAULT);	\
-    s->size = 0;							\
-    s->allocated = SEQUENCE_SIZE_DEFAULT;				\
-  } while(0)
 
 void htf_write_thread_open(struct htf_archive* archive,
 			   struct htf_thread_writer* thread_writer,
@@ -412,11 +420,11 @@ void htf_write_thread_open(struct htf_archive* archive,
 
   htf_assert(htf_archive_get_thread(archive, thread_id) == NULL);
 
-  htf_log(htf_dbg_lvl_debug, "htf_write_init_thread(%ux)\n", thread_id);
+  htf_log(htf_dbg_lvl_debug, "htf_write_thread_open(%ux)\n", thread_id);
 
   _init_thread(archive, &thread_writer->thread_trace, thread_id);
   thread_writer->max_depth = CALLSTACK_DEPTH_DEFAULT;
-  thread_writer->og_seq = malloc(sizeof(struct htf_sequence*) * thread_writer->max_depth);
+  thread_writer->og_seq = calloc(thread_writer->max_depth, sizeof(struct htf_sequence*));
 
   // the main sequence is in sequences[0]
   thread_writer->og_seq[0] = &thread_writer->thread_trace.sequences[0];
@@ -424,7 +432,7 @@ void htf_write_thread_open(struct htf_archive* archive,
   _init_sequence(thread_writer->og_seq[0]);
 
   for(int i = 1; i<thread_writer->max_depth; i++) {
-    thread_writer->og_seq[i] = malloc(sizeof(struct htf_sequence));
+    thread_writer->og_seq[i] = calloc(sizeof(struct htf_sequence), 1);
     _init_sequence(thread_writer->og_seq[i]);
   }
   thread_writer->cur_depth = 0;
@@ -644,7 +652,7 @@ void htf_print_event(struct htf_thread *t, struct htf_event* e) {
 	     sizeReceived);
       break;
     }
-default:
+	default:
     printf("{.record: %x, .size:%x}", e->record, e->event_size);
   }
 }

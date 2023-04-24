@@ -167,7 +167,7 @@ static void _htf_read_sequence(const char* base_dirname,
   _htf_fread(s->token, sizeof(htf_token_t), s->size, file);  
   fclose(file);
 
-  htf_log(htf_dbg_lvl_debug, "\tLoad sequence %x {.size=%d}\n", HTF_ID(sequence_id), s->size);
+  htf_log(htf_dbg_lvl_debug, "\tLoad sequence %x {.size=%u}\n", HTF_ID(sequence_id), s->size);
 
   if(htf_debug_level >= htf_dbg_lvl_debug) {
     for(int i = 0; i<s->size && i< 15; i++) {

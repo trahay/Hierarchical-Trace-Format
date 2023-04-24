@@ -155,7 +155,7 @@ struct htf_event {
 struct htf_sequence {
   htf_token_t *token;
   unsigned size;
-  unsigned allocated;
+	unsigned allocated;
 };
 
 /*************************** Loop **********************/

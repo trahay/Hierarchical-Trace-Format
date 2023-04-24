@@ -33,7 +33,7 @@ void info_event(struct htf_thread *t, struct htf_event_summary *e) {
 
 
 void info_sequence(struct htf_sequence *s) {
-  printf("\t{.size: %d, .allocated: %d}\n", s->size, s->allocated);
+  printf("\t{.size: %u, .allocated: %u}\n", s->size, s->allocated);
 }
 
 void info_loop(struct htf_loop *l) {
