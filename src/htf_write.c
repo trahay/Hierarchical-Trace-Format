@@ -190,17 +190,16 @@ static void _htf_find_loop(struct htf_thread_writer *thread_writer) {
 
   struct htf_sequence* cur_seq = _htf_get_cur_sequence(thread_writer);
   int cur_index = cur_seq->size-1;
-  int max_len = 10; 		/* TODO: don't hardcode this */
 
   if(htf_debug_level >= htf_dbg_lvl_debug) {
     printf("find loops in :\n");
     htf_print_token_array(&thread_writer->thread_trace,
 			  cur_seq->token,
-			  cur_index-max_len,
+			  cur_index-MAX_LOOP_LENGTH,
 			  cur_index);
   }
 
-  for(int loop_len=1; loop_len < max_len; loop_len++) {
+  for(int loop_len=1; loop_len < MAX_LOOP_LENGTH; loop_len++) {
     /* search for a loop of loop_len tokens */
     int s1_start = cur_index+1 - loop_len;
     int s2_start = cur_index+1 - 2*loop_len;

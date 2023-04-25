@@ -150,6 +150,8 @@ void htf_record_mpi_collective_end(struct htf_thread_writer *thread_writer,
 #define NB_LOCATION_GROUPS_DEFAULT 16
 #define NB_LOCATIONS_DEFAULT NB_THREADS_DEFAULT
 
+#define MAX_LOOP_LENGTH 10
+
 extern _Thread_local int htf_recursion_shield;
 
 
