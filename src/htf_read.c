@@ -263,10 +263,9 @@ static int _htf_read_thread_next_event(struct htf_thread_reader *reader,
   }
 
   int event_index = HTF_TOKEN_ID(t);
-  htf_event_id_t eid = HTF_EVENT_ID(event_index);
   struct htf_event_summary* es = &reader->thread_trace->events[event_index];
   memcpy(&e->event, &es->event, sizeof(e->event));
-  e->timestamp = es->timestamps[reader->event_index[HTF_ID(eid)]];
+  e->timestamp = es->timestamps[reader->event_index[event_index]];
 
   if(move) {
     /* Move to the next event */
