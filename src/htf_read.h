@@ -36,4 +36,6 @@ int htf_read_thread_next_event(struct htf_thread_reader *reader,
 int htf_read_thread_cur_event(struct htf_thread_reader *reader,
 			      struct htf_event_occurence *e);
 
+
+#define MAX_CALLSTACK_DEPTH 100
 #endif /* HTF_READ_H */

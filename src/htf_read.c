@@ -21,10 +21,9 @@ void htf_read_thread_iterator_init(struct htf_archive *archive,
   reader->thread_trace = htf_archive_get_thread(archive, thread_id);
   htf_assert(reader->thread_trace != NULL);
 
-  /* TODO: don't hardcode the max depth */
-  reader->callstack_sequence = calloc(sizeof(htf_token_t), 100);
-  reader->callstack_index = calloc(sizeof(int), 100);
-  reader->callstack_loop_iteration = calloc(sizeof(int), 100); 
+  reader->callstack_sequence = calloc(sizeof(htf_token_t), MAX_CALLSTACK_DEPTH);
+  reader->callstack_index = calloc(sizeof(int), MAX_CALLSTACK_DEPTH);
+  reader->callstack_loop_iteration = calloc(sizeof(int), MAX_CALLSTACK_DEPTH);
   reader->event_index = calloc(sizeof(int), reader->thread_trace->nb_events);
 
   if(htf_debug_level >= htf_dbg_lvl_verbose) {
@@ -95,11 +94,11 @@ static void print_callstack(struct htf_thread_reader *reader) {
     if(HTF_TOKEN_TYPE(cur_seq_id) == HTF_TYPE_LOOP) {
       struct htf_loop *loop =  htf_get_loop(reader->thread_trace, HTF_TOKEN_TO_LOOP_ID(cur_seq_id));
       printf(" iter %d/%d", reader->callstack_loop_iteration[i], loop->nb_iterations);
-      htf_assert(reader->callstack_loop_iteration[i]<100);
+      htf_assert(reader->callstack_loop_iteration[i]<MAX_CALLSTACK_DEPTH);
     } else if(HTF_TOKEN_TYPE(cur_seq_id) == HTF_TYPE_SEQUENCE) {
       struct htf_sequence *seq =  htf_get_sequence(reader->thread_trace, HTF_TOKEN_TO_SEQUENCE_ID(cur_seq_id));
       printf(" pos %d/%d", reader->callstack_index[i], seq->size);
-      htf_assert(reader->callstack_index[i]<100);
+      htf_assert(reader->callstack_index[i]<MAX_CALLSTACK_DEPTH);
     }
 
     printf("\t-> ");
