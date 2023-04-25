@@ -227,16 +227,16 @@ OTF2_Archive_GetCompression( OTF2_Archive*     archive,
 
 
 int new_location(OTF2_Archive* archive, OTF2_LocationRef location) {
-  int index = archive->nb_locations++;
+  int index = archive->nb_locations;
 
   if(index == 0) {
     /* TODO: hacky ! we should not have to do that ! */
     archive->archive.id = location;
   }
 
-	// TODO Kind of dangerous do realloc but hey whatevs
-  archive->def_writers = realloc(archive->def_writers, sizeof(OTF2_DefWriter*) * archive->nb_locations);
-  archive->evt_writers = realloc(archive->evt_writers, sizeof(OTF2_EvtWriter*) * archive->nb_locations);
+	INCREMENT_MEMORY_SPACE(archive->def_writers, archive->nb_locations, OTF2_DefWriter*);
+	archive->nb_locations--;
+	INCREMENT_MEMORY_SPACE(archive->evt_writers, archive->nb_locations, OTF2_EvtWriter*);
 
   archive->def_writers[index] = malloc(sizeof(OTF2_DefWriter));
   archive->def_writers[index]->locationRef = location;

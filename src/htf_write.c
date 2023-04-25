@@ -405,9 +405,12 @@ static void _init_thread(struct htf_archive *archive,
 
 
   pthread_mutex_lock(&t->archive->lock);
-  while (t->archive->nb_threads > t->archive->nb_allocated_threads) {
+  while (t->archive->nb_threads >= t->archive->nb_allocated_threads) {
 	  DOUBLE_MEMORY_SPACE(t->archive->threads, t->archive->nb_allocated_threads, struct htf_thread*);
-  }
+  } for (int i = 0; i < t->nb_allocated_sequences; i++) {
+		struct htf_sequence * seq = & t->sequences[i];
+		_init_sequence(seq);
+	}
   t->archive->threads[t->archive->nb_threads++] = t;
   pthread_mutex_unlock(&t->archive->lock);
 }
@@ -705,7 +708,7 @@ void htf_record_enter(struct htf_thread_writer *thread_writer,
 
   htf_event_id_t e_id = _htf_get_event_id(&thread_writer->thread_trace, &e);
   htf_store_timestamp(thread_writer, e_id, htf_timestamp(time));
-  htf_store_event(thread_writer, htf_function_entry, e_id);
+  htf_store_event(thread_writer, htf_block_start, e_id);
 
   htf_recursion_shield--;
 }
@@ -725,7 +728,7 @@ void htf_record_leave(struct htf_thread_writer *thread_writer,
 
   htf_event_id_t e_id = _htf_get_event_id(&thread_writer->thread_trace, &e);
   htf_store_timestamp(thread_writer, e_id, htf_timestamp(time));
-  htf_store_event(thread_writer, htf_function_exit, e_id);
+  htf_store_event(thread_writer, htf_block_end, e_id);
 
   htf_recursion_shield--;
 }
