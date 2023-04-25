@@ -34,7 +34,7 @@ static inline struct htf_sequence* _htf_get_cur_sequence(struct htf_thread_write
 	//      So I'm using the initialized value, only for this.
 	//      This is only on AMG BTW
 	if (seq->initialized != 1) {
-		htf_warn("Sequence %p wasn't correctly initialized (initialized=0x%lx) (TW %p->og_seq[%d])\n", seq, seq->initialized, thread_writer, thread_writer->cur_depth);
+		htf_warn("Sequence %p wasn't correctly initialized (initialized=0x%x) (TW %p->og_seq[%d])\n", seq, seq->initialized, thread_writer, thread_writer->cur_depth);
 		_init_sequence(seq);
 	}
   return seq;
