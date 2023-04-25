@@ -369,7 +369,7 @@ static inline int _htf_sequences_equal(struct htf_sequence *s1,
  * This is better than a realloc because it moves the data around, but it is also slower.
  * Checks for error at malloc.
  */
-#define DOUBLE_MEMORY_SPACE(buffer, counter, datatype)                    \
+#define DOUBLE_MEMORY_SPACE(buffer, counter, datatype) do {               \
   datatype * new_buffer = realloc(buffer, 2 * counter * sizeof(datatype));\
   if (new_buffer == NULL) {                                               \
     new_buffer = malloc(counter * sizeof(datatype) * 2);                  \
@@ -380,10 +380,10 @@ static inline int _htf_sequences_equal(struct htf_sequence *s1,
     free(buffer);                                                         \
   }                                                                       \
 	buffer = new_buffer;                                                    \
-  counter *= 2
-
-#define INCREMENT_MEMORY_SPACE(buffer, counter, datatype) \
-	datatype * new_buffer = realloc(buffer, (counter + 1) * sizeof(datatype));\
+  counter *= 2;                                                           \
+} while (0)
+#define INCREMENT_MEMORY_SPACE(buffer, counter, datatype) do {            \
+  datatype * new_buffer = realloc(buffer, (counter + 1) * sizeof(datatype));\
   if (new_buffer == NULL) {                                               \
     new_buffer = malloc((counter + 1) * sizeof(datatype));                \
     if (new_buffer == NULL) {                                             \
@@ -392,7 +392,8 @@ static inline int _htf_sequences_equal(struct htf_sequence *s1,
     memmove(new_buffer, buffer, counter * sizeof(datatype));              \
     free(buffer);                                                         \
   }                                                                       \
-	buffer = new_buffer;                                                    \
-  counter++
+  buffer = new_buffer;                                                    \
+  counter++;                                                              \
+} while (0)
 
 #endif /* EVENT_H */
