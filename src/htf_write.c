@@ -292,7 +292,7 @@ void htf_store_event(struct htf_thread_writer *thread_writer,
 		     enum htf_event_type event_type,
 		     htf_event_id_t id) {
 
-  if(event_type == htf_function_entry) {
+  if(event_type == htf_block_start) {
     _htf_record_enter_function(thread_writer);
   } 
 
@@ -300,7 +300,7 @@ void htf_store_event(struct htf_thread_writer *thread_writer,
   struct htf_sequence *seq =  _htf_get_cur_sequence(thread_writer);
   _htf_store_token(thread_writer, seq, t);
 
-  if(event_type == htf_function_exit) {
+  if(event_type == htf_block_end) {
     _htf_record_exit_function(thread_writer);
   }
 }

@@ -76,8 +76,8 @@ static inline htf_loop_id_t HTF_TOKEN_TO_LOOP_ID(htf_token_t t) { return (htf_lo
 
 /*************************** Events **********************/
 enum htf_event_type {
-   htf_function_entry, /* TODO: rename block_start */
-   htf_function_exit,  /* TODO: rename block_end */
+   htf_block_start,
+   htf_block_end,
    htf_singleton,
 };
 
