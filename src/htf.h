@@ -156,8 +156,10 @@ struct htf_sequence {
   htf_token_t *token;
   unsigned size;
 	unsigned allocated;
+#ifndef NDEBUG
 	/** Only there to correct a bug on the AMG Benchmark. Is set to 1 in the _init_event macro. */
 	uint32_t initialized;
+#endif
 };
 
 /*************************** Loop **********************/

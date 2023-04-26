@@ -19,24 +19,34 @@ static void _htf_find_loop(struct htf_thread_writer *thread_writer);
 static inline htf_sequence_id_t _htf_get_sequence_id_from_array(struct htf_thread *thread_trace,
 								htf_token_t* token_array,
 								int array_len);
-
-#define _init_sequence(s) do {						\
-    s->token = calloc(sizeof(htf_token_t), SEQUENCE_SIZE_DEFAULT);	\
-    s->size = 0;							\
-    s->allocated = SEQUENCE_SIZE_DEFAULT;                          \
-    s->initialized = 1;               \
-  } while(0)
-
+#ifndef NDEBUG
+#define _init_sequence(s)                                                      \
+  do {                                                                         \
+    s->token = calloc(sizeof(htf_token_t), SEQUENCE_SIZE_DEFAULT);             \
+    s->size = 0;                                                               \
+    s->allocated = SEQUENCE_SIZE_DEFAULT;                                      \
+    s->initialized = 1;                                                        \
+  } while (0)
+#else
+#define _init_sequence(s)                                                      \
+  do {                                                                         \
+    s->token = calloc(sizeof(htf_token_t), SEQUENCE_SIZE_DEFAULT);             \
+    s->size = 0;                                                               \
+    s->allocated = SEQUENCE_SIZE_DEFAULT;                                      \
+  } while (0)
+#endif
 static inline struct htf_sequence* _htf_get_cur_sequence(struct htf_thread_writer *thread_writer) {
   struct htf_sequence *seq = thread_writer->og_seq[thread_writer->cur_depth];
 	//FIXME This is very hacky !!!
 	//      Basically sometimes there are these sequences that don't seem to have been correctly init ???
 	//      So I'm using the initialized value, only for this.
 	//      This is only on AMG BTW
+#ifndef NDEBUG
 	if (seq->initialized != 1) {
 		htf_warn("Sequence %p wasn't correctly initialized (initialized=0x%x) (TW %p->og_seq[%d])\n", seq, seq->initialized, thread_writer, thread_writer->cur_depth);
 		_init_sequence(seq);
 	}
+#endif
   return seq;
 }
 

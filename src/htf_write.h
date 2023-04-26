@@ -138,7 +138,7 @@ void htf_record_mpi_collective_end(struct htf_thread_writer *thread_writer,
 
 
 #define NB_EVENT_DEFAULT 1000
-#define NB_SEQUENCE_DEFAULT 1000
+#define NB_SEQUENCE_DEFAULT 10000
 #define NB_LOOP_DEFAULT 1000
 #define NB_STRING_DEFAULT 100
 #define NB_REGION_DEFAULT 100
