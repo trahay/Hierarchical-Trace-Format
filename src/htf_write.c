@@ -35,6 +35,13 @@ static inline htf_sequence_id_t _htf_get_sequence_id_from_array(struct htf_threa
     s->allocated = SEQUENCE_SIZE_DEFAULT;                                      \
   } while (0)
 #endif
+#define _init_event(e)                                                      \
+	do {                                                                      \
+		e->timestamps = malloc(sizeof(htf_timestamp_t) * NB_TIMESTAMP_DEFAULT); \
+		e->nb_allocated_timestamps = NB_TIMESTAMP_DEFAULT;                      \
+		e->nb_timestamps = 0;                                                   \
+	} while (0)
+
 static inline struct htf_sequence* _htf_get_cur_sequence(struct htf_thread_writer *thread_writer) {
   struct htf_sequence *seq = thread_writer->og_seq[thread_writer->cur_depth];
 	//FIXME This is very hacky !!!
@@ -71,17 +78,20 @@ static inline htf_sequence_id_t _htf_get_sequence_id_from_array(struct htf_threa
   htf_log(htf_dbg_lvl_debug, "Searching for sequence {.size=%d}\n", array_len);
 
   for(unsigned i = 1; i < thread_trace->nb_sequences; i++) {
-    if(_htf_arrays_equal(token_array,  array_len,
-			 thread_trace->sequences[i].token,
-			 thread_trace->sequences[i].size)) {
-      htf_log(htf_dbg_lvl_debug, "\t found with id=%u\n", i);
-      return HTF_SEQUENCE_ID(i);
-    }
-  }
+		if (_htf_arrays_equal(token_array, array_len, thread_trace->sequences[i]->token,
+													thread_trace->sequences[i]->size)) {
+			htf_log(htf_dbg_lvl_debug, "\t found with id=%u\n", i);
+			return HTF_SEQUENCE_ID(i);
+		}
+	}
 
 	if (thread_trace->nb_sequences >= thread_trace->nb_allocated_sequences) {
 		htf_warn("Doubling mem space of sequence for thread trace %p\n", thread_trace);
-		DOUBLE_MEMORY_SPACE(thread_trace->sequences, thread_trace->nb_allocated_sequences, struct htf_sequence);
+		DOUBLE_MEMORY_SPACE(thread_trace->sequences, thread_trace->nb_allocated_sequences, struct htf_sequence*);
+		for (int i = thread_trace->nb_allocated_sequences / 2; i < thread_trace->nb_allocated_sequences; i++) {
+			thread_trace->sequences[i] = malloc(sizeof(struct htf_sequence));
+			_init_sequence(thread_trace->sequences[i]);
+		}
 	}
 
   int index = thread_trace->nb_sequences++;
@@ -405,23 +415,23 @@ static void _init_thread(struct htf_archive *archive,
   t->nb_events = 0;
 
   t->nb_allocated_sequences = NB_SEQUENCE_DEFAULT;
-  t->sequences = calloc(t->nb_allocated_sequences, sizeof(struct htf_sequence));
-  t->nb_sequences = 0;
+	t->sequences = calloc(t->nb_allocated_sequences, sizeof(struct htf_sequence*));
+	t->nb_sequences = 0;
 
-  t->nb_allocated_loops = NB_LOOP_DEFAULT;
-  t->loops = calloc(t->nb_allocated_loops, sizeof(struct htf_loop));
-  t->nb_loops = 0;
+	t->nb_allocated_loops = NB_LOOP_DEFAULT;
+	t->loops = calloc(t->nb_allocated_loops, sizeof(struct htf_loop));
+	t->nb_loops = 0;
 
-
-  pthread_mutex_lock(&t->archive->lock);
-  while (t->archive->nb_threads >= t->archive->nb_allocated_threads) {
-	  DOUBLE_MEMORY_SPACE(t->archive->threads, t->archive->nb_allocated_threads, struct htf_thread*);
-  } for (int i = 0; i < t->nb_allocated_sequences; i++) {
-		struct htf_sequence * seq = & t->sequences[i];
-		_init_sequence(seq);
+	pthread_mutex_lock(&t->archive->lock);
+	while (t->archive->nb_threads >= t->archive->nb_allocated_threads) {
+		DOUBLE_MEMORY_SPACE(t->archive->threads, t->archive->nb_allocated_threads, struct htf_thread*);
 	}
-  t->archive->threads[t->archive->nb_threads++] = t;
-  pthread_mutex_unlock(&t->archive->lock);
+	for (int i = 0; i < t->nb_allocated_sequences; i++) {
+		t->sequences[i] = calloc(sizeof(struct htf_sequence), 1);
+		_init_sequence(t->sequences[i]);
+	}
+	t->archive->threads[t->archive->nb_threads++] = t;
+	pthread_mutex_unlock(&t->archive->lock);
 }
 
 void htf_write_thread_open(struct htf_archive* archive,
@@ -437,20 +447,21 @@ void htf_write_thread_open(struct htf_archive* archive,
 
   _init_thread(archive, &thread_writer->thread_trace, thread_id);
   thread_writer->max_depth = CALLSTACK_DEPTH_DEFAULT;
-  thread_writer->og_seq = calloc(thread_writer->max_depth, sizeof(struct htf_sequence*));
+	thread_writer->og_seq = calloc(thread_writer->max_depth, sizeof(struct htf_sequence*));
 
-  // the main sequence is in sequences[0]
-  thread_writer->og_seq[0] = &thread_writer->thread_trace.sequences[0];
-  thread_writer->thread_trace.nb_sequences = 1;
-  _init_sequence(thread_writer->og_seq[0]);
+	// the main sequence is in sequences[0]
+	// FIXME This one is going to have issues when reallocating
+	thread_writer->og_seq[0] = thread_writer->thread_trace.sequences[0];
+	thread_writer->thread_trace.nb_sequences = 1;
+	_init_sequence(thread_writer->og_seq[0]);
 
-  for(int i = 1; i<thread_writer->max_depth; i++) {
-    thread_writer->og_seq[i] = calloc(sizeof(struct htf_sequence), 1);
-    _init_sequence(thread_writer->og_seq[i]);
-  }
-  thread_writer->cur_depth = 0;
+	for (int i = 1; i < thread_writer->max_depth; i++) {
+		thread_writer->og_seq[i] = calloc(1, sizeof(struct htf_sequence));
+		_init_sequence(thread_writer->og_seq[i]);
+	}
+	thread_writer->cur_depth = 0;
 
-  htf_recursion_shield--;
+	htf_recursion_shield--;
 }
 
 void htf_write_define_location_group(struct htf_archive *archive,
@@ -695,9 +706,7 @@ static inline htf_event_id_t _htf_get_event_id(
 	struct htf_event_summary *es = &thread_trace->events[index];
 
 	memcpy(&es->event, e, e->event_size);
-	es->timestamps = malloc(sizeof(htf_timestamp_t) * NB_TIMESTAMP_DEFAULT);
-	es->nb_allocated_timestamps = NB_TIMESTAMP_DEFAULT;
-	es->nb_timestamps = 0;
+	_init_event(es);
 
 	return HTF_EVENT_ID(index);
 }

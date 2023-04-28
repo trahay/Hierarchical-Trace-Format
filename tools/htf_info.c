@@ -54,14 +54,14 @@ void info_thread(struct htf_thread *t) {
   printf("\tSequences {.nb_sequences: %d, .nb_allocated_sequences: %d}\n", t->nb_sequences, t->nb_allocated_sequences);
   for(unsigned i=0; i<t->nb_sequences; i++) {
     printf("\t\t");
-    print_sequence(t, &t->sequences[i], i);
-  } 
+		print_sequence(t, t->sequences[i], i);
+	}
 
-  printf("\tLoops {.nb_loops: %d, .nb_allocated_loops: %d}\n", t->nb_loops, t->nb_allocated_loops);
-  for(unsigned i=0; i<t->nb_loops; i++) {
-    printf("\t\t");
-    info_loop(&t->loops[i]);
-  } 
+	printf("\tLoops {.nb_loops: %d, .nb_allocated_loops: %d}\n", t->nb_loops, t->nb_allocated_loops);
+	for (unsigned i = 0; i < t->nb_loops; i++) {
+		printf("\t\t");
+		info_loop(&t->loops[i]);
+	}
 }
 
 void info_archive(struct htf_archive *archive) {

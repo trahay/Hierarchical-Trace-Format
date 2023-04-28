@@ -30,8 +30,8 @@ struct htf_sequence* htf_get_sequence(struct htf_thread *thread_trace,
 				      htf_sequence_id_t seq_id) {
   struct htf_sequence* seq = NULL;
   if(HTF_ID(seq_id) < thread_trace->nb_sequences)
-    seq = &thread_trace->sequences[HTF_ID(seq_id)];
-  return seq;
+		seq = thread_trace->sequences[HTF_ID(seq_id)];
+	return seq;
 }
 
 /** Returns the loop corresponding to the given loop id.

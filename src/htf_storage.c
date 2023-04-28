@@ -418,10 +418,10 @@ static void _htf_store_thread(const char* dir_name, struct htf_thread *th) {
     _htf_store_event(dir_name, th, &th->events[i], HTF_EVENT_ID(i));
   
   for(int i=0; i<th->nb_sequences; i++)
-    _htf_store_sequence(dir_name, th, &th->sequences[i], HTF_SEQUENCE_ID(i));
+		_htf_store_sequence(dir_name, th, th->sequences[i], HTF_SEQUENCE_ID(i));
 
-  for(int i=0; i<th->nb_loops; i++)
-    _htf_store_loop(dir_name, th, &th->loops[i], HTF_LOOP_ID(i));
+	for (int i = 0; i < th->nb_loops; i++)
+		_htf_store_loop(dir_name, th, &th->loops[i], HTF_LOOP_ID(i));
 }
 
 static void _htf_read_thread(struct htf_archive* global_archive,
@@ -440,28 +440,31 @@ static void _htf_read_thread(struct htf_archive* global_archive,
 
   _htf_fread(&th->nb_sequences, sizeof(th->nb_sequences), 1, token_file);
   th->nb_allocated_sequences = th->nb_sequences;
-  th->sequences = malloc(sizeof(struct htf_sequence) * th->nb_allocated_sequences);
+	th->sequences = malloc(sizeof(struct htf_sequence*) * th->nb_allocated_sequences);
+	for (int i = 0; i < th->nb_sequences; i++) {
+		th->sequences[i] = malloc(sizeof(struct htf_sequence));
+	}
 
-  _htf_fread(&th->nb_loops, sizeof(th->nb_loops), 1, token_file);
-  th->nb_allocated_loops = th->nb_loops;
-  th->loops = malloc(sizeof(struct htf_loop) * th->nb_allocated_loops);
+	_htf_fread(&th->nb_loops, sizeof(th->nb_loops), 1, token_file);
+	th->nb_allocated_loops = th->nb_loops;
+	th->loops = malloc(sizeof(struct htf_loop) * th->nb_allocated_loops);
 
-  htf_log(htf_dbg_lvl_verbose, "Reading %d events\n", th->nb_events);
-  for(int i=0; i<th->nb_events; i++)
-    _htf_read_event(global_archive->dir_name, th, &th->events[i], HTF_EVENT_ID(i));
+	htf_log(htf_dbg_lvl_verbose, "Reading %d events\n", th->nb_events);
+	for (int i = 0; i < th->nb_events; i++)
+		_htf_read_event(global_archive->dir_name, th, &th->events[i], HTF_EVENT_ID(i));
 
-  htf_log(htf_dbg_lvl_verbose, "Reading %d sequences\n", th->nb_sequences);
-  for(int i=0; i<th->nb_sequences; i++)
-    _htf_read_sequence(global_archive->dir_name, th, &th->sequences[i], HTF_SEQUENCE_ID(i));
+	htf_log(htf_dbg_lvl_verbose, "Reading %d sequences\n", th->nb_sequences);
+	for (int i = 0; i < th->nb_sequences; i++)
+		_htf_read_sequence(global_archive->dir_name, th, th->sequences[i], HTF_SEQUENCE_ID(i));
 
-  htf_log(htf_dbg_lvl_verbose, "Reading %d loops\n", th->nb_loops);
-  for(int i=0; i<th->nb_loops; i++)
-    _htf_read_loop(global_archive->dir_name, th, &th->loops[i], HTF_LOOP_ID(i));
+	htf_log(htf_dbg_lvl_verbose, "Reading %d loops\n", th->nb_loops);
+	for (int i = 0; i < th->nb_loops; i++)
+		_htf_read_loop(global_archive->dir_name, th, &th->loops[i], HTF_LOOP_ID(i));
 
-  fclose(token_file);
+	fclose(token_file);
 
-  htf_log(htf_dbg_lvl_verbose, "\tThread %u: {.nb_events=%d, .nb_sequences=%d, .nb_loops=%d}\n",
-	  th->id, th->nb_events,  th->nb_sequences, th->nb_loops);
+	htf_log(htf_dbg_lvl_verbose, "\tThread %u: {.nb_events=%d, .nb_sequences=%d, .nb_loops=%d}\n", th->id, th->nb_events,
+					th->nb_sequences, th->nb_loops);
 }
 
 void htf_storage_finalize_thread(struct htf_thread* thread) {

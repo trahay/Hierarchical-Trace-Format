@@ -239,13 +239,13 @@ struct htf_thread {
   unsigned nb_allocated_events;
   unsigned nb_events;
 
-  struct htf_sequence *sequences;
-  unsigned nb_allocated_sequences;
-  unsigned nb_sequences;
+	struct htf_sequence** sequences;
+	unsigned nb_allocated_sequences;
+	unsigned nb_sequences;
 
-  struct htf_loop *loops;
-  unsigned nb_allocated_loops;
-  unsigned nb_loops;
+	struct htf_loop* loops;
+	unsigned nb_allocated_loops;
+	unsigned nb_loops;
 };
 
 
