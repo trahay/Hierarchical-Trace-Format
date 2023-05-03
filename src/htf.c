@@ -79,25 +79,22 @@ static htf_token_t _htf_get_token_in_loop(struct htf_thread *thread_trace,
 /** Prints the given token.*/
 void htf_print_token(struct htf_thread *thread_trace, htf_token_t token) {
   switch(HTF_TOKEN_TYPE(token)) {
-  case HTF_TYPE_EVENT:
-    {
-#define ET2C(et) (((et) == HTF_EVENT_ENTER? 'E':	\
-		   (et) == HTF_EVENT_LEAVE? 'L':	\
-		   'S'))
+  case HTF_TYPE_EVENT: {
+#define ET2C(et) (((et) == HTF_EVENT_ENTER ? 'E' : (et) == HTF_EVENT_LEAVE ? 'L' : 'S'))
 
-      struct htf_event* e =  htf_get_event(thread_trace, HTF_TOKEN_TO_EVENT_ID(token)); 
-      printf("E_%d (%c)", HTF_TOKEN_ID(token), ET2C(e->record));//, e->function_id);
-      break;
-    }
-  case HTF_TYPE_SEQUENCE:
-    printf("S_%d", HTF_TOKEN_ID(token));
-    break;
+			struct htf_event* e = htf_get_event(thread_trace, HTF_TOKEN_TO_EVENT_ID(token));
+			printf("E%d_%c", HTF_TOKEN_ID(token), ET2C(e->record));	 //, e->function_id);
+			break;
+		}
+		case HTF_TYPE_SEQUENCE:
+			printf("S%d", HTF_TOKEN_ID(token));
+			break;
   case HTF_TYPE_LOOP:
-    printf("L_%d", HTF_TOKEN_ID(token));
-    break;
+			printf("L%d", HTF_TOKEN_ID(token));
+			break;
   default:
-    printf("U_%d_%d", HTF_TOKEN_TYPE(token), HTF_TOKEN_ID(token));
-    break;
+			printf("U%d_%d", HTF_TOKEN_TYPE(token), HTF_TOKEN_ID(token));
+			break;
   }
 }
 

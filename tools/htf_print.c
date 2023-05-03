@@ -11,30 +11,77 @@
 #include "htf_archive.h"
 
 /* Print one event */
-static void print_event(struct htf_thread* t,
-			struct htf_event_occurence *e) {
-  static int first_time = 1;
-  
-  if(first_time == 1) {
-    printf("#timestamp\tthread_name\tevent\n");
-    first_time = 0;
-  }
-  printf("%.9lf\t%s\t", e->timestamp/1e9, htf_get_thread_name(t));
-  htf_print_event(t, &e->event);
-  printf("\n");
+static void print_event(struct htf_thread* thread, htf_token_t token, struct htf_event_occurence* e) {
+	printf("%.9lf\t\t%s\t", e->timestamp / 1e9, htf_get_thread_name(thread));
+	htf_print_token(thread, token);
+	printf("\t");
+	htf_print_event(thread, &e->event);
+	printf("\n");
+}
+
+static void print_sequence(struct htf_thread* thread, htf_token_t token) {
+	printf("Sequence %x = ", token.id);
+	struct htf_sequence* seq = htf_get_sequence(thread, HTF_SEQUENCE_ID(token.id));
+	for (unsigned i = 0; i < seq->size; i++) {
+		htf_print_token(thread, seq->token[i]);
+		printf(" ");
+	}
+	printf("\n");
+}
+
+static void print_loop(struct htf_thread* thread, htf_token_t token) {
+	struct htf_loop* loop = htf_get_loop(thread, HTF_LOOP_ID(token.id));
+	printf("Loop %x = %d * ", token.id, loop->nb_iterations);
+	htf_print_token(thread, loop->token);
+	printf("\n");
 }
 
 /* Print all the events of a thread */
-static void print_thread(struct htf_archive *trace, struct htf_thread* thread) {
-  printf("Reading events for thread %u (%s):\n", thread->id, htf_get_thread_name(thread));
+static void print_thread(struct htf_archive* trace, struct htf_thread* thread, int show_structure) {
+	printf("Reading events for thread %u (%s):\n", thread->id, htf_get_thread_name(thread));
+	printf("Timestamp\t\tThread Name\tTag\tEvent\n");
 
-  struct htf_thread_reader reader;
-  htf_read_thread_iterator_init(trace, &reader, thread->id);
+	struct htf_thread_reader reader;
+	htf_read_thread_iterator_init(trace, &reader, thread->id);
 
-  struct htf_event_occurence e;
-  while(htf_read_thread_next_event(&reader, &e) == 0) {
-    print_event(thread, &e);
-  }
+	struct htf_event_occurence e;
+	struct htf_token t;
+	while (htf_read_thread_next_token(&reader, &t, &e) == 0) {
+		htf_log(htf_dbg_lvl_verbose, "Reading token(%x.%x)\n", t.type, t.id);
+		if (show_structure) {
+			if (reader.depth == reader.current_frame) {
+				for (int i = 0; i < reader.depth; i++)
+					printf("│ ");
+			}
+			if (reader.depth < reader.current_frame) {
+				// Means we just went deeper
+				for (int i = 0; i < reader.depth; i++)
+					printf("│ ");
+			}
+			if (reader.depth > reader.current_frame) {
+				// Means we ended some blocks
+				for (int i = 0; i < reader.current_frame; i++)
+					printf("│ ");
+				for (int i = (reader.current_frame >= 0) ? reader.current_frame : 0; i < reader.depth; i++)
+					printf("╰─");
+			}
+		}
+		reader.depth = reader.current_frame;
+		switch (t.type) {
+			case HTF_TYPE_INVALID:
+				htf_error("Type is invalid\n");
+				break;
+			case HTF_TYPE_EVENT:
+				print_event(thread, t, &e);
+				break;
+			case HTF_TYPE_SEQUENCE:
+				print_sequence(thread, t);
+				break;
+			case HTF_TYPE_LOOP:
+				print_loop(thread, t);
+				break;
+		}
+	}
 }
 
 /* compare the timestamps of the current event on each thread and select the smallest timestamp
@@ -76,8 +123,8 @@ void print_trace(struct htf_archive *trace) {
   struct htf_event_occurence e;
   int thread_index = -1;
   while((thread_index = get_next_event(readers, nb_threads, &e)) >= 0) {
-    print_event(readers[thread_index].thread_trace, &e);
-  }
+		print_event(readers[thread_index].thread_trace, HTF_TOKENIZE(1, 0), &e);
+	}
 }
 
 void usage(const char *prog_name) {
@@ -88,27 +135,31 @@ void usage(const char *prog_name) {
 }
 
 int main(int argc, char**argv) {
-  int per_thread = 0;
-  int nb_opts = 0;
-  char* trace_name = NULL;
+	int per_thread = 0;
+	int show_structure = 0;
+	int nb_opts = 0;
+	char* trace_name = NULL;
 
   for (int i = 1; i < argc; i++) {
     if (!strcmp(argv[i], "-v")) {
       htf_debug_level_set(htf_dbg_lvl_debug);
       nb_opts++;
     } else if (!strcmp(argv[i], "-T")) {
-      per_thread = 1;
-      nb_opts++;
-    } else if (!strcmp(argv[i], "-h") || !strcmp(argv[i], "-?") ) {
-      usage(argv[0]);
-      return EXIT_SUCCESS;
-    } else {
-      /* Unknown parameter name. It's probably the program name. We can stop
-       * parsing the parameter list.
-       */
-      break;
-    }
-  }
+			per_thread = 1;
+			nb_opts++;
+		} else if (!strcmp(argv[i], "-S")) {
+			show_structure = 1;
+			nb_opts++;
+		} else if (!strcmp(argv[i], "-h") || !strcmp(argv[i], "-?")) {
+			usage(argv[0]);
+			return EXIT_SUCCESS;
+		} else {
+			/* Unknown parameter name. It's probably the program name. We can stop
+			 * parsing the parameter list.
+			 */
+			break;
+		}
+	}
 
   trace_name = argv[nb_opts + 1];
   if (trace_name == NULL) {
@@ -121,9 +172,10 @@ int main(int argc, char**argv) {
 
   if(per_thread) {
     for(int i=0; i< trace.nb_threads; i++) {
-      print_thread(&trace, trace.threads[i]);
-    }
-  } else {
+			printf("\n");
+			print_thread(&trace, trace.threads[i], show_structure);
+		}
+	} else {
     print_trace(&trace);
   }
 
