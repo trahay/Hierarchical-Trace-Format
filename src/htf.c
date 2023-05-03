@@ -83,17 +83,17 @@ void htf_print_token(struct htf_thread *thread_trace, htf_token_t token) {
 #define ET2C(et) (((et) == HTF_EVENT_ENTER ? 'E' : (et) == HTF_EVENT_LEAVE ? 'L' : 'S'))
 
 			struct htf_event* e = htf_get_event(thread_trace, HTF_TOKEN_TO_EVENT_ID(token));
-			printf("E%d_%c", HTF_TOKEN_ID(token), ET2C(e->record));	 //, e->function_id);
+			printf("E%x_%c", HTF_TOKEN_ID(token), ET2C(e->record));	 //, e->function_id);
 			break;
 		}
 		case HTF_TYPE_SEQUENCE:
-			printf("S%d", HTF_TOKEN_ID(token));
+			printf("S%x", HTF_TOKEN_ID(token));
 			break;
   case HTF_TYPE_LOOP:
-			printf("L%d", HTF_TOKEN_ID(token));
+			printf("L%x", HTF_TOKEN_ID(token));
 			break;
   default:
-			printf("U%d_%d", HTF_TOKEN_TYPE(token), HTF_TOKEN_ID(token));
+			printf("U%x_%x", HTF_TOKEN_TYPE(token), HTF_TOKEN_ID(token));
 			break;
   }
 }
