@@ -6,9 +6,10 @@
 #include "htf_archive.h"
 
 static void init_callstack(struct htf_thread_reader *reader) {
-  reader->current_frame = 0;
-  reader->callstack_index[0] = 0;
-  reader->callstack_loop_iteration[0] = 0;
+	reader->current_frame = 0;
+	reader->depth = 0;
+	reader->callstack_index[0] = 0;
+	reader->callstack_loop_iteration[0] = 0;
   reader->callstack_sequence[0].type = HTF_TYPE_SEQUENCE;
   reader->callstack_sequence[0].id = 0;
 }
@@ -179,62 +180,60 @@ static void leave_block(struct htf_thread_reader *reader) {
 	     (HTF_TOKEN_TYPE(cur_seq) == HTF_TYPE_SEQUENCE));
 }
 
-static void _get_next_event(struct htf_thread_reader *reader) {
-  int cur_frame;
-  int cur_index;
-  htf_token_t cur_seq_id;
-  int cur_loop_iteration;
+static void _get_next_event(struct htf_thread_reader* reader, int move) {
+	int cur_frame;
+	int cur_index;
+	htf_token_t cur_seq_id;
+	int cur_loop_iteration;
 
-  if(reader->current_frame < 0)
-    return;
+	if (reader->current_frame < 0)
+		return;
 
-#define UPDATE_POSITION() do {						\
-    cur_frame = reader->current_frame;					\
-    cur_index = reader->callstack_index[cur_frame];			\
-    cur_seq_id = reader->callstack_sequence[cur_frame];			\
-    cur_loop_iteration = reader->callstack_loop_iteration[cur_frame];	\
-    /* Did we reach the end of the trace ?  */				\
-    if(reader->current_frame < 0) {					\
-      htf_log(htf_dbg_lvl_debug, "End of trace %d!\n", __LINE__);	\
-      reader->current_frame = -1;					\
-      return;								\
-    }									\
-  } while(0)
+	// Update Position
+	cur_frame = reader->current_frame;
+	cur_index = reader->callstack_index[cur_frame];
+	cur_seq_id = reader->callstack_sequence[cur_frame];
+	cur_loop_iteration = reader->callstack_loop_iteration[cur_frame];
+	/* Did we reach the end of the trace ?  */
+	if (reader->current_frame < 0) {
+		htf_log(htf_dbg_lvl_debug, "End of trace %d!\n", __LINE__);
+		reader->current_frame = -1;
+		return;
+	}
 
-  UPDATE_POSITION();
-  htf_assert(HTF_TOKEN_TYPE(cur_seq_id) == HTF_TYPE_SEQUENCE ||
-	     HTF_TOKEN_TYPE(cur_seq_id) == HTF_TYPE_LOOP);
-  /* get to the next position */
-  if(HTF_TOKEN_TYPE(cur_seq_id) == HTF_TYPE_SEQUENCE) {
-    if( end_of_a_sequence(reader, cur_index+1, cur_seq_id)) {
-      /* we reached the end of a sequence. leave the block and get the next event */
-      leave_block(reader);
-      _get_next_event(reader);
-      return;
-    }
+	htf_assert(HTF_TOKEN_TYPE(cur_seq_id) == HTF_TYPE_SEQUENCE || HTF_TOKEN_TYPE(cur_seq_id) == HTF_TYPE_LOOP);
+	/* get to the next position */
+	if (HTF_TOKEN_TYPE(cur_seq_id) == HTF_TYPE_SEQUENCE) {
+		if (end_of_a_sequence(reader, cur_index + 1, cur_seq_id)) {
+			/* we reached the end of a sequence. leave the block and get the next event */
+			leave_block(reader);
+			_get_next_event(reader, move);
+			return;
+		}
 
-    /* just move to the next event in the sequence */
-    reader->callstack_index[cur_frame]++;
-  } else {
-    if( end_of_a_loop(reader, cur_loop_iteration+1, cur_seq_id)) {
-      /* we reached the end of a sequence. leave the block and get the next event */
-      leave_block(reader);
-      _get_next_event(reader);
-      return;
-    }
-    /* just move to the next iteration in the sequence */   
-    reader->callstack_loop_iteration[cur_frame]++;
-  }
+		/* just move to the next event in the sequence */
+		reader->callstack_index[cur_frame]++;
+	} else {
+		if (end_of_a_loop(reader, cur_loop_iteration + 1, cur_seq_id)) {
+			/* we reached the end of a sequence. leave the block and get the next event */
+			leave_block(reader);
+			_get_next_event(reader, move);
+			return;
+		}
+		/* just move to the next iteration in the loop */
+		reader->callstack_loop_iteration[cur_frame]++;
+	}
 
-  /* We are at the next position.
-   * This may be the start of a sequence/loop, so we need to enter until we reach an event
-   */
-  htf_token_t t = get_cur_token(reader);
-  while((HTF_TOKEN_TYPE(t) == HTF_TYPE_SEQUENCE) ||
-	(HTF_TOKEN_TYPE(t) == HTF_TYPE_LOOP) ) {
-    enter_block(reader, t);
-    t = get_cur_token(reader);
-  }
+	/* We are at the next position.
+	 * This may be the start of a sequence/loop, so we need to enter until we reach an event
+	 */
+	htf_token_t t = get_cur_token(reader);
+	if (move) {
+		while ((HTF_TOKEN_TYPE(t) == HTF_TYPE_SEQUENCE) || (HTF_TOKEN_TYPE(t) == HTF_TYPE_LOOP)) {
+			enter_block(reader, t);
+			t = get_cur_token(reader);
+		}
+	}
 }
 
 static int _htf_read_thread_next_event(struct htf_thread_reader *reader,
@@ -260,19 +259,55 @@ static int _htf_read_thread_next_event(struct htf_thread_reader *reader,
   if (move) {
     /* Move to the next event */
     reader->event_index[event_index]++; // "consume" the event occurence
-    _get_next_event(reader);
-  }
+		_get_next_event(reader, 1);
+	}
 
   return 0;
 }
 
-int htf_read_thread_cur_event(struct htf_thread_reader *reader,
-			      struct htf_event_occurence *e) {
-  return _htf_read_thread_next_event(reader, e, 0);
+int htf_read_thread_cur_event(struct htf_thread_reader *reader, struct htf_event_occurence* e) {
+	return _htf_read_thread_next_event(reader, e, 0);
 }
 
-int htf_read_thread_next_event(struct htf_thread_reader *reader,
-			       struct htf_event_occurence *e) {
+int htf_read_thread_next_event(struct htf_thread_reader* reader, struct htf_event_occurence* e) {
+	return _htf_read_thread_next_event(reader, e, 1);
+}
 
-  return _htf_read_thread_next_event(reader, e, 1);
+static int _htf_read_thread_next_token(struct htf_thread_reader* reader,
+																			 struct htf_token* token,
+																			 struct htf_event_occurence* e,
+																			 int move) {
+	if (reader->current_frame < 0) {
+		return -1; /* TODO: return EOF */
+	}
+
+	/* Get the current event */
+	htf_token_t t = get_cur_token(reader);
+	memcpy(token, &t, sizeof(t));
+
+	if (HTF_TOKEN_TYPE(t) == HTF_TYPE_EVENT) {
+		int event_index = HTF_TOKEN_ID(t);
+		struct htf_event_summary* es = &reader->thread_trace->events[event_index];
+		memcpy(&e->event, &es->event, sizeof(e->event));
+		e->timestamp = es->timestamps[reader->event_index[event_index]];
+	}
+
+	if (move) {
+		/* Move to the next event */
+		if (HTF_TOKEN_TYPE(t) == HTF_TYPE_SEQUENCE || HTF_TOKEN_TYPE(t) == HTF_TYPE_LOOP) {
+			enter_block(reader, t);
+		} else {
+			reader->event_index[HTF_TOKEN_ID(t)]++;	 // "consume" the event occurence
+			_get_next_event(reader, 0);
+		}
+	}
+
+	return 0;
+}
+int htf_read_thread_cur_token(struct htf_thread_reader* reader, struct htf_token* t, struct htf_event_occurence* e) {
+	return _htf_read_thread_next_token(reader, t, e, 0);
+}
+
+int htf_read_thread_next_token(struct htf_thread_reader* reader, struct htf_token* t, struct htf_event_occurence* e) {
+	return _htf_read_thread_next_token(reader, t, e, 1);
 }
