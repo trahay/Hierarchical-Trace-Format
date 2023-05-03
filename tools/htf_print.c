@@ -1,18 +1,24 @@
-#include <fcntl.h>
-#include <unistd.h>
 #include <assert.h>
+#include <fcntl.h>
+#include <stdlib.h>
+#include <string.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
-#include <string.h>
-#include <stdlib.h>
+#include <unistd.h>
 
 #include "htf.h"
-#include "htf_read.h"
 #include "htf_archive.h"
+#include "htf_read.h"
+
+static int show_structure = 0;
+static int per_thread = 0;
+static long max_depth = MAX_CALLSTACK_DEPTH;
 
 /* Print one event */
 static void print_event(struct htf_thread* thread, htf_token_t token, struct htf_event_occurence* e) {
-	printf("%.9lf\t\t%s\t", e->timestamp / 1e9, htf_get_thread_name(thread));
+	printf("%.9lf\t\t", e->timestamp / 1e9);
+	if (!per_thread)
+		printf("%s\t", htf_get_thread_name(thread));
 	htf_print_token(thread, token);
 	printf("\t");
 	htf_print_event(thread, &e->event);
@@ -37,9 +43,9 @@ static void print_loop(struct htf_thread* thread, htf_token_t token) {
 }
 
 /* Print all the events of a thread */
-static void print_thread(struct htf_archive* trace, struct htf_thread* thread, int show_structure, int max_depth) {
+static void print_thread(struct htf_archive* trace, struct htf_thread* thread) {
 	printf("Reading events for thread %u (%s):\n", thread->id, htf_get_thread_name(thread));
-	printf("Timestamp\t\tThread Name\tTag\tEvent\n");
+	printf("Timestamp\t\tTag\tEvent\n");
 
 	struct htf_thread_reader reader;
 	htf_read_thread_iterator_init(trace, &reader, thread->id);
@@ -116,15 +122,17 @@ static int get_next_event(struct htf_thread_reader *readers,
 
 /* Print all the events of all the threads sorted by timestamp */
 void print_trace(struct htf_archive *trace) {
-  int nb_threads = trace->nb_threads;
-  struct htf_thread_reader *readers =  malloc(sizeof(struct htf_thread_reader) * (nb_threads));
-  for(int i=0; i<trace->nb_threads; i++) {
-    htf_read_thread_iterator_init(trace, &readers[i], trace->threads[i]->id);
-  }
+	int nb_threads = trace->nb_threads;
+	struct htf_thread_reader* readers = malloc(sizeof(struct htf_thread_reader) * (nb_threads));
+	for (int i = 0; i < trace->nb_threads; i++) {
+		htf_read_thread_iterator_init(trace, &readers[i], trace->threads[i]->id);
+	}
 
-  struct htf_event_occurence e;
-  int thread_index = -1;
-  while((thread_index = get_next_event(readers, nb_threads, &e)) >= 0) {
+	printf("Timestamp\t\tThread Name\tTag\tEvent\n");
+
+	struct htf_event_occurence e;
+	int thread_index = -1;
+	while ((thread_index = get_next_event(readers, nb_threads, &e)) >= 0) {
 		print_event(readers[thread_index].thread_trace, HTF_TOKENIZE(1, 0), &e);
 	}
 }
@@ -139,9 +147,6 @@ void usage(const char *prog_name) {
 }
 
 int main(int argc, char**argv) {
-	int per_thread = 0;
-	int show_structure = 0;
-	long max_depth = MAX_CALLSTACK_DEPTH;
 	int nb_opts = 0;
 	char* trace_name = NULL;
 
@@ -182,7 +187,7 @@ int main(int argc, char**argv) {
   if(per_thread) {
     for(int i=0; i< trace.nb_threads; i++) {
 			printf("\n");
-			print_thread(&trace, trace.threads[i], show_structure, max_depth);
+			print_thread(&trace, trace.threads[i]);
 		}
 	} else {
     print_trace(&trace);
