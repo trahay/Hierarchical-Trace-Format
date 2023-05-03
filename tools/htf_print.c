@@ -82,6 +82,10 @@ static void print_thread(struct htf_archive* trace, struct htf_thread* thread) {
 						printf("│ ");
 					for (int i = (reader.current_frame >= 0) ? reader.current_frame : 0; i < reader.depth; i++)
 						printf("╰─");
+
+					// FIXME 	If we don't print the last EVENT of the sequence/loop
+					// 				We're not going to see this, because the current_frame will not have been updated
+					// 				One solution would be to make it so reader only stops/outpus when current_frame <= max_depth
 				}
 			}
 			switch (t.type) {
