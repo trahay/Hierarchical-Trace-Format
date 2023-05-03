@@ -25,8 +25,13 @@ static void print_event(struct htf_thread* thread, htf_token_t token, struct htf
 	printf("\n");
 }
 
-static void print_sequence(struct htf_thread* thread, htf_token_t token) {
-	printf("Sequence %x = ", token.id);
+static void print_sequence(struct htf_thread* thread, htf_token_t token, htf_timestamp_t ts) {
+	if (ts != 0)
+		printf("%.9lf\t\t", ts / 1e9);
+	else
+		printf("Sequence     \t\t");
+	htf_print_token(thread, token);
+	printf("\t");
 	struct htf_sequence* seq = htf_get_sequence(thread, HTF_SEQUENCE_ID(token.id));
 	for (unsigned i = 0; i < seq->size; i++) {
 		htf_print_token(thread, seq->token[i]);
@@ -35,9 +40,14 @@ static void print_sequence(struct htf_thread* thread, htf_token_t token) {
 	printf("\n");
 }
 
-static void print_loop(struct htf_thread* thread, htf_token_t token) {
+static void print_loop(struct htf_thread* thread, htf_token_t token, htf_timestamp_t ts) {
+	if (ts != 0)
+		printf("%.9lf\t\t", ts / 1e9);
+	else
+		printf("Loop         \t\t");
 	struct htf_loop* loop = htf_get_loop(thread, HTF_LOOP_ID(token.id));
-	printf("Loop %x = %d * ", token.id, loop->nb_iterations);
+	htf_print_token(thread, token);
+	printf("\t%d * ", loop->nb_iterations);
 	htf_print_token(thread, loop->token);
 	printf("\n");
 }
@@ -54,7 +64,7 @@ static void print_thread(struct htf_archive* trace, struct htf_thread* thread) {
 	struct htf_token t;
 	while (htf_read_thread_next_token(&reader, &t, &e) == 0) {
 		htf_log(htf_dbg_lvl_verbose, "Reading token(%x.%x)\n", t.type, t.id);
-		if (reader.depth < max_depth) {
+		if (reader.depth <= max_depth) {
 			if (show_structure) {
 				if (reader.depth == reader.current_frame) {
 					for (int i = 0; i < reader.depth; i++)
@@ -62,8 +72,9 @@ static void print_thread(struct htf_archive* trace, struct htf_thread* thread) {
 				}
 				if (reader.depth < reader.current_frame) {
 					// Means we just went deeper
-					for (int i = 0; i < reader.depth; i++)
+					for (int i = 0; i < reader.depth - 1; i++)
 						printf("│ ");
+					printf("├─");
 				}
 				if (reader.depth > reader.current_frame) {
 					// Means we ended some blocks
@@ -81,10 +92,16 @@ static void print_thread(struct htf_archive* trace, struct htf_thread* thread) {
 					print_event(thread, t, &e);
 					break;
 				case HTF_TYPE_SEQUENCE:
-					print_sequence(thread, t);
+					if (reader.depth == max_depth)
+						print_sequence(thread, t, htf_get_starting_timestamp(&reader, t));
+					else if (show_structure)
+						print_sequence(thread, t, 0);
 					break;
 				case HTF_TYPE_LOOP:
-					print_loop(thread, t);
+					if (reader.depth == max_depth)
+						print_loop(thread, t, htf_get_starting_timestamp(&reader, t));
+					else if (show_structure)
+						print_loop(thread, t, 0);
 					break;
 			}
 		}

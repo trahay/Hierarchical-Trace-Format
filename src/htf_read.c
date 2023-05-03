@@ -85,8 +85,8 @@ static void print_callstack(struct htf_thread_reader *reader) {
 
     htf_token_t cur_seq_id = _htf_get_frame_in_callstack(reader, i);
     htf_token_t token = _htf_get_token_in_callstack(reader, i);
-    
-    printf("%.*s[%d] ", i*2, "                       ", i);
+
+		printf("%.*s[%d] ", i*2, "                       ", i);
 
     htf_print_token(reader->thread_trace, cur_seq_id);
 
@@ -104,7 +104,7 @@ static void print_callstack(struct htf_thread_reader *reader) {
     htf_print_token(reader->thread_trace, token);
 
     printf("\n");
-  } 
+	}
 }
 
 /* enter a block (push a new frame in the callstack) */
@@ -126,8 +126,7 @@ static void enter_block(struct htf_thread_reader *reader, htf_token_t new_block)
 static int end_of_a_sequence(struct htf_thread_reader *reader,
 			     int cur_index,
 			     htf_token_t seq_id) {
-  
-  if(HTF_TOKEN_TYPE(seq_id) == HTF_TYPE_SEQUENCE) {
+	if(HTF_TOKEN_TYPE(seq_id) == HTF_TYPE_SEQUENCE) {
     htf_sequence_id_t sequence = HTF_TOKEN_TO_SEQUENCE_ID(seq_id);
     struct htf_sequence* s = htf_get_sequence(reader->thread_trace, sequence);
     /* we are in a sequence and index is beyond the end of the sequence */
@@ -140,8 +139,7 @@ static int end_of_a_sequence(struct htf_thread_reader *reader,
 static int end_of_a_loop(struct htf_thread_reader *reader,
 			 int cur_index,
 			 htf_token_t seq_id) {
-  
-  if(HTF_TOKEN_TYPE(seq_id) == HTF_TYPE_LOOP) {
+	if(HTF_TOKEN_TYPE(seq_id) == HTF_TYPE_LOOP) {
     htf_loop_id_t loop = HTF_TOKEN_TO_LOOP_ID(seq_id);
     struct htf_loop* l = htf_get_loop(reader->thread_trace, loop);
     /* we are in a loop and index is beyond the number of iterations */
@@ -310,4 +308,12 @@ int htf_read_thread_cur_token(struct htf_thread_reader* reader, struct htf_token
 
 int htf_read_thread_next_token(struct htf_thread_reader* reader, struct htf_token* t, struct htf_event_occurence* e) {
 	return _htf_read_thread_next_token(reader, t, e, 1);
+}
+
+htf_timestamp_t htf_get_starting_timestamp(struct htf_thread_reader* reader, struct htf_token token) {
+	while (HTF_TOKEN_TYPE(token) == HTF_TYPE_LOOP || HTF_TOKEN_TYPE(token) == HTF_TYPE_SEQUENCE) {
+		token = htf_get_token(reader->thread_trace, token, 0);
+	}
+	htf_assert(HTF_TOKEN_TYPE(token) == HTF_TYPE_EVENT);
+	return reader->thread_trace->events[HTF_TOKEN_ID(token)].timestamps[reader->event_index[HTF_TOKEN_ID(token)]];
 }
