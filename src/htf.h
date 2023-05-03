@@ -387,6 +387,12 @@ static inline int _htf_sequences_equal(struct htf_sequence *s1,
 	buffer = new_buffer;                                                    \
   counter *= 2;                                                           \
 } while (0)
+/**
+ * Given a buffer, a counter that indicates the number of object it holds, and this object's datatype,
+ * Increments the size of the buffer by 1 using realloc, or if it fails, malloc and memmove then frees the old buffer.
+ * This is better than a realloc because it moves the data around, but it is also slower.
+ * Checks for error at malloc.
+ */
 #define INCREMENT_MEMORY_SPACE(buffer, counter, datatype) do {            \
   datatype * new_buffer = realloc(buffer, (counter + 1) * sizeof(datatype));\
   if (new_buffer == NULL) {                                               \
