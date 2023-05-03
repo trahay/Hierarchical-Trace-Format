@@ -37,7 +37,7 @@ static void print_loop(struct htf_thread* thread, htf_token_t token) {
 }
 
 /* Print all the events of a thread */
-static void print_thread(struct htf_archive* trace, struct htf_thread* thread, int show_structure) {
+static void print_thread(struct htf_archive* trace, struct htf_thread* thread, int show_structure, int max_depth) {
 	printf("Reading events for thread %u (%s):\n", thread->id, htf_get_thread_name(thread));
 	printf("Timestamp\t\tThread Name\tTag\tEvent\n");
 
@@ -48,39 +48,41 @@ static void print_thread(struct htf_archive* trace, struct htf_thread* thread, i
 	struct htf_token t;
 	while (htf_read_thread_next_token(&reader, &t, &e) == 0) {
 		htf_log(htf_dbg_lvl_verbose, "Reading token(%x.%x)\n", t.type, t.id);
-		if (show_structure) {
-			if (reader.depth == reader.current_frame) {
-				for (int i = 0; i < reader.depth; i++)
-					printf("│ ");
+		if (reader.depth < max_depth) {
+			if (show_structure) {
+				if (reader.depth == reader.current_frame) {
+					for (int i = 0; i < reader.depth; i++)
+						printf("│ ");
+				}
+				if (reader.depth < reader.current_frame) {
+					// Means we just went deeper
+					for (int i = 0; i < reader.depth; i++)
+						printf("│ ");
+				}
+				if (reader.depth > reader.current_frame) {
+					// Means we ended some blocks
+					for (int i = 0; i < reader.current_frame; i++)
+						printf("│ ");
+					for (int i = (reader.current_frame >= 0) ? reader.current_frame : 0; i < reader.depth; i++)
+						printf("╰─");
+				}
 			}
-			if (reader.depth < reader.current_frame) {
-				// Means we just went deeper
-				for (int i = 0; i < reader.depth; i++)
-					printf("│ ");
-			}
-			if (reader.depth > reader.current_frame) {
-				// Means we ended some blocks
-				for (int i = 0; i < reader.current_frame; i++)
-					printf("│ ");
-				for (int i = (reader.current_frame >= 0) ? reader.current_frame : 0; i < reader.depth; i++)
-					printf("╰─");
+			switch (t.type) {
+				case HTF_TYPE_INVALID:
+					htf_error("Type is invalid\n");
+					break;
+				case HTF_TYPE_EVENT:
+					print_event(thread, t, &e);
+					break;
+				case HTF_TYPE_SEQUENCE:
+					print_sequence(thread, t);
+					break;
+				case HTF_TYPE_LOOP:
+					print_loop(thread, t);
+					break;
 			}
 		}
 		reader.depth = reader.current_frame;
-		switch (t.type) {
-			case HTF_TYPE_INVALID:
-				htf_error("Type is invalid\n");
-				break;
-			case HTF_TYPE_EVENT:
-				print_event(thread, t, &e);
-				break;
-			case HTF_TYPE_SEQUENCE:
-				print_sequence(thread, t);
-				break;
-			case HTF_TYPE_LOOP:
-				print_loop(thread, t);
-				break;
-		}
 	}
 }
 
@@ -128,15 +130,18 @@ void print_trace(struct htf_archive *trace) {
 }
 
 void usage(const char *prog_name) {
-  printf("Usage: %s [OPTION] trace_file\n", prog_name);
-  printf("\t-T          Print events per thread\n");
-  printf("\t-v          Verbose mode\n");
-  printf("\t-?  -h      Display this help and exit\n");
+	printf("Usage: %s [OPTION] trace_file\n", prog_name);
+	printf("\t-T          Print events per thread\n");
+	printf("\t-S          Structure mode\n");
+	printf("\t--max-depth Next args is the max-depth which shall be printed\n");
+	printf("\t-v          Verbose mode\n");
+	printf("\t-?  -h      Display this help and exit\n");
 }
 
 int main(int argc, char**argv) {
 	int per_thread = 0;
 	int show_structure = 0;
+	long max_depth = MAX_CALLSTACK_DEPTH;
 	int nb_opts = 0;
 	char* trace_name = NULL;
 
@@ -150,11 +155,15 @@ int main(int argc, char**argv) {
 		} else if (!strcmp(argv[i], "-S")) {
 			show_structure = 1;
 			nb_opts++;
+		} else if (!strcmp(argv[i], "--max-depth")) {
+			max_depth = strtol(argv[i + 1], NULL, 10);
+			nb_opts += 2;
+			i++;
 		} else if (!strcmp(argv[i], "-h") || !strcmp(argv[i], "-?")) {
 			usage(argv[0]);
 			return EXIT_SUCCESS;
 		} else {
-			/* Unknown parameter name. It's probably the program name. We can stop
+			/* Unknown parameter name. It's probably the trace's path name. We can stop
 			 * parsing the parameter list.
 			 */
 			break;
@@ -173,7 +182,7 @@ int main(int argc, char**argv) {
   if(per_thread) {
     for(int i=0; i< trace.nb_threads; i++) {
 			printf("\n");
-			print_thread(&trace, trace.threads[i], show_structure);
+			print_thread(&trace, trace.threads[i], show_structure, max_depth);
 		}
 	} else {
     print_trace(&trace);
