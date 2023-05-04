@@ -30,6 +30,8 @@ static void print_sequence(struct htf_thread* thread, htf_token_t token, htf_tim
 		printf("%.9lf\t\t", ts / 1e9);
 	else
 		printf("Sequence     \t\t");
+	if (!per_thread)
+		printf("%s\t", htf_get_thread_name(thread));
 	htf_print_token(thread, token);
 	printf("\t");
 	struct htf_sequence* seq = htf_get_sequence(thread, HTF_SEQUENCE_ID(token.id));
@@ -45,6 +47,8 @@ static void print_loop(struct htf_thread* thread, htf_token_t token, htf_timesta
 		printf("%.9lf\t\t", ts / 1e9);
 	else
 		printf("Loop         \t\t");
+	if (!per_thread)
+		printf("%s\t", htf_get_thread_name(thread));
 	struct htf_loop* loop = htf_get_loop(thread, HTF_LOOP_ID(token.id));
 	htf_print_token(thread, token);
 	printf("\t%d * ", loop->nb_iterations);
@@ -61,53 +65,55 @@ static void print_thread(struct htf_archive* trace, struct htf_thread* thread) {
 	htf_read_thread_iterator_init(trace, &reader, thread->id);
 
 	struct htf_event_occurence e;
-	struct htf_token t;
+	struct htf_token t, copy_token;
 	while (htf_read_thread_next_token(&reader, &t, &e) == 0) {
-		htf_log(htf_dbg_lvl_verbose, "Reading token(%x.%x)\n", t.type, t.id);
-		if (reader.depth <= max_depth) {
-			if (show_structure) {
-				if (reader.depth == reader.current_frame) {
-					for (int i = 0; i < reader.depth; i++)
-						printf("│ ");
-				}
-				if (reader.depth < reader.current_frame) {
-					// Means we just went deeper
-					for (int i = 0; i < reader.depth - 1; i++)
-						printf("│ ");
-					printf("├─");
-				}
-				if (reader.depth > reader.current_frame) {
-					// Means we ended some blocks
-					for (int i = 0; i < reader.current_frame; i++)
-						printf("│ ");
-					for (int i = (reader.current_frame >= 0) ? reader.current_frame : 0; i < reader.depth; i++)
-						printf("╰─");
+		// We need to copy the first token we encountered
+		// Because we'll always have to print it, but t will be modified during the while loop
+		memcpy(&copy_token, &t, sizeof(copy_token));
+		htf_log(htf_dbg_lvl_verbose, "Reading token(%x.%x)\n", copy_token.type, copy_token.id);
 
-					// FIXME 	If we don't print the last EVENT of the sequence/loop
-					// 				We're not going to see this, because the current_frame will not have been updated
-					// 				One solution would be to make it so reader only stops/outpus when current_frame <= max_depth
-				}
+		// This insures we don't go deeper than necessary
+		while (reader.current_frame > max_depth) {
+			htf_read_thread_next_token(&reader, &t, &e);
+		}
+		// Prints the structure of the sequences and the loops
+		if (show_structure) {
+			for (int i = 0; i < reader.current_frame - 1; i++)
+				printf("│ ");
+			if (reader.depth == reader.current_frame) {
+				if (copy_token.type == HTF_TYPE_EVENT)
+					printf("│ ");
+				else
+					printf("├─");
 			}
-			switch (t.type) {
-				case HTF_TYPE_INVALID:
-					htf_error("Type is invalid\n");
-					break;
-				case HTF_TYPE_EVENT:
-					print_event(thread, t, &e);
-					break;
-				case HTF_TYPE_SEQUENCE:
-					if (reader.depth == max_depth)
-						print_sequence(thread, t, htf_get_starting_timestamp(&reader, t));
-					else if (show_structure)
-						print_sequence(thread, t, 0);
-					break;
-				case HTF_TYPE_LOOP:
-					if (reader.depth == max_depth)
-						print_loop(thread, t, htf_get_starting_timestamp(&reader, t));
-					else if (show_structure)
-						print_loop(thread, t, 0);
-					break;
+			if (reader.depth > reader.current_frame) {
+				// Means we ended some blocks
+				if (reader.current_frame > 0)
+					printf("│ ");
+				for (int i = (reader.current_frame >= 0) ? reader.current_frame : 0; i < reader.depth; i++)
+					printf("╰─");
 			}
+		}
+		// Prints the token we first started with
+		switch (copy_token.type) {
+			case HTF_TYPE_INVALID:
+				htf_error("Type is invalid\n");
+				break;
+			case HTF_TYPE_EVENT:
+				print_event(thread, copy_token, &e);
+				break;
+			case HTF_TYPE_SEQUENCE:
+				if (reader.depth == max_depth)
+					print_sequence(thread, copy_token, htf_get_starting_timestamp(&reader, copy_token));
+				else if (show_structure)
+					print_sequence(thread, copy_token, 0);
+				break;
+			case HTF_TYPE_LOOP:
+				if (reader.depth == max_depth)
+					print_loop(thread, copy_token, htf_get_starting_timestamp(&reader, copy_token));
+				else if (show_structure)
+					print_loop(thread, copy_token, 0);
+				break;
 		}
 		reader.depth = reader.current_frame;
 	}
