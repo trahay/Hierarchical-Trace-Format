@@ -315,5 +315,5 @@ htf_timestamp_t htf_get_starting_timestamp(struct htf_thread_reader* reader, str
 		token = htf_get_token(reader->thread_trace, token, 0);
 	}
 	htf_assert(HTF_TOKEN_TYPE(token) == HTF_TYPE_EVENT);
-	return reader->thread_trace->events[HTF_TOKEN_ID(token)].timestamps[reader->event_index[HTF_TOKEN_ID(token)]];
+	return reader->thread_trace->events[HTF_TOKEN_ID(token)].timestamps[reader->event_index[HTF_TOKEN_ID(token)] - 1];
 }

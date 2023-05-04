@@ -26,10 +26,14 @@ static void print_event(struct htf_thread* thread, htf_token_t token, struct htf
 }
 
 static void print_sequence(struct htf_thread* thread, htf_token_t token, htf_timestamp_t ts) {
-	if (ts != 0)
+	if (ts != 0) {
 		printf("%.9lf\t\t", ts / 1e9);
-	else
-		printf("Sequence     \t\t");
+	} else {
+		printf("Sequence");
+		if (show_structure)
+			printf("     ");
+		printf("\t\t");
+	}
 	if (!per_thread)
 		printf("%s\t", htf_get_thread_name(thread));
 	htf_print_token(thread, token);
@@ -43,17 +47,77 @@ static void print_sequence(struct htf_thread* thread, htf_token_t token, htf_tim
 }
 
 static void print_loop(struct htf_thread* thread, htf_token_t token, htf_timestamp_t ts) {
-	if (ts != 0)
+	if (ts != 0) {
 		printf("%.9lf\t\t", ts / 1e9);
-	else
-		printf("Loop         \t\t");
+	} else {
+		printf("Loop");
+		if (show_structure)
+			printf("         ");
+		printf("\t\t");
+	}
 	if (!per_thread)
 		printf("%s\t", htf_get_thread_name(thread));
+
 	struct htf_loop* loop = htf_get_loop(thread, HTF_LOOP_ID(token.id));
+
 	htf_print_token(thread, token);
 	printf("\t%d * ", loop->nb_iterations);
 	htf_print_token(thread, loop->token);
 	printf("\n");
+}
+
+static void print_token(struct htf_thread_reader* reader, struct htf_token* t, struct htf_event_occurence* e) {
+	struct htf_token copy_token;
+	// We need to copy the first token we encountered
+	// Because we'll always have to print it, but t will be modified during the while loop
+	memcpy(&copy_token, t, sizeof(copy_token));
+	htf_log(htf_dbg_lvl_verbose, "Reading token(%x.%x) for thread %s\n", copy_token.type, copy_token.id,
+					htf_get_thread_name(reader->thread_trace));
+
+	// This insures we don't go deeper than necessary
+	while (reader->current_frame > max_depth) {
+		htf_read_thread_next_token(reader, t, e);
+	}
+	// Prints the structure of the sequences and the loops
+	if (show_structure) {
+		for (int i = 0; i < reader->current_frame - 1; i++)
+			printf("│ ");
+		if (reader->depth == reader->current_frame) {
+			if (copy_token.type == HTF_TYPE_EVENT)
+				printf("│ ");
+			else
+				printf("├─");
+		}
+		if (reader->depth > reader->current_frame) {
+			// Means we ended some blocks
+			if (reader->current_frame > 0)
+				printf("│ ");
+			for (int i = (reader->current_frame >= 0) ? reader->current_frame : 0; i < reader->depth; i++)
+				printf("╰─");
+		}
+	}
+	// Prints the token we first started with
+	switch (copy_token.type) {
+		case HTF_TYPE_INVALID:
+			htf_error("Type is invalid\n");
+			break;
+		case HTF_TYPE_EVENT:
+			print_event(reader->thread_trace, copy_token, e);
+			break;
+		case HTF_TYPE_SEQUENCE:
+			if (reader->depth == max_depth)
+				print_sequence(reader->thread_trace, copy_token, htf_get_starting_timestamp(reader, copy_token));
+			else if (show_structure)
+				print_sequence(reader->thread_trace, copy_token, 0);
+			break;
+		case HTF_TYPE_LOOP:
+			if (reader->depth == max_depth)
+				print_loop(reader->thread_trace, copy_token, htf_get_starting_timestamp(reader, copy_token));
+			else if (show_structure)
+				print_loop(reader->thread_trace, copy_token, 0);
+			break;
+	}
+	reader->depth = reader->current_frame;
 }
 
 /* Print all the events of a thread */
@@ -65,92 +129,45 @@ static void print_thread(struct htf_archive* trace, struct htf_thread* thread) {
 	htf_read_thread_iterator_init(trace, &reader, thread->id);
 
 	struct htf_event_occurence e;
-	struct htf_token t, copy_token;
+	struct htf_token t;
 	while (htf_read_thread_next_token(&reader, &t, &e) == 0) {
-		// We need to copy the first token we encountered
-		// Because we'll always have to print it, but t will be modified during the while loop
-		memcpy(&copy_token, &t, sizeof(copy_token));
-		htf_log(htf_dbg_lvl_verbose, "Reading token(%x.%x)\n", copy_token.type, copy_token.id);
-
-		// This insures we don't go deeper than necessary
-		while (reader.current_frame > max_depth) {
-			htf_read_thread_next_token(&reader, &t, &e);
-		}
-		// Prints the structure of the sequences and the loops
-		if (show_structure) {
-			for (int i = 0; i < reader.current_frame - 1; i++)
-				printf("│ ");
-			if (reader.depth == reader.current_frame) {
-				if (copy_token.type == HTF_TYPE_EVENT)
-					printf("│ ");
-				else
-					printf("├─");
-			}
-			if (reader.depth > reader.current_frame) {
-				// Means we ended some blocks
-				if (reader.current_frame > 0)
-					printf("│ ");
-				for (int i = (reader.current_frame >= 0) ? reader.current_frame : 0; i < reader.depth; i++)
-					printf("╰─");
-			}
-		}
-		// Prints the token we first started with
-		switch (copy_token.type) {
-			case HTF_TYPE_INVALID:
-				htf_error("Type is invalid\n");
-				break;
-			case HTF_TYPE_EVENT:
-				print_event(thread, copy_token, &e);
-				break;
-			case HTF_TYPE_SEQUENCE:
-				if (reader.depth == max_depth)
-					print_sequence(thread, copy_token, htf_get_starting_timestamp(&reader, copy_token));
-				else if (show_structure)
-					print_sequence(thread, copy_token, 0);
-				break;
-			case HTF_TYPE_LOOP:
-				if (reader.depth == max_depth)
-					print_loop(thread, copy_token, htf_get_starting_timestamp(&reader, copy_token));
-				else if (show_structure)
-					print_loop(thread, copy_token, 0);
-				break;
-		}
-		reader.depth = reader.current_frame;
+		print_token(&reader, &t, &e);
 	}
 }
 
-/* compare the timestamps of the current event on each thread and select the smallest timestamp
- * This fills the event_occurence e and returns the index of the selected thread (or -1 at the end
- * of the trace)
+/** Compare the timestamps of the current token on each thread and select the smallest timestamp
+ * This fills the htf_token t, and the event_occurence e if it's an event, and returns the index of the selected thread
+ * (or -1 at the end of the trace).
  */
-static int get_next_event(struct htf_thread_reader *readers,
-			  int nb_threads,
-			  struct htf_event_occurence *e) {
+static int get_next_token(struct htf_thread_reader* readers,
+													int nb_threads,
+													struct htf_token* t,
+													struct htf_event_occurence* e) {
+	struct htf_event_occurence cur_e;
+	struct htf_token cur_t;
+	htf_timestamp_t min_ts = HTF_TIMESTAMP_INVALID;
+	int min_index = -1;
 
-  struct htf_event_occurence cur_e;
-  htf_timestamp_t min_ts = HTF_TIMESTAMP_INVALID;
-  int min_index = -1;
+	for (int i = 0; i < nb_threads; i++) {
+		if (htf_read_thread_cur_token(&readers[i], &cur_t, &cur_e) == 0) {
+			htf_timestamp_t ts = htf_get_starting_timestamp(&readers[i], cur_t);
+			if (min_ts == HTF_TIMESTAMP_INVALID || min_ts > ts) {
+				min_index = i;
+				min_ts = ts;
+			}
+		}
+	}
 
-  for(int i=0; i< nb_threads; i++) {
-    if(htf_read_thread_cur_event(&readers[i], &cur_e) == 0) {
-      if( min_ts == HTF_TIMESTAMP_INVALID || min_ts > cur_e.timestamp) {
-	min_index = i;
-	min_ts = cur_e.timestamp;
-      }
-    }
-  }
+	if (min_index >= 0) {
+		htf_read_thread_next_token(&readers[min_index], t, e);
+	}
 
-  if(min_index>=0) {
-    htf_read_thread_next_event(&readers[min_index], e);
-  }
-
-  return  min_index;
+	return min_index;
 }
 
 /* Print all the events of all the threads sorted by timestamp */
 void print_trace(struct htf_archive *trace) {
-	int nb_threads = trace->nb_threads;
-	struct htf_thread_reader* readers = malloc(sizeof(struct htf_thread_reader) * (nb_threads));
+	struct htf_thread_reader* readers = malloc(sizeof(struct htf_thread_reader) * (trace->nb_threads));
 	for (int i = 0; i < trace->nb_threads; i++) {
 		htf_read_thread_iterator_init(trace, &readers[i], trace->threads[i]->id);
 	}
@@ -158,9 +175,10 @@ void print_trace(struct htf_archive *trace) {
 	printf("Timestamp\t\tThread Name\tTag\tEvent\n");
 
 	struct htf_event_occurence e;
+	struct htf_token t;
 	int thread_index = -1;
-	while ((thread_index = get_next_event(readers, nb_threads, &e)) >= 0) {
-		print_event(readers[thread_index].thread_trace, HTF_TOKENIZE(1, 0), &e);
+	while ((thread_index = get_next_token(readers, trace->nb_threads, &t, &e)) >= 0) {
+		print_token(&readers[thread_index], &t, &e);
 	}
 }
 
