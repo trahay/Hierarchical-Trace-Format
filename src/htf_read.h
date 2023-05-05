@@ -62,9 +62,9 @@ int htf_read_thread_cur_token(struct htf_thread_reader* reader, struct htf_token
  * @return -1 in case of an error (such as the end of the trace), else 0.
  */
 int htf_read_thread_next_token(struct htf_thread_reader* reader, struct htf_token* t, struct htf_event_occurence* e);
-/**
+/** The offset is here for when you advanced in the trace. It only happens during the reading phase.
  * @return The timestamps at which the given Sequence or Loop starts, without modifying the reader's state.
  */
-htf_timestamp_t htf_get_starting_timestamp(struct htf_thread_reader* reader, struct htf_token token);
+htf_timestamp_t htf_get_starting_timestamp(struct htf_thread_reader* reader, struct htf_token token, int offset);
 #define MAX_CALLSTACK_DEPTH 100
 #endif /* HTF_READ_H */

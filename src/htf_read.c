@@ -310,10 +310,11 @@ int htf_read_thread_next_token(struct htf_thread_reader* reader, struct htf_toke
 	return _htf_read_thread_next_token(reader, t, e, 1);
 }
 
-htf_timestamp_t htf_get_starting_timestamp(struct htf_thread_reader* reader, struct htf_token token) {
+htf_timestamp_t htf_get_starting_timestamp(struct htf_thread_reader* reader, struct htf_token token, int offset) {
 	while (HTF_TOKEN_TYPE(token) == HTF_TYPE_LOOP || HTF_TOKEN_TYPE(token) == HTF_TYPE_SEQUENCE) {
 		token = htf_get_token(reader->thread_trace, token, 0);
 	}
 	htf_assert(HTF_TOKEN_TYPE(token) == HTF_TYPE_EVENT);
-	return reader->thread_trace->events[HTF_TOKEN_ID(token)].timestamps[reader->event_index[HTF_TOKEN_ID(token)] - 1];
+	return reader->thread_trace->events[HTF_TOKEN_ID(token)]
+			.timestamps[reader->event_index[HTF_TOKEN_ID(token)] - offset];
 }

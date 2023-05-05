@@ -106,13 +106,13 @@ static void print_token(struct htf_thread_reader* reader, struct htf_token* t, s
 			break;
 		case HTF_TYPE_SEQUENCE:
 			if (reader->depth == max_depth)
-				print_sequence(reader->thread_trace, copy_token, htf_get_starting_timestamp(reader, copy_token));
+				print_sequence(reader->thread_trace, copy_token, htf_get_starting_timestamp(reader, copy_token, 1));
 			else if (show_structure)
 				print_sequence(reader->thread_trace, copy_token, 0);
 			break;
 		case HTF_TYPE_LOOP:
 			if (reader->depth == max_depth)
-				print_loop(reader->thread_trace, copy_token, htf_get_starting_timestamp(reader, copy_token));
+				print_loop(reader->thread_trace, copy_token, htf_get_starting_timestamp(reader, copy_token, 1));
 			else if (show_structure)
 				print_loop(reader->thread_trace, copy_token, 0);
 			break;
@@ -135,9 +135,9 @@ static void print_thread(struct htf_archive* trace, struct htf_thread* thread) {
 	}
 }
 
-/** Compare the timestamps of the current token on each thread and select the smallest timestamp
- * This fills the htf_token t, and the event_occurence e if it's an event, and returns the index of the selected thread
- * (or -1 at the end of the trace).
+/** Compare the timestamps of the current token on each thread and select the smallest timestamp.
+ * This fills the htf_token t, and the event_occurence e if it's an event,
+ * and returns the index of the selected thread (or -1 at the end of the trace).
  */
 static int get_next_token(struct htf_thread_reader* readers,
 													int nb_threads,
@@ -150,8 +150,8 @@ static int get_next_token(struct htf_thread_reader* readers,
 
 	for (int i = 0; i < nb_threads; i++) {
 		if (htf_read_thread_cur_token(&readers[i], &cur_t, &cur_e) == 0) {
-			htf_timestamp_t ts = htf_get_starting_timestamp(&readers[i], cur_t);
-			if (min_ts == HTF_TIMESTAMP_INVALID || min_ts > ts) {
+			htf_timestamp_t ts = htf_get_starting_timestamp(&readers[i], cur_t, 0);
+			if (min_ts == HTF_TIMESTAMP_INVALID || ts < min_ts) {
 				min_index = i;
 				min_ts = ts;
 			}
