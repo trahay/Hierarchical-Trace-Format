@@ -160,8 +160,11 @@ struct htf_sequence {
 
 /*************************** Loop **********************/
 struct htf_loop {
-  unsigned nb_iterations;
-  htf_token_t token;
+	unsigned nb_iterations;
+	/** Token of the sequence being repeated. */
+	htf_token_t token;
+	/** Self-id. */
+	struct htf_token id;
 };
 
 /** Only used when reading a trace, links an event with a timestamp. */

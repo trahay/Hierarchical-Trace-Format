@@ -88,30 +88,28 @@ static inline htf_sequence_id_t _htf_get_sequence_id_from_array(struct htf_threa
   return sid;
 }
 
-static inline htf_loop_id_t _htf_create_loop_id(struct htf_thread_writer *thread_writer,
-						int start_index,
-						int loop_len) {
-
+static inline struct htf_loop* _htf_create_loop_id(struct htf_thread_writer* thread_writer,
+																									 int start_index,
+																									 int loop_len) {
 	if (thread_writer->thread_trace.nb_loops >= thread_writer->thread_trace.nb_allocated_loops) {
-		htf_warn("Doubling mem space of loops for thread writer %p's thread trace, cur=%d\n", thread_writer, thread_writer->thread_trace.nb_allocated_loops);
-		DOUBLE_MEMORY_SPACE(thread_writer->thread_trace.loops,
-												 thread_writer->thread_trace.nb_allocated_loops,
-												 struct htf_loop);
+		htf_warn("Doubling mem space of loops for thread writer %p's thread trace, cur=%d\n", thread_writer,
+						 thread_writer->thread_trace.nb_allocated_loops);
+		DOUBLE_MEMORY_SPACE(thread_writer->thread_trace.loops, thread_writer->thread_trace.nb_allocated_loops,
+												struct htf_loop);
 	}
 
-  int index = thread_writer->thread_trace.nb_loops++;
-  htf_log(htf_dbg_lvl_debug, "\tNot found. Adding it with id=%u\n", index);
+	int index = thread_writer->thread_trace.nb_loops++;
+	htf_log(htf_dbg_lvl_debug, "\tNot found. Adding it with id=%u\n", index);
 
-  struct htf_sequence* cur_seq = _htf_get_cur_sequence(thread_writer);
-  htf_sequence_id_t sid =  _htf_get_sequence_id_from_array(&thread_writer->thread_trace,
-						       &cur_seq->token[start_index],
-						       loop_len);
-  
-  struct htf_loop *l = &thread_writer->thread_trace.loops[index];
-  l->nb_iterations = 1;
-  l->token = HTF_TOKENIZE(HTF_TYPE_SEQUENCE, HTF_TOKEN_ID(sid));
+	struct htf_sequence* cur_seq = _htf_get_cur_sequence(thread_writer);
+	htf_sequence_id_t sid =
+			_htf_get_sequence_id_from_array(&thread_writer->thread_trace, &cur_seq->token[start_index], loop_len);
 
-  return HTF_LOOP_ID(index);
+	struct htf_loop* l = &thread_writer->thread_trace.loops[index];
+	l->nb_iterations = 1;
+	l->token = HTF_TOKENIZE(HTF_TYPE_SEQUENCE, HTF_TOKEN_ID(sid));
+	l->id = HTF_TOKENIZE(HTF_TYPE_LOOP, index);
+	return l;
 }
 
 void htf_store_timestamp(struct htf_thread_writer *thread_writer,
@@ -144,47 +142,50 @@ static void _htf_store_token(struct htf_thread_writer *thread_writer,
   _htf_find_loop(thread_writer);
 }
 
-static void _htf_loop_add_iteration(struct htf_thread_writer *thread_writer,
-				    htf_loop_id_t l,
-				    htf_sequence_id_t sid) {
-  struct htf_loop* loop = htf_get_loop(&thread_writer->thread_trace, l);
-
-  struct htf_sequence *s1 = htf_get_sequence(&thread_writer->thread_trace, sid);
+/**
+ * Adds an iteration of the given sequence to the loop.
+ */
+static inline void _htf_loop_add_iteration(	 // struct htf_thread_writer *thread_writer,
+		struct htf_loop* loop /*, htf_sequence_id_t sid*/) {
+#if 0
+//	SID used to be an argument for this function, but it isn't actually required.
+//	It's only there for safety purposes.
+//	We shouldn't ask it, since	it actually takes some computing power to get it, most times.
+//	"Safety checks are made to prevent crashes, but if you program well, you don't need to prevent crashes"
+	struct htf_sequence *s1 = htf_get_sequence(&thread_writer->thread_trace, sid);
   struct htf_sequence *s2 = htf_get_sequence(&thread_writer->thread_trace,
 					 HTF_TOKEN_TO_SEQUENCE_ID(loop->token));
   htf_assert(_htf_sequences_equal(s1, s2));
-  loop->nb_iterations++;
+#endif
+	loop->nb_iterations++;
 }
 
 static void _htf_create_loop(struct htf_thread_writer *thread_writer,
 			     int loop_len,
 			     int index_first_iteration,
 			     int index_second_iteration) {
+	if (index_first_iteration > index_second_iteration) {
+		int tmp = index_second_iteration;
+		index_second_iteration = index_first_iteration;
+		index_first_iteration = tmp;
+	}
 
-  if(index_first_iteration >  index_second_iteration) {
-    int tmp = index_second_iteration;
-    index_second_iteration = index_first_iteration;
-    index_first_iteration = tmp;
-  }
+	struct htf_loop* l = _htf_create_loop_id(thread_writer, index_first_iteration, loop_len);
+	//  x x x e1 e2 e3 e4 e1 e2 e3 e4
+	//  x x x l1
 
-  htf_loop_id_t l =  _htf_create_loop_id(thread_writer,
-				     index_first_iteration,
-				     loop_len);
+	struct htf_sequence* cur_seq = _htf_get_cur_sequence(thread_writer);
 
-  //  x x x e1 e2 e3 e4 e1 e2 e3 e4
-  //  x x x l1
+	cur_seq->size = index_first_iteration;
+	cur_seq->token[cur_seq->size] = l->id;
+	// This should be faster.
+	//	htf_sequence_id_t sid = _htf_get_sequence_id_from_array(
+	//			&thread_writer->thread_trace,
+	//			&cur_seq->token[index_second_iteration],
+	//			loop_len);
 
-  struct htf_sequence* cur_seq = _htf_get_cur_sequence(thread_writer);
-  cur_seq->token[index_first_iteration] = HTF_TOKENIZE(HTF_TYPE_LOOP, HTF_TOKEN_ID(l));
-
-  htf_sequence_id_t sid =  _htf_get_sequence_id_from_array(&thread_writer->thread_trace,
-						       &cur_seq->token[index_second_iteration],
-						       loop_len);
-
-  _htf_loop_add_iteration(thread_writer,
-			  l,
-			  sid);
-  cur_seq->size = index_first_iteration + 1;
+	_htf_loop_add_iteration(l);
+	cur_seq->size++;
 }
 
 static void _htf_find_loop(struct htf_thread_writer *thread_writer) {
@@ -217,18 +218,13 @@ static void _htf_find_loop(struct htf_thread_writer *thread_writer) {
 									HTF_TOKEN_TO_SEQUENCE_ID(loop->token));
 				htf_assert(seq);
 
-				if(_htf_arrays_equal(&cur_seq->token[s1_start], loop_len, seq->token,  seq->size)) {
-
-				  /* the current sequence is just another iteration of the loop
-				   * remove the sequence, and increment the iteration count
-				   */
-				  htf_sequence_id_t sid =  _htf_get_sequence_id_from_array(&thread_writer->thread_trace,
-										       &cur_seq->token[s1_start],
-										       loop_len);
-				  _htf_loop_add_iteration(thread_writer, l, sid);
-				  cur_seq->size = s1_start;
-				  cur_index = cur_seq->size-1;
-				  return;
+				if (_htf_arrays_equal(&cur_seq->token[s1_start], loop_len, seq->token, seq->size)) {
+					/* the current sequence is just another iteration of the loop
+					 * remove the sequence, and increment the iteration count
+					 */
+					_htf_loop_add_iteration(loop);
+					cur_seq->size = s1_start;
+					return;
 				}
       }
     }
