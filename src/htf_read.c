@@ -28,7 +28,7 @@ void htf_read_thread_iterator_init(struct htf_archive *archive,
 	reader->event_index = calloc(reader->thread_trace->nb_events, sizeof(int));
 
 	if (htf_debug_level >= htf_dbg_lvl_verbose) {
-		htf_log(htf_dbg_lvl_verbose, "init callstack for thread %s\n", htf_get_thread_name(reader->thread_trace));
+		htf_log(htf_dbg_lvl_verbose, "init callstack for thread %d\n", thread_id);
 		htf_log(htf_dbg_lvl_verbose, "The trace contains:\n");
 		htf_print_sequence(reader->thread_trace, HTF_SEQUENCE_ID(0));
 	}
@@ -314,7 +314,7 @@ htf_timestamp_t htf_get_starting_timestamp(struct htf_thread_reader* reader, str
 	while (HTF_TOKEN_TYPE(token) == HTF_TYPE_LOOP || HTF_TOKEN_TYPE(token) == HTF_TYPE_SEQUENCE) {
 		token = htf_get_token(reader->thread_trace, token, 0);
 	}
-	htf_assert(HTF_TOKEN_TYPE(token) == HTF_TYPE_EVENT);
+	//	htf_assert(HTF_TOKEN_TYPE(token) == HTF_TYPE_EVENT);
 	return reader->thread_trace->events[HTF_TOKEN_ID(token)]
 			.timestamps[reader->event_index[HTF_TOKEN_ID(token)] - offset];
 }

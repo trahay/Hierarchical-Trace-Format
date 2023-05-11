@@ -10,6 +10,7 @@
 
 #include "htf.h"
 #include "htf_dbg.h"
+#include "htf_read.h"
 #include "htf_timestamp.h"
 
 static void _htf_store_event(const char* base_dirname,
@@ -389,57 +390,71 @@ static FILE* _htf_get_thread(const char* dir_name,
 }
 
 static void _htf_store_thread(const char* dir_name, struct htf_thread *th) {
-  if(th->nb_events == 0) {
-    htf_log(htf_dbg_lvl_verbose, "\tSkipping Thread %u {.nb_events=%d, .nb_sequences=%d, .nb_loops=%d}\n",
-	    th->id, th->nb_events,  th->nb_sequences, th->nb_loops);
-    abort();
-  }
+	if (th->nb_events == 0) {
+		htf_log(htf_dbg_lvl_verbose, "\tSkipping Thread %u {.nb_events=%d, .nb_sequences=%d, .nb_loops=%d}\n", th->id,
+						th->nb_events, th->nb_sequences, th->nb_loops);
+		abort();
+	}
 
-  FILE* token_file = _htf_get_thread(dir_name, th->id, "w");
- 
-  htf_log(htf_dbg_lvl_verbose, "\tThread %u {.nb_events=%d, .nb_sequences=%d, .nb_loops=%d}\n",
-	  th->id, th->nb_events,  th->nb_sequences, th->nb_loops);
+	FILE* token_file = _htf_get_thread(dir_name, th->id, "w");
 
+	htf_log(htf_dbg_lvl_verbose, "\tThread %u {.nb_events=%d, .nb_sequences=%d, .nb_loops=%d}\n", th->id, th->nb_events,
+					th->nb_sequences, th->nb_loops);
 
-  _htf_fwrite(&th->id, sizeof(th->id), 1, token_file);
-  _htf_fwrite(&th->archive->id, sizeof(th->archive->id), 1, token_file);
+	_htf_fwrite(&th->id, sizeof(th->id), 1, token_file);
+	_htf_fwrite(&th->archive->id, sizeof(th->archive->id), 1, token_file);
 
-  _htf_fwrite(&th->nb_events, sizeof(th->nb_events), 1, token_file);
-  _htf_fwrite(&th->nb_sequences, sizeof(th->nb_sequences), 1, token_file);
-  _htf_fwrite(&th->nb_loops, sizeof(th->nb_loops), 1, token_file);
+	_htf_fwrite(&th->nb_events, sizeof(th->nb_events), 1, token_file);
+	_htf_fwrite(&th->nb_sequences, sizeof(th->nb_sequences), 1, token_file);
+	_htf_fwrite(&th->nb_loops, sizeof(th->nb_loops), 1, token_file);
 
-  fclose(token_file);
+	fclose(token_file);
 
 	// TODO Save timestamps and events separately
 	// TODO Save events timestamps as delta w/ sequence timestamp
 	// TODO Use ZSTD to compress
+	struct htf_thread_reader reader;
+	htf_read_thread_iterator_init(th->archive, &reader, th->id);
 
-  for(int i=0; i<th->nb_events; i++)
-    _htf_store_event(dir_name, th, &th->events[i], HTF_EVENT_ID(i));
-  
-  for(int i=0; i<th->nb_sequences; i++)
+	/* Start Reading */
+
+	struct htf_event_occurence e;
+	struct htf_token t;
+	htf_timestamp_t* last_timestamp = NULL;
+	htf_log(htf_dbg_lvl_debug, "Reading thread to delta the timestamps\n");
+	while (htf_read_thread_next_token(&reader, &t, &e) == 0) {
+		if (t.type == HTF_TYPE_EVENT) {
+			int event_index = reader.event_index[t.id] - 1;
+			if (last_timestamp) {
+				*last_timestamp = th->events[t.id].timestamps[event_index] - *last_timestamp;
+			}
+			last_timestamp = &th->events[t.id].timestamps[event_index];
+		}
+	}
+
+	for (int i = 0; i < th->nb_events; i++)
+		_htf_store_event(dir_name, th, &th->events[i], HTF_EVENT_ID(i));
+
+	for (int i = 0; i < th->nb_sequences; i++)
 		_htf_store_sequence(dir_name, th, th->sequences[i], HTF_SEQUENCE_ID(i));
 
 	for (int i = 0; i < th->nb_loops; i++)
 		_htf_store_loop(dir_name, th, &th->loops[i], HTF_LOOP_ID(i));
 }
 
-static void _htf_read_thread(struct htf_archive* global_archive,
-			     struct htf_thread *th,
-			     htf_thread_id_t thread_id) {
-   
-  FILE* token_file = _htf_get_thread(global_archive->dir_name, thread_id, "r");
-  _htf_fread(&th->id, sizeof(th->id), 1, token_file);
-  htf_location_group_id_t archive_id;
-  _htf_fread(&archive_id, sizeof(archive_id), 1, token_file);
-  th->archive = _htf_get_archive(global_archive, archive_id);
+static void _htf_read_thread(struct htf_archive* global_archive, struct htf_thread* th, htf_thread_id_t thread_id) {
+	FILE* token_file = _htf_get_thread(global_archive->dir_name, thread_id, "r");
+	_htf_fread(&th->id, sizeof(th->id), 1, token_file);
+	htf_location_group_id_t archive_id;
+	_htf_fread(&archive_id, sizeof(archive_id), 1, token_file);
+	th->archive = _htf_get_archive(global_archive, archive_id);
 
-  _htf_fread(&th->nb_events, sizeof(th->nb_events), 1, token_file);
-  th->nb_allocated_events = th->nb_events;
-  th->events = malloc(sizeof(struct htf_event_summary) * th->nb_allocated_events);
+	_htf_fread(&th->nb_events, sizeof(th->nb_events), 1, token_file);
+	th->nb_allocated_events = th->nb_events;
+	th->events = malloc(sizeof(struct htf_event_summary) * th->nb_allocated_events);
 
-  _htf_fread(&th->nb_sequences, sizeof(th->nb_sequences), 1, token_file);
-  th->nb_allocated_sequences = th->nb_sequences;
+	_htf_fread(&th->nb_sequences, sizeof(th->nb_sequences), 1, token_file);
+	th->nb_allocated_sequences = th->nb_sequences;
 	th->sequences = malloc(sizeof(struct htf_sequence*) * th->nb_allocated_sequences);
 	for (int i = 0; i < th->nb_sequences; i++) {
 		th->sequences[i] = malloc(sizeof(struct htf_sequence));

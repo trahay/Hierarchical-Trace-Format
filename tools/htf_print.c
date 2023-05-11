@@ -165,8 +165,32 @@ static int get_next_token(struct htf_thread_reader* readers,
 	return min_index;
 }
 
+static void __realign_timestamps(struct htf_archive* trace, struct htf_thread* thread) {
+	struct htf_thread_reader reader;
+	htf_read_thread_iterator_init(trace, &reader, thread->id);
+	struct htf_event_occurence e;
+	htf_token_t t;
+
+	/* Counting how many ts there are. */
+	uint count = 0;
+	for (uint eid = 0; eid < thread->nb_events; eid++) {
+		count += thread->events[eid].nb_timestamps;
+	}
+	htf_log(htf_dbg_lvl_debug, "Reorganizing %d ts\n", count);
+	htf_timestamp_t* timestamps[count];
+	int i = 0;
+	while (htf_read_thread_next_token(&reader, &t, &e) == 0) {
+		if (t.type == HTF_TYPE_EVENT)
+			timestamps[i++] = &thread->events[t.id].timestamps[reader.event_index[t.id] - 1];
+	}
+	i--;
+	while (--i >= 0) {
+		*timestamps[i] = *timestamps[i + 1] - *timestamps[i];
+	}
+}
+
 /* Print all the events of all the threads sorted by timestamp */
-void print_trace(struct htf_archive *trace) {
+void print_trace(struct htf_archive* trace) {
 	struct htf_thread_reader* readers = malloc(sizeof(struct htf_thread_reader) * (trace->nb_threads));
 	for (int i = 0; i < trace->nb_threads; i++) {
 		htf_read_thread_iterator_init(trace, &readers[i], trace->threads[i]->id);
@@ -220,23 +244,27 @@ int main(int argc, char**argv) {
 		}
 	}
 
-  trace_name = argv[nb_opts + 1];
-  if (trace_name == NULL) {
-    usage(argv[0]);
-    return EXIT_SUCCESS;
-  }
+	trace_name = argv[nb_opts + 1];
+	if (trace_name == NULL) {
+		usage(argv[0]);
+		return EXIT_SUCCESS;
+	}
 
-  struct htf_archive trace;
-  htf_read_archive(&trace, trace_name);
+	struct htf_archive trace;
+	htf_read_archive(&trace, trace_name);
 
-  if(per_thread) {
-    for(int i=0; i< trace.nb_threads; i++) {
+	for (int i = 0; i < trace.nb_threads; i++) {
+		__realign_timestamps(&trace, trace.threads[i]);
+	}
+
+	if (per_thread) {
+		for (int i = 0; i < trace.nb_threads; i++) {
 			printf("\n");
 			print_thread(&trace, trace.threads[i]);
 		}
 	} else {
-    print_trace(&trace);
-  }
+		print_trace(&trace);
+	}
 
-  return EXIT_SUCCESS;
+	return EXIT_SUCCESS;
 }
