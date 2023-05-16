@@ -17,17 +17,17 @@ set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE) # when building, don't use the install
 set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_FULL_LIBDIR}") # the RPATH to be used when installing
 
 # CMakeFind repository
-list (APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake_modules)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake_modules)
 
 
 # Look for libraries
 
 # Options to enable/disable modules
-option(ENABLE_PTHREAD  "Enable Pthread module"  ON)
-option(ENABLE_MPI      "Enable MPI module"  OFF)
+option(ENABLE_PTHREAD "Enable Pthread module" ON)
+option(ENABLE_MPI "Enable MPI module" OFF)
 #option(ENABLE_OMPT     "Enable OMPT module"     OFF)
 
-option(ENABLE_OTF2     "Enable OTF2 compatibilit layer"     ON)
+option(ENABLE_OTF2 "Enable OTF2 compatibilit layer" ON)
 
 
 if (ENABLE_MPI)

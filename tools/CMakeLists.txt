@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.1)
 
 add_compile_options(-Wall -Wextra -Wpedantic)
-include_directories(${CMAKE_SOURCE_DIR}/src/ )
-link_libraries(htf)
+include_directories(${CMAKE_SOURCE_DIR}/src/)
+link_libraries(htf zstd)
 
 add_executable(htf_print htf_print.c )
 add_executable(htf_info htf_info.c )

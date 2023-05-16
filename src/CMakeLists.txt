@@ -6,9 +6,7 @@ if (POLICY CMP0076)
 endif()
 
 
-add_library(htf
-  SHARED
-)
+add_library(htf SHARED)
 
 set(HTF_HEADERS
     htf.h
@@ -46,8 +44,9 @@ target_compile_options(htf
 
 target_link_libraries(htf
   PRIVATE
-    atomic
-  PUBLIC
+        atomic
+        zstd
+        PUBLIC
     dl
     PRIVATE
     ${CMAKE_DL_LIBS}
