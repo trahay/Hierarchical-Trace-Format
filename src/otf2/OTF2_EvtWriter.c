@@ -610,7 +610,10 @@ OTF2_EvtWriter_ThreadBegin( OTF2_EvtWriter*     writer,
                             OTF2_TimeStamp      time,
                             OTF2_CommRef        threadContingent,
                             uint64_t            sequenceCount ) {
-  TO_BE_IMPLEMENTED;
+  htf_record_thread_begin(writer->thread_writer,
+			  NULL,
+			  time);
+
   return OTF2_SUCCESS;
 }
 
@@ -629,7 +632,9 @@ OTF2_EvtWriter_ThreadEnd( OTF2_EvtWriter*     writer,
                           OTF2_TimeStamp      time,
                           OTF2_CommRef        threadContingent,
                           uint64_t            sequenceCount ) {
-  TO_BE_IMPLEMENTED;
+  htf_record_thread_end(writer->thread_writer,
+			  NULL,
+			  time);
   return OTF2_SUCCESS;
 }
 

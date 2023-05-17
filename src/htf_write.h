@@ -77,6 +77,14 @@ void htf_record_leave(struct htf_thread_writer *thread_writer,
 		      htf_timestamp_t       time,
 		      htf_region_ref_t      region_ref );
 
+void htf_record_thread_begin(struct htf_thread_writer *thread_writer,
+			     htf_attribute_list_t* attributeList __attribute__((unused)),
+			     htf_timestamp_t       time);
+
+void htf_record_thread_end(struct htf_thread_writer *thread_writer,
+			     htf_attribute_list_t* attributeList __attribute__((unused)),
+			     htf_timestamp_t       time);
+
 void htf_record_mpi_send(struct htf_thread_writer *thread_writer,
 			 htf_attribute_list_t*     attributeList __attribute__((unused)),
 			 htf_timestamp_t           time,

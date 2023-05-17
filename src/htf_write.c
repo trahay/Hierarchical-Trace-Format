@@ -298,6 +298,7 @@ void _htf_record_exit_function(struct htf_thread_writer *thread_writer) {
   htf_sequence_id_t seq_id = _htf_get_sequence_id(&thread_writer->thread_trace, cur_seq);
 
   thread_writer->cur_depth--;
+  htf_assert(thread_writer->cur_depth >= 0);
   /* upper_seq is the sequence that called cur_seq */
   struct htf_sequence *upper_seq =  _htf_get_cur_sequence(thread_writer);
   if(!upper_seq) {
@@ -567,6 +568,19 @@ void htf_print_event(struct htf_thread *t, struct htf_event* e) {
       printf("Leave %d (%s)", region_ref, htf_archive_get_string(t->archive, region->string_ref)->str);
       break;
     }
+
+  case HTF_EVENT_THREAD_BEGIN:
+    {
+      printf("THREAD_BEGIN()");
+      break;
+    }
+
+  case HTF_EVENT_THREAD_END:
+    {
+      printf("THREAD_END()");
+      break;
+    }
+
   case HTF_EVENT_MPI_SEND:
     {
       void*cursor = NULL;
@@ -752,6 +766,37 @@ void htf_record_leave(struct htf_thread_writer *thread_writer,
 }
 
 
+void htf_record_thread_begin(struct htf_thread_writer *thread_writer,
+			     htf_attribute_list_t* attributeList __attribute__((unused)),
+			     htf_timestamp_t       time) {
+  if(htf_recursion_shield)
+    return;
+  htf_recursion_shield++;
+
+  struct htf_event e;
+  init_event(&e, HTF_EVENT_THREAD_BEGIN);
+  htf_event_id_t e_id = _htf_get_event_id(&thread_writer->thread_trace, &e);
+  htf_store_timestamp(thread_writer, e_id, htf_timestamp(time));
+  htf_store_event(thread_writer, htf_block_start, e_id);
+
+  htf_recursion_shield--;
+}
+
+void htf_record_thread_end(struct htf_thread_writer *thread_writer,
+			   htf_attribute_list_t* attributeList __attribute__((unused)),
+			   htf_timestamp_t       time) {
+  if(htf_recursion_shield)
+    return;
+  htf_recursion_shield++;
+
+  struct htf_event e;
+  init_event(&e, HTF_EVENT_THREAD_END);
+  htf_event_id_t e_id = _htf_get_event_id(&thread_writer->thread_trace, &e);
+  htf_store_timestamp(thread_writer, e_id, htf_timestamp(time));
+  htf_store_event(thread_writer, htf_block_end, e_id);
+
+  htf_recursion_shield--;
+}
 
 void htf_record_mpi_send(struct htf_thread_writer *thread_writer,
 			 htf_attribute_list_t*     attributeList __attribute__((unused)),
