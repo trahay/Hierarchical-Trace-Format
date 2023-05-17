@@ -25,15 +25,13 @@ static void print_event(struct htf_thread* thread, htf_token_t token, struct htf
 	printf("\n");
 }
 
-static void print_sequence(struct htf_thread* thread, htf_token_t token, htf_timestamp_t ts) {
-	if (ts != 0) {
-		printf("%.9lf\t\t", ts / 1e9);
-	} else {
-		printf("Sequence");
-		if (show_structure)
-			printf("     ");
-		printf("\t\t");
+static void print_sequence(struct htf_thread* thread, htf_token_t token) {
+	struct htf_sequence* s = thread->sequences[token.id];
+	htf_timestamp_t ts = 0;
+	if (s->timestamps.size) {
+		ts = *(htf_timestamp_t*)array_get(&s->timestamps, s->counter++);
 	}
+	printf("%.9lf\t\t", ts / 1e9);
 	if (!per_thread)
 		printf("%s\t", htf_get_thread_name(thread));
 	htf_print_token(thread, token);
@@ -105,10 +103,7 @@ static void print_token(struct htf_thread_reader* reader, struct htf_token* t, s
 			print_event(reader->thread_trace, copy_token, e);
 			break;
 		case HTF_TYPE_SEQUENCE:
-			if (reader->depth == max_depth)
-				print_sequence(reader->thread_trace, copy_token, htf_get_starting_timestamp(reader, copy_token, 1));
-			else if (show_structure)
-				print_sequence(reader->thread_trace, copy_token, 0);
+			print_sequence(reader->thread_trace, copy_token);
 			break;
 		case HTF_TYPE_LOOP:
 			if (reader->depth == max_depth)

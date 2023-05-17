@@ -74,22 +74,41 @@ static FILE* _htf_file_open(char* filename, char* mode) {
   if(file == NULL) {
     htf_error("Cannot open %s: %s\n", filename, strerror(errno));
   }
-  return file;
+	return file;
 }
 
-#define _htf_fread(ptr, size, nmemb, stream) do {	\
-    size_t  ret = fread(ptr, size, nmemb, stream);	\
-    if(ret != nmemb) htf_error("fread failed\n");	\
-  } while(0)
+#define _htf_fread(ptr, size, nmemb, stream)      \
+	do {                                            \
+		size_t ret = fread(ptr, size, nmemb, stream); \
+		if (ret != nmemb)                             \
+			htf_error("fread failed\n");                \
+	} while (0)
 
+#define _htf_fwrite(ptr, size, nmemb, stream)      \
+	do {                                             \
+		size_t ret = fwrite(ptr, size, nmemb, stream); \
+		if (ret != nmemb)                              \
+			htf_error("fwrite failed\n");                \
+	} while (0)
 
-#define _htf_fwrite(ptr, size, nmemb, stream) do {	\
-    size_t  ret = fwrite(ptr, size, nmemb, stream);	\
-    if(ret != nmemb) htf_error("fwrite failed\n");	\
-  } while(0)
+#define _htf_array_fwrite(dyn_array, stream)                                         \
+	do {                                                                               \
+		_htf_fwrite(&dyn_array.size, sizeof(dyn_array.size), 1, stream);                 \
+		_htf_fwrite(&dyn_array.element_size, sizeof(dyn_array.element_size), 1, stream); \
+		_htf_fwrite(dyn_array.array, dyn_array.element_size, dyn_array.size, stream);    \
+	} while (0)
+
+#define _htf_array_fread(dyn_array, stream)                                         \
+	do {                                                                              \
+		_htf_fread(&dyn_array.size, sizeof(dyn_array.size), 1, stream);                 \
+		_htf_fread(&dyn_array.element_size, sizeof(dyn_array.element_size), 1, stream); \
+		dyn_array.array = malloc(dyn_array.element_size * dyn_array.size);              \
+		dyn_array.allocated = dyn_array.size;                                           \
+		_htf_fread(dyn_array.array, dyn_array.element_size, dyn_array.size, stream);    \
+	} while (0)
 
 void htf_storage_init(struct htf_archive* archive) {
-  _htf_mkdir(archive->dir_name, 0777);
+	_htf_mkdir(archive->dir_name, 0777);
 }
 
 static const char* base_dirname(struct htf_archive* a) {
@@ -205,36 +224,39 @@ static void _htf_store_sequence(const char* base_dirname,
 				struct htf_thread *th,
 				struct htf_sequence *s,
 				htf_sequence_id_t sequence_id) {
-  FILE* file = _htf_get_sequence_file(base_dirname, th, sequence_id, "w");
-  htf_log(htf_dbg_lvl_debug, "\tStore sequence %x {.size=%d}\n", HTF_ID(sequence_id), s->size);
-  
-  _htf_fwrite(&s->size, sizeof(s->size), 1, file);
-  _htf_fwrite(s->token, sizeof(s->token[0]), s->size, file);  
-  fclose(file);
+	FILE* file = _htf_get_sequence_file(base_dirname, th, sequence_id, "w");
+	htf_log(htf_dbg_lvl_debug, "\tStore sequence %x {.size=%d, .nb_ts=%u}\n", HTF_ID(sequence_id), s->size,
+					s->timestamps.size);
+	if (htf_debug_level >= htf_dbg_lvl_debug) {
+		htf_print_sequence(th, sequence_id);
+	}
+
+	_htf_fwrite(&s->size, sizeof(s->size), 1, file);
+	_htf_fwrite(s->token, sizeof(s->token[0]), s->size, file);
+	_htf_array_fwrite(s->timestamps, file);
+	fclose(file);
 }
 
 static void _htf_read_sequence(const char* base_dirname,
 			       struct htf_thread *th,
 			       struct htf_sequence *s,
 			       htf_sequence_id_t sequence_id) {
-  FILE* file = _htf_get_sequence_file(base_dirname, th, sequence_id, "r");
-  _htf_fread(&s->size, sizeof(s->size), 1, file);
-  s->token = malloc(sizeof(htf_token_t) * s->size);
-  s->allocated = s->size;
-  _htf_fread(s->token, sizeof(htf_token_t), s->size, file);  
-  fclose(file);
+	FILE* file = _htf_get_sequence_file(base_dirname, th, sequence_id, "r");
+	_htf_fread(&s->size, sizeof(s->size), 1, file);
+	s->token = malloc(sizeof(htf_token_t) * s->size);
+	s->allocated = s->size;
+	_htf_fread(s->token, sizeof(htf_token_t), s->size, file);
+	_htf_array_fread(s->timestamps, file);
+	fclose(file);
+	s->counter = 0;
 
-  htf_log(htf_dbg_lvl_debug, "\tLoad sequence %x {.size=%u}\n", HTF_ID(sequence_id), s->size);
+	htf_log(htf_dbg_lvl_debug, "\tLoad sequence %x {.size=%u, .nb_ts=%u}\n", HTF_ID(sequence_id), s->size,
+					s->timestamps.size);
 
-  if(htf_debug_level >= htf_dbg_lvl_debug) {
-    for(int i = 0; i<s->size && i< 15; i++) {
-      printf("{%x.%x} ", HTF_TOKEN_TYPE(s->token[i]), HTF_TOKEN_ID(s->token[i]));
-    }
-    printf("\n");
-  }
+	if (htf_debug_level >= htf_dbg_lvl_debug) {
+		htf_print_sequence(th, sequence_id);
+	}
 }
-
-
 
 static FILE* _htf_get_loop_file(const char* base_dirname,
 				struct htf_thread *th,

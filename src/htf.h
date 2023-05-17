@@ -4,20 +4,20 @@
 #include <pthread.h>
 #include <string.h>
 
-#include "htf_timestamp.h"
-#include "htf_dbg.h"
 #include "htf.h"
+#include "htf_dbg.h"
+#include "htf_dynamic_array.h"
+#include "htf_timestamp.h"
 
 /* A token is either:
-   - an event
-   - a sequence (ie a list of tokens)
-   - a loop (a repetition of sequences)
+	 - an event
+	 - a sequence (ie a list of tokens)
+	 - a loop (a repetition of sequences)
 */
-
 
 /* Token types */
 typedef enum htf_token_type {
-  HTF_TYPE_INVALID  = 0,
+	HTF_TYPE_INVALID  = 0,
   HTF_TYPE_EVENT    = 1,
   HTF_TYPE_SEQUENCE = 2,
   HTF_TYPE_LOOP     = 3
@@ -153,9 +153,16 @@ struct htf_event {
 
 /*************************** Sequence **********************/
 struct htf_sequence {
-  htf_token_t *token;
-  unsigned size;
+	/** Store the sequence of tokens. */
+	htf_token_t* token;
+	/** Number of tokens in the sequence. */
+	unsigned size;
+	/** Number of tokens allocated in token. */
 	unsigned allocated;
+	/** Timestamps for the start of these types of sequence. */
+	htf_array_t timestamps;
+	/** Compte le nombre de fois qu'on a vu cette séquence pendant la lecture. */
+	int counter;
 };
 
 /*************************** Loop **********************/
