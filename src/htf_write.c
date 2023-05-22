@@ -182,27 +182,37 @@ static inline uint _htf_count_token(struct htf_thread* thread,
 };
 
 /** Returns the timestamp for the given token, but compensates for the given array. It thus counts how many times
- * that token has already appeared, recursivly (ie entering loops and sequences), and then gives the correctt
+ * that token has already appeared, recursively (ie entering loops and sequences), and then gives the correctt
  * timestamps. */
 static inline htf_timestamp_t _htf_get_timestamp(struct htf_thread* thread,
 																								 htf_token_t token,
 																								 htf_token_t* array,
 																								 uint size) {
 	uint count = _htf_count_token(thread, token, array, size);
+#define CASE_EVENT_SEQUENCE(token, count)                                                 \
+	case HTF_TYPE_EVENT: {                                                                  \
+		struct htf_event_summary es = thread->events[token.id];                               \
+		return es.timestamps[es.nb_timestamps - count];                                       \
+	}                                                                                       \
+	case HTF_TYPE_SEQUENCE: {                                                               \
+		struct htf_sequence* seq = htf_get_sequence(thread, HTF_TOKEN_TO_SEQUENCE_ID(token)); \
+		return *(htf_timestamp_t*)array_get(&seq->timestamps, seq->timestamps.size - count);  \
+	}
 	switch (token.type) {
-		case HTF_TYPE_EVENT: {
-			struct htf_event_summary es = thread->events[token.id];
-			return es.timestamps[es.nb_timestamps - count];
-		}
-		case HTF_TYPE_SEQUENCE: {
-			struct htf_sequence* first_sequence = htf_get_sequence(thread, HTF_TOKEN_TO_SEQUENCE_ID(token));
-			return *(htf_timestamp_t*)array_get(&first_sequence->timestamps, first_sequence->timestamps.size - count);
-		}
+		CASE_EVENT_SEQUENCE(token, count)
 		case HTF_TYPE_LOOP: {
-			// TODO Deal with this.
+			struct htf_loop* loop = htf_get_loop(thread, HTF_TOKEN_TO_LOOP_ID(token));
+			uint second_count = loop->nb_iterations * count + _htf_count_token(thread, loop->token, array, size);
+			switch (loop->token.type) {
+				CASE_EVENT_SEQUENCE(loop->token, second_count)
+				case HTF_TYPE_LOOP:
+					htf_error("Loop inside a loop\n");
+				case HTF_TYPE_INVALID:
+					htf_error("Invalid token type.\n");
+			}
 		}
 		case HTF_TYPE_INVALID:
-			htf_error("This case isn't operational yet\n");
+			htf_error("Invalid token type.\n");
 	}
 }
 
