@@ -161,22 +161,34 @@ static inline void _htf_loop_add_iteration(struct htf_loop* loop) {
 }
 
 /** Count the number time the given token appears in the given array. */
-static inline uint _htf_count_token(htf_token_t event, htf_token_t* sequence, uint sequence_size) {
+static inline uint _htf_count_token(struct htf_thread* thread,
+																		htf_token_t event,
+																		htf_token_t* sequence,
+																		uint sequence_size) {
 	uint count = 0;
 	for (int i = 0; i < sequence_size; i++) {
 		htf_token_t token = sequence[i];
 		count += (memcmp(&event, &token, sizeof(event)) == 0);
+		if (token.type == HTF_TYPE_LOOP) {
+			struct htf_loop* loop = htf_get_loop(thread, HTF_TOKEN_TO_LOOP_ID(token));
+			struct htf_sequence* seq = htf_get_sequence(thread, HTF_TOKEN_TO_SEQUENCE_ID(loop->token));
+			count += loop->nb_iterations * _htf_count_token(thread, event, seq->token, seq->size);
+		} else if (token.type == HTF_TYPE_SEQUENCE) {
+			struct htf_sequence* seq = htf_get_sequence(thread, HTF_TOKEN_TO_SEQUENCE_ID(token));
+			count += _htf_count_token(thread, event, seq->token, seq->size);
+		}
 	}
-	// TODO Recurvive !!!
 	return count;
 };
 
+/** Returns the timestamp for the given token, but compensates for the given array. It thus counts how many times
+ * that token has already appeared, recursivly (ie entering loops and sequences), and then gives the correctt
+ * timestamps. */
 static inline htf_timestamp_t _htf_get_timestamp(struct htf_thread* thread,
 																								 htf_token_t token,
 																								 htf_token_t* array,
 																								 uint size) {
-	uint count = _htf_count_token(token, array, size);
-	htf_timestamp_t ts;
+	uint count = _htf_count_token(thread, token, array, size);
 	switch (token.type) {
 		case HTF_TYPE_EVENT: {
 			struct htf_event_summary es = thread->events[token.id];
@@ -186,7 +198,9 @@ static inline htf_timestamp_t _htf_get_timestamp(struct htf_thread* thread,
 			struct htf_sequence* first_sequence = htf_get_sequence(thread, HTF_TOKEN_TO_SEQUENCE_ID(token));
 			return *(htf_timestamp_t*)array_get(&first_sequence->timestamps, first_sequence->timestamps.size - count);
 		}
-		case HTF_TYPE_LOOP:
+		case HTF_TYPE_LOOP: {
+			// TODO Deal with this.
+		}
 		case HTF_TYPE_INVALID:
 			htf_error("This case isn't operational yet\n");
 	}
@@ -209,8 +223,6 @@ static void _htf_create_loop(struct htf_thread_writer* thread_writer,
 	struct htf_sequence* cur_seq = _htf_get_cur_sequence(thread_writer);
 
 	// We need to go back in the current sequence in order to correctly get our timestamp
-	printf("First token is (%x.%x)", cur_seq->token[index_first_iteration].type,
-				 cur_seq->token[index_first_iteration].id);
 	htf_token_t first_token = cur_seq->token[index_first_iteration];
 
 	struct htf_sequence* loop_seq = htf_get_sequence(&thread_writer->thread_trace, HTF_TOKEN_TO_SEQUENCE_ID(loop->token));
