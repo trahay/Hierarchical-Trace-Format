@@ -26,6 +26,7 @@ void htf_read_thread_iterator_init(struct htf_archive *archive,
 	reader->callstack_index = calloc(MAX_CALLSTACK_DEPTH, sizeof(int));
 	reader->callstack_loop_iteration = calloc(MAX_CALLSTACK_DEPTH, sizeof(int));
 	reader->event_index = calloc(reader->thread_trace->nb_events, sizeof(int));
+	reader->sequence_index = calloc(reader->thread_trace->nb_sequences, sizeof(int));
 
 	if (htf_debug_level >= htf_dbg_lvl_verbose) {
 		htf_log(htf_dbg_lvl_verbose, "init callstack for thread %d\n", thread_id);
@@ -245,6 +246,8 @@ static int _htf_read_thread_next_event(struct htf_thread_reader *reader,
   htf_token_t t = get_cur_token(reader);
 
 	while (HTF_TOKEN_TYPE(t) == HTF_TYPE_SEQUENCE || HTF_TOKEN_TYPE(t) == HTF_TYPE_LOOP) {
+		if (t.type == HTF_TYPE_SEQUENCE)
+			reader->sequence_index[t.id]++;
 		enter_block(reader, t);
 		t = get_cur_token(reader);
 	}
@@ -293,6 +296,8 @@ static int _htf_read_thread_next_token(struct htf_thread_reader* reader,
 	if (move) {
 		/* Move to the next event */
 		if (HTF_TOKEN_TYPE(t) == HTF_TYPE_SEQUENCE || HTF_TOKEN_TYPE(t) == HTF_TYPE_LOOP) {
+			if (t.type == HTF_TYPE_SEQUENCE)
+				reader->sequence_index[t.id]++;
 			enter_block(reader, t);
 		} else {
 			reader->event_index[HTF_TOKEN_ID(t)]++;	 // "consume" the event occurence
@@ -311,10 +316,23 @@ int htf_read_thread_next_token(struct htf_thread_reader* reader, struct htf_toke
 }
 
 htf_timestamp_t htf_get_starting_timestamp(struct htf_thread_reader* reader, struct htf_token token, int offset) {
-	while (HTF_TOKEN_TYPE(token) == HTF_TYPE_LOOP || HTF_TOKEN_TYPE(token) == HTF_TYPE_SEQUENCE) {
-		token = htf_get_token(reader->thread_trace, token, 0);
+	switch (token.type) {
+		case HTF_TYPE_EVENT: {
+			int event_index = reader->event_index[HTF_TOKEN_ID(token)];
+			return reader->thread_trace->events[HTF_TOKEN_ID(token)].timestamps[event_index - offset];
+		}
+		case HTF_TYPE_SEQUENCE: {
+			int sequence_index = reader->sequence_index[token.id];
+			struct htf_sequence* seq = htf_get_sequence(reader->thread_trace, HTF_TOKEN_TO_SEQUENCE_ID(token));
+			return *(htf_timestamp_t*)array_get(&seq->timestamps, sequence_index - offset);
+		}
+		case HTF_TYPE_LOOP: {
+			struct htf_loop* loop = htf_get_loop(reader->thread_trace, HTF_TOKEN_TO_LOOP_ID(token));
+			struct htf_sequence* seq = htf_get_sequence(reader->thread_trace, HTF_TOKEN_TO_SEQUENCE_ID(loop->token));
+			int sequence_index = reader->sequence_index[loop->token.id];
+			return *(htf_timestamp_t*)array_get(&seq->timestamps, sequence_index - (offset * loop->nb_iterations));
+		}
+		case HTF_TYPE_INVALID:
+			htf_error("Invalid token type\n");
 	}
-	//	htf_assert(HTF_TOKEN_TYPE(token) == HTF_TYPE_EVENT);
-	return reader->thread_trace->events[HTF_TOKEN_ID(token)]
-			.timestamps[reader->event_index[HTF_TOKEN_ID(token)] - offset];
 }

@@ -27,10 +27,7 @@ static void print_event(struct htf_thread* thread, htf_token_t token, struct htf
 
 static void print_sequence(struct htf_thread* thread, htf_token_t token) {
 	struct htf_sequence* s = thread->sequences[token.id];
-	htf_timestamp_t ts = 0;
-	if (s->timestamps.size) {
-		ts = *(htf_timestamp_t*)array_get(&s->timestamps, s->counter++);
-	}
+	htf_timestamp_t ts = (s->timestamps.size) ? *(htf_timestamp_t*)array_get(&s->timestamps, s->counter++) : 0;
 	printf("%.9lf\t\t", ts / 1e9);
 	if (!per_thread)
 		printf("%s\t", htf_get_thread_name(thread));
