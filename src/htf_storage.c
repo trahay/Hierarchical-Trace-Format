@@ -248,7 +248,6 @@ static void _htf_read_sequence(const char* base_dirname,
 	_htf_fread(s->token, sizeof(htf_token_t), s->size, file);
 	_htf_array_fread(s->timestamps, file);
 	fclose(file);
-	s->counter = 0;
 
 	htf_log(htf_dbg_lvl_debug, "\tLoad sequence %x {.size=%u, .nb_ts=%u}\n", HTF_ID(sequence_id), s->size,
 					s->timestamps.size);

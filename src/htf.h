@@ -161,8 +161,6 @@ struct htf_sequence {
 	unsigned allocated;
 	/** Timestamps for the start of these types of sequence. */
 	htf_array_t timestamps;
-	/** Compte le nombre de fois qu'on a vu cette séquence pendant la lecture. */
-	int counter;
 };
 
 /*************************** Loop **********************/

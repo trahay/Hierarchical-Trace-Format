@@ -25,9 +25,9 @@ static void print_event(struct htf_thread* thread, htf_token_t token, struct htf
 	printf("\n");
 }
 
-static void print_sequence(struct htf_thread* thread, htf_token_t token) {
+static void print_sequence(struct htf_thread* thread, htf_token_t token, int counter) {
 	struct htf_sequence* s = thread->sequences[token.id];
-	htf_timestamp_t ts = (s->timestamps.size) ? *(htf_timestamp_t*)array_get(&s->timestamps, s->counter++) : 0;
+	htf_timestamp_t ts = (s->timestamps.size) ? *(htf_timestamp_t*)array_get(&s->timestamps, counter) : 0;
 	printf("%.9lf\t\t", ts / 1e9);
 	if (!per_thread)
 		printf("%s\t", htf_get_thread_name(thread));
@@ -100,11 +100,11 @@ static void print_token(struct htf_thread_reader* reader, struct htf_token* t, s
 			print_event(reader->thread_trace, copy_token, e);
 			break;
 		case HTF_TYPE_SEQUENCE:
-			print_sequence(reader->thread_trace, copy_token);
+			print_sequence(reader->thread_trace, copy_token, reader->sequence_index[copy_token.id] - 1);
 			break;
 		case HTF_TYPE_LOOP:
 			if (reader->depth == max_depth)
-				print_loop(reader->thread_trace, copy_token, htf_get_starting_timestamp(reader, copy_token, 1));
+				print_loop(reader->thread_trace, copy_token, htf_get_starting_timestamp(reader, copy_token));
 			else if (show_structure)
 				print_loop(reader->thread_trace, copy_token, 0);
 			break;
@@ -142,7 +142,7 @@ static int get_next_token(struct htf_thread_reader* readers,
 
 	for (int i = 0; i < nb_threads; i++) {
 		if (htf_read_thread_cur_token(&readers[i], &cur_t, &cur_e) == 0) {
-			htf_timestamp_t ts = htf_get_starting_timestamp(&readers[i], cur_t, 0);
+			htf_timestamp_t ts = htf_get_starting_timestamp(&readers[i], cur_t);
 			if (min_ts == HTF_TIMESTAMP_INVALID || ts < min_ts) {
 				min_index = i;
 				min_ts = ts;
@@ -244,10 +244,6 @@ int main(int argc, char**argv) {
 
 	struct htf_archive trace;
 	htf_read_archive(&trace, trace_name);
-
-	for (int i = 0; i < trace.nb_threads; i++) {
-		__realign_timestamps(&trace, trace.threads[i]);
-	}
 
 	if (per_thread) {
 		for (int i = 0; i < trace.nb_threads; i++) {
