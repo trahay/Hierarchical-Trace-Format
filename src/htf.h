@@ -161,6 +161,8 @@ struct htf_sequence {
 	unsigned allocated;
 	/** Timestamps for the start of these types of sequence. */
 	htf_array_t timestamps;
+	/** Durations for these types of sequences. */
+	htf_timestamp_t* durations;
 };
 
 /*************************** Loop **********************/
@@ -175,7 +177,8 @@ struct htf_loop {
 /** Only used when reading a trace, links an event with a timestamp. */
 struct htf_event_occurence {
   struct htf_event event;
-  htf_timestamp_t timestamp;
+	htf_timestamp_t timestamp;
+	htf_timestamp_t duration;
 };
 
 /**
@@ -399,16 +402,18 @@ static inline int _htf_sequences_equal(struct htf_sequence *s1,
  */
 #define INCREMENT_MEMORY_SPACE(buffer, counter, datatype) do {            \
   datatype * new_buffer = realloc(buffer, (counter + 1) * sizeof(datatype));\
-  if (new_buffer == NULL) {                                               \
-    new_buffer = malloc((counter + 1) * sizeof(datatype));                \
-    if (new_buffer == NULL) {                                             \
-      htf_error("Failed to allocate memory using realloc AND malloc\n");  \
-    }                                                                     \
-    memmove(new_buffer, buffer, counter * sizeof(datatype));              \
-    free(buffer);                                                         \
-  }                                                                       \
-  buffer = new_buffer;                                                    \
-  counter++;                                                              \
-} while (0)
+  if (new_buffer == NULL) {                                                 \
+			new_buffer = malloc((counter + 1) * sizeof(datatype));                  \
+			if (new_buffer == NULL) {                                               \
+				htf_error("Failed to allocate memory using realloc AND malloc\n");    \
+			}                                                                       \
+			memmove(new_buffer, buffer, counter * sizeof(datatype));                \
+			free(buffer);                                                           \
+		}                                                                         \
+		buffer = new_buffer;                                                      \
+		counter++;                                                                \
+	} while (0)
+
+#define DOFOR(var_name, max) for (int var_name = 0; var_name < max; var_name++)
 
 #endif /* EVENT_H */

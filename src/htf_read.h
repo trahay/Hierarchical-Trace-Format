@@ -2,12 +2,15 @@
 #define HTF_READ_H
 
 #include "htf.h"
+#include "htf_timestamp.h"
 
 struct htf_thread_reader {
 	/** Archive being read by this reader. */
 	struct htf_archive* archive;
 	/** Thread being read. */
 	struct htf_thread* thread_trace;
+	/** The current referential timestamp. */
+	htf_timestamp_t referential_timestamp;
 
 	/** Stack containing the sequences/loops being read. */
 	htf_token_t* callstack_sequence;
