@@ -232,10 +232,20 @@ static void _get_next_token(struct htf_thread_reader* reader) {
 	}
 }
 
-static int _htf_read_thread_next_token(struct htf_thread_reader* reader,
-																			 struct htf_token* token,
-																			 struct htf_event_occurence* e,
-																			 int move) {
+int htf_move_to_next_token(struct htf_thread_reader* reader) {
+	htf_token_t t = get_cur_token(reader);
+	if (HTF_TOKEN_TYPE(t) == HTF_TYPE_SEQUENCE || HTF_TOKEN_TYPE(t) == HTF_TYPE_LOOP) {
+		if (t.type == HTF_TYPE_SEQUENCE)
+			reader->sequence_index[t.id]++;
+		enter_block(reader, t);
+	} else {
+		reader->event_index[HTF_TOKEN_ID(t)]++;	 // "consume" the event occurence
+		_get_next_token(reader);
+	}
+}
+int htf_read_thread_cur_token(struct htf_thread_reader* reader,
+															struct htf_token* token,
+															struct htf_event_occurence* e) {
 	if (reader->current_frame < 0) {
 		return -1; /* TODO: return EOF */
 	}
@@ -252,34 +262,14 @@ static int _htf_read_thread_next_token(struct htf_thread_reader* reader,
 		e->duration = es->timestamps[reader->event_index[event_index]];
 		reader->referential_timestamp += es->timestamps[reader->event_index[event_index]];
 	}
-
-	if (move) {
-		/* Move to the next event */
-		if (HTF_TOKEN_TYPE(t) == HTF_TYPE_SEQUENCE || HTF_TOKEN_TYPE(t) == HTF_TYPE_LOOP) {
-			if (t.type == HTF_TYPE_SEQUENCE)
-				reader->sequence_index[t.id]++;
-			enter_block(reader, t);
-		} else {
-			reader->event_index[HTF_TOKEN_ID(t)]++;	 // "consume" the event occurence
-			_get_next_token(reader);
-		}
-	}
-
 	return 0;
-}
-int htf_read_thread_cur_token(struct htf_thread_reader* reader, struct htf_token* t, struct htf_event_occurence* e) {
-	return _htf_read_thread_next_token(reader, t, e, 0);
-}
-
-int htf_read_thread_next_token(struct htf_thread_reader* reader, struct htf_token* t, struct htf_event_occurence* e) {
-	return _htf_read_thread_next_token(reader, t, e, 1);
 }
 
 htf_timestamp_t htf_get_starting_timestamp(struct htf_thread_reader* reader, struct htf_token token) {
 	switch (token.type) {
 		case HTF_TYPE_EVENT: {
 			int event_index = reader->event_index[HTF_TOKEN_ID(token)];
-			return reader->referential_timestamp + reader->thread_trace->events[HTF_TOKEN_ID(token)].timestamps[event_index];
+			return reader->referential_timestamp + reader->thread_trace->events[token.id].timestamps[event_index];
 		}
 		case HTF_TYPE_SEQUENCE: {
 			int sequence_index = reader->sequence_index[token.id];
@@ -294,5 +284,83 @@ htf_timestamp_t htf_get_starting_timestamp(struct htf_thread_reader* reader, str
 		}
 		case HTF_TYPE_INVALID:
 			htf_error("Invalid token type\n");
+	}
+}
+
+htf_timestamp_t htf_get_duration(struct htf_thread_reader* reader, struct htf_token token) {
+	switch (token.type) {
+		case HTF_TYPE_EVENT: {
+			int event_index = reader->event_index[HTF_TOKEN_ID(token)];
+			return reader->thread_trace->events[token.id].timestamps[event_index];
+		}
+		case HTF_TYPE_SEQUENCE: {
+			int sequence_index = reader->sequence_index[token.id];
+			struct htf_sequence* seq = htf_get_sequence(reader->thread_trace, HTF_TOKEN_TO_SEQUENCE_ID(token));
+			return seq->durations[sequence_index];
+		}
+		case HTF_TYPE_LOOP: {
+			htf_timestamp_t sum = 0;
+			struct htf_loop* loop = htf_get_loop(reader->thread_trace, HTF_TOKEN_TO_LOOP_ID(token));
+			struct htf_sequence* seq = htf_get_sequence(reader->thread_trace, HTF_TOKEN_TO_SEQUENCE_ID(loop->token));
+			int sequence_index = reader->sequence_index[loop->token.id];
+			DOFOR(i, loop->nb_iterations) {
+				sum += seq->durations[sequence_index + i];
+			}
+			return sum;
+		}
+		case HTF_TYPE_INVALID:
+			htf_error("Invalid token type\n");
+	}
+}
+
+/** Increments the counters in the reader */
+void __skip_token(struct htf_thread_reader* reader, htf_token_t token, int nb_times) {
+	switch (token.type) {
+		case HTF_TYPE_EVENT: {
+			reader->event_index[token.id] += nb_times;
+			break;
+		}
+		case HTF_TYPE_SEQUENCE: {
+			struct htf_sequence* seq = htf_get_sequence(reader->thread_trace, HTF_TOKEN_TO_SEQUENCE_ID(token));
+			reader->sequence_index[token.id] += nb_times;
+			DOFOR(i, seq->size) {
+				__skip_token(reader, seq->token[i], nb_times);
+			}
+			break;
+		}
+		case HTF_TYPE_LOOP: {
+			struct htf_loop* loop = htf_get_loop(reader->thread_trace, HTF_TOKEN_TO_LOOP_ID(token));
+			struct htf_sequence* seq = htf_get_sequence(reader->thread_trace, HTF_TOKEN_TO_SEQUENCE_ID(loop->token));
+			reader->sequence_index[loop->token.id] += nb_times * loop->nb_iterations;
+			DOFOR(i, seq->size) {
+				__skip_token(reader, seq->token[i], nb_times * loop->nb_iterations);
+			}
+			break;
+		}
+		default:
+			htf_error("This shouldn't have happened\n");
+	}
+}
+
+void skip_token(struct htf_thread_reader* reader, htf_token_t token) {
+	switch (token.type) {
+		case HTF_TYPE_EVENT: {
+			int event_index = reader->event_index[HTF_TOKEN_ID(token)] - 1;
+			reader->referential_timestamp += reader->thread_trace->events[token.id].timestamps[event_index];
+			break;
+		}
+		case HTF_TYPE_SEQUENCE: {
+			int event_index = reader->sequence_index[HTF_TOKEN_ID(token)] - 1;
+			struct htf_sequence* seq = htf_get_sequence(reader->thread_trace, HTF_TOKEN_TO_SEQUENCE_ID(token));
+			reader->referential_timestamp += seq->durations[event_index];
+			__skip_token(reader, token, 1);
+			break;
+		}
+		case HTF_TYPE_LOOP: {
+			// TODO Fuck it we ball
+			break;
+		}
+		default:
+			htf_error("This shouldn't have happened\n");
 	}
 }

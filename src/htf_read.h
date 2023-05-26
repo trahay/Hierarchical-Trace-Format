@@ -43,17 +43,9 @@ void htf_read_global_archive(struct htf_archive* archive, char* main_filename);
 void htf_read_archive(struct htf_archive* archive, char* filename);
 
 void htf_read_thread_iterator_init(struct htf_archive *archive,
-				   struct htf_thread_reader *reader,
-				   htf_thread_id_t thread_id);
+																	 struct htf_thread_reader* reader,
+																	 htf_thread_id_t thread_id);
 
-/** Copies the value of the current event in a thread to the given pointer, and moves to the next one.
- * @return -1 in case of an error (such as the end of the trace), else 0.
- */
-int htf_read_thread_next_event(struct htf_thread_reader* reader, struct htf_event_occurence* e);
-/** Copies the value of the current event in a thread to the given pointer.
- * @return -1 in case of an error (such as the end of the trace), else 0.
- */
-int htf_read_thread_cur_event(struct htf_thread_reader* reader, struct htf_event_occurence* e);
 /**
  * Copies the value of the current token in a thread to the given pointer.
  * If it is an event, copies the informations to the event_occurence pointer.
@@ -61,15 +53,16 @@ int htf_read_thread_cur_event(struct htf_thread_reader* reader, struct htf_event
  * @return -1 in case of an error (such as the end of the trace), else 0.
  */
 int htf_read_thread_cur_token(struct htf_thread_reader* reader, struct htf_token* t, struct htf_event_occurence* e);
-/**
- * Copies the value of the current token in a thread to the given pointer, and moves to the next one.
- * If it is an event, copies the informations to the event_occurence pointer.
- * Be aware that exiting a block is not a token, but entering is.
- * @return -1 in case of an error (such as the end of the trace), else 0.
- */
-int htf_read_thread_next_token(struct htf_thread_reader* reader, struct htf_token* t, struct htf_event_occurence* e);
-/** Returns the timestamp at which the given Event, Sequence or Loop starts, without modifying the reader's state.
- */
+/** Moves the reader to the next token in the thread. */
+int htf_move_to_next_token(struct htf_thread_reader* reader);
+/** Skips the given token entirely.
+ * The reader must be located at that token (contrary to htf_get_starting_timestamp). */
+void skip_token(struct htf_thread_reader* reader, htf_token_t token);
+/** Returns the timestamp at which the given Event, Sequence or Loop starts, without modifying the reader's
+ * state. */
 htf_timestamp_t htf_get_starting_timestamp(struct htf_thread_reader* reader, struct htf_token token);
+
+/** Returns the duraiton of the given Event, Sequence or Loop, without modifying the reader's state. */
+htf_timestamp_t htf_get_duration(struct htf_thread_reader* reader, struct htf_token token);
 #define MAX_CALLSTACK_DEPTH 100
 #endif /* HTF_READ_H */

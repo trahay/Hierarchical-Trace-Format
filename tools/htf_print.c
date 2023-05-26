@@ -42,9 +42,9 @@ static void print_sequence(struct htf_thread* thread, htf_token_t token, int cou
 	printf("\n");
 }
 
-static void print_loop(struct htf_thread* thread, htf_token_t token, htf_timestamp_t ts) {
+static void print_loop(struct htf_thread* thread, htf_token_t token, htf_timestamp_t ts, htf_timestamp_t duration) {
 	if (ts != 0) {
-		printf("%.9lf\t\t", ts / 1e9);
+		printf("%.9lf\t%.9lf\t", ts / 1e9, duration / 1e9);
 	} else {
 		printf("Loop");
 		if (show_structure)
@@ -69,51 +69,38 @@ static void print_loop(struct htf_thread* thread, htf_token_t token, htf_timesta
 }
 
 static void print_token(struct htf_thread_reader* reader, struct htf_token* t, struct htf_event_occurence* e) {
-	struct htf_token copy_token;
-	// We need to copy the first token we encountered
-	// Because we'll always have to print it, but t will be modified during the while loop
-	memcpy(&copy_token, t, sizeof(copy_token));
-	htf_log(htf_dbg_lvl_verbose, "Reading token(%x.%x) for thread %s\n", copy_token.type, copy_token.id,
+	htf_log(htf_dbg_lvl_verbose, "Reading token(%x.%x) for thread %s\n", t->type, t->id,
 					htf_get_thread_name(reader->thread_trace));
 
 	// This insures we don't go deeper than necessary
-	while (reader->current_frame > max_depth) {
-		htf_read_thread_next_token(reader, t, e);
+	if (reader->current_frame > max_depth) {
+		return;
 	}
 	// Prints the structure of the sequences and the loops
 	if (show_structure) {
-		for (int i = 0; i < reader->current_frame - 1; i++)
-			printf("│ ");
-		if (reader->depth == reader->current_frame) {
-			if (copy_token.type == HTF_TYPE_EVENT)
-				printf("│ ");
-			else
-				printf("├─");
-		}
-		if (reader->depth > reader->current_frame) {
-			// Means we ended some blocks
-			if (reader->current_frame > 0)
-				printf("│ ");
-			for (int i = (reader->current_frame >= 0) ? reader->current_frame : 0; i < reader->depth; i++)
-				printf("╰─");
-		}
+		for (int i = 0; i < reader->current_frame; i++)
+			printf(" ");
 	}
+	// printf("│ ");
+	// printf("├─");
+	// printf("╰─");
+	// We'll fix this once we use ncurse.
 	// Prints the token we first started with
-	switch (copy_token.type) {
+	switch (t->type) {
 		case HTF_TYPE_INVALID:
 			htf_error("Type is invalid\n");
 			break;
 		case HTF_TYPE_EVENT:
-			print_event(reader->thread_trace, copy_token, e);
+			print_event(reader->thread_trace, *t, e);
 			break;
 		case HTF_TYPE_SEQUENCE:
-			print_sequence(reader->thread_trace, copy_token, reader->sequence_index[copy_token.id] - 1);
+			print_sequence(reader->thread_trace, *t, reader->sequence_index[t->id]);
 			break;
 		case HTF_TYPE_LOOP:
-			if (reader->depth == max_depth)
-				print_loop(reader->thread_trace, copy_token, htf_get_starting_timestamp(reader, copy_token));
-			else if (show_structure)
-				print_loop(reader->thread_trace, copy_token, 0);
+			if (reader->depth == max_depth) {
+				print_loop(reader->thread_trace, *t, htf_get_starting_timestamp(reader, *t), htf_get_duration(reader, *t));
+			} else if (show_structure)
+				print_loop(reader->thread_trace, *t, 0, 0);
 			break;
 	}
 	reader->depth = reader->current_frame;
@@ -129,8 +116,9 @@ static void print_thread(struct htf_archive* trace, struct htf_thread* thread) {
 
 	struct htf_event_occurence e;
 	struct htf_token t;
-	while (htf_read_thread_next_token(&reader, &t, &e) == 0) {
+	while (htf_read_thread_cur_token(&reader, &t, &e) == 0) {
 		print_token(&reader, &t, &e);
+		htf_move_to_next_token(&reader);
 	}
 }
 
@@ -158,7 +146,8 @@ static int get_next_token(struct htf_thread_reader* readers,
 	}
 
 	if (min_index >= 0) {
-		htf_read_thread_next_token(&readers[min_index], t, e);
+		htf_read_thread_cur_token(&readers[min_index], t, e);
+		htf_move_to_next_token(&readers[min_index]);
 	}
 
 	return min_index;
@@ -188,18 +177,18 @@ static void __compute_durations(struct htf_archive* trace, struct htf_thread* th
 	htf_token_t t;
 
 	htf_timestamp_t* duration_callstack[MAX_CALLSTACK_DEPTH] = {0};
-	while (htf_read_thread_next_token(&reader, &t, &e) == 0) {
+	while (htf_read_thread_cur_token(&reader, &t, &e) == 0) {
 		if (t.type == HTF_TYPE_SEQUENCE) {
 			struct htf_sequence* seq = htf_get_sequence(reader.thread_trace, HTF_TOKEN_TO_SEQUENCE_ID(t));
-			duration_callstack[reader.depth] = &seq->durations[reader.sequence_index[t.id] - 1];
+			duration_callstack[reader.current_frame] = &seq->durations[reader.sequence_index[t.id]];
 		} else if (t.type == HTF_TYPE_EVENT) {
 			struct htf_event_summary es = reader.thread_trace->events[t.id];
-			DOFOR(i, reader.depth) {
+			DOFOR(i, reader.current_frame) {
 				if (duration_callstack[i])
-					*duration_callstack[i] += es.timestamps[reader.event_index[t.id] - 1];
+					*duration_callstack[i] += es.timestamps[reader.event_index[t.id]];
 			}
 		}
-		reader.depth = reader.current_frame;
+		htf_move_to_next_token(&reader);
 	}
 }
 
