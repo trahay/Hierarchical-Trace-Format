@@ -341,6 +341,38 @@ void __skip_token(struct htf_thread_reader* reader, htf_token_t token, int nb_ti
 	}
 }
 
+struct htf_savestate create_savestate(struct htf_thread_reader* reader) {
+	struct htf_savestate new_savestate;
+	new_savestate.referential_timestamp = reader->referential_timestamp;
+
+	new_savestate.callstack_sequence = malloc(sizeof(htf_token_t) * MAX_CALLSTACK_DEPTH);
+	memcpy(new_savestate.callstack_sequence, reader->callstack_sequence, MAX_CALLSTACK_DEPTH);
+
+	new_savestate.callstack_index = malloc(sizeof(int) * MAX_CALLSTACK_DEPTH);
+	memcpy(new_savestate.callstack_index, reader->callstack_index, MAX_CALLSTACK_DEPTH);
+
+	new_savestate.callstack_loop_iteration = malloc(sizeof(int) * MAX_CALLSTACK_DEPTH);
+	memcpy(new_savestate.callstack_loop_iteration, reader->callstack_loop_iteration, MAX_CALLSTACK_DEPTH);
+
+	new_savestate.current_frame = reader->current_frame;
+
+	new_savestate.event_index = malloc(sizeof(int) * MAX_CALLSTACK_DEPTH);
+	memcpy(new_savestate.event_index, reader->event_index, MAX_CALLSTACK_DEPTH);
+
+	new_savestate.sequence_index = malloc(sizeof(int) * MAX_CALLSTACK_DEPTH);
+	memcpy(new_savestate.sequence_index, reader->sequence_index, MAX_CALLSTACK_DEPTH);
+}
+
+void load_savestate(struct htf_thread_reader* reader, struct htf_savestate* savestate) {
+	reader->referential_timestamp = savestate->referential_timestamp;
+	memcpy(reader->callstack_sequence, savestate->callstack_sequence, MAX_CALLSTACK_DEPTH);
+	memcpy(reader->callstack_index, savestate->callstack_index, MAX_CALLSTACK_DEPTH);
+	memcpy(reader->callstack_loop_iteration, savestate->callstack_loop_iteration, MAX_CALLSTACK_DEPTH);
+	reader->current_frame = savestate->current_frame;
+	memcpy(reader->event_index, savestate->event_index, MAX_CALLSTACK_DEPTH);
+	memcpy(reader->sequence_index, savestate->sequence_index, MAX_CALLSTACK_DEPTH);
+}
+
 void skip_token(struct htf_thread_reader* reader, htf_token_t token) {
 	switch (token.type) {
 		case HTF_TYPE_EVENT: {
