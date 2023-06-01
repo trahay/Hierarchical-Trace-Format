@@ -31,11 +31,6 @@ struct htf_thread_reader {
 	/** At any point, a sequence s has been seen sequence_index[s.id] times.
 	 * Use this to grab the timestamps and other information on the sequence. */
 	int* sequence_index;
-
-	/**
-	 * Current depth, ie number of sequences + loop we are in. Only used in cosmetics, to print the structure.
-	 */
-	int depth;
 };
 
 void htf_read_global_archive(struct htf_archive* archive, char* main_filename);

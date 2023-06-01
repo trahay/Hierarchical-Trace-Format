@@ -8,7 +8,6 @@
 static void init_callstack(struct htf_thread_reader *reader) {
 	reader->referential_timestamp = 0;
 	reader->current_frame = 0;
-	reader->depth = 0;
 	reader->callstack_index[0] = 0;
 	reader->callstack_loop_iteration[0] = 0;
   reader->callstack_sequence[0].type = HTF_TYPE_SEQUENCE;

@@ -97,13 +97,12 @@ static void print_token(struct htf_thread_reader* reader, struct htf_token* t, s
 			print_sequence(reader->thread_trace, *t, reader->sequence_index[t->id]);
 			break;
 		case HTF_TYPE_LOOP:
-			if (reader->depth == max_depth) {
+			if (reader->current_frame == max_depth) {
 				print_loop(reader->thread_trace, *t, htf_get_starting_timestamp(reader, *t), htf_get_duration(reader, *t));
 			} else if (show_structure)
 				print_loop(reader->thread_trace, *t, 0, 0);
 			break;
 	}
-	reader->depth = reader->current_frame;
 }
 
 /* Print all the events of a thread */
