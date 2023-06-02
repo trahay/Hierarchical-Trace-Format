@@ -174,13 +174,6 @@ struct htf_loop {
 	struct htf_token id;
 };
 
-/** Only used when reading a trace, links an event with a timestamp. */
-struct htf_event_occurence {
-  struct htf_event event;
-	htf_timestamp_t timestamp;
-	htf_timestamp_t duration;
-};
-
 /**
  * Summary for an event. The nth time the event appears, it is at timestamps timestamps[n].
  */
