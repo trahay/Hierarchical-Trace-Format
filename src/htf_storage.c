@@ -493,11 +493,10 @@ static void _htf_store_thread(const char* dir_name, struct htf_thread *th) {
 
 	/* Start Reading */
 
-	struct htf_event_occurence e;
 	struct htf_token t;
 	htf_timestamp_t* last_timestamp = NULL;
 	htf_log(htf_dbg_lvl_debug, "Reading thread to delta the timestamps\n");
-	while (htf_read_thread_cur_token(&reader, &t, &e) == 0) {
+	while (htf_read_thread_cur_token(&reader, &t, NULL) == 0) {
 		if (t.type == HTF_TYPE_EVENT) {
 			int event_index = reader.event_index[t.id];
 			if (last_timestamp) {

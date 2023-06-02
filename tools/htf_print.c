@@ -68,7 +68,7 @@ static void print_loop(struct htf_thread* thread, htf_token_t token, htf_timesta
 	printf("\n");
 }
 
-static void print_token(struct htf_thread_reader* reader, struct htf_token* t, struct htf_event_occurence* e) {
+static void print_token(struct htf_thread_reader* reader, struct htf_token* t, struct htf_occurence* e) {
 	htf_log(htf_dbg_lvl_verbose, "Reading token(%x.%x) for thread %s\n", t->type, t->id,
 					htf_get_thread_name(reader->thread_trace));
 
@@ -91,7 +91,7 @@ static void print_token(struct htf_thread_reader* reader, struct htf_token* t, s
 			htf_error("Type is invalid\n");
 			break;
 		case HTF_TYPE_EVENT:
-			print_event(reader->thread_trace, *t, e);
+			print_event(reader->thread_trace, *t, &e->event_occurence);
 			break;
 		case HTF_TYPE_SEQUENCE:
 			print_sequence(reader->thread_trace, *t, reader->sequence_index[t->id]);
@@ -113,7 +113,7 @@ static void print_thread(struct htf_archive* trace, struct htf_thread* thread) {
 	struct htf_thread_reader reader;
 	htf_read_thread_iterator_init(trace, &reader, thread->id);
 
-	struct htf_event_occurence e;
+	struct htf_occurence e;
 	struct htf_token t;
 	while (htf_read_thread_cur_token(&reader, &t, &e) == 0) {
 		print_token(&reader, &t, &e);
@@ -128,8 +128,8 @@ static void print_thread(struct htf_archive* trace, struct htf_thread* thread) {
 static int get_next_token(struct htf_thread_reader* readers,
 													int nb_threads,
 													struct htf_token* t,
-													struct htf_event_occurence* e) {
-	struct htf_event_occurence cur_e;
+													struct htf_occurence* e) {
+	struct htf_occurence cur_e;
 	struct htf_token cur_t;
 	htf_timestamp_t min_ts = HTF_TIMESTAMP_INVALID;
 	int min_index = -1;
@@ -161,7 +161,7 @@ void print_trace(struct htf_archive* trace) {
 
 	printf("Timestamp\tDuration\tThread Name\tTag\tEvent\n");
 
-	struct htf_event_occurence e;
+	struct htf_occurence e;
 	struct htf_token t;
 	int thread_index = -1;
 	while ((thread_index = get_next_token(readers, trace->nb_threads, &t, &e)) >= 0) {
@@ -172,11 +172,10 @@ void print_trace(struct htf_archive* trace) {
 static void __compute_durations(struct htf_archive* trace, struct htf_thread* thread) {
 	struct htf_thread_reader reader;
 	htf_read_thread_iterator_init(trace, &reader, thread->id);
-	struct htf_event_occurence e;
 	htf_token_t t;
 
 	htf_timestamp_t* duration_callstack[MAX_CALLSTACK_DEPTH] = {0};
-	while (htf_read_thread_cur_token(&reader, &t, &e) == 0) {
+	while (htf_read_thread_cur_token(&reader, &t, NULL) == 0) {
 		if (t.type == HTF_TYPE_SEQUENCE) {
 			struct htf_sequence* seq = htf_get_sequence(reader.thread_trace, HTF_TOKEN_TO_SEQUENCE_ID(t));
 			duration_callstack[reader.current_frame] = &seq->durations[reader.sequence_index[t.id]];

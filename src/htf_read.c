@@ -242,9 +242,7 @@ int htf_move_to_next_token(struct htf_thread_reader* reader) {
 		_get_next_token(reader);
 	}
 }
-int htf_read_thread_cur_token(struct htf_thread_reader* reader,
-															struct htf_token* token,
-															struct htf_event_occurence* e) {
+int htf_read_thread_cur_token(struct htf_thread_reader* reader, struct htf_token* token, struct htf_occurence* e) {
 	if (reader->current_frame < 0) {
 		return -1; /* TODO: return EOF */
 	}
@@ -256,9 +254,11 @@ int htf_read_thread_cur_token(struct htf_thread_reader* reader,
 	if (HTF_TOKEN_TYPE(t) == HTF_TYPE_EVENT) {
 		int event_index = HTF_TOKEN_ID(t);
 		struct htf_event_summary* es = &reader->thread_trace->events[event_index];
-		memcpy(&e->event, &es->event, sizeof(e->event));
-		e->timestamp = reader->referential_timestamp;
-		e->duration = es->timestamps[reader->event_index[event_index]];
+		if (e) {
+			memcpy(&e->event_occurence.event, &es->event, sizeof(e->event_occurence.event));
+			e->event_occurence.timestamp = reader->referential_timestamp;
+			e->event_occurence.duration = es->timestamps[reader->event_index[event_index]];
+		}
 		reader->referential_timestamp += es->timestamps[reader->event_index[event_index]];
 	}
 	return 0;
