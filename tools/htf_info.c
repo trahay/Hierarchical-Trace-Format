@@ -10,8 +10,8 @@
 #include "htf_read.h"
 #include "htf_archive.h"
 
-void print_sequence(struct htf_thread* t, struct htf_sequence *s, int id) {
-  printf("S#%x\t{", id);
+void print_sequence(struct htf_thread* t, struct htf_sequence *s) {
+  printf("{");
   for(unsigned i=0; i<s->size; i++) {
     htf_token_t* token = &s->token[i];
     if(HTF_TOKEN_TYPE(*token) == HTF_TYPE_LOOP) {
@@ -33,11 +33,11 @@ void info_event(struct htf_thread *t, struct htf_event_summary *e) {
 
 
 void info_sequence(struct htf_sequence *s) {
-  printf("\t{.size: %u, .allocated: %u}\n", s->size, s->allocated);
+  printf("{.size: %u, .allocated: %u}\n", s->size, s->allocated);
 }
 
 void info_loop(struct htf_loop *l) {
-  printf("\t{.nb_iterations: %d, .token: %x.%x}\n",
+  printf("{.nb_iterations: %d, .token: %x.%x}\n",
 	 l->nb_iterations,
 	 HTF_TOKEN_TYPE(l->token),
 	 HTF_TOKEN_ID(l->token));
@@ -47,21 +47,21 @@ void info_thread(struct htf_thread *t) {
   printf("Thread %x {.archive: %x}\n", t->id, t->archive->id);
   printf("\tEvents {.nb_events: %d, .nb_allocated_events: %d}\n", t->nb_events, t->nb_allocated_events);
   for(unsigned i=0; i<t->nb_events; i++) {
-    printf("\t\t");
+    printf("\t\tE%x\t", i);
     info_event(t, &t->events[i]);
   } 
 
   printf("\tSequences {.nb_sequences: %d, .nb_allocated_sequences: %d}\n", t->nb_sequences, t->nb_allocated_sequences);
   for(unsigned i=0; i<t->nb_sequences; i++) {
-    printf("\t\t");
-		print_sequence(t, t->sequences[i], i);
-	}
+    printf("\t\tS%x\t", i);
+    print_sequence(t, t->sequences[i]);
+  }
 
-	printf("\tLoops {.nb_loops: %d, .nb_allocated_loops: %d}\n", t->nb_loops, t->nb_allocated_loops);
-	for (unsigned i = 0; i < t->nb_loops; i++) {
-		printf("\t\t");
-		info_loop(&t->loops[i]);
-	}
+  printf("\tLoops {.nb_loops: %d, .nb_allocated_loops: %d}\n", t->nb_loops, t->nb_allocated_loops);
+  for (unsigned i = 0; i < t->nb_loops; i++) {
+    printf("\t\tL%x\t", i);
+    info_loop(&t->loops[i]);
+  }
 }
 
 void info_archive(struct htf_archive *archive) {
