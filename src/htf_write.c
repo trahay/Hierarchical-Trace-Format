@@ -366,15 +366,10 @@ void _htf_record_exit_function(struct htf_thread_writer *thread_writer) {
     }
   }
 
-  if(thread_writer->cur_seq != thread_writer->og_seq[thread_writer->cur_depth-1]) {
-    htf_error("cur_seq=%p, but og_seq[%d] = %p\n", thread_writer->cur_seq, thread_writer->cur_depth-1, thread_writer->og_seq[thread_writer->cur_depth-1]);
-  }
-
   if (thread_writer->cur_seq != thread_writer->og_seq[thread_writer->cur_depth - 1]) {
     htf_error("cur_seq=%p, but og_seq[%d] = %p\n", thread_writer->cur_seq, thread_writer->cur_depth - 1,
 	      thread_writer->og_seq[thread_writer->cur_depth - 1]);
-	}
->>>>>>> 235527c14bcce397d495cd4502ec101ba7588ba4
+  }
 #endif
 
 	htf_sequence_id_t seq_id = _htf_get_sequence_id(&thread_writer->thread_trace, cur_seq);
