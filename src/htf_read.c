@@ -238,11 +238,14 @@ int htf_move_to_next_token(struct htf_thread_reader* reader) {
 			reader->sequence_index[t.id]++;
 		enter_block(reader, t);
 	} else {
-		reader->event_index[HTF_TOKEN_ID(t)]++;	 // "consume" the event occurence
+		// Don't forget to update the timestamp
+		struct htf_event_summary* es = &reader->thread_trace->events[t.id];
+		reader->referential_timestamp += es->timestamps[reader->event_index[t.id]];
+		reader->event_index[t.id]++;	// "consume" the event occurence
 		_get_next_token(reader);
 	}
 }
-int htf_read_thread_cur_token(struct htf_thread_reader* reader, struct htf_token* token, struct htf_occurence* e) {
+int htf_read_thread_cur_token(struct htf_thread_reader* reader, struct htf_token* token, htf_occurence* e) {
 	if (reader->current_frame < 0) {
 		return -1; /* TODO: return EOF */
 	}
@@ -250,16 +253,39 @@ int htf_read_thread_cur_token(struct htf_thread_reader* reader, struct htf_token
 	/* Get the current event */
 	htf_token_t t = get_cur_token(reader);
 	memcpy(token, &t, sizeof(t));
-
-	if (HTF_TOKEN_TYPE(t) == HTF_TYPE_EVENT) {
-		int event_index = HTF_TOKEN_ID(t);
-		struct htf_event_summary* es = &reader->thread_trace->events[event_index];
-		if (e) {
-			memcpy(&e->event_occurence.event, &es->event, sizeof(e->event_occurence.event));
-			e->event_occurence.timestamp = reader->referential_timestamp;
-			e->event_occurence.duration = es->timestamps[reader->event_index[event_index]];
+	int index = t.id;
+	switch (t.type) {
+		case HTF_TYPE_EVENT: {
+			struct htf_event_summary* es = &reader->thread_trace->events[index];
+			if (e) {
+				memcpy(&e->event_occurence.event, &es->event, sizeof(e->event_occurence.event));
+				e->event_occurence.timestamp = reader->referential_timestamp;
+				e->event_occurence.duration = es->timestamps[reader->event_index[index]];
+			}
+			break;
 		}
-		reader->referential_timestamp += es->timestamps[reader->event_index[event_index]];
+		case HTF_TYPE_SEQUENCE: {
+			struct htf_sequence* seq = reader->thread_trace->sequences[index];
+			reader->referential_timestamp = *(htf_timestamp_t*)array_get(&seq->timestamps, reader->sequence_index[index]);
+			if (e) {
+				e->sequence_occurence.timestamp = reader->referential_timestamp;
+				e->sequence_occurence.duration = seq->durations[reader->sequence_index[index]];
+				e->sequence_occurence.sequence = seq;
+				e->sequence_occurence.savestate = create_savestate(reader);
+			}
+			break;
+		}
+		case HTF_TYPE_LOOP: {
+			struct htf_loop* loop = &reader->thread_trace->loops[index];
+			if (e) {
+				e->loop_occurence.loop = loop;
+				e->loop_occurence.timestamp = htf_get_starting_timestamp(reader, *token);
+				e->loop_occurence.duration = htf_get_duration(reader, *token);
+			}
+			break;
+		}
+		default:
+			htf_error("Invalid token type\n");
 	}
 	return 0;
 }
