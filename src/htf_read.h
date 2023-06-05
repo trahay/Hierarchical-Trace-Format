@@ -25,6 +25,9 @@ struct htf_thread_reader {
 	/** At any point, an event e has been seen event_index[e.id] times.
 	 * Use this to grab the timestamps and other information on the event. */
 	int* event_index;
+	/** At any point, a sequence s has been seen sequence_index[s.id] times.
+	 * Use this to grab the timestamps and other information on the sequence. */
+	int* sequence_index;
 
 	/**
 	 * Current depth, ie number of sequences + loop we are in. Only used in cosmetics, to print the structure.
@@ -62,8 +65,7 @@ int htf_read_thread_cur_token(struct htf_thread_reader* reader, struct htf_token
  * @return -1 in case of an error (such as the end of the trace), else 0.
  */
 int htf_read_thread_next_token(struct htf_thread_reader* reader, struct htf_token* t, struct htf_event_occurence* e);
-/**
- * @return The timestamps at which the given Sequence or Loop starts, without modifying the reader's state.
+/** Returns the timestamp at which the given Event, Sequence or Loop starts, without modifying the reader's state.
  */
 htf_timestamp_t htf_get_starting_timestamp(struct htf_thread_reader* reader, struct htf_token token);
 #define MAX_CALLSTACK_DEPTH 100

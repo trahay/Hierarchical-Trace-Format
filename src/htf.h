@@ -4,20 +4,20 @@
 #include <pthread.h>
 #include <string.h>
 
-#include "htf_timestamp.h"
-#include "htf_dbg.h"
 #include "htf.h"
+#include "htf_dbg.h"
+#include "htf_dynamic_array.h"
+#include "htf_timestamp.h"
 
 /* A token is either:
-   - an event
-   - a sequence (ie a list of tokens)
-   - a loop (a repetition of sequences)
+	 - an event
+	 - a sequence (ie a list of tokens)
+	 - a loop (a repetition of sequences)
 */
-
 
 /* Token types */
 typedef enum htf_token_type {
-  HTF_TYPE_INVALID  = 0,
+	HTF_TYPE_INVALID  = 0,
   HTF_TYPE_EVENT    = 1,
   HTF_TYPE_SEQUENCE = 2,
   HTF_TYPE_LOOP     = 3
@@ -153,19 +153,23 @@ struct htf_event {
 
 /*************************** Sequence **********************/
 struct htf_sequence {
-  htf_token_t *token;
-  unsigned size;
+	/** Store the sequence of tokens. */
+	htf_token_t* token;
+	/** Number of tokens in the sequence. */
+	unsigned size;
+	/** Number of tokens allocated in token. */
 	unsigned allocated;
-#ifndef NDEBUG
-	/** Only there to correct a bug on the AMG Benchmark. Is set to 1 in the _init_event macro. */
-	uint32_t initialized;
-#endif
+	/** Timestamps for the start of these types of sequence. */
+	htf_array_t timestamps;
 };
 
 /*************************** Loop **********************/
 struct htf_loop {
-  unsigned nb_iterations;
-  htf_token_t token;
+	unsigned nb_iterations;
+	/** Token of the sequence being repeated. */
+	htf_token_t token;
+	/** Self-id. */
+	struct htf_token id;
 };
 
 /** Only used when reading a trace, links an event with a timestamp. */

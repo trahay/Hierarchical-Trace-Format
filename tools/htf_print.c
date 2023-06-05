@@ -25,15 +25,10 @@ static void print_event(struct htf_thread* thread, htf_token_t token, struct htf
 	printf("\n");
 }
 
-static void print_sequence(struct htf_thread* thread, htf_token_t token, htf_timestamp_t ts) {
-	if (ts != 0) {
-		printf("%.9lf\t\t", ts / 1e9);
-	} else {
-		printf("Sequence");
-		if (show_structure)
-			printf("     ");
-		printf("\t\t");
-	}
+static void print_sequence(struct htf_thread* thread, htf_token_t token, int counter) {
+	struct htf_sequence* s = thread->sequences[token.id];
+	htf_timestamp_t ts = (s->timestamps.size) ? *(htf_timestamp_t*)array_get(&s->timestamps, counter) : 0;
+	printf("%.9lf\t\t", ts / 1e9);
 	if (!per_thread)
 		printf("%s\t", htf_get_thread_name(thread));
 	htf_print_token(thread, token);
@@ -105,10 +100,7 @@ static void print_token(struct htf_thread_reader* reader, struct htf_token* t, s
 			print_event(reader->thread_trace, copy_token, e);
 			break;
 		case HTF_TYPE_SEQUENCE:
-			if (reader->depth == max_depth)
-				print_sequence(reader->thread_trace, copy_token, htf_get_starting_timestamp(reader, copy_token));
-			else if (show_structure)
-				print_sequence(reader->thread_trace, copy_token, 0);
+			print_sequence(reader->thread_trace, copy_token, reader->sequence_index[copy_token.id] - 1);
 			break;
 		case HTF_TYPE_LOOP:
 			if (reader->depth == max_depth)
@@ -135,9 +127,9 @@ static void print_thread(struct htf_archive* trace, struct htf_thread* thread) {
 	}
 }
 
-/** Compare the timestamps of the current token on each thread and select the smallest timestamp
- * This fills the htf_token t, and the event_occurence e if it's an event, and returns the index of the selected thread
- * (or -1 at the end of the trace).
+/** Compare the timestamps of the current token on each thread and select the smallest timestamp.
+ * This fills the htf_token t, and the event_occurence e if it's an event,
+ * and returns the index of the selected thread (or -1 at the end of the trace).
  */
 static int get_next_token(struct htf_thread_reader* readers,
 													int nb_threads,
@@ -151,7 +143,7 @@ static int get_next_token(struct htf_thread_reader* readers,
 	for (int i = 0; i < nb_threads; i++) {
 		if (htf_read_thread_cur_token(&readers[i], &cur_t, &cur_e) == 0) {
 			htf_timestamp_t ts = htf_get_starting_timestamp(&readers[i], cur_t);
-			if (min_ts == HTF_TIMESTAMP_INVALID || min_ts > ts) {
+			if (min_ts == HTF_TIMESTAMP_INVALID || ts < min_ts) {
 				min_index = i;
 				min_ts = ts;
 			}
@@ -165,8 +157,32 @@ static int get_next_token(struct htf_thread_reader* readers,
 	return min_index;
 }
 
+static void __realign_timestamps(struct htf_archive* trace, struct htf_thread* thread) {
+	struct htf_thread_reader reader;
+	htf_read_thread_iterator_init(trace, &reader, thread->id);
+	struct htf_event_occurence e;
+	htf_token_t t;
+
+	/* Counting how many ts there are. */
+	uint count = 0;
+	for (uint eid = 0; eid < thread->nb_events; eid++) {
+		count += thread->events[eid].nb_timestamps;
+	}
+	htf_log(htf_dbg_lvl_debug, "Reorganizing %d ts\n", count);
+	htf_timestamp_t* timestamps[count];
+	int i = 0;
+	while (htf_read_thread_next_token(&reader, &t, &e) == 0) {
+		if (t.type == HTF_TYPE_EVENT)
+			timestamps[i++] = &thread->events[t.id].timestamps[reader.event_index[t.id] - 1];
+	}
+	i--;
+	while (--i >= 0) {
+		*timestamps[i] = *timestamps[i + 1] - *timestamps[i];
+	}
+}
+
 /* Print all the events of all the threads sorted by timestamp */
-void print_trace(struct htf_archive *trace) {
+void print_trace(struct htf_archive* trace) {
 	struct htf_thread_reader* readers = malloc(sizeof(struct htf_thread_reader) * (trace->nb_threads));
 	for (int i = 0; i < trace->nb_threads; i++) {
 		htf_read_thread_iterator_init(trace, &readers[i], trace->threads[i]->id);
@@ -220,23 +236,23 @@ int main(int argc, char**argv) {
 		}
 	}
 
-  trace_name = argv[nb_opts + 1];
-  if (trace_name == NULL) {
-    usage(argv[0]);
-    return EXIT_SUCCESS;
-  }
+	trace_name = argv[nb_opts + 1];
+	if (trace_name == NULL) {
+		usage(argv[0]);
+		return EXIT_SUCCESS;
+	}
 
-  struct htf_archive trace;
-  htf_read_archive(&trace, trace_name);
+	struct htf_archive trace;
+	htf_read_archive(&trace, trace_name);
 
-  if(per_thread) {
-    for(int i=0; i< trace.nb_threads; i++) {
+	if (per_thread) {
+		for (int i = 0; i < trace.nb_threads; i++) {
 			printf("\n");
 			print_thread(&trace, trace.threads[i]);
 		}
 	} else {
-    print_trace(&trace);
-  }
+		print_trace(&trace);
+	}
 
-  return EXIT_SUCCESS;
+	return EXIT_SUCCESS;
 }

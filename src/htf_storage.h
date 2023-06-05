@@ -10,5 +10,5 @@ void htf_storage_finalize_global(struct htf_archive* archive);
 
 
 char* htf_archive_fullpath(char* dir_name, char* trace_name);
-
+#define ZSTD_COMPRESSION_LEVEL 1
 #endif	/* HTF_STORAGE_H */

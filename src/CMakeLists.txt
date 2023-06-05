@@ -6,32 +6,32 @@ if (POLICY CMP0076)
 endif()
 
 
-add_library(htf
-  SHARED
-)
+add_library(htf SHARED)
 
 set(HTF_HEADERS
-    htf.h
-    htf_read.h
-    htf_write.h
-    htf_archive.h
-    htf_dbg.h
-    htf_timestamp.h
-    htf_storage.h
-)
+        htf.h
+        htf_read.h
+        htf_write.h
+        htf_archive.h
+        htf_dbg.h
+        htf_timestamp.h
+        htf_storage.h
+        htf_dynamic_array.h
+        )
 
 target_sources(
-    htf
-PRIVATE
-    htf_read.c
-    htf_write.c
-    htf_archive.c
-    htf_timestamp.c
-    htf_storage.c
-    htf_dbg.c
-    htf.c
-PUBLIC
-    ${HTF_HEADERS}
+        htf
+        PRIVATE
+        htf_read.c
+        htf_write.c
+        htf_archive.c
+        htf_timestamp.c
+        htf_storage.c
+        htf_dbg.c
+        htf.c
+        htf_dynamic_array.c
+        PUBLIC
+        ${HTF_HEADERS}
 )
 
 set_property(TARGET htf
@@ -46,15 +46,15 @@ target_compile_options(htf
 
 target_link_libraries(htf
   PRIVATE
-    atomic
-  PUBLIC
+        atomic
+        zstd
+        PUBLIC
     dl
     PRIVATE
     ${CMAKE_DL_LIBS}
     rt
     m
     )
-
 install(TARGETS htf EXPORT HTFLibTargets
   LIBRARY DESTINATION ${INSTALL_LIBDIR}
   PUBLIC_HEADER DESTINATION ${INSTALL_INCLUDEDIR})

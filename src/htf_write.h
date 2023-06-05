@@ -151,14 +151,12 @@ void htf_record_mpi_collective_end(struct htf_thread_writer *thread_writer,
 				   uint64_t                  sizeSent,
 				   uint64_t                  sizeReceived);
 
-
-
 #define NB_EVENT_DEFAULT 1000
-#define NB_SEQUENCE_DEFAULT 10000
+#define NB_SEQUENCE_DEFAULT 1000
 #define NB_LOOP_DEFAULT 1000
 #define NB_STRING_DEFAULT 100
 #define NB_REGION_DEFAULT 100
-#define NB_TIMESTAMP_DEFAULT 1000000
+#define NB_TIMESTAMP_DEFAULT 1000
 #define SEQUENCE_SIZE_DEFAULT 1024
 #define CALLSTACK_DEPTH_DEFAULT 128
 #define NB_ARCHIVES_DEFAULT 1
@@ -166,7 +164,7 @@ void htf_record_mpi_collective_end(struct htf_thread_writer *thread_writer,
 #define NB_LOCATION_GROUPS_DEFAULT 16
 #define NB_LOCATIONS_DEFAULT NB_THREADS_DEFAULT
 
-#define MAX_LOOP_LENGTH 10
+#define MAX_LOOP_LENGTH 100
 
 extern _Thread_local int htf_recursion_shield;
 
