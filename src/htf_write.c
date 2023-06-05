@@ -849,6 +849,38 @@ void htf_record_thread_end(struct htf_thread_writer *thread_writer,
   htf_recursion_shield--;
 }
 
+void htf_record_thread_team_begin(struct htf_thread_writer *thread_writer,
+				  htf_attribute_list_t* attributeList __attribute__((unused)),
+				  htf_timestamp_t       time) {
+  if(htf_recursion_shield)
+    return;
+  htf_recursion_shield++;
+
+  struct htf_event e;
+  init_event(&e, HTF_EVENT_THREAD_TEAM_BEGIN);
+  htf_event_id_t e_id = _htf_get_event_id(&thread_writer->thread_trace, &e);
+  htf_store_timestamp(thread_writer, e_id, htf_timestamp(time));
+  htf_store_event(thread_writer, htf_block_start, e_id);
+
+  htf_recursion_shield--;
+}
+
+void htf_record_thread_team_end(struct htf_thread_writer *thread_writer,
+				htf_attribute_list_t* attributeList __attribute__((unused)),
+				htf_timestamp_t       time) {
+  if(htf_recursion_shield)
+    return;
+  htf_recursion_shield++;
+
+  struct htf_event e;
+  init_event(&e, HTF_EVENT_THREAD_TEAM_END);
+  htf_event_id_t e_id = _htf_get_event_id(&thread_writer->thread_trace, &e);
+  htf_store_timestamp(thread_writer, e_id, htf_timestamp(time));
+  htf_store_event(thread_writer, htf_block_end, e_id);
+
+  htf_recursion_shield--;
+}
+
 void htf_record_mpi_send(struct htf_thread_writer *thread_writer,
 			 htf_attribute_list_t*     attributeList __attribute__((unused)),
 			 htf_timestamp_t           time,

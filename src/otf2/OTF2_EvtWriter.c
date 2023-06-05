@@ -533,7 +533,10 @@ OTF2_EvtWriter_ThreadTeamBegin( OTF2_EvtWriter*     writer,
                                 OTF2_AttributeList* attributeList,
                                 OTF2_TimeStamp      time,
                                 OTF2_CommRef        threadTeam ) {
-  NOT_IMPLEMENTED;
+  htf_record_thread_team_begin(writer->thread_writer,
+			       NULL,
+			       time);
+  return OTF2_SUCCESS;
 }
 
 OTF2_ErrorCode
@@ -541,7 +544,10 @@ OTF2_EvtWriter_ThreadTeamEnd( OTF2_EvtWriter*     writer,
                               OTF2_AttributeList* attributeList,
                               OTF2_TimeStamp      time,
                               OTF2_CommRef        threadTeam ) {
-  NOT_IMPLEMENTED;
+  htf_record_thread_team_end(writer->thread_writer,
+			       NULL,
+			       time);
+  return OTF2_SUCCESS;
 }
 
 OTF2_ErrorCode
