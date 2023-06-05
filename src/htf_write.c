@@ -158,7 +158,7 @@ static void _htf_store_token(struct htf_thread_writer *thread_writer,
 	  DOUBLE_MEMORY_SPACE(seq->token, seq->allocated, htf_token_t);
   }
 
-  htf_log(htf_dbg_lvl_debug, "store_token: (%x.%x) in %p (size: %u)\n", HTF_TOKEN_TYPE(t), HTF_TOKEN_ID(t), seq, seq->size+1);
+  htf_log(htf_dbg_lvl_debug, "store_token: (%c%x) in %p (size: %u)\n", HTF_TOKEN_TYPE_C(t), HTF_TOKEN_ID(t), seq, seq->size+1);
   seq->token[seq->size++] = t;
   _htf_find_loop(thread_writer);
 }
@@ -290,6 +290,47 @@ void _htf_record_exit_function(struct htf_thread_writer *thread_writer) {
   struct htf_sequence *cur_seq =  _htf_get_cur_sequence(thread_writer);
 
 #if DEBUG
+  htf_token_t first_token = cur_seq->token[0];
+  htf_token_t last_token = cur_seq->token[cur_seq->size-1];
+  if(HTF_TOKEN_TYPE(first_token) != HTF_TOKEN_TYPE(last_token)) {
+    /* If a sequence starts with an Event (eg Enter function foo), it
+       should end with an Event too (eg. Exit function foo) */
+    htf_warn("When closing sequence %p: HTF_TOKEN_TYPE(%c%x) != HTF_TOKEN_TYPE(%c%x)\n",
+	     HTF_TOKEN_TYPE(first_token), HTF_TOKEN_ID(first_token),
+	     HTF_TOKEN_TYPE(last_token), HTF_TOKEN_ID(last_token));
+  }
+
+  if(HTF_TOKEN_TYPE(first_token) == HTF_TYPE_EVENT) {
+    struct htf_event *first_event = htf_get_event(&thread_writer->thread_trace, HTF_TOKEN_TO_EVENT_ID(first_token));
+    struct htf_event *last_event = htf_get_event(&thread_writer->thread_trace, HTF_TOKEN_TO_EVENT_ID(last_token));
+    
+    enum htf_record expected_record;
+    switch(first_event->record) {
+    case HTF_EVENT_ENTER: expected_record = HTF_EVENT_LEAVE; break;
+    case HTF_EVENT_MPI_COLLECTIVE_BEGIN: expected_record = HTF_EVENT_MPI_COLLECTIVE_END; break;
+    case HTF_EVENT_OMP_FORK: expected_record = HTF_EVENT_OMP_JOIN; break;
+    case HTF_EVENT_THREAD_FORK: expected_record = HTF_EVENT_THREAD_JOIN; break;
+    case HTF_EVENT_THREAD_TEAM_BEGIN: expected_record = HTF_EVENT_THREAD_TEAM_END; break;
+    case HTF_EVENT_THREAD_BEGIN: expected_record = HTF_EVENT_THREAD_END; break;
+    case HTF_EVENT_PROGRAM_BEGIN: expected_record = HTF_EVENT_PROGRAM_END; break;
+    default:
+      htf_warn("Unexpected start_sequence event:\n");
+      htf_print_event(&thread_writer->thread_trace, first_event);
+      printf("\n");
+      htf_abort();
+    }
+    
+    if(last_event->record != expected_record) {
+      htf_warn("Unexpected close event:\n");
+      htf_warn("\tstart_sequence event:\n");
+      htf_print_event(&thread_writer->thread_trace, first_event);
+      printf("\n");
+      htf_warn("\tend_sequence event:\n");
+      htf_print_event(&thread_writer->thread_trace, last_event);
+      printf("\n");
+    }
+  }
+
   if(thread_writer->cur_seq != thread_writer->og_seq[thread_writer->cur_depth-1]) {
     htf_error("cur_seq=%p, but og_seq[%d] = %p\n", thread_writer->cur_seq, thread_writer->cur_depth-1, thread_writer->og_seq[thread_writer->cur_depth-1]);
   }
@@ -328,6 +369,11 @@ void htf_store_event(struct htf_thread_writer *thread_writer,
 
 
 void htf_write_thread_close(struct htf_thread_writer* thread_writer) {
+
+  while(thread_writer->cur_depth>0) {
+    htf_warn("Closing unfinished sequence (lvl %d)\n", thread_writer->cur_depth);
+    _htf_record_exit_function(thread_writer);
+  }
   htf_storage_finalize_thread(&thread_writer->thread_trace);
 }
 
@@ -554,8 +600,8 @@ void htf_print_event(struct htf_thread *t, struct htf_event* e) {
       htf_region_ref_t region_ref;
       pop_data(e, &region_ref, sizeof(region_ref), &cursor);
       struct htf_region* region = htf_archive_get_region(t->archive, region_ref);
-      htf_assert(region);
-      printf("Enter %d (%s)", region_ref, htf_archive_get_string(t->archive, region->string_ref)->str);
+      const char* region_name = region ? htf_archive_get_string(t->archive, region->string_ref)->str: "INVALID";
+      printf("Enter %d (%s)", region_ref, region_name);
       break;
     }
   case HTF_EVENT_LEAVE:
@@ -564,22 +610,26 @@ void htf_print_event(struct htf_thread *t, struct htf_event* e) {
       htf_region_ref_t region_ref;
       pop_data(e, &region_ref, sizeof(region_ref), &cursor);
       struct htf_region* region = htf_archive_get_region(t->archive, region_ref);
-      htf_assert(region);
-      printf("Leave %d (%s)", region_ref, htf_archive_get_string(t->archive, region->string_ref)->str);
+      const char* region_name = region ? htf_archive_get_string(t->archive, region->string_ref)->str: "INVALID";
+      printf("Leave %d (%s)", region_ref, region_name);
       break;
     }
 
   case HTF_EVENT_THREAD_BEGIN:
-    {
       printf("THREAD_BEGIN()");
       break;
-    }
 
   case HTF_EVENT_THREAD_END:
-    {
       printf("THREAD_END()");
       break;
-    }
+
+  case HTF_EVENT_THREAD_TEAM_BEGIN:
+      printf("THREAD_TEAM_BEGIN()");
+      break;
+
+  case HTF_EVENT_THREAD_TEAM_END:
+      printf("THREAD_TEAM_END()");
+      break;
 
   case HTF_EVENT_MPI_SEND:
     {
@@ -775,6 +825,7 @@ void htf_record_thread_begin(struct htf_thread_writer *thread_writer,
 
   struct htf_event e;
   init_event(&e, HTF_EVENT_THREAD_BEGIN);
+
   htf_event_id_t e_id = _htf_get_event_id(&thread_writer->thread_trace, &e);
   htf_store_timestamp(thread_writer, e_id, htf_timestamp(time));
   htf_store_event(thread_writer, htf_block_start, e_id);
