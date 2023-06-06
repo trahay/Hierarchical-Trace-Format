@@ -9,6 +9,9 @@
 #include "htf_dynamic_array.h"
 #include "htf_timestamp.h"
 
+#ifndef NDEBUG
+#define DEBUG
+#endif
 /* A token is either:
 	 - an event
 	 - a sequence (ie a list of tokens)
@@ -17,9 +20,9 @@
 
 /* Token types */
 typedef enum htf_token_type {
-	HTF_TYPE_INVALID  = 0,
-  HTF_TYPE_EVENT    = 1,
-  HTF_TYPE_SEQUENCE = 2,
+	HTF_TYPE_INVALID = 0,
+	HTF_TYPE_EVENT = 1,
+	HTF_TYPE_SEQUENCE = 2,
   HTF_TYPE_LOOP     = 3
 } htf_token_type_t;
 
