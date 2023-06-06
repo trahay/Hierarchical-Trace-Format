@@ -247,6 +247,7 @@ static void _htf_read_sequence(const char* base_dirname,
 	s->allocated = s->size;
 	_htf_fread(s->token, sizeof(htf_token_t), s->size, file);
 	_htf_array_fread(s->timestamps, file);
+	s->durations = calloc(s->timestamps.size, sizeof(htf_timestamp_t));
 	fclose(file);
 
 	htf_log(htf_dbg_lvl_debug, "\tLoad sequence %x {.size=%u, .nb_ts=%u}\n", HTF_ID(sequence_id), s->size,
@@ -487,27 +488,26 @@ static void _htf_store_thread(const char* dir_name, struct htf_thread *th) {
 
 	fclose(token_file);
 
-	// TODO Save timestamps and events separately
-	// TODO Save events timestamps as delta w/ sequence timestamp
-	// TODO Use ZSTD to compress
 	struct htf_thread_reader reader;
 	htf_read_thread_iterator_init(th->archive, &reader, th->id);
 
 	/* Start Reading */
 
-	struct htf_event_occurence e;
 	struct htf_token t;
 	htf_timestamp_t* last_timestamp = NULL;
 	htf_log(htf_dbg_lvl_debug, "Reading thread to delta the timestamps\n");
-	while (htf_read_thread_next_token(&reader, &t, &e) == 0) {
+	while (htf_read_thread_cur_token(&reader, &t, NULL) == 0) {
 		if (t.type == HTF_TYPE_EVENT) {
-			int event_index = reader.event_index[t.id] - 1;
+			int event_index = reader.event_index[t.id];
 			if (last_timestamp) {
 				*last_timestamp = th->events[t.id].timestamps[event_index] - *last_timestamp;
 			}
 			last_timestamp = &th->events[t.id].timestamps[event_index];
 		}
+		htf_move_to_next_token(&reader);
 	}
+	*last_timestamp = 0;
+	// The last event is a leave event, and thus always has duration of 0.
 
 	for (int i = 0; i < th->nb_events; i++)
 		_htf_store_event(dir_name, th, &th->events[i], HTF_EVENT_ID(i));
