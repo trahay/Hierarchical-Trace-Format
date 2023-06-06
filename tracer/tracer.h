@@ -8,9 +8,7 @@
 
 #include "htf.h"
 
-//#define DEBUG 1
-
-#if DEBUG
+#ifdef DEBUG
 #define DEBUG_PRINTF(...) printf(__VA_ARGS__)
 #else
 #define DEBUG_PRINTF(...) (void) 0
