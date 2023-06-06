@@ -324,18 +324,19 @@ void _htf_record_enter_function(struct htf_thread_writer *thread_writer) {
 void _htf_record_exit_function(struct htf_thread_writer *thread_writer) {
 	struct htf_sequence* cur_seq = _htf_get_cur_sequence(thread_writer);
 
-#if DEBUG
-  htf_token_t first_token = cur_seq->token[0];
+#ifdef DEBUG
+	htf_token_t first_token = cur_seq->token[0];
   htf_token_t last_token = cur_seq->token[cur_seq->size-1];
   if(HTF_TOKEN_TYPE(first_token) != HTF_TOKEN_TYPE(last_token)) {
-    /* If a sequence starts with an Event (eg Enter function foo), it
-       should end with an Event too (eg. Exit function foo) */
-    htf_warn("When closing sequence %p: HTF_TOKEN_TYPE(%c%x) != HTF_TOKEN_TYPE(%c%x)\n",
-	     HTF_TOKEN_TYPE(first_token), HTF_TOKEN_ID(first_token),
-	     HTF_TOKEN_TYPE(last_token), HTF_TOKEN_ID(last_token));
-  }
+		/* If a sequence starts with an Event (eg Enter function foo), it
+			 should end with an Event too (eg. Exit function foo) */
+		// TODO Is this true ?
+		htf_warn("When closing sequence %p: HTF_TOKEN_TYPE(%c%x) != HTF_TOKEN_TYPE(%c%x)\n", cur_seq,
+						 HTF_TOKEN_TYPE(first_token), HTF_TOKEN_ID(first_token), HTF_TOKEN_TYPE(last_token),
+						 HTF_TOKEN_ID(last_token));
+	}
 
-  if(HTF_TOKEN_TYPE(first_token) == HTF_TYPE_EVENT) {
+	if(HTF_TOKEN_TYPE(first_token) == HTF_TYPE_EVENT) {
     struct htf_event *first_event = htf_get_event(&thread_writer->thread_trace, HTF_TOKEN_TO_EVENT_ID(first_token));
     struct htf_event *last_event = htf_get_event(&thread_writer->thread_trace, HTF_TOKEN_TO_EVENT_ID(last_token));
     
@@ -356,20 +357,20 @@ void _htf_record_exit_function(struct htf_thread_writer *thread_writer) {
     }
     
     if(last_event->record != expected_record) {
-      htf_warn("Unexpected close event:\n");
-      htf_warn("\tstart_sequence event:\n");
-      htf_print_event(&thread_writer->thread_trace, first_event);
-      printf("\n");
-      htf_warn("\tend_sequence event:\n");
-      htf_print_event(&thread_writer->thread_trace, last_event);
-      printf("\n");
-    }
-  }
+		htf_warn("Unexpected close event:\n");
+		htf_warn("\tstart_sequence event:\n");
+		htf_print_event(&thread_writer->thread_trace, first_event);
+		printf("\n");
+		htf_warn("\tend_sequence event:\n");
+		htf_print_event(&thread_writer->thread_trace, last_event);
+		printf("\n");
+		}
+	}
 
-  if (thread_writer->cur_seq != thread_writer->og_seq[thread_writer->cur_depth - 1]) {
-    htf_error("cur_seq=%p, but og_seq[%d] = %p\n", thread_writer->cur_seq, thread_writer->cur_depth - 1,
-	      thread_writer->og_seq[thread_writer->cur_depth - 1]);
-  }
+	if (cur_seq != thread_writer->og_seq[thread_writer->cur_depth]) {
+		htf_error("cur_seq=%p, but og_seq[%d] = %p\n", cur_seq, thread_writer->cur_depth,
+							thread_writer->og_seq[thread_writer->cur_depth]);
+	}
 #endif
 
 	htf_sequence_id_t seq_id = _htf_get_sequence_id(&thread_writer->thread_trace, cur_seq);
