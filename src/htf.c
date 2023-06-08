@@ -65,15 +65,15 @@ static htf_token_t _htf_get_token_in_sequence(struct htf_thread *thread_trace,
 static htf_token_t _htf_get_token_in_loop(struct htf_thread *thread_trace,
 					  htf_loop_id_t loop_id,
 					  int index) {
-  struct htf_loop *l = htf_get_loop(thread_trace, loop_id);
-  if(!l) {
-    htf_error("invalid loop id: %d\n", HTF_ID(loop_id));
-  }
+	struct htf_loop* l = htf_get_loop(thread_trace, loop_id);
+	if (!l) {
+		htf_error("invalid loop id: %d\n", HTF_ID(loop_id));
+	}
 
-  if(index >= l->nb_iterations) {
-    htf_error("invalid index (%d) in loop #%d\n", index, HTF_ID(loop_id));  
-  }
-  return l->token;
+	if (index >= l->nb_iterations[l->nb_loops - 1]) {
+		htf_error("invalid index (%d) in loop #%d\n", index, HTF_ID(loop_id));
+	}
+	return l->token;
 }
 
 /** Prints the given token.*/

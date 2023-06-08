@@ -170,7 +170,12 @@ struct htf_sequence {
 
 /*************************** Loop **********************/
 struct htf_loop {
-	unsigned nb_iterations;
+	/* Number of iterations for these loops. */
+	unsigned* nb_iterations;
+	/** Number of registered loops. */
+	unsigned nb_loops;
+	/** Number of allocated loops. */
+	unsigned nb_allocated;
 	/** Token of the sequence being repeated. */
 	htf_token_t token;
 	/** Self-id. */

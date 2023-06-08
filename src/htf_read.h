@@ -31,6 +31,9 @@ struct htf_thread_reader {
 	/** At any point, a sequence s has been seen sequence_index[s.id] times.
 	 * Use this to grab the timestamps and other information on the sequence. */
 	int* sequence_index;
+	/** At any point, a loop l has been seen loop_index[l.id] times.
+	 * Use this to grab the timestamps and other information on the sequence. */
+	int* loop_index;
 };
 
 /**
@@ -59,6 +62,9 @@ struct htf_savestate {
 	/** At any point, a sequence s has been seen sequence_index[s.id] times.
 	 * Use this to grab the timestamps and other information on the sequence. */
 	int* sequence_index;
+	/** At any point, a loop l has been seen loop_index[l.id] times.
+	 * Use this to grab the timestamps and other information on the sequence. */
+	int* loop_index;
 };
 /** Only used when reading a trace, links an event with a timestamp. */
 struct htf_event_occurence {
@@ -77,6 +83,7 @@ struct htf_sequence_occurence {
 
 struct htf_loop_occurence {
 	struct htf_loop* loop;
+	unsigned int nb_iterations;
 	htf_timestamp_t timestamp;
 	htf_timestamp_t duration;
 	struct htf_sequence_occurence* full_loop;

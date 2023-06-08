@@ -17,8 +17,8 @@ _Thread_local int htf_recursion_shield = 0;
 
 static void _htf_find_loop(struct htf_thread_writer *thread_writer);
 static inline htf_sequence_id_t _htf_get_sequence_id_from_array(struct htf_thread *thread_trace,
-								htf_token_t* token_array,
-								int array_len);
+																																htf_token_t* token_array,
+																																int array_len);
 
 #define _init_sequence(s)                                          \
 	do {                                                             \
@@ -27,6 +27,14 @@ static inline htf_sequence_id_t _htf_get_sequence_id_from_array(struct htf_threa
 		s->allocated = SEQUENCE_SIZE_DEFAULT;                          \
 		array_new(&s->timestamps, sizeof(htf_timestamp_t));            \
 	} while (0)
+
+#define _init_loop(l)                                               \
+	do {                                                              \
+		l->nb_iterations = calloc(LOOP_SIZE_DEFAULT, sizeof(unsigned)); \
+		l->nb_loops = 0;                                                \
+		l->nb_allocated = LOOP_SIZE_DEFAULT;                            \
+	} while (0)
+
 #define _init_event(e)                                                      \
 	do {                                                                      \
 		e->timestamps = malloc(sizeof(htf_timestamp_t) * NB_TIMESTAMP_DEFAULT); \
@@ -34,9 +42,9 @@ static inline htf_sequence_id_t _htf_get_sequence_id_from_array(struct htf_threa
 		e->nb_timestamps = 0;                                                   \
 	} while (0)
 
-static inline struct htf_sequence* _htf_get_cur_sequence(struct htf_thread_writer *thread_writer) {
-  struct htf_sequence *seq = thread_writer->og_seq[thread_writer->cur_depth];
-  return seq;
+static inline struct htf_sequence* _htf_get_cur_sequence(struct htf_thread_writer* thread_writer) {
+	struct htf_sequence* seq = thread_writer->og_seq[thread_writer->cur_depth];
+	return seq;
 }
 
 /* search for a sequence_id that matches seq
@@ -76,17 +84,17 @@ static inline htf_sequence_id_t _htf_get_sequence_id_from_array(struct htf_threa
 		}
 	}
 
-  int index = thread_trace->nb_sequences++;
-  htf_sequence_id_t sid = HTF_SEQUENCE_ID(index);
-  htf_log(htf_dbg_lvl_debug, "\tNot found. Adding it with id=%u\n", index);
+	int index = thread_trace->nb_sequences++;
+	htf_sequence_id_t sid = HTF_SEQUENCE_ID(index);
+	htf_log(htf_dbg_lvl_debug, "\tSequence not found. Adding it with id=%u\n", index);
 
-  struct htf_sequence *s = htf_get_sequence(thread_trace, sid);
-  s->size = array_len;
-  s->allocated = array_len;
-  s->token = malloc(sizeof(htf_token_t)*s->allocated);
-  memcpy(s->token, token_array, sizeof(htf_token_t)*array_len);
+	struct htf_sequence* s = htf_get_sequence(thread_trace, sid);
+	s->size = array_len;
+	s->allocated = array_len;
+	s->token = malloc(sizeof(htf_token_t) * s->allocated);
+	memcpy(s->token, token_array, sizeof(htf_token_t) * array_len);
 
-  return sid;
+	return sid;
 }
 
 static inline struct htf_loop* _htf_create_loop_id(struct htf_thread_writer* thread_writer,
@@ -97,17 +105,29 @@ static inline struct htf_loop* _htf_create_loop_id(struct htf_thread_writer* thr
 						 thread_writer->thread_trace.nb_allocated_loops);
 		DOUBLE_MEMORY_SPACE(thread_writer->thread_trace.loops, thread_writer->thread_trace.nb_allocated_loops,
 												struct htf_loop);
+		for (int i = thread_writer->thread_trace.nb_allocated_loops / 2; i < thread_writer->thread_trace.nb_allocated_loops;
+				 i++) {
+			_init_loop((&thread_writer->thread_trace.loops[i]));
+		}
 	}
-
-	int index = thread_writer->thread_trace.nb_loops++;
-	htf_log(htf_dbg_lvl_debug, "\tNot found. Adding it with id=%u\n", index);
 
 	struct htf_sequence* cur_seq = _htf_get_cur_sequence(thread_writer);
 	htf_sequence_id_t sid =
 			_htf_get_sequence_id_from_array(&thread_writer->thread_trace, &cur_seq->token[start_index], loop_len);
 
+	int index = -1;
+	DOFOR(i, thread_writer->thread_trace.nb_loops) {
+		if (thread_writer->thread_trace.loops[i].token.id == sid.id) {
+			index = i;
+			break;
+		}
+	}
+	if (index == -1) {
+		index = thread_writer->thread_trace.nb_loops++;
+	}
+	htf_log(htf_dbg_lvl_debug, "\tLoop not found. Adding it with id=%u\n", index);
 	struct htf_loop* l = &thread_writer->thread_trace.loops[index];
-	l->nb_iterations = 1;
+	l->nb_iterations[l->nb_loops++] = 1;
 	l->token = HTF_TOKENIZE(HTF_TYPE_SEQUENCE, HTF_TOKEN_ID(sid));
 	l->id = HTF_TOKENIZE(HTF_TYPE_LOOP, index);
 	return l;
@@ -157,7 +177,7 @@ static inline void _htf_loop_add_iteration(struct htf_loop* loop) {
 					 HTF_TOKEN_TO_SEQUENCE_ID(loop->token));
   htf_assert(_htf_sequences_equal(s1, s2));
 #endif
-	loop->nb_iterations++;
+	loop->nb_iterations[loop->nb_loops - 1]++;
 }
 
 /** Count the number time the given token appears in the given array. */
@@ -172,7 +192,7 @@ static inline uint _htf_count_token(struct htf_thread* thread,
 		if (token.type == HTF_TYPE_LOOP) {
 			struct htf_loop* loop = htf_get_loop(thread, HTF_TOKEN_TO_LOOP_ID(token));
 			struct htf_sequence* seq = htf_get_sequence(thread, HTF_TOKEN_TO_SEQUENCE_ID(loop->token));
-			count += loop->nb_iterations * _htf_count_token(thread, event, seq->token, seq->size);
+			count += loop->nb_iterations[loop->nb_loops - 1] * _htf_count_token(thread, event, seq->token, seq->size);
 		} else if (token.type == HTF_TYPE_SEQUENCE) {
 			struct htf_sequence* seq = htf_get_sequence(thread, HTF_TOKEN_TO_SEQUENCE_ID(token));
 			count += _htf_count_token(thread, event, seq->token, seq->size);
@@ -202,7 +222,8 @@ static inline htf_timestamp_t _htf_get_timestamp(struct htf_thread* thread,
 		CASE_EVENT_SEQUENCE(token, count)
 		case HTF_TYPE_LOOP: {
 			struct htf_loop* loop = htf_get_loop(thread, HTF_TOKEN_TO_LOOP_ID(token));
-			uint second_count = loop->nb_iterations * count + _htf_count_token(thread, loop->token, array, size);
+			uint second_count =
+					loop->nb_iterations[loop->nb_loops - 1] * count + _htf_count_token(thread, loop->token, array, size);
 			switch (loop->token.type) {
 				CASE_EVENT_SEQUENCE(loop->token, second_count)
 				case HTF_TYPE_LOOP:
@@ -330,7 +351,6 @@ void _htf_record_exit_function(struct htf_thread_writer *thread_writer) {
   if(HTF_TOKEN_TYPE(first_token) != HTF_TOKEN_TYPE(last_token)) {
 		/* If a sequence starts with an Event (eg Enter function foo), it
 			 should end with an Event too (eg. Exit function foo) */
-		// TODO Is this true ?
 		htf_warn("When closing sequence %p: HTF_TOKEN_TYPE(%c%x) != HTF_TOKEN_TYPE(%c%x)\n", cur_seq,
 						 HTF_TOKEN_TYPE(first_token), HTF_TOKEN_ID(first_token), HTF_TOKEN_TYPE(last_token),
 						 HTF_TOKEN_ID(last_token));
@@ -516,6 +536,9 @@ static void _init_thread(struct htf_archive *archive,
 	for (int i = 0; i < t->nb_allocated_sequences; i++) {
 		t->sequences[i] = calloc(sizeof(struct htf_sequence), 1);
 		_init_sequence(t->sequences[i]);
+	}
+	DOFOR(i, t->nb_allocated_loops) {
+		_init_loop((&t->loops[i]));
 	}
 	t->archive->threads[t->archive->nb_threads++] = t;
 	pthread_mutex_unlock(&t->archive->lock);

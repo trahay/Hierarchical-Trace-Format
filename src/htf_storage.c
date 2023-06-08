@@ -271,27 +271,42 @@ static void _htf_store_loop(const char* base_dirname,
 			    struct htf_thread* th,
 			    struct htf_loop *l,
 			    htf_loop_id_t loop_id) {
-  FILE* file = _htf_get_loop_file(base_dirname, th, loop_id, "w");
-  htf_log(htf_dbg_lvl_debug, "\tStore loop %x {.nb_iterations=%d, .token=%x.%x}\n",
-	  HTF_ID(loop_id), l->nb_iterations, l->token.type, l->token.id );
+	FILE* file = _htf_get_loop_file(base_dirname, th, loop_id, "w");
+	if (htf_debug_level >= htf_dbg_lvl_debug) {
+		htf_log(htf_dbg_lvl_debug, "\tStore loops %x {.nb_loops=%d, .token=%x.%x, .nb_iterations: [", HTF_ID(loop_id),
+						l->nb_loops, l->token.type, l->token.id);
+		DOFOR(i, l->nb_loops - 1) {
+			printf("%d, ", l->nb_iterations[i]);
+		}
+		printf("%d]}\n", l->nb_iterations[l->nb_loops - 1]);
+	}
 
-  _htf_fwrite(&l->nb_iterations, sizeof(l->nb_iterations), 1, file);
-  _htf_fwrite(&l->token, sizeof(l->token), 1, file);
-  fclose(file);
+	_htf_fwrite(&l->nb_loops, sizeof(l->nb_loops), 1, file);
+	_htf_fwrite(l->nb_iterations, sizeof(unsigned int), l->nb_loops, file);
+	_htf_fwrite(&l->token, sizeof(l->token), 1, file);
+	fclose(file);
 }
 
 static void _htf_read_loop(const char* base_dirname,
 			   struct htf_thread *th,
 			   struct htf_loop *l,
 			   htf_loop_id_t loop_id) {
-  FILE* file = _htf_get_loop_file(base_dirname, th, loop_id, "r");
-  _htf_fread(&l->nb_iterations, sizeof(l->nb_iterations), 1, file);
-  _htf_fread(&l->token, sizeof(l->token), 1, file);
-  fclose(file);
-  htf_log(htf_dbg_lvl_debug, "\tLoad loop %x {.nb_iterations=%d, .token=%x.%x}\n",
-	  HTF_ID(loop_id), l->nb_iterations, l->token.type, l->token.id );
-}
+	FILE* file = _htf_get_loop_file(base_dirname, th, loop_id, "r");
 
+	_htf_fread(&l->nb_loops, sizeof(l->nb_loops), 1, file);
+	l->nb_iterations = calloc(l->nb_loops, sizeof(unsigned int));
+	_htf_fread(l->nb_iterations, sizeof(unsigned int), l->nb_loops, file);
+	_htf_fread(&l->token, sizeof(l->token), 1, file);
+	fclose(file);
+	if (htf_debug_level >= htf_dbg_lvl_debug) {
+		htf_log(htf_dbg_lvl_debug, "\tLoad loops %x {.nb_loops=%d, .token=%x.%x, .nb_iterations: [", HTF_ID(loop_id),
+						l->nb_loops, l->token.type, l->token.id);
+		DOFOR(i, l->nb_loops - 1) {
+			printf("%d, ", l->nb_iterations[i]);
+		}
+		printf("%d]}\n", l->nb_iterations[l->nb_loops - 1]);
+	}
+}
 
 static FILE* _htf_get_string_file(struct htf_archive *a,
 				  int string_index, char* mode) {

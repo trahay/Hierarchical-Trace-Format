@@ -53,10 +53,10 @@ static void print_loop(struct htf_thread* thread, htf_token_t token, struct htf_
 	if (!per_thread)
 		printf("%s\t", htf_get_thread_name(thread));
 
-	struct htf_loop* l = htf_get_loop(thread, HTF_TOKEN_TO_LOOP_ID(token));
+	struct htf_loop* l = loop->loop;
 
 	htf_print_token(thread, token);
-	printf("\t%d * ", l->nb_iterations);
+	printf("\t%d * ", loop->nb_iterations);
 	htf_print_token(thread, l->token);
 	printf(" = ");
 	// TODO Make sure this is a sequence
@@ -79,7 +79,7 @@ static void print_token(struct htf_thread_reader* reader, struct htf_token* t, h
 	// Prints the structure of the sequences and the loops
 	if (show_structure) {
 		for (int i = 0; i < reader->current_frame; i++)
-			printf("--");
+			printf("│ ");
 	}
 	// printf("│ ");
 	// printf("├─");

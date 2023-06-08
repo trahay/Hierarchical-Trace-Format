@@ -158,6 +158,7 @@ void htf_record_mpi_collective_end(struct htf_thread_writer *thread_writer,
 #define NB_REGION_DEFAULT 100
 #define NB_TIMESTAMP_DEFAULT 1000
 #define SEQUENCE_SIZE_DEFAULT 1024
+#define LOOP_SIZE_DEFAULT 16
 #define CALLSTACK_DEPTH_DEFAULT 128
 #define NB_ARCHIVES_DEFAULT 1
 #define NB_THREADS_DEFAULT 16

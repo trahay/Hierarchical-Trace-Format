@@ -80,7 +80,7 @@ int main(int argc, char** argv) {
 	htf_assert(thread_writer.og_seq[0]->token[0].type == HTF_TYPE_LOOP);
 	/* Check that the loop is correct */
 	struct htf_loop* l = htf_get_loop(&thread_writer.thread_trace, HTF_LOOP_ID(thread_writer.og_seq[0]->token[0].id));
-	htf_assert(l->nb_iterations == 2);
+	htf_assert(l->nb_iterations[l->nb_loops - 1] == 2);
 	htf_token_t supposed_id = HTF_TOKENIZE(HTF_TYPE_LOOP, 0);
 	// htf_assert(memcmp(&l->id, &supposed_id, sizeof(l->id)) == 0);
 	/* Check that the sequence inside that loop is correct */
@@ -99,7 +99,17 @@ int main(int argc, char** argv) {
 		init_dummy_event(&thread_writer, eid);
 	htf_assert(thread_writer.cur_depth == 0);
 	htf_assert(thread_writer.og_seq[0]->size == 1);
-	htf_assert(l->nb_iterations == 3);
+	htf_assert(l->nb_iterations[l->nb_loops - 1] == 3);
+	/* Now start recording one more event and then loop again */
+	init_dummy_event(&thread_writer, MAX_EVENT);
+	DOFOR(i, 4) {
+		for (int eid = 0; eid < MAX_EVENT; eid++)
+			init_dummy_event(&thread_writer, eid);
+	}
+	htf_assert(thread_writer.cur_depth == 0);
+	htf_assert(thread_writer.og_seq[0]->size == 3);	 // L0 E L0
+	htf_assert(l->nb_iterations[0] == 3);
+	htf_assert(l->nb_iterations[1] == 4);
 
 	return 0;
 }

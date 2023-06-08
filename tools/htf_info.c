@@ -16,8 +16,8 @@ void print_sequence(struct htf_thread* t, struct htf_sequence *s) {
     htf_token_t* token = &s->token[i];
     if(HTF_TOKEN_TYPE(*token) == HTF_TYPE_LOOP) {
       struct htf_loop* l = htf_get_loop(t, HTF_LOOP_ID(token->id));
-      printf("%d*", l->nb_iterations);
-      token = &l->token;
+			//      printf("%d*", l->nb_iterations);
+			token = &l->token;
     }
     printf("%c%x",  HTF_TOKEN_TYPE_C(*token), HTF_TOKEN_ID(*token));
     if(i<s->size - 1)
@@ -37,10 +37,12 @@ void info_sequence(struct htf_sequence *s) {
 }
 
 void info_loop(struct htf_loop *l) {
-  printf("{.nb_iterations: %d, .token: %x.%x}\n",
-	 l->nb_iterations,
-	 HTF_TOKEN_TYPE(l->token),
-	 HTF_TOKEN_ID(l->token));
+	printf("{.nb_loops: %d, .token: %x.%x, .nb_iterations: [", l->nb_loops, HTF_TOKEN_TYPE(l->token),
+				 HTF_TOKEN_ID(l->token));
+	DOFOR(i, l->nb_loops - 1) {
+		printf("%d, ", l->nb_iterations[i]);
+	}
+	printf("%d]}\n", l->nb_iterations[l->nb_loops - 1]);
 }
 
 void info_thread(struct htf_thread *t) {
