@@ -504,7 +504,7 @@ static void _htf_store_thread(const char* dir_name, struct htf_thread *th) {
 	fclose(token_file);
 
 	struct htf_thread_reader reader;
-	htf_read_thread_iterator_init(th->archive, &reader, th->id);
+	htf_read_thread_iterator_init(th->archive, &reader, th->id, OPTION_NONE);
 
 	/* Start Reading */
 

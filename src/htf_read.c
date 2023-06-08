@@ -16,9 +16,11 @@ static void init_callstack(struct htf_thread_reader *reader) {
 
 void htf_read_thread_iterator_init(struct htf_archive *archive,
 				   struct htf_thread_reader *reader,
-				   htf_thread_id_t thread_id) {
+				   htf_thread_id_t thread_id,
+				   enum thread_reader_option options) {
   htf_assert(thread_id != HTF_THREAD_ID_INVALID);
   reader->archive = archive;
+  reader->options = options;
   reader->thread_trace = htf_archive_get_thread(archive, thread_id);
   htf_assert(reader->thread_trace != NULL);
 
@@ -221,7 +223,8 @@ static void _get_next_token(struct htf_thread_reader* reader) {
 		/* just move to the next event in the sequence */
 		reader->callstack_index[cur_frame]++;
 	} else {
-		if (end_of_a_loop(reader, cur_loop_iteration + 1, cur_seq_id)) {
+	  if (_reader_show_structure(reader) ||
+	      end_of_a_loop(reader, cur_loop_iteration + 1, cur_seq_id)) {
 			/* we reached the end of a sequence. leave the block and get the next event */
 			leave_block(reader);
 			_get_next_token(reader);
@@ -248,7 +251,9 @@ int htf_move_to_next_token(struct htf_thread_reader* reader) {
 		reader->event_index[t.id]++;	// "consume" the event occurence
 		_get_next_token(reader);
 	}
+	return 0;
 }
+
 int htf_read_thread_cur_token(struct htf_thread_reader* reader, struct htf_token* token, htf_occurence* e) {
 	if (reader->current_frame < 0) {
 		return -1; /* TODO: return EOF */

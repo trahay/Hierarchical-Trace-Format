@@ -4,6 +4,11 @@
 #include "htf.h"
 #include "htf_timestamp.h"
 
+enum thread_reader_option {
+  OPTION_NONE = 0,
+  OPTION_SHOW_STRUCTURE = 1,
+};
+
 struct htf_thread_reader {
 	/** Archive being read by this reader. */
 	struct htf_archive* archive;
@@ -34,6 +39,8 @@ struct htf_thread_reader {
 	/** At any point, a loop l has been seen loop_index[l.id] times.
 	 * Use this to grab the timestamps and other information on the sequence. */
 	int* loop_index;
+
+	enum thread_reader_option options;
 };
 
 /**
@@ -106,7 +113,8 @@ void htf_read_archive(struct htf_archive* archive, char* filename);
 
 void htf_read_thread_iterator_init(struct htf_archive* archive,
 																	 struct htf_thread_reader* reader,
-																	 htf_thread_id_t thread_id);
+				   htf_thread_id_t thread_id,
+				   enum thread_reader_option options);
 
 /**
  * Copies the value of the current token in a thread to the given pointer.
@@ -127,4 +135,9 @@ htf_timestamp_t htf_get_starting_timestamp(struct htf_thread_reader* reader, str
 /** Returns the duraiton of the given Event, Sequence or Loop, without modifying the reader's state. */
 htf_timestamp_t htf_get_duration(struct htf_thread_reader* reader, struct htf_token token);
 #define MAX_CALLSTACK_DEPTH 100
+
+static int _reader_show_structure(struct htf_thread_reader* reader) __attribute__((unused));
+static int _reader_show_structure(struct htf_thread_reader* reader) {
+  return reader->options & OPTION_SHOW_STRUCTURE;
+}
 #endif /* HTF_READ_H */
