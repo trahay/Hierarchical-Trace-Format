@@ -136,17 +136,19 @@ static inline struct htf_loop* _htf_create_loop_id(struct htf_thread_writer* thr
 void htf_store_timestamp(struct htf_thread_writer *thread_writer,
 			 htf_event_id_t e_id,
 			 htf_timestamp_t ts) {
-  htf_assert(HTF_ID(e_id) < thread_writer->thread_trace.nb_allocated_events);
+	htf_assert(HTF_ID(e_id) < thread_writer->thread_trace.nb_allocated_events);
 
-  struct htf_event_summary *es = &thread_writer->thread_trace.events[HTF_ID(e_id)];
-  htf_assert(es);
+	struct htf_event_summary* es = &thread_writer->thread_trace.events[HTF_ID(e_id)];
+	htf_assert(es);
 
-  if(es->nb_timestamps >= es->nb_allocated_timestamps) {
-    htf_warn("Doubling mem space of timestamps for event %u\n", HTF_ID(e_id));
-	  DOUBLE_MEMORY_SPACE(es->timestamps, es->nb_allocated_timestamps, htf_timestamp_t);
-  }
+	if (es->nb_timestamps >= es->nb_allocated_timestamps) {
+		htf_warn("Doubling mem space of timestamps for event %u\n", HTF_ID(e_id));
+		DOUBLE_MEMORY_SPACE(es->timestamps, es->nb_allocated_timestamps, htf_timestamp_t);
+	}
 
-  es->timestamps[es->nb_timestamps++] = ts; 
+	es->timestamps[es->nb_timestamps] = ts;
+	htf_delta_timestamp(&es->timestamps[es->nb_timestamps]);
+	es->nb_timestamps++;
 }
 
 static void _htf_store_token(struct htf_thread_writer *thread_writer,
