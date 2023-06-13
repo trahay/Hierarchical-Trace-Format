@@ -374,6 +374,29 @@ void __skip_token(struct htf_thread_reader* reader, htf_token_t token, int nb_ti
 			htf_error("This shouldn't have happened\n");
 	}
 }
+void skip_token(struct htf_thread_reader* reader, htf_token_t token) {
+	switch (token.type) {
+		case HTF_TYPE_EVENT: {
+			int event_index = reader->event_index[HTF_TOKEN_ID(token)];
+			reader->referential_timestamp += reader->thread_trace->events[token.id].timestamps[event_index];
+			break;
+		}
+		case HTF_TYPE_SEQUENCE: {
+			int event_index = reader->sequence_index[HTF_TOKEN_ID(token)];
+			struct htf_sequence* seq = htf_get_sequence(reader->thread_trace, HTF_TOKEN_TO_SEQUENCE_ID(token));
+			reader->referential_timestamp += seq->durations[event_index];
+			__skip_token(reader, token, 1);
+			break;
+		}
+		case HTF_TYPE_LOOP: {
+			// TODO Fuck it we ball
+			break;
+		}
+		default:
+			htf_error("This shouldn't have happened\n");
+	}
+}
+
 _Thread_local size_t savestate_memory = 0;
 struct htf_savestate create_savestate(struct htf_thread_reader* reader) {
 	struct htf_savestate new_savestate;
@@ -412,27 +435,4 @@ void load_savestate(struct htf_thread_reader* reader, struct htf_savestate* save
 	memcpy(reader->event_index, savestate->event_index, sizeof(int) * MAX_CALLSTACK_DEPTH);
 	memcpy(reader->sequence_index, savestate->sequence_index, sizeof(int) * MAX_CALLSTACK_DEPTH);
 	memcpy(reader->loop_index, savestate->loop_index, sizeof(int) * MAX_CALLSTACK_DEPTH);
-}
-
-void skip_token(struct htf_thread_reader* reader, htf_token_t token) {
-	switch (token.type) {
-		case HTF_TYPE_EVENT: {
-			int event_index = reader->event_index[HTF_TOKEN_ID(token)];
-			reader->referential_timestamp += reader->thread_trace->events[token.id].timestamps[event_index];
-			break;
-		}
-		case HTF_TYPE_SEQUENCE: {
-			int event_index = reader->sequence_index[HTF_TOKEN_ID(token)];
-			struct htf_sequence* seq = htf_get_sequence(reader->thread_trace, HTF_TOKEN_TO_SEQUENCE_ID(token));
-			reader->referential_timestamp += seq->durations[event_index];
-			__skip_token(reader, token, 1);
-			break;
-		}
-		case HTF_TYPE_LOOP: {
-			// TODO Fuck it we ball
-			break;
-		}
-		default:
-			htf_error("This shouldn't have happened\n");
-	}
 }
