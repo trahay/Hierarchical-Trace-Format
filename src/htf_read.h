@@ -95,6 +95,7 @@ typedef union {
 	struct htf_event_occurence event_occurence;
 } htf_occurence;
 
+_Thread_local extern size_t savestate_memory;
 /** Creates a savestate from a reader. */
 struct htf_savestate create_savestate(struct htf_thread_reader* reader);
 /** Loads a savestate to a reader. */
