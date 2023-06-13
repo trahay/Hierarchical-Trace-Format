@@ -421,7 +421,7 @@ struct htf_savestate create_savestate(struct htf_thread_reader* reader) {
 
 	new_savestate.loop_index = malloc(sizeof(int) * MAX_CALLSTACK_DEPTH);
 	memcpy(new_savestate.loop_index, reader->loop_index, sizeof(int) * MAX_CALLSTACK_DEPTH);
-	savestate_memory += MAX_CALLSTACK_DEPTH * 6;
+	savestate_memory += MAX_CALLSTACK_DEPTH * 6 * sizeof(int);
 	savestate_memory += sizeof(new_savestate);
 	return new_savestate;
 }
