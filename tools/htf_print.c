@@ -48,7 +48,8 @@ static void print_loop(struct htf_thread* thread, htf_token_t token, struct htf_
 		printf("Loop");
 		if (show_structure)
 			printf("         ");
-		printf("\t\t\t");
+		printf("\t%.6lf * %d", loop->duration / (1e9 * loop->nb_iterations), loop->nb_iterations);
+		printf("\t");
 	}
 	if (!per_thread)
 		printf("%s\t", htf_get_thread_name(thread));
@@ -59,7 +60,6 @@ static void print_loop(struct htf_thread* thread, htf_token_t token, struct htf_
 	printf("\t%d * ", loop->nb_iterations);
 	htf_print_token(thread, l->token);
 	printf(" = ");
-	// TODO Make sure this is a sequence
 	struct htf_sequence* seq = htf_get_sequence(thread, HTF_TOKEN_TO_SEQUENCE_ID(l->token));
 	for (unsigned i = 0; i < seq->size; i++) {
 		htf_print_token(thread, seq->token[i]);
@@ -68,18 +68,12 @@ static void print_loop(struct htf_thread* thread, htf_token_t token, struct htf_
 	printf("\n");
 }
 
-static void print_token(struct htf_thread_reader* reader, struct htf_token* t, htf_occurence* e) {
-	htf_log(htf_dbg_lvl_verbose, "Reading token(%x.%x) for thread %s\n", t->type, t->id,
-					htf_get_thread_name(reader->thread_trace));
+static void print_token(struct htf_thread* thread, struct htf_token* t, htf_occurence* e, int depth) {
+	htf_log(htf_dbg_lvl_verbose, "Reading token(%x.%x) for thread %s\n", t->type, t->id, htf_get_thread_name(thread));
 
-	// This insures we don't go deeper than necessary
-	if (reader->current_frame > max_depth) {
-		return;
-	}
 	// Prints the structure of the sequences and the loops
 	if (show_structure) {
-		for (int i = 0; i < reader->current_frame; i++)
-			printf("│ ");
+		DOFOR(i, depth) printf("│ ");
 	}
 	// printf("│ ");
 	// printf("├─");
@@ -91,21 +85,50 @@ static void print_token(struct htf_thread_reader* reader, struct htf_token* t, h
 			htf_error("Type is invalid\n");
 			break;
 		case HTF_TYPE_EVENT:
-			print_event(reader->thread_trace, *t, &e->event_occurence);
+			print_event(thread, *t, &e->event_occurence);
 			break;
 		case HTF_TYPE_SEQUENCE: {
 			if (show_structure)
-				print_sequence(reader->thread_trace, *t, &e->sequence_occurence);
+				print_sequence(thread, *t, &e->sequence_occurence);
 			break;
 		}
 		case HTF_TYPE_LOOP: {
-			if (reader->current_frame == max_depth) {
-				print_loop(reader->thread_trace, *t, &e->loop_occurence, 1);
+			if (depth == max_depth) {
+				print_loop(thread, *t, &e->loop_occurence, 1);
 			} else if (show_structure)
-				print_loop(reader->thread_trace, *t, &e->loop_occurence, 0);
+				print_loop(thread, *t, &e->loop_occurence, 0);
 			break;
 		}
 	}
+}
+
+static void display_sequence(struct htf_thread_reader* reader,
+														 htf_token_t token,
+														 struct htf_sequence_occurence* occurence,
+														 int depth) {
+	if (occurence) {
+		load_savestate(reader, &occurence->savestate);
+		enter_block(reader, token);
+	}
+	htf_occurence* current_level;
+	htf_token_t* current_level_token;
+	unsigned size;
+	htf_read_thread_cur_level(reader, &current_level, &current_level_token, &size);
+	DOFOR(i, size) {
+		print_token(reader->thread_trace, &current_level_token[i], &current_level[i], depth);
+		if (depth < max_depth) {
+			if (current_level_token[i].type == HTF_TYPE_SEQUENCE) {
+				display_sequence(reader, current_level_token[i], &current_level[i].sequence_occurence, depth + 1);
+			}
+			if (current_level_token[i].type == HTF_TYPE_LOOP) {
+				struct htf_loop_occurence loop = current_level[i].loop_occurence;
+				DOFOR(j, loop.nb_iterations) {
+					display_sequence(reader, loop.loop->token, &loop.full_loop[j], depth + 1);
+				}
+			}
+		}
+	}
+	leave_block(reader);
 }
 
 /* Print all the events of a thread */
@@ -115,13 +138,11 @@ static void print_thread(struct htf_archive* trace, struct htf_thread* thread) {
 
 	struct htf_thread_reader reader;
 	htf_read_thread_iterator_init(trace, &reader, thread->id);
-
-	htf_occurence e;
-	struct htf_token t;
-	while (htf_read_thread_cur_token(&reader, &t, &e) == 0) {
-		print_token(&reader, &t, &e);
-		htf_move_to_next_token(&reader);
-	}
+	display_sequence(&reader, HTF_TOKENIZE(HTF_TYPE_SEQUENCE, 0), NULL, 0);
+	//	while (htf_read_thread_cur_token(&reader, &t, &e) == 0) {
+	//		print_token(&reader, &t, &e);
+	//		htf_move_to_next_token(&reader);
+	//	}
 }
 
 /** Compare the timestamps of the current token on each thread and select the smallest timestamp.
@@ -163,38 +184,9 @@ void print_trace(struct htf_archive* trace) {
 	htf_occurence e;
 	struct htf_token t;
 	int thread_index = -1;
-	while ((thread_index = get_next_token(readers, trace->nb_threads, &t, &e)) >= 0) {
-		print_token(&readers[thread_index], &t, &e);
-	}
-}
-
-static void __compute_durations(struct htf_archive* trace, struct htf_thread* thread) {
-	struct htf_thread_reader reader;
-	htf_read_thread_iterator_init(trace, &reader, thread->id);
-	htf_token_t t;
-
-	htf_timestamp_t* duration_callstack[MAX_CALLSTACK_DEPTH] = {0};
-	while (htf_read_thread_cur_token(&reader, &t, NULL) == 0) {
-		switch (t.type) {
-			case HTF_TYPE_EVENT: {
-				htf_timestamp_t duration = reader.thread_trace->events[t.id].timestamps[reader.event_index[t.id]];
-				DOFOR(i, reader.current_frame) {
-					if (duration_callstack[i])
-						*duration_callstack[i] += duration;
-				}
-				break;
-			}
-			case HTF_TYPE_SEQUENCE: {
-				struct htf_sequence* seq = htf_get_sequence(reader.thread_trace, HTF_TOKEN_TO_SEQUENCE_ID(t));
-				duration_callstack[reader.current_frame] = &seq->durations[reader.sequence_index[t.id]];
-				break;
-			}
-			default:
-				duration_callstack[reader.current_frame] = NULL;
-				break;
-		}
-		htf_move_to_next_token(&reader);
-	}
+	//	while ((thread_index = get_next_token(readers, trace->nb_threads, &t, &e)) >= 0) {
+	//		print_token(&readers[thread_index], &t, &e);
+	//	}
 }
 
 void usage(const char* prog_name) {
@@ -244,16 +236,13 @@ int main(int argc, char**argv) {
 	struct htf_archive trace;
 	htf_read_archive(&trace, trace_name);
 
-	for (int i = 0; i < trace.nb_threads; i++) {
-		__compute_durations(&trace, trace.threads[i]);
-	}
-
 	if (per_thread) {
 		for (int i = 0; i < trace.nb_threads; i++) {
 			printf("\n");
 			print_thread(&trace, trace.threads[i]);
 		}
 	} else {
+		htf_error("This is currently buggy so don't do it\n");
 		print_trace(&trace);
 	}
 
