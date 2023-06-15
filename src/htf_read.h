@@ -78,7 +78,11 @@ struct htf_sequence_occurence {
 	struct htf_savestate savestate;
 	htf_timestamp_t timestamp;
 	htf_timestamp_t duration;
-	struct htf_occurence* full_sequence;
+	/**Occurences of the events in this sequence. */
+	void* full_sequence;
+	// TODO Probably not a good thing to make it a void * ?
+	//  But I can't think of any other way to make it work
+	//  Should ask Francois ?
 };
 
 struct htf_loop_occurence {

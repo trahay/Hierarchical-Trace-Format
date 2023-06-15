@@ -127,6 +127,37 @@ static void print_token(struct htf_thread* thread, struct htf_token* t, htf_occu
 	}
 }
 
+static void free_occurence(htf_token_t token, htf_occurence* occurence) {
+	htf_error("This function does not work yet\n");
+	// Not too sure what to do with all that tbf
+	switch (token.type) {
+		case HTF_TYPE_SEQUENCE: {
+			struct htf_sequence_occurence seq = occurence->sequence_occurence;
+			DOFOR(i, seq.sequence->size) {
+				free_occurence(seq.sequence->token[i], &((htf_occurence*)seq.full_sequence)[i]);
+			}
+			free(seq.full_sequence);
+			free(&(occurence->sequence_occurence));
+			break;
+		}
+		case HTF_TYPE_LOOP: {
+			struct htf_loop_occurence loop = occurence->loop_occurence;
+			DOFOR(i, loop.nb_iterations) {
+				free_occurence(loop.loop->token, &loop.full_loop[i]);
+			}
+			free(loop.full_loop);
+			free(&(occurence->loop_occurence));
+			break;
+		}
+		case HTF_TYPE_EVENT:
+			// Fails here ? Idk why
+			free(&(occurence->event_occurence));
+			break;
+		default:
+			htf_error("This shouldn't happen\n");
+	}
+}
+
 static void display_sequence(struct htf_thread_reader* reader,
 														 htf_token_t token,
 														 struct htf_sequence_occurence* occurence,
@@ -135,9 +166,9 @@ static void display_sequence(struct htf_thread_reader* reader,
 		load_savestate(reader, &occurence->savestate);
 		enter_block(reader, token);
 	}
-	htf_occurence* current_level;
-	htf_token_t* current_level_token;
-	int size;
+	htf_occurence* current_level = NULL;
+	htf_token_t* current_level_token = NULL;
+	int size = 0;
 	htf_read_thread_cur_level(reader, &current_level, &current_level_token, &size);
 	DOFOR(i, size) {
 		print_token(reader->thread_trace, &current_level_token[i], &current_level[i], depth, i == (size - 1));
@@ -155,6 +186,13 @@ static void display_sequence(struct htf_thread_reader* reader,
 			}
 		}
 	}
+	if (occurence)
+		occurence->full_sequence = current_level;
+	else {
+		//		DOFOR(i, size) {
+		//				free_occurence(current_level_token[i], &current_level[i]);
+		//		}
+	}
 	leave_block(reader);
 }
 
@@ -166,10 +204,6 @@ static void print_thread(struct htf_archive* trace, struct htf_thread* thread) {
 	struct htf_thread_reader reader;
 	htf_read_thread_iterator_init(trace, &reader, thread->id);
 	display_sequence(&reader, HTF_TOKENIZE(HTF_TYPE_SEQUENCE, 0), NULL, 0);
-	//	while (htf_read_thread_cur_token(&reader, &t, &e) == 0) {
-	//		print_token(&reader, &t, &e);
-	//		htf_move_to_next_token(&reader);
-	//	}
 }
 
 /** Compare the timestamps of the current token on each thread and select the smallest timestamp.

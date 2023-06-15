@@ -273,9 +273,10 @@ int htf_read_thread_cur_level(struct htf_thread_reader* reader,
 			htf_get_sequence(reader->thread_trace, HTF_TOKEN_TO_SEQUENCE_ID(current_sequence_id));
 
 	htf_assert(current_sequence->size > 0);
-	*length = current_sequence->size;
-	*token_array = current_sequence->token;
-	*occurence_array = malloc(sizeof(htf_occurence) * (*length));
+	memcpy(length, &current_sequence->size, sizeof(current_sequence->size));
+	memcpy(token_array, &current_sequence->token, sizeof(void*));
+	// We're copying the address, not the whole array.
+	*occurence_array = malloc(sizeof(htf_occurence) * current_sequence->size);
 	DOFOR(i, current_sequence->size) {
 		htf_token_t token = current_sequence->token[i];
 		switch (token.type) {
@@ -353,7 +354,7 @@ int htf_read_thread_cur_token(struct htf_thread_reader* reader, struct htf_token
 		}
 		case HTF_TYPE_SEQUENCE: {
 			struct htf_sequence* seq = reader->thread_trace->sequences[index];
-			reader->referential_timestamp = *(htf_timestamp_t*)array_get(&seq->timestamps, reader->sequence_index[index]);
+			reader->referential_timestamp = ((htf_timestamp_t*)seq->timestamps.array)[reader->sequence_index[index]];
 			if (e) {
 				e->sequence_occurence.timestamp = reader->referential_timestamp;
 				e->sequence_occurence.duration = seq->durations[reader->sequence_index[index]];
