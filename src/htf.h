@@ -186,10 +186,11 @@ struct htf_loop {
  * Summary for an event. The nth time the event appears, it is at timestamps timestamps[n].
  */
 struct htf_event_summary {
-  struct htf_event event;
-  htf_timestamp_t *timestamps;
-  unsigned nb_allocated_timestamps;
-  unsigned nb_timestamps;
+	struct htf_event event;
+	htf_timestamp_t* timestamps;
+	htf_timestamp_t* durations;
+	unsigned nb_allocated_events;
+	unsigned nb_events;
 };
 
 #define HTF_UNDEFINED_UINT8  ( ( uint8_t )( ~( ( uint8_t )0u ) ) )

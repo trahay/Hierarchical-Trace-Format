@@ -129,8 +129,8 @@ static void _htf_store_event(const char* base_dirname,
 														 htf_event_id_t event_id) {
 	FILE* file = _htf_get_event_file(base_dirname, th, event_id, "w");
 	htf_timestamp_t ts = 0;
-	for (int i = 0; i < e->nb_timestamps; i++) {
-		ts |= e->timestamps[i];
+	for (int i = 0; i < e->nb_events; i++) {
+		ts |= e->durations[i];
 	}
 	enum timestamp_size ts_size = bit64;
 	if (ts < UINT8_MAX) {
@@ -141,32 +141,32 @@ static void _htf_store_event(const char* base_dirname,
 		ts_size = bit32;
 	}
 	size_t size = (1 << ts_size);
-	htf_log(htf_dbg_lvl_debug, "\tStore event %x {.nb_timestamps=%d} using %zu bytes, mask was %016lx \n",
-					HTF_ID(event_id), e->nb_timestamps, size, ts);
+	htf_log(htf_dbg_lvl_debug, "\tStore event %x {.nb_events=%d} using %zu bytes, mask was %016lx \n", HTF_ID(event_id),
+					e->nb_events, size, ts);
 
 	_htf_fwrite(&e->event, sizeof(struct htf_event), 1, file);
-	_htf_fwrite(&e->nb_timestamps, sizeof(e->nb_timestamps), 1, file);
+	_htf_fwrite(&e->nb_events, sizeof(e->nb_events), 1, file);
 	_htf_fwrite(&ts_size, sizeof(ts_size), 1, file);
 
-	char* buffer = malloc(size * e->nb_timestamps);
-	for (int i = 0; i < e->nb_timestamps; i++) {
-		memcpy(&buffer[size * i], &e->timestamps[i], size);
+	char* buffer = malloc(size * e->nb_events);
+	for (int i = 0; i < e->nb_events; i++) {
+		memcpy(&buffer[size * i], &e->durations[i], size);
 	}
-	size_t maxCSize = ZSTD_compressBound(size * e->nb_timestamps);
+	size_t maxCSize = ZSTD_compressBound(size * e->nb_events);
 	void* cBuff = malloc(maxCSize);
-	size_t cSize = ZSTD_compress(cBuff, maxCSize, buffer, e->nb_timestamps * size, ZSTD_COMPRESSION_LEVEL);
-	if (cSize < size * e->nb_timestamps) {
+	size_t cSize = ZSTD_compress(cBuff, maxCSize, buffer, e->nb_events * size, ZSTD_COMPRESSION_LEVEL);
+	if (cSize < size * e->nb_events) {
 		// If the compression is worth it
 		_htf_fwrite(&cSize, sizeof(cSize), 1, file);
 		_htf_fwrite(cBuff, cSize, 1, file);
 		htf_log(htf_dbg_lvl_debug, "\t\tStored %zu bytes instead of %zu using ZSTD\n", cSize,
-						(e->nb_timestamps * sizeof(htf_timestamp_t)));
+						(e->nb_events * sizeof(htf_timestamp_t)));
 	} else {
 		cSize = 0;
 		_htf_fwrite(&cSize, sizeof(cSize), 1, file);
-		_htf_fwrite(buffer, size * e->nb_timestamps, 1, file);
-		htf_log(htf_dbg_lvl_debug, "\t\tStored %zu bytes instead of %zu\n", size * e->nb_timestamps,
-						(e->nb_timestamps * sizeof(htf_timestamp_t)));
+		_htf_fwrite(buffer, size * e->nb_events, 1, file);
+		htf_log(htf_dbg_lvl_debug, "\t\tStored %zu bytes instead of %zu\n", size * e->nb_events,
+						(e->nb_events * sizeof(htf_timestamp_t)));
 	}
 	free(cBuff);
 	free(buffer);
@@ -180,32 +180,31 @@ static void _htf_read_event(const char* base_dirname,
 	FILE* file = _htf_get_event_file(base_dirname, th, event_id, "r");
 
 	_htf_fread(&e->event, sizeof(struct htf_event), 1, file);
-	_htf_fread(&e->nb_timestamps, sizeof(e->nb_timestamps), 1, file);
+	_htf_fread(&e->nb_events, sizeof(e->nb_events), 1, file);
 	enum timestamp_size ts_size;
 	_htf_fread(&ts_size, sizeof(ts_size), 1, file);
 	size_t size = (1 << ts_size);
 
-	htf_log(htf_dbg_lvl_debug, "\tLoad event %x {.nb_timestamps=%d} using %zu bytes\n", HTF_ID(event_id),
-					e->nb_timestamps, size);
+	htf_log(htf_dbg_lvl_debug, "\tLoad event %x {.nb_events=%d} using %zu bytes\n", HTF_ID(event_id), e->nb_events, size);
 
 	size_t cSize;
 	_htf_fread(&cSize, sizeof(cSize), 1, file);
-	char* buffer = malloc(e->nb_timestamps * size);
-	e->timestamps = calloc(e->nb_timestamps, sizeof(htf_timestamp_t));
+	char* buffer = malloc(e->nb_events * size);
+	e->timestamps = calloc(e->nb_events, sizeof(htf_timestamp_t));
 	if (cSize) {
 		// Then we used ZSTD
 		void* cBuffer = malloc(cSize);
 		_htf_fread(cBuffer, cSize, 1, file);
 		size_t rSize = ZSTD_getFrameContentSize(cBuffer, cSize);
-		htf_assert(rSize == e->nb_timestamps * size);
+		htf_assert(rSize == e->nb_events * size);
 		ZSTD_decompress(buffer, rSize, cBuffer, cSize);
 		free(cBuffer);
 	} else {
 		// We didn't use ZSTD
-		_htf_fread(buffer, e->nb_timestamps * size, 1, file);
+		_htf_fread(buffer, e->nb_events * size, 1, file);
 	}
 	fclose(file);
-	for (int i = 0; i < e->nb_timestamps; i++) {
+	for (int i = 0; i < e->nb_events; i++) {
 		memcpy(&e->timestamps[i], &buffer[size * i], size);
 	}
 	free(buffer);

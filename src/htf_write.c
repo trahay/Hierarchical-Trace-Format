@@ -38,8 +38,9 @@ static inline htf_sequence_id_t _htf_get_sequence_id_from_array(struct htf_threa
 #define _init_event(e)                                                      \
 	do {                                                                      \
 		e->timestamps = malloc(sizeof(htf_timestamp_t) * NB_TIMESTAMP_DEFAULT); \
-		e->nb_allocated_timestamps = NB_TIMESTAMP_DEFAULT;                      \
-		e->nb_timestamps = 0;                                                   \
+		e->durations = malloc(sizeof(htf_timestamp_t) * NB_TIMESTAMP_DEFAULT);  \
+		e->nb_allocated_events = NB_TIMESTAMP_DEFAULT;                          \
+		e->nb_events = 0;                                                       \
 	} while (0)
 
 static inline struct htf_sequence* _htf_get_cur_sequence(struct htf_thread_writer* thread_writer) {
@@ -141,14 +142,17 @@ void htf_store_timestamp(struct htf_thread_writer *thread_writer,
 	struct htf_event_summary* es = &thread_writer->thread_trace.events[HTF_ID(e_id)];
 	htf_assert(es);
 
-	if (es->nb_timestamps >= es->nb_allocated_timestamps) {
+	if (es->nb_events >= es->nb_allocated_events) {
 		htf_warn("Doubling mem space of timestamps for event %u\n", HTF_ID(e_id));
-		DOUBLE_MEMORY_SPACE(es->timestamps, es->nb_allocated_timestamps, htf_timestamp_t);
+		DOUBLE_MEMORY_SPACE(es->timestamps, es->nb_allocated_events, htf_timestamp_t);
+		es->nb_allocated_events /= 2;
+		DOUBLE_MEMORY_SPACE(es->durations, es->nb_allocated_events, htf_timestamp_t);
 	}
 
-	es->timestamps[es->nb_timestamps] = ts;
-	htf_delta_timestamp(&es->timestamps[es->nb_timestamps]);
-	es->nb_timestamps++;
+	es->timestamps[es->nb_events] = ts;
+	es->durations[es->nb_events] = ts;
+	htf_delta_timestamp(&es->durations[es->nb_events]);
+	es->nb_events++;
 }
 
 static void _htf_store_token(struct htf_thread_writer *thread_writer,
@@ -214,7 +218,7 @@ static inline htf_timestamp_t _htf_get_timestamp(struct htf_thread* thread,
 #define CASE_EVENT_SEQUENCE(token, count)                                                 \
 	case HTF_TYPE_EVENT: {                                                                  \
 		struct htf_event_summary es = thread->events[token.id];                               \
-		return es.timestamps[es.nb_timestamps - count];                                       \
+		return es.timestamps[es.nb_events - count];                                           \
 	}                                                                                       \
 	case HTF_TYPE_SEQUENCE: {                                                               \
 		struct htf_sequence* seq = htf_get_sequence(thread, HTF_TOKEN_TO_SEQUENCE_ID(token)); \
