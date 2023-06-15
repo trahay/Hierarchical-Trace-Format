@@ -623,28 +623,30 @@ static void _htf_read_archive(struct htf_archive* global_archive,
 			      struct htf_archive* archive,
 			      char* dir_name,
 			      char* trace_name) {
-
-  archive->fullpath = htf_archive_fullpath(dir_name, trace_name);
-  archive->dir_name = strdup(dir_name);
-  archive->trace_name = strdup(trace_name);
-  archive->global_archive = global_archive;
-  archive->nb_archives = 0;
+	archive->fullpath = htf_archive_fullpath(dir_name, trace_name);
+	archive->dir_name = strdup(dir_name);
+	archive->trace_name = strdup(trace_name);
+	archive->global_archive = global_archive;
+	archive->nb_archives = 0;
 	archive->nb_allocated_archives = 1;
 	archive->archive_list = malloc(sizeof(struct htf_archive*));
 	if (archive->archive_list == NULL) {
 		htf_error("Failed to allocate memory\n");
 	}
+	archive->nb_threads = 0;
+	archive->nb_allocated_threads = 1;
+	archive->threads = malloc(sizeof(struct htf_thread*));
 
-  htf_log(htf_dbg_lvl_debug, "Reading archive {.dir_name='%s', .trace='%s'}\n", archive->dir_name, archive->trace_name);
+	htf_log(htf_dbg_lvl_debug, "Reading archive {.dir_name='%s', .trace='%s'}\n", archive->dir_name, archive->trace_name);
 
-  FILE* f = _htf_file_open(archive->fullpath, "r");
+	FILE* f = _htf_file_open(archive->fullpath, "r");
 
-  _htf_fread(&archive->id, sizeof(htf_location_group_id_t), 1, f);
-  _htf_fread(&archive->definitions.nb_strings, sizeof(int), 1, f);
-  _htf_fread(&archive->definitions.nb_regions, sizeof(int), 1, f);
-  _htf_fread(&archive->nb_location_groups, sizeof(int), 1, f);
-  _htf_fread(&archive->nb_locations, sizeof(int), 1, f);
-  _htf_fread(&archive->nb_threads, sizeof(int), 1, f);
+	_htf_fread(&archive->id, sizeof(htf_location_group_id_t), 1, f);
+	_htf_fread(&archive->definitions.nb_strings, sizeof(int), 1, f);
+	_htf_fread(&archive->definitions.nb_regions, sizeof(int), 1, f);
+	_htf_fread(&archive->nb_location_groups, sizeof(int), 1, f);
+	_htf_fread(&archive->nb_locations, sizeof(int), 1, f);
+	_htf_fread(&archive->nb_threads, sizeof(int), 1, f);
   
   archive->definitions.nb_allocated_strings = archive->definitions.nb_strings;
   archive->definitions.strings = malloc(sizeof(struct htf_string) * archive->definitions.nb_allocated_strings);
@@ -722,8 +724,8 @@ void htf_read_thread(struct htf_archive* archive, htf_thread_id_t thread_id) {
   }
 
   while (archive->nb_threads >= archive->nb_allocated_threads) {
-		INCREMENT_MEMORY_SPACE(archive->threads, archive->nb_allocated_threads, struct htf_thread*);
-  }
+		DOUBLE_MEMORY_SPACE(archive->threads, archive->nb_allocated_threads, struct htf_thread*);
+	}
 
 	int index = archive->nb_threads++;
   archive->threads[index] = malloc(sizeof(struct htf_thread));
