@@ -67,13 +67,38 @@ static void print_loop(struct htf_thread* thread, htf_token_t token, struct htf_
 	}
 	printf("\n");
 }
-
-static void print_token(struct htf_thread* thread, struct htf_token* t, htf_occurence* e, int depth) {
+static int seq_loop_to_close[MAX_CALLSTACK_DEPTH] = {0};
+static void print_token(struct htf_thread* thread, struct htf_token* t, htf_occurence* e, int depth, int last_one) {
 	htf_log(htf_dbg_lvl_verbose, "Reading token(%x.%x) for thread %s\n", t->type, t->id, htf_get_thread_name(thread));
 
 	// Prints the structure of the sequences and the loops
 	if (show_structure) {
-		DOFOR(i, depth) printf("│ ");
+		if (last_one) {
+			if (t->type == HTF_TYPE_SEQUENCE || t->type == HTF_TYPE_LOOP) {
+				seq_loop_to_close[depth] = 1;
+				DOFOR(i, depth - 1) printf("│ ");
+				if (depth)
+					printf("├─");
+			} else {
+				int nb_last_sequences = 1;
+				for (int i = depth - 1; i > 0; i--) {
+					if (!seq_loop_to_close[i])
+						break;
+					seq_loop_to_close[i] = 0;
+					nb_last_sequences++;
+				}
+				DOFOR(i, depth - nb_last_sequences) printf("│ ");
+				DOFOR(i, nb_last_sequences) printf("╰─");
+			}
+		} else {
+			if (t->type == HTF_TYPE_SEQUENCE || t->type == HTF_TYPE_LOOP) {
+				DOFOR(i, depth - 1) printf("│ ");
+				if (depth)
+					printf("├─");
+			} else {
+				DOFOR(i, depth) printf("│ ");
+			}
+		}
 	}
 	// printf("│ ");
 	// printf("├─");
@@ -112,10 +137,10 @@ static void display_sequence(struct htf_thread_reader* reader,
 	}
 	htf_occurence* current_level;
 	htf_token_t* current_level_token;
-	unsigned size;
+	int size;
 	htf_read_thread_cur_level(reader, &current_level, &current_level_token, &size);
 	DOFOR(i, size) {
-		print_token(reader->thread_trace, &current_level_token[i], &current_level[i], depth);
+		print_token(reader->thread_trace, &current_level_token[i], &current_level[i], depth, i == (size - 1));
 		if (depth < max_depth) {
 			if (current_level_token[i].type == HTF_TYPE_SEQUENCE) {
 				display_sequence(reader, current_level_token[i], &current_level[i].sequence_occurence, depth + 1);
@@ -123,7 +148,9 @@ static void display_sequence(struct htf_thread_reader* reader,
 			if (current_level_token[i].type == HTF_TYPE_LOOP) {
 				struct htf_loop_occurence loop = current_level[i].loop_occurence;
 				DOFOR(j, loop.nb_iterations) {
-					display_sequence(reader, loop.loop->token, &loop.full_loop[j], depth + 1);
+					print_token(reader->thread_trace, &loop.loop->token, (htf_occurence*)&loop.full_loop[j], depth + 1,
+											j == (loop.nb_iterations - 1));
+					display_sequence(reader, loop.loop->token, &loop.full_loop[j], depth + 2);
 				}
 			}
 		}

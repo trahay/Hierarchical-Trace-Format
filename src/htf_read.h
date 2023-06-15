@@ -126,10 +126,10 @@ int htf_move_to_next_token(struct htf_thread_reader* reader);
 int htf_read_thread_cur_level(struct htf_thread_reader* reader,
 															htf_occurence** occurence_array,
 															struct htf_token** token_array,
-															unsigned* length);
-/** Skips the given token entirely, returns how much duration was skipped.
+															int* length);
+/** Skips the given sequence entirely, returns how much duration was skipped.
  * The reader must be located at that token (contrary to htf_get_starting_timestamp). */
-htf_timestamp_t skip_token(struct htf_thread_reader* reader, htf_token_t token);
+htf_timestamp_t skip_sequence(struct htf_thread_reader* reader, htf_token_t token);
 /** Returns the timestamp at which the given Event, Sequence or Loop starts, without modifying the reader's
  * state. */
 htf_timestamp_t htf_get_starting_timestamp(struct htf_thread_reader* reader, struct htf_token token);
