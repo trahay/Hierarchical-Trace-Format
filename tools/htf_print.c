@@ -214,10 +214,10 @@ static void print_thread(struct htf_archive* trace, struct htf_thread* thread) {
 	htf_occurence e;
 	struct htf_token t;
 	while (htf_read_thread_cur_token(&reader, &t, &e) == 0) {
-		print_token(&reader, &t, &e);
+		print_token(reader.thread_trace, &t, &e, 0, 0);
 		htf_move_to_next_token(&reader);
 	}
-	htf_read_thread_iterator_init(trace, &reader, thread->id);
+	htf_read_thread_iterator_init(trace, &reader, thread->id, reader_options);
 	display_sequence(&reader, HTF_TOKENIZE(HTF_TYPE_SEQUENCE, 0), NULL, 0);
 }
 
