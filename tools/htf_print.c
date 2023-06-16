@@ -166,7 +166,7 @@ static void display_sequence(struct htf_thread_reader* reader,
 														 struct htf_sequence_occurence* occurence,
 														 int depth) {
 	if (occurence) {
-		load_savestate(reader, &occurence->savestate);
+		load_savestate(reader, occurence->savestate);
 		enter_block(reader, token);
 	}
 	htf_occurence* current_level = NULL;
