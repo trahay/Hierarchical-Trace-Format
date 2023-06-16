@@ -82,7 +82,7 @@ struct htf_event_occurence {
 
 struct htf_sequence_occurence {
 	struct htf_sequence* sequence;
-	struct htf_savestate savestate;
+	struct htf_savestate* savestate;
 	htf_timestamp_t timestamp;
 	htf_timestamp_t duration;
 	/**Occurences of the events in this sequence. */
@@ -110,7 +110,7 @@ _Thread_local extern size_t savestate_memory;
 void enter_block(struct htf_thread_reader* reader, htf_token_t new_block);
 void leave_block(struct htf_thread_reader* reader);
 /** Creates a savestate from a reader. */
-struct htf_savestate create_savestate(struct htf_thread_reader* reader);
+struct htf_savestate* create_savestate(struct htf_thread_reader* reader);
 /** Loads a savestate to a reader. */
 void load_savestate(struct htf_thread_reader* reader, struct htf_savestate* savestate);
 

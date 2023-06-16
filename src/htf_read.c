@@ -491,29 +491,29 @@ htf_timestamp_t skip_sequence(struct htf_thread_reader* reader, htf_token_t toke
 }
 
 _Thread_local size_t savestate_memory = 0;
-struct htf_savestate create_savestate(struct htf_thread_reader* reader) {
-	struct htf_savestate new_savestate;
-	new_savestate.referential_timestamp = reader->referential_timestamp;
+struct htf_savestate* create_savestate(struct htf_thread_reader* reader) {
+	struct htf_savestate* new_savestate = malloc(sizeof(struct htf_savestate));
+	new_savestate->referential_timestamp = reader->referential_timestamp;
 
-	new_savestate.callstack_sequence = malloc(sizeof(htf_token_t) * MAX_CALLSTACK_DEPTH);
-	memcpy(new_savestate.callstack_sequence, reader->callstack_sequence, sizeof(int) * MAX_CALLSTACK_DEPTH);
+	new_savestate->callstack_sequence = malloc(sizeof(htf_token_t) * MAX_CALLSTACK_DEPTH);
+	memcpy(new_savestate->callstack_sequence, reader->callstack_sequence, sizeof(int) * MAX_CALLSTACK_DEPTH);
 
-	new_savestate.callstack_index = malloc(sizeof(int) * MAX_CALLSTACK_DEPTH);
-	memcpy(new_savestate.callstack_index, reader->callstack_index, sizeof(int) * MAX_CALLSTACK_DEPTH);
+	new_savestate->callstack_index = malloc(sizeof(int) * MAX_CALLSTACK_DEPTH);
+	memcpy(new_savestate->callstack_index, reader->callstack_index, sizeof(int) * MAX_CALLSTACK_DEPTH);
 
-	new_savestate.callstack_loop_iteration = malloc(sizeof(int) * MAX_CALLSTACK_DEPTH);
-	memcpy(new_savestate.callstack_loop_iteration, reader->callstack_loop_iteration, sizeof(int) * MAX_CALLSTACK_DEPTH);
+	new_savestate->callstack_loop_iteration = malloc(sizeof(int) * MAX_CALLSTACK_DEPTH);
+	memcpy(new_savestate->callstack_loop_iteration, reader->callstack_loop_iteration, sizeof(int) * MAX_CALLSTACK_DEPTH);
 
-	new_savestate.current_frame = reader->current_frame;
+	new_savestate->current_frame = reader->current_frame;
 
-	new_savestate.event_index = malloc(sizeof(int) * MAX_CALLSTACK_DEPTH);
-	memcpy(new_savestate.event_index, reader->event_index, sizeof(int) * reader->thread_trace->nb_events);
+	new_savestate->event_index = malloc(sizeof(int) * reader->thread_trace->nb_events);
+	memcpy(new_savestate->event_index, reader->event_index, sizeof(int) * reader->thread_trace->nb_events);
 
-	new_savestate.sequence_index = malloc(sizeof(int) * MAX_CALLSTACK_DEPTH);
-	memcpy(new_savestate.sequence_index, reader->sequence_index, sizeof(int) * reader->thread_trace->nb_sequences);
+	new_savestate->sequence_index = malloc(sizeof(int) * reader->thread_trace->nb_sequences);
+	memcpy(new_savestate->sequence_index, reader->sequence_index, sizeof(int) * reader->thread_trace->nb_sequences);
 
-	new_savestate.loop_index = malloc(sizeof(int) * MAX_CALLSTACK_DEPTH);
-	memcpy(new_savestate.loop_index, reader->loop_index, sizeof(int) * reader->thread_trace->nb_loops);
+	new_savestate->loop_index = malloc(sizeof(int) * reader->thread_trace->nb_loops);
+	memcpy(new_savestate->loop_index, reader->loop_index, sizeof(int) * reader->thread_trace->nb_loops);
 	savestate_memory += MAX_CALLSTACK_DEPTH * 6 * sizeof(int);
 	savestate_memory += sizeof(new_savestate);
 	return new_savestate;
