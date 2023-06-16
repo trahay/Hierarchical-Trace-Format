@@ -296,7 +296,7 @@ int htf_read_thread_cur_level(struct htf_thread_reader* reader,
 
 				// Update the reader
 				reader->referential_timestamp += occurence->duration;
-				reader->sequence_index[token.id]++;
+				reader->event_index[token.id]++;
 				break;
 			}
 			case HTF_TYPE_LOOP: {
