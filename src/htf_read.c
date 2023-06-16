@@ -316,7 +316,7 @@ int htf_read_thread_cur_level(struct htf_thread_reader* reader,
 				occurence->duration = 0;
 				DOFOR(j, occurence->nb_iterations) {
 					_htf_write_sequence_occurence(reader, &occurence->full_loop[j], loop->token);
-					occurence->duration += occurence->full_loop[i].duration;
+					occurence->duration += occurence->full_loop[j].duration;
 				}
 				leave_block(reader);
 

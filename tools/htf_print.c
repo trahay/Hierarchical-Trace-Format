@@ -29,9 +29,9 @@ static void print_sequence(struct htf_thread* thread, htf_token_t token, struct 
 	struct htf_sequence* s = seq->sequence;
 	htf_timestamp_t ts = seq->timestamp;
 	htf_timestamp_t duration = seq->duration;
-	printf("%.9lf", ts / 1e9);
+	printf("Sequence");
 	if (show_structure)
-		printf(" ");
+		printf("   ");
 	printf("\t%.9lf\t", duration / 1e9);
 	if (!per_thread)
 		printf("%s\t", htf_get_thread_name(thread));
@@ -50,7 +50,7 @@ static void print_loop(struct htf_thread* thread, htf_token_t token, struct htf_
 	} else {
 		printf("Loop");
 		if (show_structure)
-			printf("         ");
+			printf("        ");
 		printf("\t%.6lf * %d", loop->duration / (1e9 * loop->nb_iterations), loop->nb_iterations);
 		printf("\t");
 	}
