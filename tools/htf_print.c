@@ -29,7 +29,10 @@ static void print_sequence(struct htf_thread* thread, htf_token_t token, struct 
 	struct htf_sequence* s = seq->sequence;
 	htf_timestamp_t ts = seq->timestamp;
 	htf_timestamp_t duration = seq->duration;
-	printf("%.9lf\t%.9lf\t", ts / 1e9, duration / 1e9);
+	printf("%.9lf", ts / 1e9);
+	if (show_structure)
+		printf(" ");
+	printf("\t%.9lf\t", duration / 1e9);
 	if (!per_thread)
 		printf("%s\t", htf_get_thread_name(thread));
 	htf_print_token(thread, token);
@@ -76,9 +79,9 @@ static void print_token(struct htf_thread* thread, struct htf_token* t, htf_occu
 		if (last_one) {
 			if (t->type == HTF_TYPE_SEQUENCE || t->type == HTF_TYPE_LOOP) {
 				seq_loop_to_close[depth] = 1;
-				DOFOR(i, depth - 1) printf("│ ");
+				DOFOR(i, depth - 1) printf("│");
 				if (depth)
-					printf("├─");
+					printf("├┬");
 			} else {
 				int nb_last_sequences = 1;
 				for (int i = depth - 1; i > 0; i--) {
@@ -87,16 +90,16 @@ static void print_token(struct htf_thread* thread, struct htf_token* t, htf_occu
 					seq_loop_to_close[i] = 0;
 					nb_last_sequences++;
 				}
-				DOFOR(i, depth - nb_last_sequences) printf("│ ");
-				DOFOR(i, nb_last_sequences) printf("╰─");
+				DOFOR(i, depth - nb_last_sequences) printf("│");
+				DOFOR(i, nb_last_sequences) printf("╰");
 			}
 		} else {
 			if (t->type == HTF_TYPE_SEQUENCE || t->type == HTF_TYPE_LOOP) {
-				DOFOR(i, depth - 1) printf("│ ");
+				DOFOR(i, depth - 1) printf("│");
 				if (depth)
-					printf("├─");
+					printf("├┬");
 			} else {
-				DOFOR(i, depth) printf("│ ");
+				DOFOR(i, depth) printf("│");
 			}
 		}
 	}
