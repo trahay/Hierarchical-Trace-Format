@@ -242,7 +242,7 @@ int htf_move_to_next_token(struct htf_thread_reader* reader) {
 	} else {
 		// Don't forget to update the timestamp
 		struct htf_event_summary* es = &reader->thread_trace->events[t.id];
-		reader->referential_timestamp += es->timestamps[reader->event_index[t.id]];
+		reader->referential_timestamp += es->durations[reader->event_index[t.id]];
 		reader->event_index[t.id]++;	// "consume" the event occurence
 		_get_next_token(reader);
 	}
@@ -288,7 +288,7 @@ int htf_read_thread_cur_level(struct htf_thread_reader* reader,
 				// Write it to the occurence
 				memcpy(&occurence->event, &es->event, sizeof(occurence->event));
 				occurence->timestamp = reader->referential_timestamp;
-				occurence->duration = es->timestamps[reader->event_index[token.id]];
+				occurence->duration = es->durations[reader->event_index[token.id]];
 
 				// Update the reader
 				reader->referential_timestamp += occurence->duration;
@@ -348,7 +348,7 @@ int htf_read_thread_cur_token(struct htf_thread_reader* reader, struct htf_token
 			if (e) {
 				memcpy(&e->event_occurence.event, &es->event, sizeof(e->event_occurence.event));
 				e->event_occurence.timestamp = reader->referential_timestamp;
-				e->event_occurence.duration = es->timestamps[reader->event_index[index]];
+				e->event_occurence.duration = es->durations[reader->event_index[index]];
 			}
 			break;
 		}
@@ -383,7 +383,7 @@ htf_timestamp_t htf_get_starting_timestamp(struct htf_thread_reader* reader, str
 	switch (token.type) {
 		case HTF_TYPE_EVENT: {
 			int event_index = reader->event_index[HTF_TOKEN_ID(token)];
-			return reader->referential_timestamp + reader->thread_trace->events[token.id].timestamps[event_index];
+			return reader->referential_timestamp + reader->thread_trace->events[token.id].durations[event_index];
 		}
 		case HTF_TYPE_SEQUENCE: {
 			int sequence_index = reader->sequence_index[token.id];
@@ -405,7 +405,7 @@ htf_timestamp_t htf_get_duration(struct htf_thread_reader* reader, struct htf_to
 	switch (token.type) {
 		case HTF_TYPE_EVENT: {
 			int event_index = reader->event_index[HTF_TOKEN_ID(token)];
-			return reader->thread_trace->events[token.id].timestamps[event_index];
+			return reader->thread_trace->events[token.id].durations[event_index];
 		}
 		case HTF_TYPE_SEQUENCE: {
 			int sequence_index = reader->sequence_index[token.id];
@@ -434,7 +434,7 @@ htf_timestamp_t __skip_token(struct htf_thread_reader* reader, htf_token_t token
 		case HTF_TYPE_EVENT: {
 			struct htf_event_summary es = reader->thread_trace->events[token.id];
 			DOFOR(i, nb_times) {
-				ts += es.timestamps[reader->event_index[token.id] + i];
+				ts += es.durations[reader->event_index[token.id] + i];
 			}
 			reader->event_index[token.id] += nb_times;
 			break;

@@ -265,9 +265,11 @@ static void _htf_create_loop(struct htf_thread_writer* thread_writer,
 	struct htf_sequence* loop_seq = htf_get_sequence(&thread_writer->thread_trace, HTF_TOKEN_TO_SEQUENCE_ID(loop->token));
 	htf_timestamp_t ts = _htf_get_timestamp(&thread_writer->thread_trace, first_token,
 																					&cur_seq->token[index_first_iteration], 2 * loop_len);
+	//	printf("L%x @ %lu", loop->id.id, ts);
 	array_add(&loop_seq->timestamps, &ts);
 	ts = _htf_get_timestamp(&thread_writer->thread_trace, first_token, &cur_seq->token[index_second_iteration], loop_len);
 	array_add(&loop_seq->timestamps, &ts);
+	//	printf("L%x @ %lu", loop->id.id, ts);
 
 	cur_seq->size = index_first_iteration;
 	cur_seq->token[cur_seq->size] = loop->id;

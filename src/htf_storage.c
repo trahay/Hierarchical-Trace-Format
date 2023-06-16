@@ -190,7 +190,7 @@ static void _htf_read_event(const char* base_dirname,
 	size_t cSize;
 	_htf_fread(&cSize, sizeof(cSize), 1, file);
 	char* buffer = malloc(e->nb_events * size);
-	e->timestamps = calloc(e->nb_events, sizeof(htf_timestamp_t));
+	e->durations = calloc(e->nb_events, sizeof(htf_timestamp_t));
 	if (cSize) {
 		// Then we used ZSTD
 		void* cBuffer = malloc(cSize);
@@ -205,7 +205,7 @@ static void _htf_read_event(const char* base_dirname,
 	}
 	fclose(file);
 	for (int i = 0; i < e->nb_events; i++) {
-		memcpy(&e->timestamps[i], &buffer[size * i], size);
+		memcpy(&e->durations[i], &buffer[size * i], size);
 	}
 	free(buffer);
 }

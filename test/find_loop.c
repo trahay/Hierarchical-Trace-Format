@@ -11,8 +11,8 @@
 #define _init_event(e)                                                      \
 	do {                                                                      \
 		e->timestamps = malloc(sizeof(htf_timestamp_t) * NB_TIMESTAMP_DEFAULT); \
-		e->nb_allocated_timestamps = NB_TIMESTAMP_DEFAULT;                      \
-		e->nb_timestamps = 0;                                                   \
+		e->nb_allocated_events = NB_TIMESTAMP_DEFAULT;                          \
+		e->nb_events = 0;                                                       \
 	} while (0)
 static inline htf_event_id_t _htf_get_event_id(struct htf_thread* thread_trace, struct htf_event* e) {
 	htf_log(htf_dbg_lvl_max, "Searching for event {.event_type=%d}\n", e->record);
