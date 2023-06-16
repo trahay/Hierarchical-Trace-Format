@@ -205,6 +205,18 @@ static void print_thread(struct htf_archive* trace, struct htf_thread* thread) {
 	printf("Timestamp\tDuration\tTag\tEvent\n");
 
 	struct htf_thread_reader reader;
+	int reader_options = OPTION_NONE;
+	if(show_structure)
+	  reader_options |= OPTION_SHOW_STRUCTURE;
+
+	htf_read_thread_iterator_init(trace, &reader, thread->id, reader_options);
+
+	htf_occurence e;
+	struct htf_token t;
+	while (htf_read_thread_cur_token(&reader, &t, &e) == 0) {
+		print_token(&reader, &t, &e);
+		htf_move_to_next_token(&reader);
+	}
 	htf_read_thread_iterator_init(trace, &reader, thread->id);
 	display_sequence(&reader, HTF_TOKENIZE(HTF_TYPE_SEQUENCE, 0), NULL, 0);
 }
@@ -239,8 +251,12 @@ static int get_next_token(struct htf_thread_reader* readers, int nb_threads, str
 /* Print all the events of all the threads sorted by timestamp */
 void print_trace(struct htf_archive* trace) {
 	struct htf_thread_reader* readers = malloc(sizeof(struct htf_thread_reader) * (trace->nb_threads));
+	int reader_options = OPTION_NONE;
+	if(show_structure)
+	  reader_options |= OPTION_SHOW_STRUCTURE;
+
 	for (int i = 0; i < trace->nb_threads; i++) {
-		htf_read_thread_iterator_init(trace, &readers[i], trace->threads[i]->id);
+	  htf_read_thread_iterator_init(trace, &readers[i], trace->threads[i]->id, reader_options);
 	}
 
 	printf("Timestamp\tDuration\tThread Name\tTag\tEvent\n");
