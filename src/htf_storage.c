@@ -294,6 +294,7 @@ static void _htf_read_loop(const char* base_dirname,
 
 	_htf_fread(&l->nb_loops, sizeof(l->nb_loops), 1, file);
 	l->nb_iterations = calloc(l->nb_loops, sizeof(unsigned int));
+	l->id = HTF_TOKENIZE(HTF_TYPE_LOOP, loop_id.id);
 	_htf_fread(l->nb_iterations, sizeof(unsigned int), l->nb_loops, file);
 	_htf_fread(&l->token, sizeof(l->token), 1, file);
 	fclose(file);

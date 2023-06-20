@@ -438,9 +438,8 @@ htf_timestamp_t __skip_token(struct htf_thread_reader* reader, htf_token_t token
 		case HTF_TYPE_EVENT: {
 			struct htf_event_summary es = reader->thread_trace->events[token.id];
 			DOFOR(i, nb_times) {
-				ts += es.durations[reader->event_index[token.id] + i];
+				ts += es.durations[reader->event_index[token.id]++];
 			}
-			reader->event_index[token.id] += nb_times;
 			break;
 		}
 		case HTF_TYPE_SEQUENCE: {
@@ -449,6 +448,7 @@ htf_timestamp_t __skip_token(struct htf_thread_reader* reader, htf_token_t token
 				ts += __skip_token(reader, seq->token[i], nb_times);
 			}
 			reader->sequence_index[token.id] += nb_times;
+			htf_assert(reader->sequence_index[token.id] <= seq->timestamps.size);
 			break;
 		}
 		case HTF_TYPE_LOOP: {
@@ -456,11 +456,13 @@ htf_timestamp_t __skip_token(struct htf_thread_reader* reader, htf_token_t token
 			struct htf_sequence* seq = htf_get_sequence(reader->thread_trace, HTF_TOKEN_TO_SEQUENCE_ID(loop->token));
 			htf_assert(loop->token.type == HTF_TYPE_SEQUENCE);
 			DOFOR(i, nb_times) {
-				reader->sequence_index[loop->token.id] += nb_times * loop->nb_iterations[reader->loop_index[token.id]];
+				reader->sequence_index[loop->token.id] += loop->nb_iterations[reader->loop_index[token.id]];
+				htf_assert(reader->sequence_index[loop->token.id] <= seq->timestamps.size);
+
 				DOFOR(j, seq->size) {
-					ts += __skip_token(reader, seq->token[j], nb_times * loop->nb_iterations[reader->loop_index[token.id]]);
+					ts += __skip_token(reader, seq->token[j], loop->nb_iterations[reader->loop_index[token.id]]);
 				}
-				reader->loop_index[token.id] += 1;
+				reader->loop_index[token.id]++;
 			}
 			break;
 		}
@@ -474,6 +476,7 @@ htf_timestamp_t skip_sequence(struct htf_thread_reader* reader, htf_token_t toke
 		case HTF_TYPE_SEQUENCE: {
 			int sequence_index = reader->sequence_index[HTF_TOKEN_ID(token)];
 			struct htf_sequence* seq = htf_get_sequence(reader->thread_trace, HTF_TOKEN_TO_SEQUENCE_ID(token));
+			htf_assert(sequence_index <= seq->timestamps.size);
 			seq->durations[sequence_index] = __skip_token(reader, token, 1);
 			reader->referential_timestamp = ((htf_timestamp_t*)seq->timestamps.array)[sequence_index];
 			reader->referential_timestamp += seq->durations[sequence_index];
