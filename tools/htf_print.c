@@ -32,9 +32,13 @@ static void print_sequence(struct htf_thread* thread,
 	struct htf_sequence* s = seq->sequence;
 	htf_timestamp_t ts = seq->timestamp;
 	htf_timestamp_t duration = seq->duration;
-	printf("Sequence");
-	if (show_structure)
-		printf("   ");
+	if (containing_loop == NULL) {
+		printf("Sequence");
+		if (show_structure)
+			printf("   ");
+	} else {
+		printf("%.9lf", ts / 1e9);
+	}
 	printf("\t%.9lf\t", duration / 1e9);
 	if (!per_thread)
 		printf("%s\t", htf_get_thread_name(thread));
