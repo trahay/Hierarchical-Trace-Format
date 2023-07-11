@@ -82,10 +82,14 @@ struct htf_event_occurence {
 
 struct htf_sequence_occurence {
 	struct htf_sequence* sequence;
-	struct htf_savestate savestate;
+	struct htf_savestate* savestate;
 	htf_timestamp_t timestamp;
 	htf_timestamp_t duration;
-	struct htf_occurence* full_sequence;
+	/**Occurences of the events in this sequence. */
+	void* full_sequence;
+	// TODO Probably not a good thing to make it a void * ?
+	//  But I can't think of any other way to make it work
+	//  Should ask Francois ?
 };
 
 struct htf_loop_occurence {
@@ -102,8 +106,11 @@ typedef union {
 	struct htf_event_occurence event_occurence;
 } htf_occurence;
 
+_Thread_local extern size_t savestate_memory;
+void enter_block(struct htf_thread_reader* reader, htf_token_t new_block);
+void leave_block(struct htf_thread_reader* reader);
 /** Creates a savestate from a reader. */
-struct htf_savestate create_savestate(struct htf_thread_reader* reader);
+struct htf_savestate* create_savestate(struct htf_thread_reader* reader);
 /** Loads a savestate to a reader. */
 void load_savestate(struct htf_thread_reader* reader, struct htf_savestate* savestate);
 
@@ -125,9 +132,16 @@ void htf_read_thread_iterator_init(struct htf_archive* archive,
 int htf_read_thread_cur_token(struct htf_thread_reader* reader, struct htf_token* t, htf_occurence* e);
 /** Moves the reader to the next token in the thread. */
 int htf_move_to_next_token(struct htf_thread_reader* reader);
-/** Skips the given token entirely.
+
+/** Reads the whole current level of the thread and writes it to the level.
+ * Does the malloc on its own, so you should pass a pointer to NULL to begin with.*/
+int htf_read_thread_cur_level(struct htf_thread_reader* reader,
+															htf_occurence** occurence_array,
+															struct htf_token** token_array,
+															int* length);
+/** Skips the given sequence entirely, returns how much duration was skipped.
  * The reader must be located at that token (contrary to htf_get_starting_timestamp). */
-void skip_token(struct htf_thread_reader* reader, htf_token_t token);
+htf_timestamp_t skip_sequence(struct htf_thread_reader* reader, htf_token_t token);
 /** Returns the timestamp at which the given Event, Sequence or Loop starts, without modifying the reader's
  * state. */
 htf_timestamp_t htf_get_starting_timestamp(struct htf_thread_reader* reader, struct htf_token token);

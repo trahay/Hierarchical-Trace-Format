@@ -1,8 +1,8 @@
 #ifndef HTF_DBG_H
 #define HTF_DBG_H
 
+#include <pthread.h>
 #include <stdio.h>
-
 enum htf_debug_level {
   htf_dbg_lvl_error,   // only print errors
   htf_dbg_lvl_quiet,   // only print important messages
@@ -20,11 +20,11 @@ void htf_debug_level_set(enum htf_debug_level  lvl);
 
 #define htf_abort() abort()
 
-#define _htf_log(fd, _debug_level_, format, ...)	\
-  do {						\
-    if (htf_debug_level >= _debug_level_)	\
-      printf("[HTF] "format, ##__VA_ARGS__);	\
-  } while(0)
+#define _htf_log(fd, _debug_level_, format, ...)                    \
+	do {                                                              \
+		if (htf_debug_level >= _debug_level_)                           \
+			printf("[HTF - %lx] " format, pthread_self(), ##__VA_ARGS__); \
+	} while (0)
 
 #define htf_log(_debug_level_, format, ...) _htf_log(stdout, _debug_level_, format, ##__VA_ARGS__)
 

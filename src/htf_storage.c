@@ -129,8 +129,8 @@ static void _htf_store_event(const char* base_dirname,
 														 htf_event_id_t event_id) {
 	FILE* file = _htf_get_event_file(base_dirname, th, event_id, "w");
 	htf_timestamp_t ts = 0;
-	for (int i = 0; i < e->nb_timestamps; i++) {
-		ts |= e->timestamps[i];
+	for (int i = 0; i < e->nb_events; i++) {
+		ts |= e->durations[i];
 	}
 	enum timestamp_size ts_size = bit64;
 	if (ts < UINT8_MAX) {
@@ -141,32 +141,32 @@ static void _htf_store_event(const char* base_dirname,
 		ts_size = bit32;
 	}
 	size_t size = (1 << ts_size);
-	htf_log(htf_dbg_lvl_debug, "\tStore event %x {.nb_timestamps=%d} using %zu bytes, mask was %016lx \n",
-					HTF_ID(event_id), e->nb_timestamps, size, ts);
+	htf_log(htf_dbg_lvl_debug, "\tStore event %x {.nb_events=%d} using %zu bytes, mask was %016lx \n", HTF_ID(event_id),
+					e->nb_events, size, ts);
 
 	_htf_fwrite(&e->event, sizeof(struct htf_event), 1, file);
-	_htf_fwrite(&e->nb_timestamps, sizeof(e->nb_timestamps), 1, file);
+	_htf_fwrite(&e->nb_events, sizeof(e->nb_events), 1, file);
 	_htf_fwrite(&ts_size, sizeof(ts_size), 1, file);
 
-	char* buffer = malloc(size * e->nb_timestamps);
-	for (int i = 0; i < e->nb_timestamps; i++) {
-		memcpy(&buffer[size * i], &e->timestamps[i], size);
+	char* buffer = malloc(size * e->nb_events);
+	for (int i = 0; i < e->nb_events; i++) {
+		memcpy(&buffer[size * i], &e->durations[i], size);
 	}
-	size_t maxCSize = ZSTD_compressBound(size * e->nb_timestamps);
+	size_t maxCSize = ZSTD_compressBound(size * e->nb_events);
 	void* cBuff = malloc(maxCSize);
-	size_t cSize = ZSTD_compress(cBuff, maxCSize, buffer, e->nb_timestamps * size, ZSTD_COMPRESSION_LEVEL);
-	if (cSize < size * e->nb_timestamps) {
+	size_t cSize = ZSTD_compress(cBuff, maxCSize, buffer, e->nb_events * size, ZSTD_COMPRESSION_LEVEL);
+	if (cSize < size * e->nb_events) {
 		// If the compression is worth it
 		_htf_fwrite(&cSize, sizeof(cSize), 1, file);
 		_htf_fwrite(cBuff, cSize, 1, file);
 		htf_log(htf_dbg_lvl_debug, "\t\tStored %zu bytes instead of %zu using ZSTD\n", cSize,
-						(e->nb_timestamps * sizeof(htf_timestamp_t)));
+						(e->nb_events * sizeof(htf_timestamp_t)));
 	} else {
 		cSize = 0;
 		_htf_fwrite(&cSize, sizeof(cSize), 1, file);
-		_htf_fwrite(buffer, size * e->nb_timestamps, 1, file);
-		htf_log(htf_dbg_lvl_debug, "\t\tStored %zu bytes instead of %zu\n", size * e->nb_timestamps,
-						(e->nb_timestamps * sizeof(htf_timestamp_t)));
+		_htf_fwrite(buffer, size * e->nb_events, 1, file);
+		htf_log(htf_dbg_lvl_debug, "\t\tStored %zu bytes instead of %zu\n", size * e->nb_events,
+						(e->nb_events * sizeof(htf_timestamp_t)));
 	}
 	free(cBuff);
 	free(buffer);
@@ -180,33 +180,32 @@ static void _htf_read_event(const char* base_dirname,
 	FILE* file = _htf_get_event_file(base_dirname, th, event_id, "r");
 
 	_htf_fread(&e->event, sizeof(struct htf_event), 1, file);
-	_htf_fread(&e->nb_timestamps, sizeof(e->nb_timestamps), 1, file);
+	_htf_fread(&e->nb_events, sizeof(e->nb_events), 1, file);
 	enum timestamp_size ts_size;
 	_htf_fread(&ts_size, sizeof(ts_size), 1, file);
 	size_t size = (1 << ts_size);
 
-	htf_log(htf_dbg_lvl_debug, "\tLoad event %x {.nb_timestamps=%d} using %zu bytes\n", HTF_ID(event_id),
-					e->nb_timestamps, size);
+	htf_log(htf_dbg_lvl_debug, "\tLoad event %x {.nb_events=%d} using %zu bytes\n", HTF_ID(event_id), e->nb_events, size);
 
 	size_t cSize;
 	_htf_fread(&cSize, sizeof(cSize), 1, file);
-	char* buffer = malloc(e->nb_timestamps * size);
-	e->timestamps = calloc(e->nb_timestamps, sizeof(htf_timestamp_t));
+	char* buffer = malloc(e->nb_events * size);
+	e->durations = calloc(e->nb_events, sizeof(htf_timestamp_t));
 	if (cSize) {
 		// Then we used ZSTD
 		void* cBuffer = malloc(cSize);
 		_htf_fread(cBuffer, cSize, 1, file);
 		size_t rSize = ZSTD_getFrameContentSize(cBuffer, cSize);
-		htf_assert(rSize == e->nb_timestamps * size);
+		htf_assert(rSize == e->nb_events * size);
 		ZSTD_decompress(buffer, rSize, cBuffer, cSize);
 		free(cBuffer);
 	} else {
 		// We didn't use ZSTD
-		_htf_fread(buffer, e->nb_timestamps * size, 1, file);
+		_htf_fread(buffer, e->nb_events * size, 1, file);
 	}
 	fclose(file);
-	for (int i = 0; i < e->nb_timestamps; i++) {
-		memcpy(&e->timestamps[i], &buffer[size * i], size);
+	for (int i = 0; i < e->nb_events; i++) {
+		memcpy(&e->durations[i], &buffer[size * i], size);
 	}
 	free(buffer);
 }
@@ -295,6 +294,7 @@ static void _htf_read_loop(const char* base_dirname,
 
 	_htf_fread(&l->nb_loops, sizeof(l->nb_loops), 1, file);
 	l->nb_iterations = calloc(l->nb_loops, sizeof(unsigned int));
+	l->id = HTF_TOKENIZE(HTF_TYPE_LOOP, loop_id.id);
 	_htf_fread(l->nb_iterations, sizeof(unsigned int), l->nb_loops, file);
 	_htf_fread(&l->token, sizeof(l->token), 1, file);
 	fclose(file);
@@ -502,27 +502,7 @@ static void _htf_store_thread(const char* dir_name, struct htf_thread *th) {
 	_htf_fwrite(&th->nb_loops, sizeof(th->nb_loops), 1, token_file);
 
 	fclose(token_file);
-
-	struct htf_thread_reader reader;
-	htf_read_thread_iterator_init(th->archive, &reader, th->id, OPTION_NONE);
-
-	/* Start Reading */
-
-	struct htf_token t;
-	htf_timestamp_t* last_timestamp = NULL;
-	htf_log(htf_dbg_lvl_debug, "Reading thread to delta the timestamps\n");
-	while (htf_read_thread_cur_token(&reader, &t, NULL) == 0) {
-		if (t.type == HTF_TYPE_EVENT) {
-			int event_index = reader.event_index[t.id];
-			if (last_timestamp) {
-				*last_timestamp = th->events[t.id].timestamps[event_index] - *last_timestamp;
-			}
-			last_timestamp = &th->events[t.id].timestamps[event_index];
-		}
-		htf_move_to_next_token(&reader);
-	}
-	*last_timestamp = 0;
-	// The last event is a leave event, and thus always has duration of 0.
+	htf_finish_timestamp();
 
 	for (int i = 0; i < th->nb_events; i++)
 		_htf_store_event(dir_name, th, &th->events[i], HTF_EVENT_ID(i));
@@ -644,28 +624,30 @@ static void _htf_read_archive(struct htf_archive* global_archive,
 			      struct htf_archive* archive,
 			      char* dir_name,
 			      char* trace_name) {
-
-  archive->fullpath = htf_archive_fullpath(dir_name, trace_name);
-  archive->dir_name = strdup(dir_name);
-  archive->trace_name = strdup(trace_name);
-  archive->global_archive = global_archive;
-  archive->nb_archives = 0;
+	archive->fullpath = htf_archive_fullpath(dir_name, trace_name);
+	archive->dir_name = strdup(dir_name);
+	archive->trace_name = strdup(trace_name);
+	archive->global_archive = global_archive;
+	archive->nb_archives = 0;
 	archive->nb_allocated_archives = 1;
 	archive->archive_list = malloc(sizeof(struct htf_archive*));
 	if (archive->archive_list == NULL) {
 		htf_error("Failed to allocate memory\n");
 	}
+	archive->nb_threads = 0;
+	archive->nb_allocated_threads = 1;
+	archive->threads = malloc(sizeof(struct htf_thread*));
 
-  htf_log(htf_dbg_lvl_debug, "Reading archive {.dir_name='%s', .trace='%s'}\n", archive->dir_name, archive->trace_name);
+	htf_log(htf_dbg_lvl_debug, "Reading archive {.dir_name='%s', .trace='%s'}\n", archive->dir_name, archive->trace_name);
 
-  FILE* f = _htf_file_open(archive->fullpath, "r");
+	FILE* f = _htf_file_open(archive->fullpath, "r");
 
-  _htf_fread(&archive->id, sizeof(htf_location_group_id_t), 1, f);
-  _htf_fread(&archive->definitions.nb_strings, sizeof(int), 1, f);
-  _htf_fread(&archive->definitions.nb_regions, sizeof(int), 1, f);
-  _htf_fread(&archive->nb_location_groups, sizeof(int), 1, f);
-  _htf_fread(&archive->nb_locations, sizeof(int), 1, f);
-  _htf_fread(&archive->nb_threads, sizeof(int), 1, f);
+	_htf_fread(&archive->id, sizeof(htf_location_group_id_t), 1, f);
+	_htf_fread(&archive->definitions.nb_strings, sizeof(int), 1, f);
+	_htf_fread(&archive->definitions.nb_regions, sizeof(int), 1, f);
+	_htf_fread(&archive->nb_location_groups, sizeof(int), 1, f);
+	_htf_fread(&archive->nb_locations, sizeof(int), 1, f);
+	_htf_fread(&archive->nb_threads, sizeof(int), 1, f);
   
   archive->definitions.nb_allocated_strings = archive->definitions.nb_strings;
   archive->definitions.strings = malloc(sizeof(struct htf_string) * archive->definitions.nb_allocated_strings);
@@ -743,8 +725,8 @@ void htf_read_thread(struct htf_archive* archive, htf_thread_id_t thread_id) {
   }
 
   while (archive->nb_threads >= archive->nb_allocated_threads) {
-		INCREMENT_MEMORY_SPACE(archive->threads, archive->nb_allocated_threads, struct htf_thread*);
-  }
+		DOUBLE_MEMORY_SPACE(archive->threads, archive->nb_allocated_threads, struct htf_thread*);
+	}
 
 	int index = archive->nb_threads++;
   archive->threads[index] = malloc(sizeof(struct htf_thread));
