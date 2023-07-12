@@ -1,6 +1,7 @@
-//
-// Created by khatharsis on 15/05/23.
-//
+/*
+ * Copyright (C) Telecom SudParis
+ * See LICENSE in top-level directory.
+ */
 
 #ifndef HTF_SRC_HTF_DYNAMIC_ARRAY_H
 #define HTF_SRC_HTF_DYNAMIC_ARRAY_H
@@ -34,3 +35,12 @@ void array_remove_first(htf_array_t* array, void* element);
 #define DEFAULT_ARRAY_SIZE 1000
 
 #endif  // HTF_SRC_HTF_DYNAMIC_ARRAY_H
+
+
+/* -*-
+   mode: c;
+   c-file-style: "k&r";
+   c-basic-offset 2;
+   tab-width 2 ;
+   indent-tabs-mode nil
+   -*- */

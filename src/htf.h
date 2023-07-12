@@ -565,7 +565,7 @@ static inline int _htf_sequences_equal(struct htf_sequence* s1, struct htf_seque
     memmove(new_buffer, buffer, counter * sizeof(datatype));              \
     free(buffer);                                                         \
   }                                                                       \
-	buffer = new_buffer;                                                    \
+  buffer = new_buffer;							  \
   counter *= 2;                                                           \
 } while (0)
 

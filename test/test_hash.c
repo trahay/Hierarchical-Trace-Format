@@ -1,11 +1,13 @@
-//
-// Created by khatharsis on 10/07/23.
-//
+/*
+ * Copyright (C) Telecom SudParis
+ * See LICENSE in top-level directory.
+ */
 
 #include <inttypes.h>
 #include <malloc.h>
 #include "htf_murmur.h"
 #include "stdlib.h"
+
 #define SEED 0
 #define MAX_EVENT (1000000)
 #define MAX_SEQUENCE (1 << 14)
@@ -14,7 +16,8 @@
 #define NUM_TEST_SEQUENCE (1 << 14)
 #define NUM_HASHED (MAX_EVENT + MAX_SEQUENCE + MAX_LOOP + (NUM_TEST_SEQUENCE * MAX_SEQUENCE_LENGTH))
 #define SIZE_COLLISION_ARRAY UINT32_MAX
-int main(int argc, char** argv) {
+
+int main(int argc __attribute__((unused)), char** argv __attribute__((unused))) {
   short* collisions = calloc(SIZE_COLLISION_ARRAY, sizeof(int));
   htf_assert(collisions);
   int count_collision = 0;
@@ -74,7 +77,6 @@ int main(int argc, char** argv) {
 
       htf_murmur_hash3_x64_32(&token, sequence_size, SEED, &hash);
       uint32_t new_key = hash % SIZE_COLLISION_ARRAY;
-      int buffer;
       if (collisions[new_key]) {
         count_collision++;
       }
@@ -93,3 +95,12 @@ int main(int argc, char** argv) {
   }
   printf("Max collision at %d: %d\n", max_i, collisions[max_i]);
 }
+
+
+/* -*-
+   mode: c;
+   c-file-style: "k&r";
+   c-basic-offset 2;
+   tab-width 2 ;
+   indent-tabs-mode nil
+   -*- */
