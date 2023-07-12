@@ -17,11 +17,13 @@ set(HTF_HEADERS
         htf_timestamp.h
         htf_storage.h
         htf_dynamic_array.h
+        htf_murmur.h
         )
 
 target_sources(
         htf
         PRIVATE
+        htf_murmur.c
         htf_read.c
         htf_write.c
         htf_archive.c
