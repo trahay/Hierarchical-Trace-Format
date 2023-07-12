@@ -1,9 +1,9 @@
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 
+#include "OTF2_MarkerReader.h"
 #include "htf.h"
 #include "otf2.h"
-#include "OTF2_MarkerReader.h"
 
 /** @brief After callback registration, the markers could be
  *         read with the following function. The user of this
@@ -22,13 +22,9 @@
  *
  *  @return OTF2_ErrorCode with !=OTF2_SUCCESS if there was an error.
  */
-OTF2_ErrorCode
-OTF2_MarkerReader_ReadMarkers( OTF2_MarkerReader* reader,
-                               uint64_t           recordsToRead,
-                               uint64_t*          recordsRead ) {
+OTF2_ErrorCode OTF2_MarkerReader_ReadMarkers(OTF2_MarkerReader* reader, uint64_t recordsToRead, uint64_t* recordsRead) {
   NOT_IMPLEMENTED;
 }
-
 
 /** @brief Sets the callback functions for the given reader object. Every time
  *         when OTF2 reads a record, a callback function is called and the records
@@ -47,9 +43,8 @@ OTF2_MarkerReader_ReadMarkers( OTF2_MarkerReader* reader,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_MarkerReader_SetCallbacks( OTF2_MarkerReader*                reader,
-                                const OTF2_MarkerReaderCallbacks* callbacks,
-                                void*                             userData ) {
+OTF2_ErrorCode OTF2_MarkerReader_SetCallbacks(OTF2_MarkerReader* reader,
+                                              const OTF2_MarkerReaderCallbacks* callbacks,
+                                              void* userData) {
   NOT_IMPLEMENTED;
 }

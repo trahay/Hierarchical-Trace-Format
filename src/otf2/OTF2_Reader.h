@@ -28,10 +28,8 @@
  *
  */
 
-
 #ifndef OTF2_READER_H
 #define OTF2_READER_H
-
 
 /**
  *  @file
@@ -171,27 +169,20 @@
  *  @}
  */
 
-
 #include <stdint.h>
-
 
 #include "otf2_compiler.h"
 
-
 #include <otf2/OTF2_ErrorCodes.h>
 
-
 #include <otf2/OTF2_Archive.h>
-
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-
 /** @brief Keeps all necessary information for the reader. */
 typedef struct OTF2_Reader_struct OTF2_Reader;
-
 
 /** @brief Create a new reader handle.
  *
@@ -204,9 +195,7 @@ typedef struct OTF2_Reader_struct OTF2_Reader;
  *  @return                 Returns a handle to the reader if successful,
  *                          NULL otherwise.
  */
-OTF2_Reader*
-OTF2_Reader_Open( const char* anchorFilePath );
-
+OTF2_Reader* OTF2_Reader_Open(const char* anchorFilePath);
 
 /** @brief Close a reader handle.
  *
@@ -217,9 +206,7 @@ OTF2_Reader_Open( const char* anchorFilePath );
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Reader_Close( OTF2_Reader* reader );
-
+OTF2_ErrorCode OTF2_Reader_Close(OTF2_Reader* reader);
 
 /** @brief Set the @a hint in the @a reader to the given @a value.
  *
@@ -246,11 +233,7 @@ OTF2_Reader_Close( OTF2_Reader* reader );
  *             in case the provided value is invalid for this hint}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_Reader_SetHint( OTF2_Reader* reader,
-                     OTF2_Hint    hint,
-                     void*        value );
-
+OTF2_ErrorCode OTF2_Reader_SetHint(OTF2_Reader* reader, OTF2_Hint hint, void* value);
 
 /** @brief Set the collective callbacks for the reader.
  *
@@ -270,13 +253,11 @@ OTF2_Reader_SetHint( OTF2_Reader* reader,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Reader_SetCollectiveCallbacks( OTF2_Reader*                    reader,
-                                    const OTF2_CollectiveCallbacks* collectiveCallbacks,
-                                    void*                           collectiveData,
-                                    OTF2_CollectiveContext*         globalCommContext,
-                                    OTF2_CollectiveContext*         localCommContext );
-
+OTF2_ErrorCode OTF2_Reader_SetCollectiveCallbacks(OTF2_Reader* reader,
+                                                  const OTF2_CollectiveCallbacks* collectiveCallbacks,
+                                                  void* collectiveData,
+                                                  OTF2_CollectiveContext* globalCommContext,
+                                                  OTF2_CollectiveContext* localCommContext);
 
 /** @brief Convenient function to set the collective callbacks to a serial
  *         implementation.
@@ -285,9 +266,7 @@ OTF2_Reader_SetCollectiveCallbacks( OTF2_Reader*                    reader,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Reader_SetSerialCollectiveCallbacks( OTF2_Reader* reader );
-
+OTF2_ErrorCode OTF2_Reader_SetSerialCollectiveCallbacks(OTF2_Reader* reader);
 
 /** @brief Set the locking callbacks for the reader.
  *
@@ -308,11 +287,9 @@ OTF2_Reader_SetSerialCollectiveCallbacks( OTF2_Reader* reader );
  *             in case there were locking callbacks already set}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_Reader_SetLockingCallbacks( OTF2_Reader*                 reader,
-                                 const OTF2_LockingCallbacks* lockingCallbacks,
-                                 void*                        lockingData );
-
+OTF2_ErrorCode OTF2_Reader_SetLockingCallbacks(OTF2_Reader* reader,
+                                               const OTF2_LockingCallbacks* lockingCallbacks,
+                                               void* lockingData);
 
 /** @brief Register event reader callbacks.
  *
@@ -323,12 +300,10 @@ OTF2_Reader_SetLockingCallbacks( OTF2_Reader*                 reader,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Reader_RegisterEvtCallbacks( OTF2_Reader*                   reader,
-                                  OTF2_EvtReader*                evtReader,
-                                  const OTF2_EvtReaderCallbacks* callbacks,
-                                  void*                          userData );
-
+OTF2_ErrorCode OTF2_Reader_RegisterEvtCallbacks(OTF2_Reader* reader,
+                                                OTF2_EvtReader* evtReader,
+                                                const OTF2_EvtReaderCallbacks* callbacks,
+                                                void* userData);
 
 /** @brief Register global event reader callbacks.
  *
@@ -340,12 +315,10 @@ OTF2_Reader_RegisterEvtCallbacks( OTF2_Reader*                   reader,
  *  @return Returns @eref{OTF2_SUCCESS} if successful, an error code if an error
  *          occurs.
  */
-OTF2_ErrorCode
-OTF2_Reader_RegisterGlobalEvtCallbacks( OTF2_Reader*                         reader,
-                                        OTF2_GlobalEvtReader*                evtReader,
-                                        const OTF2_GlobalEvtReaderCallbacks* callbacks,
-                                        void*                                userData );
-
+OTF2_ErrorCode OTF2_Reader_RegisterGlobalEvtCallbacks(OTF2_Reader* reader,
+                                                      OTF2_GlobalEvtReader* evtReader,
+                                                      const OTF2_GlobalEvtReaderCallbacks* callbacks,
+                                                      void* userData);
 
 /** @brief Register local definition reader callbacks.
  *
@@ -356,12 +329,10 @@ OTF2_Reader_RegisterGlobalEvtCallbacks( OTF2_Reader*                         rea
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Reader_RegisterDefCallbacks( OTF2_Reader*                   reader,
-                                  OTF2_DefReader*                defReader,
-                                  const OTF2_DefReaderCallbacks* callbacks,
-                                  void*                          userData );
-
+OTF2_ErrorCode OTF2_Reader_RegisterDefCallbacks(OTF2_Reader* reader,
+                                                OTF2_DefReader* defReader,
+                                                const OTF2_DefReaderCallbacks* callbacks,
+                                                void* userData);
 
 /** @brief Register global definition reader callbacks.
  *
@@ -372,12 +343,10 @@ OTF2_Reader_RegisterDefCallbacks( OTF2_Reader*                   reader,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Reader_RegisterGlobalDefCallbacks( OTF2_Reader*                         reader,
-                                        OTF2_GlobalDefReader*                defReader,
-                                        const OTF2_GlobalDefReaderCallbacks* callbacks,
-                                        void*                                userData );
-
+OTF2_ErrorCode OTF2_Reader_RegisterGlobalDefCallbacks(OTF2_Reader* reader,
+                                                      OTF2_GlobalDefReader* defReader,
+                                                      const OTF2_GlobalDefReaderCallbacks* callbacks,
+                                                      void* userData);
 
 /** @brief Register snapshot event reader callbacks.
  *
@@ -390,12 +359,10 @@ OTF2_Reader_RegisterGlobalDefCallbacks( OTF2_Reader*                         rea
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Reader_RegisterSnapCallbacks( OTF2_Reader*                    reader,
-                                   OTF2_SnapReader*                snapReader,
-                                   const OTF2_SnapReaderCallbacks* callbacks,
-                                   void*                           userData );
-
+OTF2_ErrorCode OTF2_Reader_RegisterSnapCallbacks(OTF2_Reader* reader,
+                                                 OTF2_SnapReader* snapReader,
+                                                 const OTF2_SnapReaderCallbacks* callbacks,
+                                                 void* userData);
 
 /** @brief Register global event reader callbacks.
  *
@@ -409,12 +376,10 @@ OTF2_Reader_RegisterSnapCallbacks( OTF2_Reader*                    reader,
  *  @return Returns @eref{OTF2_SUCCESS} if successful, an error code if an error
  *          occurs.
  */
-OTF2_ErrorCode
-OTF2_Reader_RegisterGlobalSnapCallbacks( OTF2_Reader*                          reader,
-                                         OTF2_GlobalSnapReader*                evtReader,
-                                         const OTF2_GlobalSnapReaderCallbacks* callbacks,
-                                         void*                                 userData );
-
+OTF2_ErrorCode OTF2_Reader_RegisterGlobalSnapCallbacks(OTF2_Reader* reader,
+                                                       OTF2_GlobalSnapReader* evtReader,
+                                                       const OTF2_GlobalSnapReaderCallbacks* callbacks,
+                                                       void* userData);
 
 /** @brief Register marker reader callbacks.
  *
@@ -427,12 +392,10 @@ OTF2_Reader_RegisterGlobalSnapCallbacks( OTF2_Reader*                          r
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Reader_RegisterMarkerCallbacks( OTF2_Reader*                      reader,
-                                     OTF2_MarkerReader*                markerReader,
-                                     const OTF2_MarkerReaderCallbacks* callbacks,
-                                     void*                             userData );
-
+OTF2_ErrorCode OTF2_Reader_RegisterMarkerCallbacks(OTF2_Reader* reader,
+                                                   OTF2_MarkerReader* markerReader,
+                                                   const OTF2_MarkerReaderCallbacks* callbacks,
+                                                   void* userData);
 
 /** @brief Read a given number of events via a local event reader.
  *
@@ -443,12 +406,10 @@ OTF2_Reader_RegisterMarkerCallbacks( OTF2_Reader*                      reader,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Reader_ReadLocalEvents( OTF2_Reader*    reader,
-                             OTF2_EvtReader* evtReader,
-                             uint64_t        eventsToRead,
-                             uint64_t*       eventsRead );
-
+OTF2_ErrorCode OTF2_Reader_ReadLocalEvents(OTF2_Reader* reader,
+                                           OTF2_EvtReader* evtReader,
+                                           uint64_t eventsToRead,
+                                           uint64_t* eventsRead);
 
 /** @brief Read all events via a local event reader.
  *
@@ -458,11 +419,7 @@ OTF2_Reader_ReadLocalEvents( OTF2_Reader*    reader,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Reader_ReadAllLocalEvents( OTF2_Reader*    reader,
-                                OTF2_EvtReader* evtReader,
-                                uint64_t*       eventsRead );
-
+OTF2_ErrorCode OTF2_Reader_ReadAllLocalEvents(OTF2_Reader* reader, OTF2_EvtReader* evtReader, uint64_t* eventsRead);
 
 /** @brief Read a given number of events via a local event reader backwards.
  *
@@ -473,12 +430,10 @@ OTF2_Reader_ReadAllLocalEvents( OTF2_Reader*    reader,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Reader_ReadLocalEventsBackward( OTF2_Reader*    reader,
-                                     OTF2_EvtReader* evtReader,
-                                     uint64_t        eventsToRead,
-                                     uint64_t*       eventsRead );
-
+OTF2_ErrorCode OTF2_Reader_ReadLocalEventsBackward(OTF2_Reader* reader,
+                                                   OTF2_EvtReader* evtReader,
+                                                   uint64_t eventsToRead,
+                                                   uint64_t* eventsRead);
 
 /** @brief Read an event via a global event reader.
  *
@@ -487,10 +442,7 @@ OTF2_Reader_ReadLocalEventsBackward( OTF2_Reader*    reader,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Reader_ReadGlobalEvent( OTF2_Reader*          reader,
-                             OTF2_GlobalEvtReader* evtReader );
-
+OTF2_ErrorCode OTF2_Reader_ReadGlobalEvent(OTF2_Reader* reader, OTF2_GlobalEvtReader* evtReader);
 
 /** @brief Has the global event reader at least one more event to deliver.
  *
@@ -502,11 +454,7 @@ OTF2_Reader_ReadGlobalEvent( OTF2_Reader*          reader,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Reader_HasGlobalEvent( OTF2_Reader*          reader,
-                            OTF2_GlobalEvtReader* evtReader,
-                            int*                  flag );
-
+OTF2_ErrorCode OTF2_Reader_HasGlobalEvent(OTF2_Reader* reader, OTF2_GlobalEvtReader* evtReader, int* flag);
 
 /** @brief Read a given number of events via a global event reader.
  *
@@ -517,12 +465,10 @@ OTF2_Reader_HasGlobalEvent( OTF2_Reader*          reader,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Reader_ReadGlobalEvents( OTF2_Reader*          reader,
-                              OTF2_GlobalEvtReader* evtReader,
-                              uint64_t              eventsToRead,
-                              uint64_t*             eventsRead );
-
+OTF2_ErrorCode OTF2_Reader_ReadGlobalEvents(OTF2_Reader* reader,
+                                            OTF2_GlobalEvtReader* evtReader,
+                                            uint64_t eventsToRead,
+                                            uint64_t* eventsRead);
 
 /** @brief Read all events via a global event reader.
  *
@@ -532,11 +478,9 @@ OTF2_Reader_ReadGlobalEvents( OTF2_Reader*          reader,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Reader_ReadAllGlobalEvents( OTF2_Reader*          reader,
-                                 OTF2_GlobalEvtReader* evtReader,
-                                 uint64_t*             eventsRead );
-
+OTF2_ErrorCode OTF2_Reader_ReadAllGlobalEvents(OTF2_Reader* reader,
+                                               OTF2_GlobalEvtReader* evtReader,
+                                               uint64_t* eventsRead);
 
 /** @brief Read a given number of definitions via a local definition reader.
  *
@@ -555,12 +499,10 @@ OTF2_Reader_ReadAllGlobalEvents( OTF2_Reader*          reader,
  *    @retelse{the error code}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_Reader_ReadLocalDefinitions( OTF2_Reader*    reader,
-                                  OTF2_DefReader* defReader,
-                                  uint64_t        definitionsToRead,
-                                  uint64_t*       definitionsRead );
-
+OTF2_ErrorCode OTF2_Reader_ReadLocalDefinitions(OTF2_Reader* reader,
+                                                OTF2_DefReader* defReader,
+                                                uint64_t definitionsToRead,
+                                                uint64_t* definitionsRead);
 
 /** @brief Read all definitions via a local definition reader.
  *
@@ -578,11 +520,9 @@ OTF2_Reader_ReadLocalDefinitions( OTF2_Reader*    reader,
  *    @retelse{the error code}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_Reader_ReadAllLocalDefinitions( OTF2_Reader*    reader,
-                                     OTF2_DefReader* defReader,
-                                     uint64_t*       definitionsRead );
-
+OTF2_ErrorCode OTF2_Reader_ReadAllLocalDefinitions(OTF2_Reader* reader,
+                                                   OTF2_DefReader* defReader,
+                                                   uint64_t* definitionsRead);
 
 /** @brief Read a given number of definitions via a global definition reader.
  *
@@ -594,12 +534,10 @@ OTF2_Reader_ReadAllLocalDefinitions( OTF2_Reader*    reader,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Reader_ReadGlobalDefinitions( OTF2_Reader*          reader,
-                                   OTF2_GlobalDefReader* defReader,
-                                   uint64_t              definitionsToRead,
-                                   uint64_t*             definitionsRead );
-
+OTF2_ErrorCode OTF2_Reader_ReadGlobalDefinitions(OTF2_Reader* reader,
+                                                 OTF2_GlobalDefReader* defReader,
+                                                 uint64_t definitionsToRead,
+                                                 uint64_t* definitionsRead);
 
 /** @brief Read all definitions via a global definition reader.
  *
@@ -610,11 +548,9 @@ OTF2_Reader_ReadGlobalDefinitions( OTF2_Reader*          reader,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Reader_ReadAllGlobalDefinitions( OTF2_Reader*          reader,
-                                      OTF2_GlobalDefReader* defReader,
-                                      uint64_t*             definitionsRead );
-
+OTF2_ErrorCode OTF2_Reader_ReadAllGlobalDefinitions(OTF2_Reader* reader,
+                                                    OTF2_GlobalDefReader* defReader,
+                                                    uint64_t* definitionsRead);
 
 /** @brief Read a given number of records via a local snapshot reader.
  *
@@ -627,12 +563,10 @@ OTF2_Reader_ReadAllGlobalDefinitions( OTF2_Reader*          reader,
  *
  *  @since Version 1.2
  */
-OTF2_ErrorCode
-OTF2_Reader_ReadLocalSnapshots( OTF2_Reader*     reader,
-                                OTF2_SnapReader* snapReader,
-                                uint64_t         recordsToRead,
-                                uint64_t*        recordsRead );
-
+OTF2_ErrorCode OTF2_Reader_ReadLocalSnapshots(OTF2_Reader* reader,
+                                              OTF2_SnapReader* snapReader,
+                                              uint64_t recordsToRead,
+                                              uint64_t* recordsRead);
 
 /** @brief Read all records via a local snapshot reader.
  *
@@ -644,11 +578,9 @@ OTF2_Reader_ReadLocalSnapshots( OTF2_Reader*     reader,
  *
  *  @since Version 1.2
  */
-OTF2_ErrorCode
-OTF2_Reader_ReadAllLocalSnapshots( OTF2_Reader*     reader,
-                                   OTF2_SnapReader* snapReader,
-                                   uint64_t*        recordsRead );
-
+OTF2_ErrorCode OTF2_Reader_ReadAllLocalSnapshots(OTF2_Reader* reader,
+                                                 OTF2_SnapReader* snapReader,
+                                                 uint64_t* recordsRead);
 
 /** @brief Read a given number of records via a global snapshot reader.
  *
@@ -662,12 +594,10 @@ OTF2_Reader_ReadAllLocalSnapshots( OTF2_Reader*     reader,
  *
  *  @since Version 1.2
  */
-OTF2_ErrorCode
-OTF2_Reader_ReadGlobalSnapshots( OTF2_Reader*           reader,
-                                 OTF2_GlobalSnapReader* snapReader,
-                                 uint64_t               recordsToRead,
-                                 uint64_t*              recordsRead );
-
+OTF2_ErrorCode OTF2_Reader_ReadGlobalSnapshots(OTF2_Reader* reader,
+                                               OTF2_GlobalSnapReader* snapReader,
+                                               uint64_t recordsToRead,
+                                               uint64_t* recordsRead);
 
 /** @brief Read all records via a global snapshot reader.
  *
@@ -679,11 +609,9 @@ OTF2_Reader_ReadGlobalSnapshots( OTF2_Reader*           reader,
  *
  *  @since Version 1.2
  */
-OTF2_ErrorCode
-OTF2_Reader_ReadAllGlobalSnapshots( OTF2_Reader*           reader,
-                                    OTF2_GlobalSnapReader* snapReader,
-                                    uint64_t*              recordsRead );
-
+OTF2_ErrorCode OTF2_Reader_ReadAllGlobalSnapshots(OTF2_Reader* reader,
+                                                  OTF2_GlobalSnapReader* snapReader,
+                                                  uint64_t* recordsRead);
 
 /** @brief Read a given number of markers via a marker reader.
  *
@@ -697,12 +625,10 @@ OTF2_Reader_ReadAllGlobalSnapshots( OTF2_Reader*           reader,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Reader_ReadMarkers( OTF2_Reader*       reader,
-                         OTF2_MarkerReader* markerReader,
-                         uint64_t           markersToRead,
-                         uint64_t*          markersRead );
-
+OTF2_ErrorCode OTF2_Reader_ReadMarkers(OTF2_Reader* reader,
+                                       OTF2_MarkerReader* markerReader,
+                                       uint64_t markersToRead,
+                                       uint64_t* markersRead);
 
 /** @brief Read all markers via a marker reader.
  *
@@ -715,11 +641,7 @@ OTF2_Reader_ReadMarkers( OTF2_Reader*       reader,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Reader_ReadAllMarkers( OTF2_Reader*       reader,
-                            OTF2_MarkerReader* markerReader,
-                            uint64_t*          markersRead );
-
+OTF2_ErrorCode OTF2_Reader_ReadAllMarkers(OTF2_Reader* reader, OTF2_MarkerReader* markerReader, uint64_t* markersRead);
 
 /** @brief Get a local event reader.
  *
@@ -729,10 +651,7 @@ OTF2_Reader_ReadAllMarkers( OTF2_Reader*       reader,
  *  @return                 Returns a handle to the local event reader if
  *                          successful, NULL otherwise.
  */
-OTF2_EvtReader*
-OTF2_Reader_GetEvtReader( OTF2_Reader*     reader,
-                          OTF2_LocationRef location );
-
+OTF2_EvtReader* OTF2_Reader_GetEvtReader(OTF2_Reader* reader, OTF2_LocationRef location);
 
 /** @brief Get a global event reader.
  *
@@ -741,9 +660,7 @@ OTF2_Reader_GetEvtReader( OTF2_Reader*     reader,
  *  @return                 Returns a handle to the global event reader if
  *                          successful, NULL otherwise.
  */
-OTF2_GlobalEvtReader*
-OTF2_Reader_GetGlobalEvtReader( OTF2_Reader* reader );
-
+OTF2_GlobalEvtReader* OTF2_Reader_GetGlobalEvtReader(OTF2_Reader* reader);
 
 /** @brief Get a local definition reader.
  *
@@ -753,10 +670,7 @@ OTF2_Reader_GetGlobalEvtReader( OTF2_Reader* reader );
  *  @return                 Returns a handle to the local definition reader if
  *                          successful, NULL otherwise.
  */
-OTF2_DefReader*
-OTF2_Reader_GetDefReader( OTF2_Reader*     reader,
-                          OTF2_LocationRef location );
-
+OTF2_DefReader* OTF2_Reader_GetDefReader(OTF2_Reader* reader, OTF2_LocationRef location);
 
 /** @brief Get a global definition reader.
  *
@@ -765,9 +679,7 @@ OTF2_Reader_GetDefReader( OTF2_Reader*     reader,
  *  @return                 Returns a handle to the global definition reader if
  *                          successful, NULL otherwise.
  */
-OTF2_GlobalDefReader*
-OTF2_Reader_GetGlobalDefReader( OTF2_Reader* reader );
-
+OTF2_GlobalDefReader* OTF2_Reader_GetGlobalDefReader(OTF2_Reader* reader);
 
 /** @brief Get a local snapshot reader.
  *
@@ -778,10 +690,7 @@ OTF2_Reader_GetGlobalDefReader( OTF2_Reader* reader );
  *                          successful, NULL otherwise.
  *  @since Version 1.2
  */
-OTF2_SnapReader*
-OTF2_Reader_GetSnapReader( OTF2_Reader*     reader,
-                           OTF2_LocationRef location );
-
+OTF2_SnapReader* OTF2_Reader_GetSnapReader(OTF2_Reader* reader, OTF2_LocationRef location);
 
 /** @brief Get a global snap reader.
  *
@@ -791,9 +700,7 @@ OTF2_Reader_GetSnapReader( OTF2_Reader*     reader,
  *                          successful, NULL otherwise.
  *  @since Version 1.2
  */
-OTF2_GlobalSnapReader*
-OTF2_Reader_GetGlobalSnapReader( OTF2_Reader* reader );
-
+OTF2_GlobalSnapReader* OTF2_Reader_GetGlobalSnapReader(OTF2_Reader* reader);
 
 /** @brief Get a thumb reader.
  *
@@ -805,10 +712,7 @@ OTF2_Reader_GetGlobalSnapReader( OTF2_Reader* reader );
  *  @return                 Returns a global definition writer handle if
  *                          successful, NULL if an error occurs.
  */
-OTF2_ThumbReader*
-OTF2_Reader_GetThumbReader( OTF2_Reader* reader,
-                            uint32_t     number );
-
+OTF2_ThumbReader* OTF2_Reader_GetThumbReader(OTF2_Reader* reader, uint32_t number);
 
 /** @brief Get a marker reader.
  *
@@ -819,9 +723,7 @@ OTF2_Reader_GetThumbReader( OTF2_Reader* reader,
  *  @return                 Returns a handle to the marker reader if
  *                          successful, NULL otherwise.
  */
-OTF2_MarkerReader*
-OTF2_Reader_GetMarkerReader( OTF2_Reader* reader );
-
+OTF2_MarkerReader* OTF2_Reader_GetMarkerReader(OTF2_Reader* reader);
 
 /** @brief Get a marker writer.
  *
@@ -832,9 +734,7 @@ OTF2_Reader_GetMarkerReader( OTF2_Reader* reader );
  *  @return                 Returns a handle to the marker writer if
  *                          successful, NULL otherwise.
  */
-OTF2_MarkerWriter*
-OTF2_Reader_GetMarkerWriter( OTF2_Reader* reader );
-
+OTF2_MarkerWriter* OTF2_Reader_GetMarkerWriter(OTF2_Reader* reader);
 
 /** @brief Close a local event reader.
  *
@@ -843,10 +743,7 @@ OTF2_Reader_GetMarkerWriter( OTF2_Reader* reader );
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Reader_CloseEvtReader( OTF2_Reader*    reader,
-                            OTF2_EvtReader* evtReader );
-
+OTF2_ErrorCode OTF2_Reader_CloseEvtReader(OTF2_Reader* reader, OTF2_EvtReader* evtReader);
 
 /** @brief Closes the global event reader.
  *
@@ -857,10 +754,7 @@ OTF2_Reader_CloseEvtReader( OTF2_Reader*    reader,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Reader_CloseGlobalEvtReader( OTF2_Reader*          reader,
-                                  OTF2_GlobalEvtReader* globalEvtReader );
-
+OTF2_ErrorCode OTF2_Reader_CloseGlobalEvtReader(OTF2_Reader* reader, OTF2_GlobalEvtReader* globalEvtReader);
 
 /** @brief Close a local definition reader.
  *
@@ -869,10 +763,7 @@ OTF2_Reader_CloseGlobalEvtReader( OTF2_Reader*          reader,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Reader_CloseDefReader( OTF2_Reader*    reader,
-                            OTF2_DefReader* defReader );
-
+OTF2_ErrorCode OTF2_Reader_CloseDefReader(OTF2_Reader* reader, OTF2_DefReader* defReader);
 
 /** @brief Closes the global definition reader.
  *
@@ -881,10 +772,7 @@ OTF2_Reader_CloseDefReader( OTF2_Reader*    reader,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Reader_CloseGlobalDefReader( OTF2_Reader*          reader,
-                                  OTF2_GlobalDefReader* globalDefReader );
-
+OTF2_ErrorCode OTF2_Reader_CloseGlobalDefReader(OTF2_Reader* reader, OTF2_GlobalDefReader* globalDefReader);
 
 /** @brief Close a local snapshot reader.
  *
@@ -895,10 +783,7 @@ OTF2_Reader_CloseGlobalDefReader( OTF2_Reader*          reader,
  *
  *  @since Version 1.2
  */
-OTF2_ErrorCode
-OTF2_Reader_CloseSnapReader( OTF2_Reader*     reader,
-                             OTF2_SnapReader* snapReader );
-
+OTF2_ErrorCode OTF2_Reader_CloseSnapReader(OTF2_Reader* reader, OTF2_SnapReader* snapReader);
 
 /** @brief Closes the global snapshot reader.
  *
@@ -909,10 +794,7 @@ OTF2_Reader_CloseSnapReader( OTF2_Reader*     reader,
  *
  *  @since Version 1.2
  */
-OTF2_ErrorCode
-OTF2_Reader_CloseGlobalSnapReader( OTF2_Reader*           reader,
-                                   OTF2_GlobalSnapReader* globalSnapReader );
-
+OTF2_ErrorCode OTF2_Reader_CloseGlobalSnapReader(OTF2_Reader* reader, OTF2_GlobalSnapReader* globalSnapReader);
 
 /** @brief Close an opened thumbnail reader.
  *
@@ -923,10 +805,7 @@ OTF2_Reader_CloseGlobalSnapReader( OTF2_Reader*           reader,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Reader_CloseThumbReader( OTF2_Reader*      reader,
-                              OTF2_ThumbReader* thumbReader );
-
+OTF2_ErrorCode OTF2_Reader_CloseThumbReader(OTF2_Reader* reader, OTF2_ThumbReader* thumbReader);
 
 /** @brief Closes the marker reader.
  *
@@ -937,10 +816,7 @@ OTF2_Reader_CloseThumbReader( OTF2_Reader*      reader,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Reader_CloseMarkerReader( OTF2_Reader*       reader,
-                               OTF2_MarkerReader* markerReader );
-
+OTF2_ErrorCode OTF2_Reader_CloseMarkerReader(OTF2_Reader* reader, OTF2_MarkerReader* markerReader);
 
 /** @brief Closes the marker writer.
  *
@@ -951,10 +827,7 @@ OTF2_Reader_CloseMarkerReader( OTF2_Reader*       reader,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Reader_CloseMarkerWriter( OTF2_Reader*       reader,
-                               OTF2_MarkerWriter* markerWriter );
-
+OTF2_ErrorCode OTF2_Reader_CloseMarkerWriter(OTF2_Reader* reader, OTF2_MarkerWriter* markerWriter);
 
 /** @brief Get OTF2 version.
  *
@@ -965,12 +838,7 @@ OTF2_Reader_CloseMarkerWriter( OTF2_Reader*       reader,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Reader_GetVersion( OTF2_Reader* reader,
-                        uint8_t*     major,
-                        uint8_t*     minor,
-                        uint8_t*     bugfix );
-
+OTF2_ErrorCode OTF2_Reader_GetVersion(OTF2_Reader* reader, uint8_t* major, uint8_t* minor, uint8_t* bugfix);
 
 /** @brief Get event and definition chunk sizes.
  *
@@ -980,11 +848,7 @@ OTF2_Reader_GetVersion( OTF2_Reader* reader,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Reader_GetChunkSize( OTF2_Reader* reader,
-                          uint64_t*    chunkSizeEvents,
-                          uint64_t*    chunkSizeDefinitions );
-
+OTF2_ErrorCode OTF2_Reader_GetChunkSize(OTF2_Reader* reader, uint64_t* chunkSizeEvents, uint64_t* chunkSizeDefinitions);
 
 /** @brief Get file substrate information.
  *
@@ -993,10 +857,7 @@ OTF2_Reader_GetChunkSize( OTF2_Reader* reader,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Reader_GetFileSubstrate( OTF2_Reader*        reader,
-                              OTF2_FileSubstrate* substrate );
-
+OTF2_ErrorCode OTF2_Reader_GetFileSubstrate(OTF2_Reader* reader, OTF2_FileSubstrate* substrate);
 
 /** @brief Get compression mode.
  *
@@ -1005,10 +866,7 @@ OTF2_Reader_GetFileSubstrate( OTF2_Reader*        reader,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Reader_GetCompression( OTF2_Reader*      reader,
-                            OTF2_Compression* compression );
-
+OTF2_ErrorCode OTF2_Reader_GetCompression(OTF2_Reader* reader, OTF2_Compression* compression);
 
 /** @brief Get number of locations.
  *
@@ -1017,10 +875,7 @@ OTF2_Reader_GetCompression( OTF2_Reader*      reader,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Reader_GetNumberOfLocations( OTF2_Reader* reader,
-                                  uint64_t*    numberOfLocations );
-
+OTF2_ErrorCode OTF2_Reader_GetNumberOfLocations(OTF2_Reader* reader, uint64_t* numberOfLocations);
 
 /** @brief Get number of global definitions.
  *
@@ -1029,10 +884,7 @@ OTF2_Reader_GetNumberOfLocations( OTF2_Reader* reader,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Reader_GetNumberOfGlobalDefinitions( OTF2_Reader* reader,
-                                          uint64_t*    numberOfDefinitions );
-
+OTF2_ErrorCode OTF2_Reader_GetNumberOfGlobalDefinitions(OTF2_Reader* reader, uint64_t* numberOfDefinitions);
 
 /** @brief Get machine name.
  *
@@ -1041,10 +893,7 @@ OTF2_Reader_GetNumberOfGlobalDefinitions( OTF2_Reader* reader,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Reader_GetMachineName( OTF2_Reader* reader,
-                            char**       machineName );
-
+OTF2_ErrorCode OTF2_Reader_GetMachineName(OTF2_Reader* reader, char** machineName);
 
 /** @brief Get creator name.
  *
@@ -1053,10 +902,7 @@ OTF2_Reader_GetMachineName( OTF2_Reader* reader,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Reader_GetCreator( OTF2_Reader* reader,
-                        char**       creator );
-
+OTF2_ErrorCode OTF2_Reader_GetCreator(OTF2_Reader* reader, char** creator);
 
 /** @brief Get description.
  *
@@ -1065,10 +911,7 @@ OTF2_Reader_GetCreator( OTF2_Reader* reader,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Reader_GetDescription( OTF2_Reader* reader,
-                            char**       description );
-
+OTF2_ErrorCode OTF2_Reader_GetDescription(OTF2_Reader* reader, char** description);
 
 /** @brief Get the names of all trace file properties.
  *
@@ -1080,11 +923,7 @@ OTF2_Reader_GetDescription( OTF2_Reader* reader,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Reader_GetPropertyNames( OTF2_Reader* reader,
-                              uint32_t*    numberOfProperties,
-                              char***      names );
-
+OTF2_ErrorCode OTF2_Reader_GetPropertyNames(OTF2_Reader* reader, uint32_t* numberOfProperties, char*** names);
 
 /** @brief Get the value of the named trace file property.
  *
@@ -1099,11 +938,7 @@ OTF2_Reader_GetPropertyNames( OTF2_Reader* reader,
  *             if the named property was not found}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_Reader_GetProperty( OTF2_Reader* reader,
-                         const char*  name,
-                         char**       value );
-
+OTF2_ErrorCode OTF2_Reader_GetProperty(OTF2_Reader* reader, const char* name, char** value);
 
 /** @brief Get the value of the named trace file property as boolean.
  *
@@ -1119,11 +954,7 @@ OTF2_Reader_GetProperty( OTF2_Reader* reader,
  *             if the value could not be interpreted as a boolean value}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_Reader_GetBoolProperty( OTF2_Reader* reader,
-                             const char*  name,
-                             bool*        value );
-
+OTF2_ErrorCode OTF2_Reader_GetBoolProperty(OTF2_Reader* reader, const char* name, bool* value);
 
 /** @brief Get the identifier of the trace file.
  *
@@ -1132,10 +963,7 @@ OTF2_Reader_GetBoolProperty( OTF2_Reader* reader,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Reader_GetTraceId( OTF2_Reader* reader,
-                        uint64_t*    id );
-
+OTF2_ErrorCode OTF2_Reader_GetTraceId(OTF2_Reader* reader, uint64_t* id);
 
 /** @brief Get number of snapshots.
  *
@@ -1146,10 +974,7 @@ OTF2_Reader_GetTraceId( OTF2_Reader* reader,
  *
  *  @since Version 1.2
  */
-OTF2_ErrorCode
-OTF2_Reader_GetNumberOfSnapshots( OTF2_Reader* reader,
-                                  uint32_t*    number );
-
+OTF2_ErrorCode OTF2_Reader_GetNumberOfSnapshots(OTF2_Reader* reader, uint32_t* number);
 
 /** @brief Get number of thumbs.
  *
@@ -1160,10 +985,7 @@ OTF2_Reader_GetNumberOfSnapshots( OTF2_Reader* reader,
  *
  *  @since Version 1.2
  */
-OTF2_ErrorCode
-OTF2_Reader_GetNumberOfThumbnails( OTF2_Reader* reader,
-                                   uint32_t*    number );
-
+OTF2_ErrorCode OTF2_Reader_GetNumberOfThumbnails(OTF2_Reader* reader, uint32_t* number);
 
 /** @brief Open the events file container.
  *
@@ -1176,9 +998,7 @@ OTF2_Reader_GetNumberOfThumbnails( OTF2_Reader* reader,
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  *
  */
-OTF2_ErrorCode
-OTF2_Reader_OpenEvtFiles( OTF2_Reader* reader );
-
+OTF2_ErrorCode OTF2_Reader_OpenEvtFiles(OTF2_Reader* reader);
 
 /** @brief Closes the events file container.
  *
@@ -1193,9 +1013,7 @@ OTF2_Reader_OpenEvtFiles( OTF2_Reader* reader );
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  *
  */
-OTF2_ErrorCode
-OTF2_Reader_CloseEvtFiles( OTF2_Reader* reader );
-
+OTF2_ErrorCode OTF2_Reader_CloseEvtFiles(OTF2_Reader* reader);
 
 /** @brief Open the local definitions file container.
  *
@@ -1208,9 +1026,7 @@ OTF2_Reader_CloseEvtFiles( OTF2_Reader* reader );
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  *
  */
-OTF2_ErrorCode
-OTF2_Reader_OpenDefFiles( OTF2_Reader* reader );
-
+OTF2_ErrorCode OTF2_Reader_OpenDefFiles(OTF2_Reader* reader);
 
 /** @brief Closes the local definitions file container.
  *
@@ -1225,9 +1041,7 @@ OTF2_Reader_OpenDefFiles( OTF2_Reader* reader );
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  *
  */
-OTF2_ErrorCode
-OTF2_Reader_CloseDefFiles( OTF2_Reader* reader );
-
+OTF2_ErrorCode OTF2_Reader_CloseDefFiles(OTF2_Reader* reader);
 
 /** @brief Open the snapshots file container.
  *
@@ -1240,9 +1054,7 @@ OTF2_Reader_CloseDefFiles( OTF2_Reader* reader );
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  *
  */
-OTF2_ErrorCode
-OTF2_Reader_OpenSnapFiles( OTF2_Reader* reader );
-
+OTF2_ErrorCode OTF2_Reader_OpenSnapFiles(OTF2_Reader* reader);
 
 /** @brief Closes the snapshots file container.
  *
@@ -1257,9 +1069,7 @@ OTF2_Reader_OpenSnapFiles( OTF2_Reader* reader );
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  *
  */
-OTF2_ErrorCode
-OTF2_Reader_CloseSnapFiles( OTF2_Reader* reader );
-
+OTF2_ErrorCode OTF2_Reader_CloseSnapFiles(OTF2_Reader* reader);
 
 /** @brief Select a location to be read.
  *
@@ -1271,10 +1081,7 @@ OTF2_Reader_CloseSnapFiles( OTF2_Reader* reader );
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  *
  */
-OTF2_ErrorCode
-OTF2_Reader_SelectLocation( OTF2_Reader*     reader,
-                            OTF2_LocationRef location );
-
+OTF2_ErrorCode OTF2_Reader_SelectLocation(OTF2_Reader* reader, OTF2_LocationRef location);
 
 /** @brief Determines if this reader is the primary archive which handles the
  *  global archive state (anchor file, global definitions, marker, ...).
@@ -1284,11 +1091,7 @@ OTF2_Reader_SelectLocation( OTF2_Reader*     reader,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Reader_IsPrimary( OTF2_Reader* reader,
-                       bool*        result );
-
-
+OTF2_ErrorCode OTF2_Reader_IsPrimary(OTF2_Reader* reader, bool* result);
 
 /** @brief Same as OTF2_Reader_IsPrimary.
  *
@@ -1299,15 +1102,10 @@ OTF2_Reader_IsPrimary( OTF2_Reader* reader,
  *
  * @deprecated In version 3.0
  */
-OTF2_ErrorCode
-OTF2_Reader_IsMaster( OTF2_Reader* reader,
-                      bool*        result );
-
-
+OTF2_ErrorCode OTF2_Reader_IsMaster(OTF2_Reader* reader, bool* result);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-
 
 #endif /* !OTF2_READER_H */

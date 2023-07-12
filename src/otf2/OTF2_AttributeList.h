@@ -28,10 +28,8 @@
  *
  */
 
-
 #ifndef OTF2_ATTRIBUTE_LIST_H
 #define OTF2_ATTRIBUTE_LIST_H
-
 
 /**
  *  @file
@@ -81,37 +79,29 @@
  *  @}
  */
 
-
 #include <stdint.h>
 #ifndef __cplusplus
 #include <stdbool.h>
 #endif
 
-
 #include <otf2/OTF2_ErrorCodes.h>
 
-
-#include <otf2/OTF2_GeneralDefinitions.h>
 #include <otf2/OTF2_AttributeValue.h>
-
+#include <otf2/OTF2_GeneralDefinitions.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-
 /** @brief Attribute list handle. */
 typedef struct OTF2_AttributeList_struct OTF2_AttributeList;
-
 
 /** @brief Create a new attribute list handle.
  *
  *  @return                 Returns a handle to the attribute list if
  *                          successful, NULL otherwise.
  */
-OTF2_AttributeList*
-OTF2_AttributeList_New( void );
-
+OTF2_AttributeList* OTF2_AttributeList_New(void);
 
 /** @brief Delete an attribute list handle.
  *
@@ -121,9 +111,7 @@ OTF2_AttributeList_New( void );
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_AttributeList_Delete( OTF2_AttributeList* attributeList );
-
+OTF2_ErrorCode OTF2_AttributeList_Delete(OTF2_AttributeList* attributeList);
 
 /** @brief Add an attribute to an attribute list.
  *
@@ -137,12 +125,10 @@ OTF2_AttributeList_Delete( OTF2_AttributeList* attributeList );
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_AttributeList_AddAttribute( OTF2_AttributeList* attributeList,
-                                 OTF2_AttributeRef   attribute,
-                                 OTF2_Type           type,
-                                 OTF2_AttributeValue attributeValue );
-
+OTF2_ErrorCode OTF2_AttributeList_AddAttribute(OTF2_AttributeList* attributeList,
+                                               OTF2_AttributeRef attribute,
+                                               OTF2_Type type,
+                                               OTF2_AttributeValue attributeValue);
 
 /** @brief Add an OTF2_TYPE_UINT8 attribute to an attribute list.
  *
@@ -154,11 +140,9 @@ OTF2_AttributeList_AddAttribute( OTF2_AttributeList* attributeList,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_AttributeList_AddUint8( OTF2_AttributeList* attributeList,
-                             OTF2_AttributeRef   attribute,
-                             uint8_t             uint8Value );
-
+OTF2_ErrorCode OTF2_AttributeList_AddUint8(OTF2_AttributeList* attributeList,
+                                           OTF2_AttributeRef attribute,
+                                           uint8_t uint8Value);
 
 /** @brief Add an OTF2_TYPE_UINT16 attribute to an attribute list.
  *
@@ -170,11 +154,9 @@ OTF2_AttributeList_AddUint8( OTF2_AttributeList* attributeList,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_AttributeList_AddUint16( OTF2_AttributeList* attributeList,
-                              OTF2_AttributeRef   attribute,
-                              uint16_t            uint16Value );
-
+OTF2_ErrorCode OTF2_AttributeList_AddUint16(OTF2_AttributeList* attributeList,
+                                            OTF2_AttributeRef attribute,
+                                            uint16_t uint16Value);
 
 /** @brief Add an OTF2_TYPE_UINT32 attribute to an attribute list.
  *
@@ -186,11 +168,9 @@ OTF2_AttributeList_AddUint16( OTF2_AttributeList* attributeList,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_AttributeList_AddUint32( OTF2_AttributeList* attributeList,
-                              OTF2_AttributeRef   attribute,
-                              uint32_t            uint32Value );
-
+OTF2_ErrorCode OTF2_AttributeList_AddUint32(OTF2_AttributeList* attributeList,
+                                            OTF2_AttributeRef attribute,
+                                            uint32_t uint32Value);
 
 /** @brief Add an OTF2_TYPE_UINT64 attribute to an attribute list.
  *
@@ -202,11 +182,9 @@ OTF2_AttributeList_AddUint32( OTF2_AttributeList* attributeList,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_AttributeList_AddUint64( OTF2_AttributeList* attributeList,
-                              OTF2_AttributeRef   attribute,
-                              uint64_t            uint64Value );
-
+OTF2_ErrorCode OTF2_AttributeList_AddUint64(OTF2_AttributeList* attributeList,
+                                            OTF2_AttributeRef attribute,
+                                            uint64_t uint64Value);
 
 /** @brief Add an OTF2_TYPE_INT8 attribute to an attribute list.
  *
@@ -218,11 +196,9 @@ OTF2_AttributeList_AddUint64( OTF2_AttributeList* attributeList,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_AttributeList_AddInt8( OTF2_AttributeList* attributeList,
-                            OTF2_AttributeRef   attribute,
-                            int8_t              int8Value );
-
+OTF2_ErrorCode OTF2_AttributeList_AddInt8(OTF2_AttributeList* attributeList,
+                                          OTF2_AttributeRef attribute,
+                                          int8_t int8Value);
 
 /** @brief Add an OTF2_TYPE_INT16 attribute to an attribute list.
  *
@@ -234,11 +210,9 @@ OTF2_AttributeList_AddInt8( OTF2_AttributeList* attributeList,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_AttributeList_AddInt16( OTF2_AttributeList* attributeList,
-                             OTF2_AttributeRef   attribute,
-                             int16_t             int16Value );
-
+OTF2_ErrorCode OTF2_AttributeList_AddInt16(OTF2_AttributeList* attributeList,
+                                           OTF2_AttributeRef attribute,
+                                           int16_t int16Value);
 
 /** @brief Add an OTF2_TYPE_INT32 attribute to an attribute list.
  *
@@ -250,11 +224,9 @@ OTF2_AttributeList_AddInt16( OTF2_AttributeList* attributeList,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_AttributeList_AddInt32( OTF2_AttributeList* attributeList,
-                             OTF2_AttributeRef   attribute,
-                             int32_t             int32Value );
-
+OTF2_ErrorCode OTF2_AttributeList_AddInt32(OTF2_AttributeList* attributeList,
+                                           OTF2_AttributeRef attribute,
+                                           int32_t int32Value);
 
 /** @brief Add an OTF2_TYPE_INT64 attribute to an attribute list.
  *
@@ -266,11 +238,9 @@ OTF2_AttributeList_AddInt32( OTF2_AttributeList* attributeList,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_AttributeList_AddInt64( OTF2_AttributeList* attributeList,
-                             OTF2_AttributeRef   attribute,
-                             int64_t             int64Value );
-
+OTF2_ErrorCode OTF2_AttributeList_AddInt64(OTF2_AttributeList* attributeList,
+                                           OTF2_AttributeRef attribute,
+                                           int64_t int64Value);
 
 /** @brief Add an OTF2_TYPE_FLOAT attribute to an attribute list.
  *
@@ -282,11 +252,9 @@ OTF2_AttributeList_AddInt64( OTF2_AttributeList* attributeList,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_AttributeList_AddFloat( OTF2_AttributeList* attributeList,
-                             OTF2_AttributeRef   attribute,
-                             float               float32Value );
-
+OTF2_ErrorCode OTF2_AttributeList_AddFloat(OTF2_AttributeList* attributeList,
+                                           OTF2_AttributeRef attribute,
+                                           float float32Value);
 
 /** @brief Add an OTF2_TYPE_DOUBLE attribute to an attribute list.
  *
@@ -298,11 +266,9 @@ OTF2_AttributeList_AddFloat( OTF2_AttributeList* attributeList,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_AttributeList_AddDouble( OTF2_AttributeList* attributeList,
-                              OTF2_AttributeRef   attribute,
-                              double              float64Value );
-
+OTF2_ErrorCode OTF2_AttributeList_AddDouble(OTF2_AttributeList* attributeList,
+                                            OTF2_AttributeRef attribute,
+                                            double float64Value);
 
 /** @brief Add an OTF2_TYPE_STRING attribute to an attribute list.
  *
@@ -314,11 +280,9 @@ OTF2_AttributeList_AddDouble( OTF2_AttributeList* attributeList,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_AttributeList_AddStringRef( OTF2_AttributeList* attributeList,
-                                 OTF2_AttributeRef   attribute,
-                                 OTF2_StringRef      stringRef );
-
+OTF2_ErrorCode OTF2_AttributeList_AddStringRef(OTF2_AttributeList* attributeList,
+                                               OTF2_AttributeRef attribute,
+                                               OTF2_StringRef stringRef);
 
 /** @brief Add an OTF2_TYPE_ATTRIBUTE attribute to an attribute list.
  *
@@ -330,11 +294,9 @@ OTF2_AttributeList_AddStringRef( OTF2_AttributeList* attributeList,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_AttributeList_AddAttributeRef( OTF2_AttributeList* attributeList,
-                                    OTF2_AttributeRef   attribute,
-                                    OTF2_AttributeRef   attributeRef );
-
+OTF2_ErrorCode OTF2_AttributeList_AddAttributeRef(OTF2_AttributeList* attributeList,
+                                                  OTF2_AttributeRef attribute,
+                                                  OTF2_AttributeRef attributeRef);
 
 /** @brief Add an OTF2_TYPE_LOCATION attribute to an attribute list.
  *
@@ -346,11 +308,9 @@ OTF2_AttributeList_AddAttributeRef( OTF2_AttributeList* attributeList,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_AttributeList_AddLocationRef( OTF2_AttributeList* attributeList,
-                                   OTF2_AttributeRef   attribute,
-                                   OTF2_LocationRef    locationRef );
-
+OTF2_ErrorCode OTF2_AttributeList_AddLocationRef(OTF2_AttributeList* attributeList,
+                                                 OTF2_AttributeRef attribute,
+                                                 OTF2_LocationRef locationRef);
 
 /** @brief Add an OTF2_TYPE_REGION attribute to an attribute list.
  *
@@ -362,11 +322,9 @@ OTF2_AttributeList_AddLocationRef( OTF2_AttributeList* attributeList,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_AttributeList_AddRegionRef( OTF2_AttributeList* attributeList,
-                                 OTF2_AttributeRef   attribute,
-                                 OTF2_RegionRef      regionRef );
-
+OTF2_ErrorCode OTF2_AttributeList_AddRegionRef(OTF2_AttributeList* attributeList,
+                                               OTF2_AttributeRef attribute,
+                                               OTF2_RegionRef regionRef);
 
 /** @brief Add an OTF2_TYPE_GROUP attribute to an attribute list.
  *
@@ -378,11 +336,9 @@ OTF2_AttributeList_AddRegionRef( OTF2_AttributeList* attributeList,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_AttributeList_AddGroupRef( OTF2_AttributeList* attributeList,
-                                OTF2_AttributeRef   attribute,
-                                OTF2_GroupRef       groupRef );
-
+OTF2_ErrorCode OTF2_AttributeList_AddGroupRef(OTF2_AttributeList* attributeList,
+                                              OTF2_AttributeRef attribute,
+                                              OTF2_GroupRef groupRef);
 
 /** @brief Add an OTF2_TYPE_METRIC attribute to an attribute list.
  *
@@ -394,11 +350,9 @@ OTF2_AttributeList_AddGroupRef( OTF2_AttributeList* attributeList,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_AttributeList_AddMetricRef( OTF2_AttributeList* attributeList,
-                                 OTF2_AttributeRef   attribute,
-                                 OTF2_MetricRef      metricRef );
-
+OTF2_ErrorCode OTF2_AttributeList_AddMetricRef(OTF2_AttributeList* attributeList,
+                                               OTF2_AttributeRef attribute,
+                                               OTF2_MetricRef metricRef);
 
 /** @brief Add an OTF2_TYPE_COMM attribute to an attribute list.
  *
@@ -410,11 +364,9 @@ OTF2_AttributeList_AddMetricRef( OTF2_AttributeList* attributeList,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_AttributeList_AddCommRef( OTF2_AttributeList* attributeList,
-                               OTF2_AttributeRef   attribute,
-                               OTF2_CommRef        commRef );
-
+OTF2_ErrorCode OTF2_AttributeList_AddCommRef(OTF2_AttributeList* attributeList,
+                                             OTF2_AttributeRef attribute,
+                                             OTF2_CommRef commRef);
 
 /** @brief Add an OTF2_TYPE_PARAMETER attribute to an attribute list.
  *
@@ -426,11 +378,9 @@ OTF2_AttributeList_AddCommRef( OTF2_AttributeList* attributeList,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_AttributeList_AddParameterRef( OTF2_AttributeList* attributeList,
-                                    OTF2_AttributeRef   attribute,
-                                    OTF2_ParameterRef   parameterRef );
-
+OTF2_ErrorCode OTF2_AttributeList_AddParameterRef(OTF2_AttributeList* attributeList,
+                                                  OTF2_AttributeRef attribute,
+                                                  OTF2_ParameterRef parameterRef);
 
 /** @brief Add an OTF2_TYPE_RMA_WIN attribute to an attribute list.
  *
@@ -442,11 +392,9 @@ OTF2_AttributeList_AddParameterRef( OTF2_AttributeList* attributeList,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_AttributeList_AddRmaWinRef( OTF2_AttributeList* attributeList,
-                                 OTF2_AttributeRef   attribute,
-                                 OTF2_RmaWinRef      rmaWinRef );
-
+OTF2_ErrorCode OTF2_AttributeList_AddRmaWinRef(OTF2_AttributeList* attributeList,
+                                               OTF2_AttributeRef attribute,
+                                               OTF2_RmaWinRef rmaWinRef);
 
 /** @brief Add an OTF2_TYPE_SOURCE_CODE_LOCATION attribute to an attribute list.
  *
@@ -459,11 +407,9 @@ OTF2_AttributeList_AddRmaWinRef( OTF2_AttributeList* attributeList,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_AttributeList_AddSourceCodeLocationRef( OTF2_AttributeList*        attributeList,
-                                             OTF2_AttributeRef          attribute,
-                                             OTF2_SourceCodeLocationRef sourceCodeLocationRef );
-
+OTF2_ErrorCode OTF2_AttributeList_AddSourceCodeLocationRef(OTF2_AttributeList* attributeList,
+                                                           OTF2_AttributeRef attribute,
+                                                           OTF2_SourceCodeLocationRef sourceCodeLocationRef);
 
 /** @brief Add an OTF2_TYPE_CALLING_CONTEXT attribute to an attribute list.
  *
@@ -475,11 +421,9 @@ OTF2_AttributeList_AddSourceCodeLocationRef( OTF2_AttributeList*        attribut
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_AttributeList_AddCallingContextRef( OTF2_AttributeList*    attributeList,
-                                         OTF2_AttributeRef      attribute,
-                                         OTF2_CallingContextRef callingContextRef );
-
+OTF2_ErrorCode OTF2_AttributeList_AddCallingContextRef(OTF2_AttributeList* attributeList,
+                                                       OTF2_AttributeRef attribute,
+                                                       OTF2_CallingContextRef callingContextRef);
 
 /** @brief Add an OTF2_TYPE_INTERRUPT_GENERATOR attribute to an attribute list.
  *
@@ -492,11 +436,9 @@ OTF2_AttributeList_AddCallingContextRef( OTF2_AttributeList*    attributeList,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_AttributeList_AddInterruptGeneratorRef( OTF2_AttributeList*        attributeList,
-                                             OTF2_AttributeRef          attribute,
-                                             OTF2_InterruptGeneratorRef interruptGeneratorRef );
-
+OTF2_ErrorCode OTF2_AttributeList_AddInterruptGeneratorRef(OTF2_AttributeList* attributeList,
+                                                           OTF2_AttributeRef attribute,
+                                                           OTF2_InterruptGeneratorRef interruptGeneratorRef);
 
 /** @brief Add an OTF2_TYPE_IO_FILE attribute to an attribute list.
  *
@@ -508,11 +450,9 @@ OTF2_AttributeList_AddInterruptGeneratorRef( OTF2_AttributeList*        attribut
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_AttributeList_AddIoFileRef( OTF2_AttributeList* attributeList,
-                                 OTF2_AttributeRef   attribute,
-                                 OTF2_IoFileRef      ioFileRef );
-
+OTF2_ErrorCode OTF2_AttributeList_AddIoFileRef(OTF2_AttributeList* attributeList,
+                                               OTF2_AttributeRef attribute,
+                                               OTF2_IoFileRef ioFileRef);
 
 /** @brief Add an OTF2_TYPE_IO_HANDLE attribute to an attribute list.
  *
@@ -524,11 +464,9 @@ OTF2_AttributeList_AddIoFileRef( OTF2_AttributeList* attributeList,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_AttributeList_AddIoHandleRef( OTF2_AttributeList* attributeList,
-                                   OTF2_AttributeRef   attribute,
-                                   OTF2_IoHandleRef    ioHandleRef );
-
+OTF2_ErrorCode OTF2_AttributeList_AddIoHandleRef(OTF2_AttributeList* attributeList,
+                                                 OTF2_AttributeRef attribute,
+                                                 OTF2_IoHandleRef ioHandleRef);
 
 /** @brief Add an OTF2_TYPE_LOCATION_GROUP attribute to an attribute list.
  *
@@ -540,11 +478,9 @@ OTF2_AttributeList_AddIoHandleRef( OTF2_AttributeList* attributeList,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_AttributeList_AddLocationGroupRef( OTF2_AttributeList*   attributeList,
-                                        OTF2_AttributeRef     attribute,
-                                        OTF2_LocationGroupRef locationGroupRef );
-
+OTF2_ErrorCode OTF2_AttributeList_AddLocationGroupRef(OTF2_AttributeList* attributeList,
+                                                      OTF2_AttributeRef attribute,
+                                                      OTF2_LocationGroupRef locationGroupRef);
 
 /** @brief Remove an attribute from an attribute list.
  *
@@ -553,10 +489,7 @@ OTF2_AttributeList_AddLocationGroupRef( OTF2_AttributeList*   attributeList,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_AttributeList_RemoveAttribute( OTF2_AttributeList* attributeList,
-                                    OTF2_AttributeRef   attribute );
-
+OTF2_ErrorCode OTF2_AttributeList_RemoveAttribute(OTF2_AttributeList* attributeList, OTF2_AttributeRef attribute);
 
 /** @brief Remove all attributes from an attribute list.
  *
@@ -564,9 +497,7 @@ OTF2_AttributeList_RemoveAttribute( OTF2_AttributeList* attributeList,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_AttributeList_RemoveAllAttributes( OTF2_AttributeList* attributeList );
-
+OTF2_ErrorCode OTF2_AttributeList_RemoveAllAttributes(OTF2_AttributeList* attributeList);
 
 /** @brief Test if an attribute is in the attribute list.
  *
@@ -575,10 +506,7 @@ OTF2_AttributeList_RemoveAllAttributes( OTF2_AttributeList* attributeList );
  *
  *  @return                 True if the id is in the list, else false.
  */
-bool
-OTF2_AttributeList_TestAttributeByID( const OTF2_AttributeList* attributeList,
-                                      OTF2_AttributeRef         attribute );
-
+bool OTF2_AttributeList_TestAttributeByID(const OTF2_AttributeList* attributeList, OTF2_AttributeRef attribute);
 
 /** @brief Get an attribute from an attribute list by attribute ID.
  *
@@ -589,12 +517,10 @@ OTF2_AttributeList_TestAttributeByID( const OTF2_AttributeList* attributeList,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_AttributeList_GetAttributeByID( const OTF2_AttributeList* attributeList,
-                                     OTF2_AttributeRef         attribute,
-                                     OTF2_Type*                type,
-                                     OTF2_AttributeValue*      attributeValue );
-
+OTF2_ErrorCode OTF2_AttributeList_GetAttributeByID(const OTF2_AttributeList* attributeList,
+                                                   OTF2_AttributeRef attribute,
+                                                   OTF2_Type* type,
+                                                   OTF2_AttributeValue* attributeValue);
 
 /** @brief Get an OTF2_TYPE_UINT8 attribute from an attribute list by attribute ID.
  *
@@ -607,11 +533,9 @@ OTF2_AttributeList_GetAttributeByID( const OTF2_AttributeList* attributeList,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_AttributeList_GetUint8( const OTF2_AttributeList* attributeList,
-                             OTF2_AttributeRef         attribute,
-                             uint8_t*                  uint8Value );
-
+OTF2_ErrorCode OTF2_AttributeList_GetUint8(const OTF2_AttributeList* attributeList,
+                                           OTF2_AttributeRef attribute,
+                                           uint8_t* uint8Value);
 
 /** @brief Get an OTF2_TYPE_UINT16 attribute from an attribute list by attribute ID.
  *
@@ -624,11 +548,9 @@ OTF2_AttributeList_GetUint8( const OTF2_AttributeList* attributeList,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_AttributeList_GetUint16( const OTF2_AttributeList* attributeList,
-                              OTF2_AttributeRef         attribute,
-                              uint16_t*                 uint16Value );
-
+OTF2_ErrorCode OTF2_AttributeList_GetUint16(const OTF2_AttributeList* attributeList,
+                                            OTF2_AttributeRef attribute,
+                                            uint16_t* uint16Value);
 
 /** @brief Get an OTF2_TYPE_UINT32 attribute from an attribute list by attribute ID.
  *
@@ -641,11 +563,9 @@ OTF2_AttributeList_GetUint16( const OTF2_AttributeList* attributeList,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_AttributeList_GetUint32( const OTF2_AttributeList* attributeList,
-                              OTF2_AttributeRef         attribute,
-                              uint32_t*                 uint32Value );
-
+OTF2_ErrorCode OTF2_AttributeList_GetUint32(const OTF2_AttributeList* attributeList,
+                                            OTF2_AttributeRef attribute,
+                                            uint32_t* uint32Value);
 
 /** @brief Get an OTF2_TYPE_UINT64 attribute from an attribute list by attribute ID.
  *
@@ -658,11 +578,9 @@ OTF2_AttributeList_GetUint32( const OTF2_AttributeList* attributeList,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_AttributeList_GetUint64( const OTF2_AttributeList* attributeList,
-                              OTF2_AttributeRef         attribute,
-                              uint64_t*                 uint64Value );
-
+OTF2_ErrorCode OTF2_AttributeList_GetUint64(const OTF2_AttributeList* attributeList,
+                                            OTF2_AttributeRef attribute,
+                                            uint64_t* uint64Value);
 
 /** @brief Get an OTF2_TYPE_INT8 attribute from an attribute list by attribute ID.
  *
@@ -675,11 +593,9 @@ OTF2_AttributeList_GetUint64( const OTF2_AttributeList* attributeList,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_AttributeList_GetInt8( const OTF2_AttributeList* attributeList,
-                            OTF2_AttributeRef         attribute,
-                            int8_t*                   int8Value );
-
+OTF2_ErrorCode OTF2_AttributeList_GetInt8(const OTF2_AttributeList* attributeList,
+                                          OTF2_AttributeRef attribute,
+                                          int8_t* int8Value);
 
 /** @brief Get an OTF2_TYPE_INT16 attribute from an attribute list by attribute ID.
  *
@@ -692,11 +608,9 @@ OTF2_AttributeList_GetInt8( const OTF2_AttributeList* attributeList,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_AttributeList_GetInt16( const OTF2_AttributeList* attributeList,
-                             OTF2_AttributeRef         attribute,
-                             int16_t*                  int16Value );
-
+OTF2_ErrorCode OTF2_AttributeList_GetInt16(const OTF2_AttributeList* attributeList,
+                                           OTF2_AttributeRef attribute,
+                                           int16_t* int16Value);
 
 /** @brief Get an OTF2_TYPE_INT32 attribute from an attribute list by attribute ID.
  *
@@ -709,11 +623,9 @@ OTF2_AttributeList_GetInt16( const OTF2_AttributeList* attributeList,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_AttributeList_GetInt32( const OTF2_AttributeList* attributeList,
-                             OTF2_AttributeRef         attribute,
-                             int32_t*                  int32Value );
-
+OTF2_ErrorCode OTF2_AttributeList_GetInt32(const OTF2_AttributeList* attributeList,
+                                           OTF2_AttributeRef attribute,
+                                           int32_t* int32Value);
 
 /** @brief Get an OTF2_TYPE_INT64 attribute from an attribute list by attribute ID.
  *
@@ -726,11 +638,9 @@ OTF2_AttributeList_GetInt32( const OTF2_AttributeList* attributeList,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_AttributeList_GetInt64( const OTF2_AttributeList* attributeList,
-                             OTF2_AttributeRef         attribute,
-                             int64_t*                  int64Value );
-
+OTF2_ErrorCode OTF2_AttributeList_GetInt64(const OTF2_AttributeList* attributeList,
+                                           OTF2_AttributeRef attribute,
+                                           int64_t* int64Value);
 
 /** @brief Get an OTF2_TYPE_FLOAT attribute from an attribute list by attribute ID.
  *
@@ -743,11 +653,9 @@ OTF2_AttributeList_GetInt64( const OTF2_AttributeList* attributeList,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_AttributeList_GetFloat( const OTF2_AttributeList* attributeList,
-                             OTF2_AttributeRef         attribute,
-                             float*                    float32Value );
-
+OTF2_ErrorCode OTF2_AttributeList_GetFloat(const OTF2_AttributeList* attributeList,
+                                           OTF2_AttributeRef attribute,
+                                           float* float32Value);
 
 /** @brief Get an OTF2_TYPE_DOUBLE attribute from an attribute list by attribute ID.
  *
@@ -760,11 +668,9 @@ OTF2_AttributeList_GetFloat( const OTF2_AttributeList* attributeList,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_AttributeList_GetDouble( const OTF2_AttributeList* attributeList,
-                              OTF2_AttributeRef         attribute,
-                              double*                   float64Value );
-
+OTF2_ErrorCode OTF2_AttributeList_GetDouble(const OTF2_AttributeList* attributeList,
+                                            OTF2_AttributeRef attribute,
+                                            double* float64Value);
 
 /** @brief Get an OTF2_TYPE_STRING attribute from an attribute list by attribute ID.
  *
@@ -777,11 +683,9 @@ OTF2_AttributeList_GetDouble( const OTF2_AttributeList* attributeList,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_AttributeList_GetStringRef( const OTF2_AttributeList* attributeList,
-                                 OTF2_AttributeRef         attribute,
-                                 OTF2_StringRef*           stringRef );
-
+OTF2_ErrorCode OTF2_AttributeList_GetStringRef(const OTF2_AttributeList* attributeList,
+                                               OTF2_AttributeRef attribute,
+                                               OTF2_StringRef* stringRef);
 
 /** @brief Get an OTF2_TYPE_ATTRIBUTE attribute from an attribute list by attribute ID.
  *
@@ -794,11 +698,9 @@ OTF2_AttributeList_GetStringRef( const OTF2_AttributeList* attributeList,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_AttributeList_GetAttributeRef( const OTF2_AttributeList* attributeList,
-                                    OTF2_AttributeRef         attribute,
-                                    OTF2_AttributeRef*        attributeRef );
-
+OTF2_ErrorCode OTF2_AttributeList_GetAttributeRef(const OTF2_AttributeList* attributeList,
+                                                  OTF2_AttributeRef attribute,
+                                                  OTF2_AttributeRef* attributeRef);
 
 /** @brief Get an OTF2_TYPE_LOCATION attribute from an attribute list by attribute ID.
  *
@@ -811,11 +713,9 @@ OTF2_AttributeList_GetAttributeRef( const OTF2_AttributeList* attributeList,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_AttributeList_GetLocationRef( const OTF2_AttributeList* attributeList,
-                                   OTF2_AttributeRef         attribute,
-                                   OTF2_LocationRef*         locationRef );
-
+OTF2_ErrorCode OTF2_AttributeList_GetLocationRef(const OTF2_AttributeList* attributeList,
+                                                 OTF2_AttributeRef attribute,
+                                                 OTF2_LocationRef* locationRef);
 
 /** @brief Get an OTF2_TYPE_REGION attribute from an attribute list by attribute ID.
  *
@@ -828,11 +728,9 @@ OTF2_AttributeList_GetLocationRef( const OTF2_AttributeList* attributeList,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_AttributeList_GetRegionRef( const OTF2_AttributeList* attributeList,
-                                 OTF2_AttributeRef         attribute,
-                                 OTF2_RegionRef*           regionRef );
-
+OTF2_ErrorCode OTF2_AttributeList_GetRegionRef(const OTF2_AttributeList* attributeList,
+                                               OTF2_AttributeRef attribute,
+                                               OTF2_RegionRef* regionRef);
 
 /** @brief Get an OTF2_TYPE_GROUP attribute from an attribute list by attribute ID.
  *
@@ -845,11 +743,9 @@ OTF2_AttributeList_GetRegionRef( const OTF2_AttributeList* attributeList,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_AttributeList_GetGroupRef( const OTF2_AttributeList* attributeList,
-                                OTF2_AttributeRef         attribute,
-                                OTF2_GroupRef*            groupRef );
-
+OTF2_ErrorCode OTF2_AttributeList_GetGroupRef(const OTF2_AttributeList* attributeList,
+                                              OTF2_AttributeRef attribute,
+                                              OTF2_GroupRef* groupRef);
 
 /** @brief Get an OTF2_TYPE_METRIC attribute from an attribute list by attribute ID.
  *
@@ -862,11 +758,9 @@ OTF2_AttributeList_GetGroupRef( const OTF2_AttributeList* attributeList,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_AttributeList_GetMetricRef( const OTF2_AttributeList* attributeList,
-                                 OTF2_AttributeRef         attribute,
-                                 OTF2_MetricRef*           metricRef );
-
+OTF2_ErrorCode OTF2_AttributeList_GetMetricRef(const OTF2_AttributeList* attributeList,
+                                               OTF2_AttributeRef attribute,
+                                               OTF2_MetricRef* metricRef);
 
 /** @brief Get an OTF2_TYPE_COMM attribute from an attribute list by attribute ID.
  *
@@ -879,11 +773,9 @@ OTF2_AttributeList_GetMetricRef( const OTF2_AttributeList* attributeList,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_AttributeList_GetCommRef( const OTF2_AttributeList* attributeList,
-                               OTF2_AttributeRef         attribute,
-                               OTF2_CommRef*             commRef );
-
+OTF2_ErrorCode OTF2_AttributeList_GetCommRef(const OTF2_AttributeList* attributeList,
+                                             OTF2_AttributeRef attribute,
+                                             OTF2_CommRef* commRef);
 
 /** @brief Get an OTF2_TYPE_PARAMETER attribute from an attribute list by attribute ID.
  *
@@ -896,11 +788,9 @@ OTF2_AttributeList_GetCommRef( const OTF2_AttributeList* attributeList,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_AttributeList_GetParameterRef( const OTF2_AttributeList* attributeList,
-                                    OTF2_AttributeRef         attribute,
-                                    OTF2_ParameterRef*        parameterRef );
-
+OTF2_ErrorCode OTF2_AttributeList_GetParameterRef(const OTF2_AttributeList* attributeList,
+                                                  OTF2_AttributeRef attribute,
+                                                  OTF2_ParameterRef* parameterRef);
 
 /** @brief Get an OTF2_TYPE_RMA_WIN attribute from an attribute list by attribute ID.
  *
@@ -913,11 +803,9 @@ OTF2_AttributeList_GetParameterRef( const OTF2_AttributeList* attributeList,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_AttributeList_GetRmaWinRef( const OTF2_AttributeList* attributeList,
-                                 OTF2_AttributeRef         attribute,
-                                 OTF2_RmaWinRef*           rmaWinRef );
-
+OTF2_ErrorCode OTF2_AttributeList_GetRmaWinRef(const OTF2_AttributeList* attributeList,
+                                               OTF2_AttributeRef attribute,
+                                               OTF2_RmaWinRef* rmaWinRef);
 
 /** @brief Get an OTF2_TYPE_SOURCE_CODE_LOCATION attribute from an attribute list by attribute ID.
  *
@@ -930,11 +818,9 @@ OTF2_AttributeList_GetRmaWinRef( const OTF2_AttributeList* attributeList,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_AttributeList_GetSourceCodeLocationRef( const OTF2_AttributeList*   attributeList,
-                                             OTF2_AttributeRef           attribute,
-                                             OTF2_SourceCodeLocationRef* sourceCodeLocationRef );
-
+OTF2_ErrorCode OTF2_AttributeList_GetSourceCodeLocationRef(const OTF2_AttributeList* attributeList,
+                                                           OTF2_AttributeRef attribute,
+                                                           OTF2_SourceCodeLocationRef* sourceCodeLocationRef);
 
 /** @brief Get an OTF2_TYPE_CALLING_CONTEXT attribute from an attribute list by attribute ID.
  *
@@ -947,11 +833,9 @@ OTF2_AttributeList_GetSourceCodeLocationRef( const OTF2_AttributeList*   attribu
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_AttributeList_GetCallingContextRef( const OTF2_AttributeList* attributeList,
-                                         OTF2_AttributeRef         attribute,
-                                         OTF2_CallingContextRef*   callingContextRef );
-
+OTF2_ErrorCode OTF2_AttributeList_GetCallingContextRef(const OTF2_AttributeList* attributeList,
+                                                       OTF2_AttributeRef attribute,
+                                                       OTF2_CallingContextRef* callingContextRef);
 
 /** @brief Get an OTF2_TYPE_INTERRUPT_GENERATOR attribute from an attribute list by attribute ID.
  *
@@ -964,11 +848,9 @@ OTF2_AttributeList_GetCallingContextRef( const OTF2_AttributeList* attributeList
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_AttributeList_GetInterruptGeneratorRef( const OTF2_AttributeList*   attributeList,
-                                             OTF2_AttributeRef           attribute,
-                                             OTF2_InterruptGeneratorRef* interruptGeneratorRef );
-
+OTF2_ErrorCode OTF2_AttributeList_GetInterruptGeneratorRef(const OTF2_AttributeList* attributeList,
+                                                           OTF2_AttributeRef attribute,
+                                                           OTF2_InterruptGeneratorRef* interruptGeneratorRef);
 
 /** @brief Get an OTF2_TYPE_IO_FILE attribute from an attribute list by attribute ID.
  *
@@ -981,11 +863,9 @@ OTF2_AttributeList_GetInterruptGeneratorRef( const OTF2_AttributeList*   attribu
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_AttributeList_GetIoFileRef( const OTF2_AttributeList* attributeList,
-                                 OTF2_AttributeRef         attribute,
-                                 OTF2_IoFileRef*           ioFileRef );
-
+OTF2_ErrorCode OTF2_AttributeList_GetIoFileRef(const OTF2_AttributeList* attributeList,
+                                               OTF2_AttributeRef attribute,
+                                               OTF2_IoFileRef* ioFileRef);
 
 /** @brief Get an OTF2_TYPE_IO_HANDLE attribute from an attribute list by attribute ID.
  *
@@ -998,11 +878,9 @@ OTF2_AttributeList_GetIoFileRef( const OTF2_AttributeList* attributeList,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_AttributeList_GetIoHandleRef( const OTF2_AttributeList* attributeList,
-                                   OTF2_AttributeRef         attribute,
-                                   OTF2_IoHandleRef*         ioHandleRef );
-
+OTF2_ErrorCode OTF2_AttributeList_GetIoHandleRef(const OTF2_AttributeList* attributeList,
+                                                 OTF2_AttributeRef attribute,
+                                                 OTF2_IoHandleRef* ioHandleRef);
 
 /** @brief Get an OTF2_TYPE_LOCATION_GROUP attribute from an attribute list by attribute ID.
  *
@@ -1015,11 +893,9 @@ OTF2_AttributeList_GetIoHandleRef( const OTF2_AttributeList* attributeList,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_AttributeList_GetLocationGroupRef( const OTF2_AttributeList* attributeList,
-                                        OTF2_AttributeRef         attribute,
-                                        OTF2_LocationGroupRef*    locationGroupRef );
-
+OTF2_ErrorCode OTF2_AttributeList_GetLocationGroupRef(const OTF2_AttributeList* attributeList,
+                                                      OTF2_AttributeRef attribute,
+                                                      OTF2_LocationGroupRef* locationGroupRef);
 
 /** @brief Get an attribute from an attribute list by attribute index.
  *
@@ -1031,13 +907,11 @@ OTF2_AttributeList_GetLocationGroupRef( const OTF2_AttributeList* attributeList,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_AttributeList_GetAttributeByIndex( const OTF2_AttributeList* attributeList,
-                                        uint32_t                  index,
-                                        OTF2_AttributeRef*        attribute,
-                                        OTF2_Type*                type,
-                                        OTF2_AttributeValue*      attributeValue );
-
+OTF2_ErrorCode OTF2_AttributeList_GetAttributeByIndex(const OTF2_AttributeList* attributeList,
+                                                      uint32_t index,
+                                                      OTF2_AttributeRef* attribute,
+                                                      OTF2_Type* type,
+                                                      OTF2_AttributeValue* attributeValue);
 
 /** @brief Get first attribute from an attribute list and remove it.
  *
@@ -1050,12 +924,10 @@ OTF2_AttributeList_GetAttributeByIndex( const OTF2_AttributeList* attributeList,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_AttributeList_PopAttribute( OTF2_AttributeList*  attributeList,
-                                 OTF2_AttributeRef*   attribute,
-                                 OTF2_Type*           type,
-                                 OTF2_AttributeValue* attributeValue );
-
+OTF2_ErrorCode OTF2_AttributeList_PopAttribute(OTF2_AttributeList* attributeList,
+                                               OTF2_AttributeRef* attribute,
+                                               OTF2_Type* type,
+                                               OTF2_AttributeValue* attributeValue);
 
 /** @brief Get the number of entries in an attribute list.
  *
@@ -1064,13 +936,10 @@ OTF2_AttributeList_PopAttribute( OTF2_AttributeList*  attributeList,
  *  @return                 Returns the number of elements in the list. Returns
  *                          zero if the list does not exist.
  */
-uint32_t
-OTF2_AttributeList_GetNumberOfElements( const OTF2_AttributeList* attributeList );
-
+uint32_t OTF2_AttributeList_GetNumberOfElements(const OTF2_AttributeList* attributeList);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-
 
 #endif /* !OTF2_ATTRIBUTE_LIST_H */

@@ -10,7 +10,6 @@
  *
  */
 
-
 /**
  *  @file
  *
@@ -352,7 +351,6 @@
  *  @}
  */
 
-
 #ifndef OTF2_MPI_COLLECTIVES_H
 #define OTF2_MPI_COLLECTIVES_H
 
@@ -361,9 +359,7 @@
 
 #include <otf2/otf2.h>
 
-
 #include <mpi.h>
-
 
 /** @brief Register an MPI collective context to an OTF2 archive.
  *
@@ -375,11 +371,9 @@
  *
  *  @return Success or error code.
  */
-static OTF2_ErrorCode
-OTF2_MPI_Archive_SetCollectiveCallbacks( OTF2_Archive* archive,
-                                         MPI_Comm      globalComm,
-                                         MPI_Comm      localComm );
-
+static OTF2_ErrorCode OTF2_MPI_Archive_SetCollectiveCallbacks(OTF2_Archive* archive,
+                                                              MPI_Comm globalComm,
+                                                              MPI_Comm localComm);
 
 /** @brief Register an MPI collective context to an OTF2 archive.
  *
@@ -391,11 +385,9 @@ OTF2_MPI_Archive_SetCollectiveCallbacks( OTF2_Archive* archive,
  *
  *  @return Success or error code.
  */
-static OTF2_ErrorCode
-OTF2_MPI_Archive_SetCollectiveCallbacksSplit( OTF2_Archive* archive,
-                                              MPI_Comm      globalComm,
-                                              uint32_t      numberOfFiles );
-
+static OTF2_ErrorCode OTF2_MPI_Archive_SetCollectiveCallbacksSplit(OTF2_Archive* archive,
+                                                                   MPI_Comm globalComm,
+                                                                   uint32_t numberOfFiles);
 
 /** @brief Register an MPI collective context to an OTF2 reader.
  *
@@ -404,10 +396,7 @@ OTF2_MPI_Archive_SetCollectiveCallbacksSplit( OTF2_Archive* archive,
  *
  *  @return Success or error code.
  */
-static OTF2_ErrorCode
-OTF2_MPI_Reader_SetCollectiveCallbacks( OTF2_Reader* reader,
-                                        MPI_Comm     globalComm );
-
+static OTF2_ErrorCode OTF2_MPI_Reader_SetCollectiveCallbacks(OTF2_Reader* reader, MPI_Comm globalComm);
 
 /** @def OTF2_MPI_USE_PMPI
  *  @brief If you want that the collectives call the PMPI interface, define
@@ -420,13 +409,12 @@ OTF2_MPI_Reader_SetCollectiveCallbacks( OTF2_Reader* reader,
  *  @def OTF2_MPI_USE_PMPI_undef_me
  */
 #ifdef OTF2_MPI_USE_PMPI
-# define CALL_MPI( name ) P ## name
+#define CALL_MPI(name) P##name
 #else
-# define CALL_MPI( name ) name
-# define OTF2_MPI_USE_PMPI
-# define OTF2_MPI_USE_PMPI_undef_me
+#define CALL_MPI(name) name
+#define OTF2_MPI_USE_PMPI
+#define OTF2_MPI_USE_PMPI_undef_me
 #endif
-
 
 /**
  *  @def OTF2_MPI_UINT8_T
@@ -436,11 +424,11 @@ OTF2_MPI_Reader_SetCollectiveCallbacks( OTF2_Reader* reader,
  *  The latter in case of an MPI 3.0 conforming implementation.
  */
 #ifndef OTF2_MPI_UINT8_T
-# if MPI_VERSION >= 3
-#  define OTF2_MPI_UINT8_T MPI_UINT8_T
-# else
-#  define OTF2_MPI_UINT8_T MPI_UNSIGNED_CHAR
-# endif
+#if MPI_VERSION >= 3
+#define OTF2_MPI_UINT8_T MPI_UINT8_T
+#else
+#define OTF2_MPI_UINT8_T MPI_UNSIGNED_CHAR
+#endif
 #endif
 
 /**
@@ -451,13 +439,12 @@ OTF2_MPI_Reader_SetCollectiveCallbacks( OTF2_Reader* reader,
  *  The latter in case of an MPI 3.0 conforming implementation.
  */
 #ifndef OTF2_MPI_INT8_T
-# if MPI_VERSION >= 3
-#  define OTF2_MPI_INT8_T MPI_INT8_T
-# else
-#  define OTF2_MPI_INT8_T MPI_CHAR
-# endif
+#if MPI_VERSION >= 3
+#define OTF2_MPI_INT8_T MPI_INT8_T
+#else
+#define OTF2_MPI_INT8_T MPI_CHAR
 #endif
-
+#endif
 
 /**
  *  @def OTF2_MPI_UINT16_T
@@ -467,11 +454,11 @@ OTF2_MPI_Reader_SetCollectiveCallbacks( OTF2_Reader* reader,
  *  The latter in case of an MPI 3.0 conforming implementation.
  */
 #ifndef OTF2_MPI_UINT16_T
-# if MPI_VERSION >= 3
-#  define OTF2_MPI_UINT16_T MPI_UINT16_T
-# else
-#  define OTF2_MPI_UINT16_T MPI_UNSIGNED_SHORT
-# endif
+#if MPI_VERSION >= 3
+#define OTF2_MPI_UINT16_T MPI_UINT16_T
+#else
+#define OTF2_MPI_UINT16_T MPI_UNSIGNED_SHORT
+#endif
 #endif
 
 /**
@@ -482,13 +469,12 @@ OTF2_MPI_Reader_SetCollectiveCallbacks( OTF2_Reader* reader,
  *  The latter in case of an MPI 3.0 conforming implementation.
  */
 #ifndef OTF2_MPI_INT16_T
-# if MPI_VERSION >= 3
-#  define OTF2_MPI_INT16_T MPI_INT16_T
-# else
-#  define OTF2_MPI_INT16_T MPI_SHORT
-# endif
+#if MPI_VERSION >= 3
+#define OTF2_MPI_INT16_T MPI_INT16_T
+#else
+#define OTF2_MPI_INT16_T MPI_SHORT
 #endif
-
+#endif
 
 /**
  *  @def OTF2_MPI_UINT32_T
@@ -498,11 +484,11 @@ OTF2_MPI_Reader_SetCollectiveCallbacks( OTF2_Reader* reader,
  *  The latter in case of an MPI 3.0 conforming implementation.
  */
 #ifndef OTF2_MPI_UINT32_T
-# if MPI_VERSION >= 3
-#  define OTF2_MPI_UINT32_T MPI_UINT32_T
-# else
-#  define OTF2_MPI_UINT32_T MPI_UNSIGNED
-# endif
+#if MPI_VERSION >= 3
+#define OTF2_MPI_UINT32_T MPI_UINT32_T
+#else
+#define OTF2_MPI_UINT32_T MPI_UNSIGNED
+#endif
 #endif
 
 /**
@@ -513,13 +499,12 @@ OTF2_MPI_Reader_SetCollectiveCallbacks( OTF2_Reader* reader,
  *  The latter in case of an MPI 3.0 conforming implementation.
  */
 #ifndef OTF2_MPI_INT32_T
-# if MPI_VERSION >= 3
-#  define OTF2_MPI_INT32_T MPI_INT32_T
-# else
-#  define OTF2_MPI_INT32_T MPI_INT
-# endif
+#if MPI_VERSION >= 3
+#define OTF2_MPI_INT32_T MPI_INT32_T
+#else
+#define OTF2_MPI_INT32_T MPI_INT
 #endif
-
+#endif
 
 /**
  *  @def OTF2_MPI_UINT64_T
@@ -529,10 +514,10 @@ OTF2_MPI_Reader_SetCollectiveCallbacks( OTF2_Reader* reader,
  *  conforming implementation.
  */
 #ifndef OTF2_MPI_UINT64_T
-# define OTF2_MPI_UINT64_T MPI_UINT64_T
-# if MPI_VERSION < 3
-#  error Please define OTF2_MPI_UINT64_T to a suitable MPI datatype for uint64_t.
-# endif
+#define OTF2_MPI_UINT64_T MPI_UINT64_T
+#if MPI_VERSION < 3
+#error Please define OTF2_MPI_UINT64_T to a suitable MPI datatype for uint64_t.
+#endif
 #endif
 
 /**
@@ -543,12 +528,11 @@ OTF2_MPI_Reader_SetCollectiveCallbacks( OTF2_Reader* reader,
  *  conforming implementation.
  */
 #ifndef OTF2_MPI_INT64_T
-# define OTF2_MPI_INT64_T MPI_INT64_T
-# if MPI_VERSION < 3
-#  error Please define OTF2_MPI_INT64 to a suitable MPI datatype for int64_t.
-# endif
+#define OTF2_MPI_INT64_T MPI_INT64_T
+#if MPI_VERSION < 3
+#error Please define OTF2_MPI_INT64 to a suitable MPI datatype for int64_t.
 #endif
-
+#endif
 
 /**
  *  @def OTF2_MPI_FLOAT
@@ -557,9 +541,8 @@ OTF2_MPI_Reader_SetCollectiveCallbacks( OTF2_Reader* reader,
  *  @c MPI_FLOAT is used as proper default value.
  */
 #ifndef OTF2_MPI_FLOAT
-# define OTF2_MPI_FLOAT MPI_FLOAT
+#define OTF2_MPI_FLOAT MPI_FLOAT
 #endif
-
 
 /**
  *  @def OTF2_MPI_DOUBLE
@@ -568,650 +551,472 @@ OTF2_MPI_Reader_SetCollectiveCallbacks( OTF2_Reader* reader,
  *  @c MPI_DOUBLE is used as proper default value.
  */
 #ifndef OTF2_MPI_DOUBLE
-# define OTF2_MPI_DOUBLE MPI_DOUBLE
+#define OTF2_MPI_DOUBLE MPI_DOUBLE
 #endif
-
 
 /**
  * @cond IMPLEMENTATION_OF_THE_CALLBACKS__PLEASE_IGNORE
  */
 
-
 /** @brief Collective context which wraps an MPI communicator.
  */
-struct OTF2_CollectiveContext
-{
-    MPI_Comm comm;
-    int      size;
-    int      rank;
-    int      displacements[ 1 ];
+struct OTF2_CollectiveContext {
+  MPI_Comm comm;
+  int size;
+  int rank;
+  int displacements[1];
 };
-
 
 /** @brief User data structure, which will be used by the MPI collectives.
  */
-typedef struct OTF2_MPI_UserData
-{
-    OTF2_CollectiveCallbacks callbacks;
-    OTF2_CollectiveContext*  global;
-    OTF2_CollectiveContext*  local;
+typedef struct OTF2_MPI_UserData {
+  OTF2_CollectiveCallbacks callbacks;
+  OTF2_CollectiveContext* global;
+  OTF2_CollectiveContext* local;
 } OTF2_MPI_UserData;
 
+static void otf2_mpi_get_collectives(OTF2_CollectiveCallbacks* collectiveCallbacks);
 
-static void
-otf2_mpi_get_collectives( OTF2_CollectiveCallbacks* collectiveCallbacks );
+static OTF2_CollectiveContext* otf2_mpi_create_context(MPI_Comm comm, bool duplicate);
 
+static void otf2_mpi_destroy_context(OTF2_CollectiveContext* collectiveContext);
 
-static OTF2_CollectiveContext*
-otf2_mpi_create_context( MPI_Comm comm,
-                         bool     duplicate );
+static OTF2_CollectiveContext* otf2_mpi_split_context_by_number(OTF2_CollectiveContext* commContext,
+                                                                uint32_t numberOfFiles);
 
+static OTF2_ErrorCode OTF2_MPI_Archive_SetCollectiveCallbacks(OTF2_Archive* archive,
+                                                              MPI_Comm globalComm,
+                                                              MPI_Comm localComm) {
+  OTF2_ErrorCode status = OTF2_SUCCESS;
+  OTF2_MPI_UserData* user_data = NULL;
 
-static void
-otf2_mpi_destroy_context( OTF2_CollectiveContext* collectiveContext );
+  (void)OTF2_MPI_Archive_SetCollectiveCallbacksSplit;
+  (void)OTF2_MPI_Reader_SetCollectiveCallbacks;
 
+  if (!archive) {
+    return OTF2_ERROR_INVALID_ARGUMENT;
+  }
 
-static OTF2_CollectiveContext*
-otf2_mpi_split_context_by_number( OTF2_CollectiveContext* commContext,
-                                  uint32_t                numberOfFiles );
+  if (MPI_COMM_NULL == globalComm) {
+    return OTF2_ERROR_INVALID_ARGUMENT;
+  }
 
+  user_data = (OTF2_MPI_UserData*)calloc(1, sizeof(*user_data));
+  if (!user_data) {
+    return OTF2_ERROR_MEM_ALLOC_FAILED;
+  }
 
-static OTF2_ErrorCode
-OTF2_MPI_Archive_SetCollectiveCallbacks( OTF2_Archive* archive,
-                                         MPI_Comm      globalComm,
-                                         MPI_Comm      localComm )
-{
-    OTF2_ErrorCode     status    = OTF2_SUCCESS;
-    OTF2_MPI_UserData* user_data = NULL;
+  otf2_mpi_get_collectives(&user_data->callbacks);
 
-    ( void )OTF2_MPI_Archive_SetCollectiveCallbacksSplit;
-    ( void )OTF2_MPI_Reader_SetCollectiveCallbacks;
+  user_data->global = otf2_mpi_create_context(globalComm, true);
+  if (!user_data->global) {
+    status = OTF2_ERROR_PROCESSED_WITH_FAULTS;
+    goto out;
+  }
 
-    if ( !archive )
-    {
-        return OTF2_ERROR_INVALID_ARGUMENT;
+  if (MPI_COMM_NULL != localComm) {
+    user_data->local = otf2_mpi_create_context(localComm, true);
+    if (!user_data->local) {
+      status = OTF2_ERROR_PROCESSED_WITH_FAULTS;
+      goto out;
     }
+  }
 
-    if ( MPI_COMM_NULL == globalComm )
-    {
-        return OTF2_ERROR_INVALID_ARGUMENT;
-    }
-
-    user_data = ( OTF2_MPI_UserData* )calloc( 1, sizeof( *user_data ) );
-    if ( !user_data )
-    {
-        return OTF2_ERROR_MEM_ALLOC_FAILED;
-    }
-
-    otf2_mpi_get_collectives( &user_data->callbacks );
-
-    user_data->global = otf2_mpi_create_context( globalComm, true );
-    if ( !user_data->global )
-    {
-        status = OTF2_ERROR_PROCESSED_WITH_FAULTS;
-        goto out;
-    }
-
-    if ( MPI_COMM_NULL != localComm )
-    {
-        user_data->local = otf2_mpi_create_context( localComm, true );
-        if ( !user_data->local )
-        {
-            status = OTF2_ERROR_PROCESSED_WITH_FAULTS;
-            goto out;
-        }
-    }
-
-    status = OTF2_Archive_SetCollectiveCallbacks( archive,
-                                                  &user_data->callbacks,
-                                                  user_data,
-                                                  user_data->global,
-                                                  user_data->local );
+  status =
+    OTF2_Archive_SetCollectiveCallbacks(archive, &user_data->callbacks, user_data, user_data->global, user_data->local);
 
 out:
-    if ( OTF2_SUCCESS != status )
-    {
-        otf2_mpi_destroy_context( user_data->local );
-        otf2_mpi_destroy_context( user_data->global );
-        free( user_data );
-    }
+  if (OTF2_SUCCESS != status) {
+    otf2_mpi_destroy_context(user_data->local);
+    otf2_mpi_destroy_context(user_data->global);
+    free(user_data);
+  }
 
-    return status;
+  return status;
 }
 
+static OTF2_ErrorCode OTF2_MPI_Archive_SetCollectiveCallbacksSplit(OTF2_Archive* archive,
+                                                                   MPI_Comm globalComm,
+                                                                   uint32_t numberOfFiles) {
+  OTF2_ErrorCode status = OTF2_SUCCESS;
+  OTF2_MPI_UserData* user_data = NULL;
 
-static OTF2_ErrorCode
-OTF2_MPI_Archive_SetCollectiveCallbacksSplit( OTF2_Archive* archive,
-                                              MPI_Comm      globalComm,
-                                              uint32_t      numberOfFiles )
-{
-    OTF2_ErrorCode     status    = OTF2_SUCCESS;
-    OTF2_MPI_UserData* user_data = NULL;
+  (void)OTF2_MPI_Archive_SetCollectiveCallbacks;
+  (void)OTF2_MPI_Reader_SetCollectiveCallbacks;
 
-    ( void )OTF2_MPI_Archive_SetCollectiveCallbacks;
-    ( void )OTF2_MPI_Reader_SetCollectiveCallbacks;
+  if (!archive) {
+    return OTF2_ERROR_INVALID_ARGUMENT;
+  }
 
-    if ( !archive )
-    {
-        return OTF2_ERROR_INVALID_ARGUMENT;
-    }
+  if (MPI_COMM_NULL == globalComm) {
+    return OTF2_ERROR_INVALID_ARGUMENT;
+  }
 
-    if ( MPI_COMM_NULL == globalComm )
-    {
-        return OTF2_ERROR_INVALID_ARGUMENT;
-    }
+  user_data = (OTF2_MPI_UserData*)calloc(1, sizeof(*user_data));
+  if (!user_data) {
+    return OTF2_ERROR_MEM_ALLOC_FAILED;
+  }
 
-    user_data = ( OTF2_MPI_UserData* )calloc( 1, sizeof( *user_data ) );
-    if ( !user_data )
-    {
-        return OTF2_ERROR_MEM_ALLOC_FAILED;
-    }
+  otf2_mpi_get_collectives(&user_data->callbacks);
 
-    otf2_mpi_get_collectives( &user_data->callbacks );
+  user_data->global = otf2_mpi_create_context(globalComm, true);
+  if (!user_data->global) {
+    status = OTF2_ERROR_PROCESSED_WITH_FAULTS;
+    goto out;
+  }
 
-    user_data->global = otf2_mpi_create_context( globalComm, true );
-    if ( !user_data->global )
-    {
-        status = OTF2_ERROR_PROCESSED_WITH_FAULTS;
-        goto out;
-    }
+  user_data->local = otf2_mpi_split_context_by_number(user_data->global, numberOfFiles);
+  if (!user_data->local) {
+    status = OTF2_ERROR_PROCESSED_WITH_FAULTS;
+    goto out;
+  }
 
-    user_data->local = otf2_mpi_split_context_by_number( user_data->global,
-                                                         numberOfFiles );
-    if ( !user_data->local )
-    {
-        status = OTF2_ERROR_PROCESSED_WITH_FAULTS;
-        goto out;
-    }
-
-    status = OTF2_Archive_SetCollectiveCallbacks( archive,
-                                                  &user_data->callbacks,
-                                                  user_data,
-                                                  user_data->global,
-                                                  user_data->local );
+  status =
+    OTF2_Archive_SetCollectiveCallbacks(archive, &user_data->callbacks, user_data, user_data->global, user_data->local);
 
 out:
-    if ( OTF2_SUCCESS != status )
-    {
-        otf2_mpi_destroy_context( user_data->local );
-        otf2_mpi_destroy_context( user_data->global );
-        free( user_data );
-    }
+  if (OTF2_SUCCESS != status) {
+    otf2_mpi_destroy_context(user_data->local);
+    otf2_mpi_destroy_context(user_data->global);
+    free(user_data);
+  }
 
-    return status;
+  return status;
 }
 
+static OTF2_ErrorCode OTF2_MPI_Reader_SetCollectiveCallbacks(OTF2_Reader* reader, MPI_Comm globalComm) {
+  OTF2_ErrorCode status = OTF2_SUCCESS;
+  OTF2_MPI_UserData* user_data = NULL;
 
-static OTF2_ErrorCode
-OTF2_MPI_Reader_SetCollectiveCallbacks( OTF2_Reader* reader,
-                                        MPI_Comm     globalComm )
-{
-    OTF2_ErrorCode     status    = OTF2_SUCCESS;
-    OTF2_MPI_UserData* user_data = NULL;
+  (void)OTF2_MPI_Archive_SetCollectiveCallbacks;
+  (void)OTF2_MPI_Archive_SetCollectiveCallbacksSplit;
 
-    ( void )OTF2_MPI_Archive_SetCollectiveCallbacks;
-    ( void )OTF2_MPI_Archive_SetCollectiveCallbacksSplit;
+  if (!reader) {
+    return OTF2_ERROR_INVALID_ARGUMENT;
+  }
 
-    if ( !reader )
-    {
-        return OTF2_ERROR_INVALID_ARGUMENT;
-    }
+  if (MPI_COMM_NULL == globalComm) {
+    return OTF2_ERROR_INVALID_ARGUMENT;
+  }
 
-    if ( MPI_COMM_NULL == globalComm )
-    {
-        return OTF2_ERROR_INVALID_ARGUMENT;
-    }
+  user_data = (OTF2_MPI_UserData*)calloc(1, sizeof(*user_data));
+  if (!user_data) {
+    return OTF2_ERROR_MEM_ALLOC_FAILED;
+  }
 
-    user_data = ( OTF2_MPI_UserData* )calloc( 1, sizeof( *user_data ) );
-    if ( !user_data )
-    {
-        return OTF2_ERROR_MEM_ALLOC_FAILED;
-    }
+  otf2_mpi_get_collectives(&user_data->callbacks);
 
-    otf2_mpi_get_collectives( &user_data->callbacks );
+  user_data->global = otf2_mpi_create_context(globalComm, true);
+  if (!user_data->global) {
+    status = OTF2_ERROR_PROCESSED_WITH_FAULTS;
+    goto out;
+  }
 
-    user_data->global = otf2_mpi_create_context( globalComm, true );
-    if ( !user_data->global )
-    {
-        status = OTF2_ERROR_PROCESSED_WITH_FAULTS;
-        goto out;
-    }
-
-    status = OTF2_Reader_SetCollectiveCallbacks( reader,
-                                                 &user_data->callbacks,
-                                                 user_data,
-                                                 user_data->global,
-                                                 NULL );
+  status = OTF2_Reader_SetCollectiveCallbacks(reader, &user_data->callbacks, user_data, user_data->global, NULL);
 
 out:
-    if ( OTF2_SUCCESS != status )
-    {
-        otf2_mpi_destroy_context( user_data->global );
-        free( user_data );
-    }
+  if (OTF2_SUCCESS != status) {
+    otf2_mpi_destroy_context(user_data->global);
+    free(user_data);
+  }
 
-    return status;
+  return status;
 }
 
+static OTF2_CollectiveContext* otf2_mpi_create_context(MPI_Comm comm, bool duplicate) {
+  int ret;
+  int size;
 
-static OTF2_CollectiveContext*
-otf2_mpi_create_context( MPI_Comm comm,
-                         bool     duplicate )
-{
-    int ret;
-    int size;
+  ret = CALL_MPI(MPI_Comm_size)(comm, &size);
+  if (MPI_SUCCESS != ret) {
+    return NULL;
+  }
 
-    ret = CALL_MPI( MPI_Comm_size ) ( comm, &size );
-    if ( MPI_SUCCESS != ret )
-    {
-        return NULL;
+  OTF2_CollectiveContext* new_context =
+    (OTF2_CollectiveContext*)malloc(sizeof(*new_context) + ((size - 1) * sizeof(int)));
+  if (!new_context) {
+    return NULL;
+  }
+
+  new_context->size = size;
+  ret = CALL_MPI(MPI_Comm_rank)(comm, &new_context->rank);
+  if (MPI_SUCCESS != ret) {
+    free(new_context);
+    return NULL;
+  }
+
+  if (duplicate) {
+    ret = CALL_MPI(MPI_Comm_dup)(comm, &new_context->comm);
+    if (MPI_SUCCESS != ret) {
+      free(new_context);
+      return NULL;
     }
+  } else {
+    new_context->comm = comm;
+  }
 
-    OTF2_CollectiveContext* new_context =
-        ( OTF2_CollectiveContext* )malloc( sizeof( *new_context )
-                                           + ( ( size - 1 ) * sizeof( int ) ) );
-    if ( !new_context )
-    {
-        return NULL;
-    }
-
-    new_context->size = size;
-    ret               = CALL_MPI( MPI_Comm_rank ) ( comm, &new_context->rank );
-    if ( MPI_SUCCESS != ret )
-    {
-        free( new_context );
-        return NULL;
-    }
-
-    if ( duplicate )
-    {
-        ret = CALL_MPI( MPI_Comm_dup ) ( comm, &new_context->comm );
-        if ( MPI_SUCCESS != ret )
-        {
-            free( new_context );
-            return NULL;
-        }
-    }
-    else
-    {
-        new_context->comm = comm;
-    }
-
-    return new_context;
+  return new_context;
 }
 
+static void otf2_mpi_destroy_context(OTF2_CollectiveContext* collectiveContext) {
+  if (!collectiveContext) {
+    return;
+  }
 
-static void
-otf2_mpi_destroy_context( OTF2_CollectiveContext* collectiveContext )
-{
-    if ( !collectiveContext )
-    {
-        return;
-    }
+  CALL_MPI(MPI_Comm_free)(&collectiveContext->comm);
 
-    CALL_MPI( MPI_Comm_free ) ( &collectiveContext->comm );
-
-    free( collectiveContext );
+  free(collectiveContext);
 }
 
+static OTF2_CollectiveContext* otf2_mpi_split_context(OTF2_CollectiveContext* commContext, int color, int key) {
+  OTF2_CollectiveContext* new_context;
+  MPI_Comm new_comm;
+  int ret;
+  ret = CALL_MPI(MPI_Comm_split)(commContext->comm, color, key, &new_comm);
+  if (MPI_SUCCESS != ret) {
+    return NULL;
+  }
 
-static OTF2_CollectiveContext*
-otf2_mpi_split_context( OTF2_CollectiveContext* commContext,
-                        int                     color,
-                        int                     key )
-{
-    OTF2_CollectiveContext* new_context;
-    MPI_Comm                new_comm;
-    int                     ret;
-    ret = CALL_MPI( MPI_Comm_split ) ( commContext->comm,
-                                       color,
-                                       key,
-                                       &new_comm );
-    if ( MPI_SUCCESS != ret )
-    {
-        return NULL;
-    }
+  new_context = otf2_mpi_create_context(new_comm, false);
+  if (!new_context) {
+    CALL_MPI(MPI_Comm_free)(&new_comm);
+    return NULL;
+  }
 
-    new_context = otf2_mpi_create_context( new_comm, false );
-    if ( !new_context )
-    {
-        CALL_MPI( MPI_Comm_free ) ( &new_comm );
-        return NULL;
-    }
-
-    return new_context;
+  return new_context;
 }
 
-
-static OTF2_CollectiveContext*
-otf2_mpi_split_context_by_number( OTF2_CollectiveContext* commContext,
-                                  uint32_t                numberOfFiles )
-{
-    int file_number = 0;
-    int rem         = commContext->size % numberOfFiles;
-    int local_size  = commContext->size / numberOfFiles + !!rem;
-    int local_rank  = 0;
-    int local_root  = 0;
-    int i;
-    for ( i = 0; i < commContext->rank; i++ )
-    {
-        local_rank++;
-        if ( local_root + local_size == i + 1 )
-        {
-            local_root += local_size;
-            file_number++;
-            local_size -= file_number == rem;
-            local_rank  = 0;
-        }
+static OTF2_CollectiveContext* otf2_mpi_split_context_by_number(OTF2_CollectiveContext* commContext,
+                                                                uint32_t numberOfFiles) {
+  int file_number = 0;
+  int rem = commContext->size % numberOfFiles;
+  int local_size = commContext->size / numberOfFiles + !!rem;
+  int local_rank = 0;
+  int local_root = 0;
+  int i;
+  for (i = 0; i < commContext->rank; i++) {
+    local_rank++;
+    if (local_root + local_size == i + 1) {
+      local_root += local_size;
+      file_number++;
+      local_size -= file_number == rem;
+      local_rank = 0;
     }
+  }
 
-    return otf2_mpi_split_context( commContext,
-                                   file_number,
-                                   local_rank );
+  return otf2_mpi_split_context(commContext, file_number, local_rank);
 }
 
-
-static MPI_Datatype
-otf2_mpi_get_type( OTF2_Type type )
-{
-#define case_return( TYPE, MPI_SUFFIX ) \
-    case OTF2_TYPE_ ## TYPE: \
-        return OTF2_MPI_ ## TYPE ## MPI_SUFFIX
-    switch ( type )
-    {
-        case_return( UINT8,  _T );
-        case_return( INT8,   _T );
-        case_return( UINT16, _T );
-        case_return( INT16,  _T );
-        case_return( UINT32, _T );
-        case_return( INT32,  _T );
-        case_return( UINT64, _T );
-        case_return( INT64,  _T );
-        case_return( FLOAT,     );
-        case_return( DOUBLE,    );
-        default:
-            return MPI_DATATYPE_NULL;
-    }
+static MPI_Datatype otf2_mpi_get_type(OTF2_Type type) {
+#define case_return(TYPE, MPI_SUFFIX) \
+  case OTF2_TYPE_##TYPE:              \
+    return OTF2_MPI_##TYPE##MPI_SUFFIX
+  switch (type) {
+    case_return(UINT8, _T);
+    case_return(INT8, _T);
+    case_return(UINT16, _T);
+    case_return(INT16, _T);
+    case_return(UINT32, _T);
+    case_return(INT32, _T);
+    case_return(UINT64, _T);
+    case_return(INT64, _T);
+    case_return(FLOAT, );
+    case_return(DOUBLE, );
+  default:
+    return MPI_DATATYPE_NULL;
+  }
 #undef case_return
 }
 
+static void otf2_mpi_collectives_release(void* userData,
+                                         OTF2_CollectiveContext* globalCommContext,
+                                         OTF2_CollectiveContext* localCommContext) {
+  OTF2_MPI_UserData* user_data = (OTF2_MPI_UserData*)userData;
 
-static void
-otf2_mpi_collectives_release( void*                   userData,
-                              OTF2_CollectiveContext* globalCommContext,
-                              OTF2_CollectiveContext* localCommContext )
-{
-    OTF2_MPI_UserData* user_data = ( OTF2_MPI_UserData* )userData;
+  (void)globalCommContext;
+  (void)localCommContext;
 
-    ( void )globalCommContext;
-    ( void )localCommContext;
-
-    otf2_mpi_destroy_context( user_data->global );
-    otf2_mpi_destroy_context( user_data->local );
-    free( user_data );
+  otf2_mpi_destroy_context(user_data->global);
+  otf2_mpi_destroy_context(user_data->local);
+  free(user_data);
 }
 
+static OTF2_CallbackCode otf2_mpi_collectives_create_local_comm(void* userData,
+                                                                OTF2_CollectiveContext** localCommContextOut,
+                                                                OTF2_CollectiveContext* globalCommContext,
+                                                                uint32_t globalRank,
+                                                                uint32_t globalSize,
+                                                                uint32_t localRank,
+                                                                uint32_t localSize,
+                                                                uint32_t fileNumber,
+                                                                uint32_t numberOfFiles) {
+  (void)userData;
+  (void)globalRank;
+  (void)globalSize;
+  (void)localSize;
+  (void)numberOfFiles;
 
-static OTF2_CallbackCode
-otf2_mpi_collectives_create_local_comm( void*                    userData,
-                                        OTF2_CollectiveContext** localCommContextOut,
-                                        OTF2_CollectiveContext*  globalCommContext,
-                                        uint32_t                 globalRank,
-                                        uint32_t                 globalSize,
-                                        uint32_t                 localRank,
-                                        uint32_t                 localSize,
-                                        uint32_t                 fileNumber,
-                                        uint32_t                 numberOfFiles )
-{
-    ( void )userData;
-    ( void )globalRank;
-    ( void )globalSize;
-    ( void )localSize;
-    ( void )numberOfFiles;
+  *localCommContextOut = otf2_mpi_split_context(globalCommContext, fileNumber, localRank);
 
-    *localCommContextOut = otf2_mpi_split_context( globalCommContext,
-                                                   fileNumber,
-                                                   localRank );
-
-    return *localCommContextOut
-           ? OTF2_CALLBACK_SUCCESS
-           : OTF2_CALLBACK_ERROR;
+  return *localCommContextOut ? OTF2_CALLBACK_SUCCESS : OTF2_CALLBACK_ERROR;
 }
 
+static OTF2_CallbackCode otf2_mpi_collectives_free_local_comm(void* userData,
+                                                              OTF2_CollectiveContext* localCommContext) {
+  (void)userData;
 
-static OTF2_CallbackCode
-otf2_mpi_collectives_free_local_comm( void*                   userData,
-                                      OTF2_CollectiveContext* localCommContext )
-{
-    ( void )userData;
+  otf2_mpi_destroy_context(localCommContext);
 
-    otf2_mpi_destroy_context( localCommContext );
-
-    return OTF2_CALLBACK_SUCCESS;
+  return OTF2_CALLBACK_SUCCESS;
 }
 
+static OTF2_CallbackCode otf2_mpi_collectives_get_size(void* userData,
+                                                       OTF2_CollectiveContext* commContext,
+                                                       uint32_t* size) {
+  (void)userData;
 
-static OTF2_CallbackCode
-otf2_mpi_collectives_get_size( void*                   userData,
-                               OTF2_CollectiveContext* commContext,
-                               uint32_t*               size )
-{
-    ( void )userData;
+  *size = commContext->size;
 
-    *size = commContext->size;
-
-    return OTF2_CALLBACK_SUCCESS;
+  return OTF2_CALLBACK_SUCCESS;
 }
 
+static OTF2_CallbackCode otf2_mpi_collectives_get_rank(void* userData,
+                                                       OTF2_CollectiveContext* commContext,
+                                                       uint32_t* rank) {
+  (void)userData;
 
-static OTF2_CallbackCode
-otf2_mpi_collectives_get_rank( void*                   userData,
-                               OTF2_CollectiveContext* commContext,
-                               uint32_t*               rank )
-{
-    ( void )userData;
+  *rank = commContext->rank;
 
-    *rank = commContext->rank;
-
-    return OTF2_CALLBACK_SUCCESS;
+  return OTF2_CALLBACK_SUCCESS;
 }
 
+static OTF2_CallbackCode otf2_mpi_collectives_barrier(void* userData, OTF2_CollectiveContext* commContext) {
+  int ret;
 
-static OTF2_CallbackCode
-otf2_mpi_collectives_barrier( void*                   userData,
-                              OTF2_CollectiveContext* commContext )
-{
-    int ret;
+  (void)userData;
 
-    ( void )userData;
+  ret = CALL_MPI(MPI_Barrier)(commContext->comm);
 
-    ret = CALL_MPI( MPI_Barrier ) ( commContext->comm );
-
-    return MPI_SUCCESS == ret
-           ? OTF2_CALLBACK_SUCCESS
-           : OTF2_CALLBACK_ERROR;
+  return MPI_SUCCESS == ret ? OTF2_CALLBACK_SUCCESS : OTF2_CALLBACK_ERROR;
 }
 
+static OTF2_CallbackCode otf2_mpi_collectives_bcast(void* userData,
+                                                    OTF2_CollectiveContext* commContext,
+                                                    void* data,
+                                                    uint32_t numberElements,
+                                                    OTF2_Type type,
+                                                    uint32_t root) {
+  int ret;
 
-static OTF2_CallbackCode
-otf2_mpi_collectives_bcast( void*                   userData,
-                            OTF2_CollectiveContext* commContext,
-                            void*                   data,
-                            uint32_t                numberElements,
-                            OTF2_Type               type,
-                            uint32_t                root )
-{
-    int ret;
+  (void)userData;
 
-    ( void )userData;
+  ret = CALL_MPI(MPI_Bcast)(data, numberElements, otf2_mpi_get_type(type), root, commContext->comm);
 
-    ret = CALL_MPI( MPI_Bcast ) ( data,
-                                  numberElements,
-                                  otf2_mpi_get_type( type ),
-                                  root,
-                                  commContext->comm );
-
-    return MPI_SUCCESS == ret
-           ? OTF2_CALLBACK_SUCCESS
-           : OTF2_CALLBACK_ERROR;
+  return MPI_SUCCESS == ret ? OTF2_CALLBACK_SUCCESS : OTF2_CALLBACK_ERROR;
 }
 
+static OTF2_CallbackCode otf2_mpi_collectives_gather(void* userData,
+                                                     OTF2_CollectiveContext* commContext,
+                                                     const void* inData,
+                                                     void* outData,
+                                                     uint32_t numberElements,
+                                                     OTF2_Type type,
+                                                     uint32_t root) {
+  int ret;
 
-static OTF2_CallbackCode
-otf2_mpi_collectives_gather( void*                   userData,
-                             OTF2_CollectiveContext* commContext,
-                             const void*             inData,
-                             void*                   outData,
-                             uint32_t                numberElements,
-                             OTF2_Type               type,
-                             uint32_t                root )
-{
-    int ret;
+  (void)userData;
 
-    ( void )userData;
+  ret = CALL_MPI(MPI_Gather)((void*)inData, numberElements, otf2_mpi_get_type(type), outData, numberElements,
+                             otf2_mpi_get_type(type), root, commContext->comm);
 
-    ret = CALL_MPI( MPI_Gather ) ( ( void* )inData,
-                                   numberElements,
-                                   otf2_mpi_get_type( type ),
-                                   outData,
-                                   numberElements,
-                                   otf2_mpi_get_type( type ),
-                                   root,
-                                   commContext->comm );
-
-    return MPI_SUCCESS == ret
-           ? OTF2_CALLBACK_SUCCESS
-           : OTF2_CALLBACK_ERROR;
+  return MPI_SUCCESS == ret ? OTF2_CALLBACK_SUCCESS : OTF2_CALLBACK_ERROR;
 }
 
+static OTF2_CallbackCode otf2_mpi_collectives_gatherv(void* userData,
+                                                      OTF2_CollectiveContext* commContext,
+                                                      const void* inData,
+                                                      uint32_t inElements,
+                                                      void* outData,
+                                                      const uint32_t* outElements,
+                                                      OTF2_Type type,
+                                                      uint32_t root) {
+  int ret;
+  int* displs = NULL;
 
-static OTF2_CallbackCode
-otf2_mpi_collectives_gatherv( void*                   userData,
-                              OTF2_CollectiveContext* commContext,
-                              const void*             inData,
-                              uint32_t                inElements,
-                              void*                   outData,
-                              const uint32_t*         outElements,
-                              OTF2_Type               type,
-                              uint32_t                root )
-{
-    int  ret;
-    int* displs = NULL;
+  (void)userData;
 
-    ( void )userData;
-
-    if ( ( int )root == commContext->rank )
-    {
-        int i;
-        int displ = 0;
-        for ( i = 0; i < commContext->rank; ++i )
-        {
-            commContext->displacements[ i ] = displ;
-            displ                          += outElements[ i ];
-        }
-        displs = commContext->displacements;
+  if ((int)root == commContext->rank) {
+    int i;
+    int displ = 0;
+    for (i = 0; i < commContext->rank; ++i) {
+      commContext->displacements[i] = displ;
+      displ += outElements[i];
     }
+    displs = commContext->displacements;
+  }
 
-    ret = CALL_MPI( MPI_Gatherv ) ( ( void* )inData,
-                                    inElements,
-                                    otf2_mpi_get_type( type ),
-                                    outData,
-                                    ( int* )outElements,
-                                    displs,
-                                    otf2_mpi_get_type( type ),
-                                    root,
-                                    commContext->comm );
+  ret = CALL_MPI(MPI_Gatherv)((void*)inData, inElements, otf2_mpi_get_type(type), outData, (int*)outElements, displs,
+                              otf2_mpi_get_type(type), root, commContext->comm);
 
-    return MPI_SUCCESS == ret
-           ? OTF2_CALLBACK_SUCCESS
-           : OTF2_CALLBACK_ERROR;
+  return MPI_SUCCESS == ret ? OTF2_CALLBACK_SUCCESS : OTF2_CALLBACK_ERROR;
 }
 
+static OTF2_CallbackCode otf2_mpi_collectives_scatter(void* userData,
+                                                      OTF2_CollectiveContext* commContext,
+                                                      const void* inData,
+                                                      void* outData,
+                                                      uint32_t numberElements,
+                                                      OTF2_Type type,
+                                                      uint32_t root) {
+  (void)userData;
 
-static OTF2_CallbackCode
-otf2_mpi_collectives_scatter( void*                   userData,
-                              OTF2_CollectiveContext* commContext,
-                              const void*             inData,
-                              void*                   outData,
-                              uint32_t                numberElements,
-                              OTF2_Type               type,
-                              uint32_t                root )
-{
-    ( void )userData;
+  int ret = CALL_MPI(MPI_Scatter)((void*)inData, numberElements, otf2_mpi_get_type(type), outData, numberElements,
+                                  otf2_mpi_get_type(type), root, commContext->comm);
 
-    int ret = CALL_MPI( MPI_Scatter ) ( ( void* )inData,
-                                        numberElements,
-                                        otf2_mpi_get_type( type ),
-                                        outData,
-                                        numberElements,
-                                        otf2_mpi_get_type( type ),
-                                        root,
-                                        commContext->comm );
-
-    return MPI_SUCCESS == ret
-           ? OTF2_CALLBACK_SUCCESS
-           : OTF2_CALLBACK_ERROR;
+  return MPI_SUCCESS == ret ? OTF2_CALLBACK_SUCCESS : OTF2_CALLBACK_ERROR;
 }
 
+static OTF2_CallbackCode otf2_mpi_collectives_scatterv(void* userData,
+                                                       OTF2_CollectiveContext* commContext,
+                                                       const void* inData,
+                                                       const uint32_t* inElements,
+                                                       void* outData,
+                                                       uint32_t outElements,
+                                                       OTF2_Type type,
+                                                       uint32_t root) {
+  int* displs = NULL;
 
-static OTF2_CallbackCode
-otf2_mpi_collectives_scatterv( void*                   userData,
-                               OTF2_CollectiveContext* commContext,
-                               const void*             inData,
-                               const uint32_t*         inElements,
-                               void*                   outData,
-                               uint32_t                outElements,
-                               OTF2_Type               type,
-                               uint32_t                root )
-{
-    int* displs = NULL;
+  (void)userData;
 
-    ( void )userData;
-
-    if ( ( int )root == commContext->rank )
-    {
-        int i;
-        int displ = 0;
-        for ( i = 0; i < commContext->rank; ++i )
-        {
-            commContext->displacements[ i ] = displ;
-            displ                          += inElements[ i ];
-        }
-        displs = commContext->displacements;
+  if ((int)root == commContext->rank) {
+    int i;
+    int displ = 0;
+    for (i = 0; i < commContext->rank; ++i) {
+      commContext->displacements[i] = displ;
+      displ += inElements[i];
     }
+    displs = commContext->displacements;
+  }
 
-    int ret = CALL_MPI( MPI_Scatterv ) ( ( void* )inData,
-                                         ( int* )inElements,
-                                         displs,
-                                         otf2_mpi_get_type( type ),
-                                         outData,
-                                         outElements,
-                                         otf2_mpi_get_type( type ),
-                                         root,
-                                         commContext->comm );
+  int ret = CALL_MPI(MPI_Scatterv)((void*)inData, (int*)inElements, displs, otf2_mpi_get_type(type), outData,
+                                   outElements, otf2_mpi_get_type(type), root, commContext->comm);
 
-    return MPI_SUCCESS == ret
-           ? OTF2_CALLBACK_SUCCESS
-           : OTF2_CALLBACK_ERROR;
+  return MPI_SUCCESS == ret ? OTF2_CALLBACK_SUCCESS : OTF2_CALLBACK_ERROR;
 }
 
-
-static void
-otf2_mpi_get_collectives( OTF2_CollectiveCallbacks* collectiveCallbacks )
-{
-    collectiveCallbacks->otf2_release           = otf2_mpi_collectives_release;
-    collectiveCallbacks->otf2_get_size          = otf2_mpi_collectives_get_size;
-    collectiveCallbacks->otf2_get_rank          = otf2_mpi_collectives_get_rank;
-    collectiveCallbacks->otf2_create_local_comm = otf2_mpi_collectives_create_local_comm;
-    collectiveCallbacks->otf2_free_local_comm   = otf2_mpi_collectives_free_local_comm;
-    collectiveCallbacks->otf2_barrier           = otf2_mpi_collectives_barrier;
-    collectiveCallbacks->otf2_bcast             = otf2_mpi_collectives_bcast;
-    collectiveCallbacks->otf2_gather            = otf2_mpi_collectives_gather;
-    collectiveCallbacks->otf2_gatherv           = otf2_mpi_collectives_gatherv;
-    collectiveCallbacks->otf2_scatter           = otf2_mpi_collectives_scatter;
-    collectiveCallbacks->otf2_scatterv          = otf2_mpi_collectives_scatterv;
+static void otf2_mpi_get_collectives(OTF2_CollectiveCallbacks* collectiveCallbacks) {
+  collectiveCallbacks->otf2_release = otf2_mpi_collectives_release;
+  collectiveCallbacks->otf2_get_size = otf2_mpi_collectives_get_size;
+  collectiveCallbacks->otf2_get_rank = otf2_mpi_collectives_get_rank;
+  collectiveCallbacks->otf2_create_local_comm = otf2_mpi_collectives_create_local_comm;
+  collectiveCallbacks->otf2_free_local_comm = otf2_mpi_collectives_free_local_comm;
+  collectiveCallbacks->otf2_barrier = otf2_mpi_collectives_barrier;
+  collectiveCallbacks->otf2_bcast = otf2_mpi_collectives_bcast;
+  collectiveCallbacks->otf2_gather = otf2_mpi_collectives_gather;
+  collectiveCallbacks->otf2_gatherv = otf2_mpi_collectives_gatherv;
+  collectiveCallbacks->otf2_scatter = otf2_mpi_collectives_scatter;
+  collectiveCallbacks->otf2_scatterv = otf2_mpi_collectives_scatterv;
 }
-
 
 #undef CALL_MPI
 #ifdef OTF2_MPI_USE_PMPI_undef_me
@@ -1219,10 +1024,8 @@ otf2_mpi_get_collectives( OTF2_CollectiveCallbacks* collectiveCallbacks )
 #undef OTF2_MPI_USE_PMPI_undef_me
 #endif
 
-
 /**
  * @endcond
  */
-
 
 #endif /* OTF2_MPI_COLLECTIVES_H */

@@ -28,10 +28,8 @@
  *
  */
 
-
 #ifndef OTF2_EVT_READER_H
 #define OTF2_EVT_READER_H
-
 
 /**
  *  @file
@@ -40,23 +38,18 @@
  *              location.
  */
 
-
 #include <stdint.h>
-
 
 #include <otf2/OTF2_ErrorCodes.h>
 
-
-#include <otf2/OTF2_Events.h>
-#include <otf2/OTF2_Definitions.h>
 #include <otf2/OTF2_AttributeList.h>
+#include <otf2/OTF2_Definitions.h>
+#include <otf2/OTF2_Events.h>
 #include <otf2/OTF2_EvtReaderCallbacks.h>
-
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
 
 /** @brief Return the location ID of the reading related location.
  *
@@ -66,10 +59,7 @@ extern "C" {
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtReader_GetLocationID( const OTF2_EvtReader* reader,
-                              OTF2_LocationRef*     location );
-
+OTF2_ErrorCode OTF2_EvtReader_GetLocationID(const OTF2_EvtReader* reader, OTF2_LocationRef* location);
 
 /** @brief The following function can be used to get the position
  *         (number of the event in the stream) of last read event.
@@ -80,10 +70,7 @@ OTF2_EvtReader_GetLocationID( const OTF2_EvtReader* reader,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtReader_GetPos( OTF2_EvtReader* reader,
-                       uint64_t*       position );
-
+OTF2_ErrorCode OTF2_EvtReader_GetPos(OTF2_EvtReader* reader, uint64_t* position);
 
 /** @brief Sets the callback functions for the given reader object. Every time
  *         when OTF2 reads a record, a callback function is called and the records
@@ -102,11 +89,9 @@ OTF2_EvtReader_GetPos( OTF2_EvtReader* reader,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtReader_SetCallbacks( OTF2_EvtReader*                reader,
-                             const OTF2_EvtReaderCallbacks* callbacks,
-                             void*                          userData );
-
+OTF2_ErrorCode OTF2_EvtReader_SetCallbacks(OTF2_EvtReader* reader,
+                                           const OTF2_EvtReaderCallbacks* callbacks,
+                                           void* userData);
 
 /** @brief Seek jumps to an event position.
  *
@@ -117,10 +102,7 @@ OTF2_EvtReader_SetCallbacks( OTF2_EvtReader*                reader,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtReader_Seek( OTF2_EvtReader* reader,
-                     uint64_t        position );
-
+OTF2_ErrorCode OTF2_EvtReader_Seek(OTF2_EvtReader* reader, uint64_t position);
 
 /** @brief After callback registration, the local events could be read
  *         with the following function. Reads at most @a recordsToRead records.
@@ -133,11 +115,7 @@ OTF2_EvtReader_Seek( OTF2_EvtReader* reader,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtReader_ReadEvents( OTF2_EvtReader* reader,
-                           uint64_t        recordsToRead,
-                           uint64_t*       recordsRead );
-
+OTF2_ErrorCode OTF2_EvtReader_ReadEvents(OTF2_EvtReader* reader, uint64_t recordsToRead, uint64_t* recordsRead);
 
 /** @brief The following function rewrites the timestamp from the event on the
  *  actual reading position if the buffer is in OTF2_BUFFER_MODIFY mode. It also
@@ -155,10 +133,7 @@ OTF2_EvtReader_ReadEvents( OTF2_EvtReader* reader,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtReader_TimeStampRewrite( OTF2_EvtReader* reader,
-                                 OTF2_TimeStamp  time );
-
+OTF2_ErrorCode OTF2_EvtReader_TimeStampRewrite(OTF2_EvtReader* reader, OTF2_TimeStamp time);
 
 /** @brief This functions reads recordsRead events backwards from the current
  *  position.
@@ -169,11 +144,7 @@ OTF2_EvtReader_TimeStampRewrite( OTF2_EvtReader* reader,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtReader_ReadEventsBackward( OTF2_EvtReader* reader,
-                                   uint64_t        recordsToRead,
-                                   uint64_t*       recordsRead );
-
+OTF2_ErrorCode OTF2_EvtReader_ReadEventsBackward(OTF2_EvtReader* reader, uint64_t recordsToRead, uint64_t* recordsRead);
 
 /** @brief Enable or disable applying of the mapping tables to events read
  *         from this event reader.
@@ -186,10 +157,7 @@ OTF2_EvtReader_ReadEventsBackward( OTF2_EvtReader* reader,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtReader_ApplyMappingTables( OTF2_EvtReader* reader,
-                                   bool            action );
-
+OTF2_ErrorCode OTF2_EvtReader_ApplyMappingTables(OTF2_EvtReader* reader, bool action);
 
 /** @brief Enable or disable applying of the clock offset to event timestamps
  *         read from this event reader.
@@ -203,14 +171,10 @@ OTF2_EvtReader_ApplyMappingTables( OTF2_EvtReader* reader,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtReader_ApplyClockOffsets( OTF2_EvtReader* reader,
-                                  bool            action );
-
+OTF2_ErrorCode OTF2_EvtReader_ApplyClockOffsets(OTF2_EvtReader* reader, bool action);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-
 
 #endif /* !OTF2_EVT_READER_H */

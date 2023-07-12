@@ -9,10 +9,8 @@
  * directory for details.
  */
 
-
 #ifndef OTF2_MARKER_READER_H
 #define OTF2_MARKER_READER_H
-
 
 /**
  *  @file
@@ -20,21 +18,16 @@
  *  @brief      This file provides all routines that read marker records.
  */
 
-
 #include <stdint.h>
 
-
 #include <otf2/OTF2_ErrorCodes.h>
-
 
 #include <otf2/OTF2_Marker.h>
 #include <otf2/OTF2_MarkerReaderCallbacks.h>
 
-
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
 
 /** @brief After callback registration, the markers could be
  *         read with the following function. The user of this
@@ -53,11 +46,7 @@ extern "C" {
  *
  *  @return OTF2_ErrorCode with !=OTF2_SUCCESS if there was an error.
  */
-OTF2_ErrorCode
-OTF2_MarkerReader_ReadMarkers( OTF2_MarkerReader* reader,
-                               uint64_t           recordsToRead,
-                               uint64_t*          recordsRead );
-
+OTF2_ErrorCode OTF2_MarkerReader_ReadMarkers(OTF2_MarkerReader* reader, uint64_t recordsToRead, uint64_t* recordsRead);
 
 /** @brief Sets the callback functions for the given reader object. Every time
  *         when OTF2 reads a record, a callback function is called and the records
@@ -76,15 +65,12 @@ OTF2_MarkerReader_ReadMarkers( OTF2_MarkerReader* reader,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_MarkerReader_SetCallbacks( OTF2_MarkerReader*                reader,
-                                const OTF2_MarkerReaderCallbacks* callbacks,
-                                void*                             userData );
-
+OTF2_ErrorCode OTF2_MarkerReader_SetCallbacks(OTF2_MarkerReader* reader,
+                                              const OTF2_MarkerReaderCallbacks* callbacks,
+                                              void* userData);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-
 
 #endif /* !OTF2_MARKER_READER_H */

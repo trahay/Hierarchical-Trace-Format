@@ -1,10 +1,9 @@
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 
+#include "OTF2_GlobalEvtReader.h"
 #include "htf.h"
 #include "otf2.h"
-#include "OTF2_GlobalEvtReader.h"
-
 
 /** @brief Sets the callback functions for the given reader object. Every time
  *         when OTF2 reads a record, a callback function is called and the records
@@ -21,13 +20,11 @@
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReader_SetCallbacks( OTF2_GlobalEvtReader*                reader,
-                                   const OTF2_GlobalEvtReaderCallbacks* callbacks,
-                                   void*                                userData ) {
+OTF2_ErrorCode OTF2_GlobalEvtReader_SetCallbacks(OTF2_GlobalEvtReader* reader,
+                                                 const OTF2_GlobalEvtReaderCallbacks* callbacks,
+                                                 void* userData) {
   NOT_IMPLEMENTED;
 }
-
 
 /** @brief Triggers the callback for the next event record.
  *
@@ -36,11 +33,9 @@ OTF2_GlobalEvtReader_SetCallbacks( OTF2_GlobalEvtReader*                reader,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReader_ReadEvent( OTF2_GlobalEvtReader* reader ) {
+OTF2_ErrorCode OTF2_GlobalEvtReader_ReadEvent(OTF2_GlobalEvtReader* reader) {
   NOT_IMPLEMENTED;
 }
-
 
 /** @brief Has more events.
  *
@@ -51,9 +46,7 @@ OTF2_GlobalEvtReader_ReadEvent( OTF2_GlobalEvtReader* reader ) {
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReader_HasEvent( OTF2_GlobalEvtReader* reader,
-                               int*                  flag ) {
+OTF2_ErrorCode OTF2_GlobalEvtReader_HasEvent(OTF2_GlobalEvtReader* reader, int* flag) {
   NOT_IMPLEMENTED;
 }
 
@@ -69,9 +62,8 @@ OTF2_GlobalEvtReader_HasEvent( OTF2_GlobalEvtReader* reader,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReader_ReadEvents( OTF2_GlobalEvtReader* reader,
-                                 uint64_t              recordsToRead,
-                                 uint64_t*             recordsRead ) {
+OTF2_ErrorCode OTF2_GlobalEvtReader_ReadEvents(OTF2_GlobalEvtReader* reader,
+                                               uint64_t recordsToRead,
+                                               uint64_t* recordsRead) {
   NOT_IMPLEMENTED;
 }

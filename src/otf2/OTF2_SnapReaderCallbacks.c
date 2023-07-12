@@ -1,10 +1,9 @@
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 
+#include "OTF2_SnapReaderCallbacks.h"
 #include "htf.h"
 #include "otf2.h"
-#include "OTF2_SnapReaderCallbacks.h"
-
 
 /** @brief Allocates a new struct for the snap event callbacks.
  *
@@ -12,11 +11,9 @@
  *
  *  @return A newly allocated struct of type @eref{OTF2_SnapReaderCallbacks}.
  */
-OTF2_SnapReaderCallbacks*
-OTF2_SnapReaderCallbacks_New( void ) {
+OTF2_SnapReaderCallbacks* OTF2_SnapReaderCallbacks_New(void) {
   NOT_IMPLEMENTED;
 }
-
 
 /** @brief Deallocates a struct for the snap event callbacks.
  *
@@ -25,11 +22,9 @@ OTF2_SnapReaderCallbacks_New( void ) {
  *
  *  @since Version 1.2
  */
-void
-OTF2_SnapReaderCallbacks_Delete( OTF2_SnapReaderCallbacks* snapReaderCallbacks ) {
+void OTF2_SnapReaderCallbacks_Delete(OTF2_SnapReaderCallbacks* snapReaderCallbacks) {
   NOT_IMPLEMENTED;
 }
-
 
 /** @brief Clears a struct for the snapshot event callbacks.
  *
@@ -38,13 +33,9 @@ OTF2_SnapReaderCallbacks_Delete( OTF2_SnapReaderCallbacks* snapReaderCallbacks )
  *
  *  @since Version 1.2
  */
-void
-OTF2_SnapReaderCallbacks_Clear( OTF2_SnapReaderCallbacks* snapReaderCallbacks ) {
+void OTF2_SnapReaderCallbacks_Clear(OTF2_SnapReaderCallbacks* snapReaderCallbacks) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the Unknown snap event.
  *
@@ -60,15 +51,10 @@ OTF2_SnapReaderCallbacks_Clear( OTF2_SnapReaderCallbacks* snapReaderCallbacks ) 
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_SnapReaderCallbacks_SetUnknownCallback(
-    OTF2_SnapReaderCallbacks*       snapReaderCallbacks,
-    OTF2_SnapReaderCallback_Unknown unknownCallback ) {
+OTF2_ErrorCode OTF2_SnapReaderCallbacks_SetUnknownCallback(OTF2_SnapReaderCallbacks* snapReaderCallbacks,
+                                                           OTF2_SnapReaderCallback_Unknown unknownCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the SnapshotStart snap event.
  *
@@ -84,15 +70,11 @@ OTF2_SnapReaderCallbacks_SetUnknownCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_SnapReaderCallbacks_SetSnapshotStartCallback(
-    OTF2_SnapReaderCallbacks*             snapReaderCallbacks,
-    OTF2_SnapReaderCallback_SnapshotStart snapshotStartCallback ) {
+OTF2_ErrorCode OTF2_SnapReaderCallbacks_SetSnapshotStartCallback(
+  OTF2_SnapReaderCallbacks* snapReaderCallbacks,
+  OTF2_SnapReaderCallback_SnapshotStart snapshotStartCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the SnapshotEnd snap event.
  *
@@ -108,15 +90,11 @@ OTF2_SnapReaderCallbacks_SetSnapshotStartCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_SnapReaderCallbacks_SetSnapshotEndCallback(
-    OTF2_SnapReaderCallbacks*           snapReaderCallbacks,
-    OTF2_SnapReaderCallback_SnapshotEnd snapshotEndCallback ) {
+OTF2_ErrorCode OTF2_SnapReaderCallbacks_SetSnapshotEndCallback(
+  OTF2_SnapReaderCallbacks* snapReaderCallbacks,
+  OTF2_SnapReaderCallback_SnapshotEnd snapshotEndCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the MeasurementOnOff snap event.
  *
@@ -132,15 +110,11 @@ OTF2_SnapReaderCallbacks_SetSnapshotEndCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_SnapReaderCallbacks_SetMeasurementOnOffCallback(
-    OTF2_SnapReaderCallbacks*                snapReaderCallbacks,
-    OTF2_SnapReaderCallback_MeasurementOnOff measurementOnOffCallback ) {
+OTF2_ErrorCode OTF2_SnapReaderCallbacks_SetMeasurementOnOffCallback(
+  OTF2_SnapReaderCallbacks* snapReaderCallbacks,
+  OTF2_SnapReaderCallback_MeasurementOnOff measurementOnOffCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the Enter snap event.
  *
@@ -156,15 +130,10 @@ OTF2_SnapReaderCallbacks_SetMeasurementOnOffCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_SnapReaderCallbacks_SetEnterCallback(
-    OTF2_SnapReaderCallbacks*     snapReaderCallbacks,
-    OTF2_SnapReaderCallback_Enter enterCallback ) {
+OTF2_ErrorCode OTF2_SnapReaderCallbacks_SetEnterCallback(OTF2_SnapReaderCallbacks* snapReaderCallbacks,
+                                                         OTF2_SnapReaderCallback_Enter enterCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the MpiSend snap event.
  *
@@ -180,15 +149,10 @@ OTF2_SnapReaderCallbacks_SetEnterCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_SnapReaderCallbacks_SetMpiSendCallback(
-    OTF2_SnapReaderCallbacks*       snapReaderCallbacks,
-    OTF2_SnapReaderCallback_MpiSend mpiSendCallback ) {
+OTF2_ErrorCode OTF2_SnapReaderCallbacks_SetMpiSendCallback(OTF2_SnapReaderCallbacks* snapReaderCallbacks,
+                                                           OTF2_SnapReaderCallback_MpiSend mpiSendCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the MpiIsend snap event.
  *
@@ -204,15 +168,10 @@ OTF2_SnapReaderCallbacks_SetMpiSendCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_SnapReaderCallbacks_SetMpiIsendCallback(
-    OTF2_SnapReaderCallbacks*        snapReaderCallbacks,
-    OTF2_SnapReaderCallback_MpiIsend mpiIsendCallback ) {
+OTF2_ErrorCode OTF2_SnapReaderCallbacks_SetMpiIsendCallback(OTF2_SnapReaderCallbacks* snapReaderCallbacks,
+                                                            OTF2_SnapReaderCallback_MpiIsend mpiIsendCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the MpiIsendComplete snap event.
  *
@@ -228,15 +187,11 @@ OTF2_SnapReaderCallbacks_SetMpiIsendCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_SnapReaderCallbacks_SetMpiIsendCompleteCallback(
-    OTF2_SnapReaderCallbacks*                snapReaderCallbacks,
-    OTF2_SnapReaderCallback_MpiIsendComplete mpiIsendCompleteCallback ) {
+OTF2_ErrorCode OTF2_SnapReaderCallbacks_SetMpiIsendCompleteCallback(
+  OTF2_SnapReaderCallbacks* snapReaderCallbacks,
+  OTF2_SnapReaderCallback_MpiIsendComplete mpiIsendCompleteCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the MpiRecv snap event.
  *
@@ -252,15 +207,10 @@ OTF2_SnapReaderCallbacks_SetMpiIsendCompleteCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_SnapReaderCallbacks_SetMpiRecvCallback(
-    OTF2_SnapReaderCallbacks*       snapReaderCallbacks,
-    OTF2_SnapReaderCallback_MpiRecv mpiRecvCallback ) {
+OTF2_ErrorCode OTF2_SnapReaderCallbacks_SetMpiRecvCallback(OTF2_SnapReaderCallbacks* snapReaderCallbacks,
+                                                           OTF2_SnapReaderCallback_MpiRecv mpiRecvCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the MpiIrecvRequest snap event.
  *
@@ -276,15 +226,11 @@ OTF2_SnapReaderCallbacks_SetMpiRecvCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_SnapReaderCallbacks_SetMpiIrecvRequestCallback(
-    OTF2_SnapReaderCallbacks*               snapReaderCallbacks,
-    OTF2_SnapReaderCallback_MpiIrecvRequest mpiIrecvRequestCallback ) {
+OTF2_ErrorCode OTF2_SnapReaderCallbacks_SetMpiIrecvRequestCallback(
+  OTF2_SnapReaderCallbacks* snapReaderCallbacks,
+  OTF2_SnapReaderCallback_MpiIrecvRequest mpiIrecvRequestCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the MpiIrecv snap event.
  *
@@ -300,15 +246,10 @@ OTF2_SnapReaderCallbacks_SetMpiIrecvRequestCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_SnapReaderCallbacks_SetMpiIrecvCallback(
-    OTF2_SnapReaderCallbacks*        snapReaderCallbacks,
-    OTF2_SnapReaderCallback_MpiIrecv mpiIrecvCallback ) {
+OTF2_ErrorCode OTF2_SnapReaderCallbacks_SetMpiIrecvCallback(OTF2_SnapReaderCallbacks* snapReaderCallbacks,
+                                                            OTF2_SnapReaderCallback_MpiIrecv mpiIrecvCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the MpiCollectiveBegin snap event.
  *
@@ -324,15 +265,11 @@ OTF2_SnapReaderCallbacks_SetMpiIrecvCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_SnapReaderCallbacks_SetMpiCollectiveBeginCallback(
-    OTF2_SnapReaderCallbacks*                  snapReaderCallbacks,
-    OTF2_SnapReaderCallback_MpiCollectiveBegin mpiCollectiveBeginCallback ) {
+OTF2_ErrorCode OTF2_SnapReaderCallbacks_SetMpiCollectiveBeginCallback(
+  OTF2_SnapReaderCallbacks* snapReaderCallbacks,
+  OTF2_SnapReaderCallback_MpiCollectiveBegin mpiCollectiveBeginCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the MpiCollectiveEnd snap event.
  *
@@ -348,15 +285,11 @@ OTF2_SnapReaderCallbacks_SetMpiCollectiveBeginCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_SnapReaderCallbacks_SetMpiCollectiveEndCallback(
-    OTF2_SnapReaderCallbacks*                snapReaderCallbacks,
-    OTF2_SnapReaderCallback_MpiCollectiveEnd mpiCollectiveEndCallback ) {
+OTF2_ErrorCode OTF2_SnapReaderCallbacks_SetMpiCollectiveEndCallback(
+  OTF2_SnapReaderCallbacks* snapReaderCallbacks,
+  OTF2_SnapReaderCallback_MpiCollectiveEnd mpiCollectiveEndCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the OmpFork snap event.
  *
@@ -372,15 +305,10 @@ OTF2_SnapReaderCallbacks_SetMpiCollectiveEndCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_SnapReaderCallbacks_SetOmpForkCallback(
-    OTF2_SnapReaderCallbacks*       snapReaderCallbacks,
-    OTF2_SnapReaderCallback_OmpFork ompForkCallback ) {
+OTF2_ErrorCode OTF2_SnapReaderCallbacks_SetOmpForkCallback(OTF2_SnapReaderCallbacks* snapReaderCallbacks,
+                                                           OTF2_SnapReaderCallback_OmpFork ompForkCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the OmpAcquireLock snap event.
  *
@@ -396,15 +324,11 @@ OTF2_SnapReaderCallbacks_SetOmpForkCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_SnapReaderCallbacks_SetOmpAcquireLockCallback(
-    OTF2_SnapReaderCallbacks*              snapReaderCallbacks,
-    OTF2_SnapReaderCallback_OmpAcquireLock ompAcquireLockCallback ) {
+OTF2_ErrorCode OTF2_SnapReaderCallbacks_SetOmpAcquireLockCallback(
+  OTF2_SnapReaderCallbacks* snapReaderCallbacks,
+  OTF2_SnapReaderCallback_OmpAcquireLock ompAcquireLockCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the OmpTaskCreate snap event.
  *
@@ -420,15 +344,11 @@ OTF2_SnapReaderCallbacks_SetOmpAcquireLockCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_SnapReaderCallbacks_SetOmpTaskCreateCallback(
-    OTF2_SnapReaderCallbacks*             snapReaderCallbacks,
-    OTF2_SnapReaderCallback_OmpTaskCreate ompTaskCreateCallback ) {
+OTF2_ErrorCode OTF2_SnapReaderCallbacks_SetOmpTaskCreateCallback(
+  OTF2_SnapReaderCallbacks* snapReaderCallbacks,
+  OTF2_SnapReaderCallback_OmpTaskCreate ompTaskCreateCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the OmpTaskSwitch snap event.
  *
@@ -444,15 +364,11 @@ OTF2_SnapReaderCallbacks_SetOmpTaskCreateCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_SnapReaderCallbacks_SetOmpTaskSwitchCallback(
-    OTF2_SnapReaderCallbacks*             snapReaderCallbacks,
-    OTF2_SnapReaderCallback_OmpTaskSwitch ompTaskSwitchCallback ) {
+OTF2_ErrorCode OTF2_SnapReaderCallbacks_SetOmpTaskSwitchCallback(
+  OTF2_SnapReaderCallbacks* snapReaderCallbacks,
+  OTF2_SnapReaderCallback_OmpTaskSwitch ompTaskSwitchCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the Metric snap event.
  *
@@ -468,15 +384,10 @@ OTF2_SnapReaderCallbacks_SetOmpTaskSwitchCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_SnapReaderCallbacks_SetMetricCallback(
-    OTF2_SnapReaderCallbacks*      snapReaderCallbacks,
-    OTF2_SnapReaderCallback_Metric metricCallback ) {
+OTF2_ErrorCode OTF2_SnapReaderCallbacks_SetMetricCallback(OTF2_SnapReaderCallbacks* snapReaderCallbacks,
+                                                          OTF2_SnapReaderCallback_Metric metricCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the ParameterString snap event.
  *
@@ -492,15 +403,11 @@ OTF2_SnapReaderCallbacks_SetMetricCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_SnapReaderCallbacks_SetParameterStringCallback(
-    OTF2_SnapReaderCallbacks*               snapReaderCallbacks,
-    OTF2_SnapReaderCallback_ParameterString parameterStringCallback ) {
+OTF2_ErrorCode OTF2_SnapReaderCallbacks_SetParameterStringCallback(
+  OTF2_SnapReaderCallbacks* snapReaderCallbacks,
+  OTF2_SnapReaderCallback_ParameterString parameterStringCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the ParameterInt snap event.
  *
@@ -516,15 +423,11 @@ OTF2_SnapReaderCallbacks_SetParameterStringCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_SnapReaderCallbacks_SetParameterIntCallback(
-    OTF2_SnapReaderCallbacks*            snapReaderCallbacks,
-    OTF2_SnapReaderCallback_ParameterInt parameterIntCallback ) {
+OTF2_ErrorCode OTF2_SnapReaderCallbacks_SetParameterIntCallback(
+  OTF2_SnapReaderCallbacks* snapReaderCallbacks,
+  OTF2_SnapReaderCallback_ParameterInt parameterIntCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the ParameterUnsignedInt snap event.
  *
@@ -541,9 +444,8 @@ OTF2_SnapReaderCallbacks_SetParameterIntCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_SnapReaderCallbacks_SetParameterUnsignedIntCallback(
-    OTF2_SnapReaderCallbacks*                    snapReaderCallbacks,
-    OTF2_SnapReaderCallback_ParameterUnsignedInt parameterUnsignedIntCallback ) {
+OTF2_ErrorCode OTF2_SnapReaderCallbacks_SetParameterUnsignedIntCallback(
+  OTF2_SnapReaderCallbacks* snapReaderCallbacks,
+  OTF2_SnapReaderCallback_ParameterUnsignedInt parameterUnsignedIntCallback) {
   NOT_IMPLEMENTED;
 }

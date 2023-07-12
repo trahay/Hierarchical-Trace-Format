@@ -1,9 +1,9 @@
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 
+#include "OTF2_SnapReader.h"
 #include "htf.h"
 #include "otf2.h"
-#include "OTF2_SnapReader.h"
 
 /** @brief Return the location ID of the reading related location.
  *
@@ -15,12 +15,9 @@
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_SnapReader_GetLocationID( const OTF2_SnapReader* reader,
-                               OTF2_LocationRef*      location ) {
+OTF2_ErrorCode OTF2_SnapReader_GetLocationID(const OTF2_SnapReader* reader, OTF2_LocationRef* location) {
   NOT_IMPLEMENTED;
 }
-
 
 /** @brief Sets the callback functions for the given reader object. Every time
  *         when OTF2 reads a record, a callback function is called and the records
@@ -41,13 +38,11 @@ OTF2_SnapReader_GetLocationID( const OTF2_SnapReader* reader,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_SnapReader_SetCallbacks( OTF2_SnapReader*                reader,
-                              const OTF2_SnapReaderCallbacks* callbacks,
-                              void*                           userData ) {
+OTF2_ErrorCode OTF2_SnapReader_SetCallbacks(OTF2_SnapReader* reader,
+                                            const OTF2_SnapReaderCallbacks* callbacks,
+                                            void* userData) {
   NOT_IMPLEMENTED;
 }
-
 
 /** @brief Seek jumps to start of latest snapshot that was made
  *         before a given time 'req_time'.
@@ -61,13 +56,9 @@ OTF2_SnapReader_SetCallbacks( OTF2_SnapReader*                reader,
  *
  *  @return OTF2_ErrorCode with !=OTF2_SUCCESS if there was an error.
  */
-OTF2_ErrorCode
-OTF2_SnapReader_Seek( OTF2_SnapReader* reader,
-                      uint64_t         req_time,
-                      bool*            found ) {
+OTF2_ErrorCode OTF2_SnapReader_Seek(OTF2_SnapReader* reader, uint64_t req_time, bool* found) {
   NOT_IMPLEMENTED;
 }
-
 
 /** @brief After callback registration, the local snapshot events could be read
  *         with the following function. Reads at most @a recordsToRead records.
@@ -83,9 +74,6 @@ OTF2_SnapReader_Seek( OTF2_SnapReader* reader,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_SnapReader_ReadSnapshots( OTF2_SnapReader* reader,
-                               uint64_t         recordsToRead,
-                               uint64_t*        recordsRead ) {
+OTF2_ErrorCode OTF2_SnapReader_ReadSnapshots(OTF2_SnapReader* reader, uint64_t recordsToRead, uint64_t* recordsRead) {
   NOT_IMPLEMENTED;
 }

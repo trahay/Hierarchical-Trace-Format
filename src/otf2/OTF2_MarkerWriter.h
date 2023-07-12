@@ -9,10 +9,8 @@
  * directory for details.
  */
 
-
 #ifndef OTF2_MARKER_WRITER_H
 #define OTF2_MARKER_WRITER_H
-
 
 /**
  *  @file
@@ -20,27 +18,20 @@
  *  @brief      This file provides all routines that write marker records.
  */
 
-
 #include <stdint.h>
-
 
 #include <otf2/OTF2_ErrorCodes.h>
 
-
 #include <otf2/OTF2_Definitions.h>
 
-
 #include <otf2/OTF2_Marker.h>
-
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-
 /** @brief Handle definition for the external marker writer. */
 typedef struct OTF2_MarkerWriter_struct OTF2_MarkerWriter;
-
 
 /** @brief Write a marker definition.
  *
@@ -56,12 +47,11 @@ typedef struct OTF2_MarkerWriter_struct OTF2_MarkerWriter;
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_MarkerWriter_WriteDefMarker( OTF2_MarkerWriter*  writerHandle,
-                                  OTF2_MarkerRef      self,
-                                  const char*         markerGroup,
-                                  const char*         markerCategory,
-                                  OTF2_MarkerSeverity severity );
+OTF2_ErrorCode OTF2_MarkerWriter_WriteDefMarker(OTF2_MarkerWriter* writerHandle,
+                                                OTF2_MarkerRef self,
+                                                const char* markerGroup,
+                                                const char* markerCategory,
+                                                OTF2_MarkerSeverity severity);
 
 /** @brief Write a marker record.
  *
@@ -84,18 +74,16 @@ OTF2_MarkerWriter_WriteDefMarker( OTF2_MarkerWriter*  writerHandle,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_MarkerWriter_WriteMarker( OTF2_MarkerWriter* writerHandle,
-                               OTF2_TimeStamp     timestamp,
-                               OTF2_TimeStamp     duration,
-                               OTF2_MarkerRef     marker,
-                               OTF2_MarkerScope   scope,
-                               uint64_t           scopeRef,
-                               const char*        text );
+OTF2_ErrorCode OTF2_MarkerWriter_WriteMarker(OTF2_MarkerWriter* writerHandle,
+                                             OTF2_TimeStamp timestamp,
+                                             OTF2_TimeStamp duration,
+                                             OTF2_MarkerRef marker,
+                                             OTF2_MarkerScope scope,
+                                             uint64_t scopeRef,
+                                             const char* text);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-
 
 #endif /* !OTF2_MARKER_WRITER_H */

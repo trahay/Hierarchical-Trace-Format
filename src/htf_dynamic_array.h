@@ -7,10 +7,10 @@
 
 #include <sys/types.h>
 typedef struct htf_array {
-	void* array;
-	size_t element_size;
-	uint size;
-	uint allocated;
+  void* array;
+  size_t element_size;
+  uint size;
+  uint allocated;
 } htf_array_t;
 
 /** Creates a new array */
@@ -33,4 +33,4 @@ void array_remove_first(htf_array_t* array, void* element);
 
 #define DEFAULT_ARRAY_SIZE 1000
 
-#endif	// HTF_SRC_HTF_DYNAMIC_ARRAY_H
+#endif  // HTF_SRC_HTF_DYNAMIC_ARRAY_H

@@ -28,10 +28,8 @@
  *
  */
 
-
 #ifndef OTF2_IDMAP_H
 #define OTF2_IDMAP_H
-
 
 /**
  *  @file
@@ -52,20 +50,16 @@
  *  look-up procedure.
  */
 
-
 #include <stddef.h>
 #include <stdint.h>
 #ifndef __cplusplus
 #include <stdbool.h>
 #endif
 
-
 #include <otf2/OTF2_ErrorCodes.h>
-
 
 /** Opaque data structure representing an ID mapping table. */
 typedef struct OTF2_IdMap_struct OTF2_IdMap;
-
 
 /** Wrapper around enum OTF2_IdMapMode_enum, so that it is guaranteed
  *  that it is a uint8_t */
@@ -75,25 +69,18 @@ typedef uint8_t OTF2_IdMapMode;
  * Enumeration type defining the two different modes of an identifier mapping
  * table.
  */
-enum OTF2_IdMapMode_enum
-{
-    OTF2_ID_MAP_DENSE,   /**< Dense mapping table */
-    OTF2_ID_MAP_SPARSE   /**< Sparse mapping table */
+enum OTF2_IdMapMode_enum {
+  OTF2_ID_MAP_DENSE, /**< Dense mapping table */
+  OTF2_ID_MAP_SPARSE /**< Sparse mapping table */
 };
-
 
 /** @brief Function prototype for use in @a OTF2_IdMap_Traverse.
  */
-typedef void
-( * OTF2_IdMap_TraverseCallback )( uint64_t localId,
-                                   uint64_t globalId,
-                                   void*    userData );
-
+typedef void (*OTF2_IdMap_TraverseCallback)(uint64_t localId, uint64_t globalId, void* userData);
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 
 /**
  *  Creates and returns a new instance of OTF2_IdMap with the given @a mode
@@ -106,10 +93,7 @@ extern "C" {
  *  @return Pointer to new instance or NULL if memory request couldn't be
  *  fulfilled.
  */
-OTF2_IdMap*
-OTF2_IdMap_Create( OTF2_IdMapMode mode,
-                   uint64_t       capacity );
-
+OTF2_IdMap* OTF2_IdMap_Create(OTF2_IdMapMode mode, uint64_t capacity);
 
 /**
  *  Creates and returns a new instance of OTF2_IdMap from the array given by
@@ -131,11 +115,7 @@ OTF2_IdMap_Create( OTF2_IdMapMode mode,
  *  @return Pointer to new instance or NULL if memory request couldn't be
  *  fulfilled.
  */
-OTF2_IdMap*
-OTF2_IdMap_CreateFromUint64Array( uint64_t        length,
-                                  const uint64_t* mappings,
-                                  bool            optimizeSize );
-
+OTF2_IdMap* OTF2_IdMap_CreateFromUint64Array(uint64_t length, const uint64_t* mappings, bool optimizeSize);
 
 /**
  *  Creates and returns a new instance of OTF2_IdMap from the array given by
@@ -151,11 +131,7 @@ OTF2_IdMap_CreateFromUint64Array( uint64_t        length,
  *  @return Pointer to new instance or NULL if memory request couldn't be
  *  fulfilled.
  */
-OTF2_IdMap*
-OTF2_IdMap_CreateFromUint32Array( uint64_t        length,
-                                  const uint32_t* mappings,
-                                  bool            optimizeSize );
-
+OTF2_IdMap* OTF2_IdMap_CreateFromUint32Array(uint64_t length, const uint32_t* mappings, bool optimizeSize);
 
 /**
  *  Destroys the given @a instance of OTF2_IdMap and releases the allocated
@@ -163,9 +139,7 @@ OTF2_IdMap_CreateFromUint32Array( uint64_t        length,
  *
  *  @param instance Object to be freed
  */
-void
-OTF2_IdMap_Free( OTF2_IdMap* instance );
-
+void OTF2_IdMap_Free(OTF2_IdMap* instance);
 
 /**
  *  Returns the actual number of entries stored in the given OTF2_IdMap
@@ -176,10 +150,7 @@ OTF2_IdMap_Free( OTF2_IdMap* instance );
  *
  *  @return OTF2_SUCCESS, or error code.
  */
-OTF2_ErrorCode
-OTF2_IdMap_GetSize( const OTF2_IdMap* instance,
-                    uint64_t*         size );
-
+OTF2_ErrorCode OTF2_IdMap_GetSize(const OTF2_IdMap* instance, uint64_t* size);
 
 /**
  *  Returns the identifier mapping mode (dense/sparse) used for the given
@@ -190,10 +161,7 @@ OTF2_IdMap_GetSize( const OTF2_IdMap* instance,
  *
  *  @return OTF2_SUCCESS, or error code.
  */
-OTF2_ErrorCode
-OTF2_IdMap_GetMode( const OTF2_IdMap* instance,
-                    OTF2_IdMapMode*   mode );
-
+OTF2_ErrorCode OTF2_IdMap_GetMode(const OTF2_IdMap* instance, OTF2_IdMapMode* mode);
 
 /**
  *  Removes all entries in the given mapping table @a instance. It can be
@@ -203,9 +171,7 @@ OTF2_IdMap_GetMode( const OTF2_IdMap* instance,
  *
  *  @return OTF2_SUCCESS, or error code.
  */
-OTF2_ErrorCode
-OTF2_IdMap_Clear( OTF2_IdMap* instance );
-
+OTF2_ErrorCode OTF2_IdMap_Clear(OTF2_IdMap* instance);
 
 /**
  *  Adds the given mapping from @a localId to @a globalId to the mapping
@@ -221,11 +187,7 @@ OTF2_IdMap_Clear( OTF2_IdMap* instance );
  *
  *  @return OTF2_SUCCESS, or error code.
  */
-OTF2_ErrorCode
-OTF2_IdMap_AddIdPair( OTF2_IdMap* instance,
-                      uint64_t    localId,
-                      uint64_t    globalId );
-
+OTF2_ErrorCode OTF2_IdMap_AddIdPair(OTF2_IdMap* instance, uint64_t localId, uint64_t globalId);
 
 /**
  *  Maps the given @a localId to the global id and store it in the storage
@@ -239,11 +201,7 @@ OTF2_IdMap_AddIdPair( OTF2_IdMap* instance,
  *
  *  @return OTF2_SUCCESS, or error code.
  */
-OTF2_ErrorCode
-OTF2_IdMap_GetGlobalId( const OTF2_IdMap* instance,
-                        uint64_t          localId,
-                        uint64_t*         globalId );
-
+OTF2_ErrorCode OTF2_IdMap_GetGlobalId(const OTF2_IdMap* instance, uint64_t localId, uint64_t* globalId);
 
 /**
  *  Maps the given @a localId to the global id and store it in the storage
@@ -258,11 +216,7 @@ OTF2_IdMap_GetGlobalId( const OTF2_IdMap* instance,
  *
  *  @return OTF2_SUCCESS, or error code.
  */
-OTF2_ErrorCode
-OTF2_IdMap_GetGlobalIdSave( const OTF2_IdMap* instance,
-                            uint64_t          localId,
-                            uint64_t*         globalId );
-
+OTF2_ErrorCode OTF2_IdMap_GetGlobalIdSave(const OTF2_IdMap* instance, uint64_t localId, uint64_t* globalId);
 
 /**
  *  Calls for each mapping pair the callback @a callback.
@@ -273,15 +227,10 @@ OTF2_IdMap_GetGlobalIdSave( const OTF2_IdMap* instance,
  *
  *  @return OTF2_SUCCESS, or error code.
  */
-OTF2_ErrorCode
-OTF2_IdMap_Traverse( const OTF2_IdMap*           instance,
-                     OTF2_IdMap_TraverseCallback callback,
-                     void*                       userData );
-
+OTF2_ErrorCode OTF2_IdMap_Traverse(const OTF2_IdMap* instance, OTF2_IdMap_TraverseCallback callback, void* userData);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-
 
 #endif /* OTF2_IDMAP_H */

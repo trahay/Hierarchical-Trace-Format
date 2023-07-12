@@ -9,10 +9,8 @@
  * directory for details.
  */
 
-
 #ifndef OTF2_THUMBNAIL_H
 #define OTF2_THUMBNAIL_H
-
 
 /**
  *  @file
@@ -21,27 +19,21 @@
  *              read and write thumbnail data.
  */
 
-
 #include <stdint.h>
 
-
 #include <otf2/OTF2_GeneralDefinitions.h>
-
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-
 /** @brief Keeps all necessary information about the thumb writer.
  *  See OTF2_ThumbWriter_struct for detailed information. */
 typedef struct OTF2_ThumbWriter_struct OTF2_ThumbWriter;
 
-
 /** @brief Keeps all necessary information about the event reader.
  *  See OTF2_ThumbReader_struct for detailed information. */
 typedef struct OTF2_ThumbReader_struct OTF2_ThumbReader;
-
 
 /** @brief Reads a thumbnail header.
  *
@@ -62,15 +54,13 @@ typedef struct OTF2_ThumbReader_struct OTF2_ThumbReader;
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_ThumbReader_GetHeader( OTF2_ThumbReader*   reader,
-                            char** const        name,
-                            char** const        description,
-                            OTF2_ThumbnailType* type,
-                            uint32_t*           numberOfSamples,
-                            uint32_t*           numberOfMetrics,
-                            uint64_t**          refsToDefs );
-
+OTF2_ErrorCode OTF2_ThumbReader_GetHeader(OTF2_ThumbReader* reader,
+                                          char** const name,
+                                          char** const description,
+                                          OTF2_ThumbnailType* type,
+                                          uint32_t* numberOfSamples,
+                                          uint32_t* numberOfMetrics,
+                                          uint64_t** refsToDefs);
 
 /** @brief Reads a thumbnail sample.
  *
@@ -84,12 +74,10 @@ OTF2_ThumbReader_GetHeader( OTF2_ThumbReader*   reader,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_ThumbReader_ReadSample( OTF2_ThumbReader* reader,
-                             uint64_t*         baseline,
-                             uint32_t          numberOfMetrics,
-                             uint64_t*         metricSamples );
-
+OTF2_ErrorCode OTF2_ThumbReader_ReadSample(OTF2_ThumbReader* reader,
+                                           uint64_t* baseline,
+                                           uint32_t numberOfMetrics,
+                                           uint64_t* metricSamples);
 
 /** @brief Writes a thumbnail sample.
  *
@@ -103,16 +91,13 @@ OTF2_ThumbReader_ReadSample( OTF2_ThumbReader* reader,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_ThumbWriter_WriteSample( OTF2_ThumbWriter* writer,
-                              uint64_t          baseline,
-                              uint32_t          numberOfMetrics,
-                              const uint64_t*   metricSamples );
-
+OTF2_ErrorCode OTF2_ThumbWriter_WriteSample(OTF2_ThumbWriter* writer,
+                                            uint64_t baseline,
+                                            uint32_t numberOfMetrics,
+                                            const uint64_t* metricSamples);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-
 
 #endif /* !OTF2_THUMBNAIL_H */

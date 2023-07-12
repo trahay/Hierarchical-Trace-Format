@@ -28,10 +28,8 @@
  *
  */
 
-
 #ifndef OTF2_GLOBAL_DEF_READER_H
 #define OTF2_GLOBAL_DEF_READER_H
-
 
 /**
  *  @file
@@ -39,22 +37,17 @@
  *  @brief      This is the definition reader.
  */
 
-
 #include <stddef.h>
 #include <stdint.h>
 
-
 #include <otf2/OTF2_ErrorCodes.h>
-
 
 #include <otf2/OTF2_Definitions.h>
 #include <otf2/OTF2_GlobalDefReaderCallbacks.h>
 
-
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
 
 /** @brief Sets the callback functions for the given reader object. Every time
  *         when OTF2 reads a record, a callback function is called and the records
@@ -71,11 +64,9 @@ extern "C" {
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_GlobalDefReader_SetCallbacks( OTF2_GlobalDefReader*                reader,
-                                   const OTF2_GlobalDefReaderCallbacks* callbacks,
-                                   void*                                userData );
-
+OTF2_ErrorCode OTF2_GlobalDefReader_SetCallbacks(OTF2_GlobalDefReader* reader,
+                                                 const OTF2_GlobalDefReaderCallbacks* callbacks,
+                                                 void* userData);
 
 /** @brief Reads the given number of records from the global definition reader.
  *
@@ -89,15 +80,12 @@ OTF2_GlobalDefReader_SetCallbacks( OTF2_GlobalDefReader*                reader,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_GlobalDefReader_ReadDefinitions( OTF2_GlobalDefReader* reader,
-                                      uint64_t              recordsToRead,
-                                      uint64_t*             recordsRead );
-
+OTF2_ErrorCode OTF2_GlobalDefReader_ReadDefinitions(OTF2_GlobalDefReader* reader,
+                                                    uint64_t recordsToRead,
+                                                    uint64_t* recordsRead);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-
 
 #endif /* !OTF2_GLOBAL_DEF_READER_H */

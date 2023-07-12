@@ -9,10 +9,8 @@
  * directory for details.
  */
 
-
 #ifndef OTF2_MARKER_READER_CALLBACKS_H
 #define OTF2_MARKER_READER_CALLBACKS_H
-
 
 /**
  *  @file
@@ -20,30 +18,23 @@
  *  @brief      This defines the callbacks for the marker reader.
  */
 
-
 #include <stdint.h>
-
 
 #include <otf2/OTF2_ErrorCodes.h>
 
-
-#include <otf2/OTF2_GeneralDefinitions.h>
 #include <otf2/OTF2_Definitions.h>
+#include <otf2/OTF2_GeneralDefinitions.h>
 #include <otf2/OTF2_IdMap.h>
 
-
 #include <otf2/OTF2_Marker.h>
-
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-
 /** @brief Opaque struct which holds all definition record callbacks.
  */
 typedef struct OTF2_MarkerReaderCallbacks_struct OTF2_MarkerReaderCallbacks;
-
 
 /** @brief Allocates a new struct for the marker callbacks.
  *
@@ -51,9 +42,7 @@ typedef struct OTF2_MarkerReaderCallbacks_struct OTF2_MarkerReaderCallbacks;
  *
  *  @return A newly allocated struct of type @eref{OTF2_MarkerReaderCallbacks}.
  */
-OTF2_MarkerReaderCallbacks*
-OTF2_MarkerReaderCallbacks_New( void );
-
+OTF2_MarkerReaderCallbacks* OTF2_MarkerReaderCallbacks_New(void);
 
 /** @brief Deallocates a struct for the marker callbacks.
  *
@@ -62,9 +51,7 @@ OTF2_MarkerReaderCallbacks_New( void );
  *  @param markerReaderCallbacks Handle to a struct previously allocated
  *                               with @eref{OTF2_MarkerReaderCallbacks_New}.
  */
-void
-OTF2_MarkerReaderCallbacks_Delete( OTF2_MarkerReaderCallbacks* markerReaderCallbacks );
-
+void OTF2_MarkerReaderCallbacks_Delete(OTF2_MarkerReaderCallbacks* markerReaderCallbacks);
 
 /** @brief Clears a struct for the marker callbacks.
  *
@@ -73,9 +60,7 @@ OTF2_MarkerReaderCallbacks_Delete( OTF2_MarkerReaderCallbacks* markerReaderCallb
  *  @param markerReaderCallbacks Handle to a struct previously allocated
  *                               with @eref{OTF2_MarkerReaderCallbacks_New}.
  */
-void
-OTF2_MarkerReaderCallbacks_Clear( OTF2_MarkerReaderCallbacks* markerReaderCallbacks );
-
+void OTF2_MarkerReaderCallbacks_Clear(OTF2_MarkerReaderCallbacks* markerReaderCallbacks);
 
 /** @brief Function pointer definition for the callback which is
  *         triggered for an unknown marker.
@@ -88,9 +73,7 @@ OTF2_MarkerReaderCallbacks_Clear( OTF2_MarkerReaderCallbacks* markerReaderCallba
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( *OTF2_MarkerReaderCallback_Unknown )( void* userData );
-
+typedef OTF2_CallbackCode (*OTF2_MarkerReaderCallback_Unknown)(void* userData);
 
 /** @brief Registers the callback for an unknown marker.
  *
@@ -106,11 +89,8 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_MarkerReaderCallbacks_SetUnknownCallback(
-    OTF2_MarkerReaderCallbacks*       markerReaderCallbacks,
-    OTF2_MarkerReaderCallback_Unknown unknownCallback );
-
+OTF2_ErrorCode OTF2_MarkerReaderCallbacks_SetUnknownCallback(OTF2_MarkerReaderCallbacks* markerReaderCallbacks,
+                                                             OTF2_MarkerReaderCallback_Unknown unknownCallback);
 
 /** @brief Function pointer definition for the callback which is triggered by
  *         a @eref{DefMarker} definition record.
@@ -130,13 +110,11 @@ OTF2_MarkerReaderCallbacks_SetUnknownCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( *OTF2_MarkerReaderCallback_DefMarker )( void*               userData,
-                                          OTF2_MarkerRef      self,
-                                          const char*         markerGroup,
-                                          const char*         markerCategory,
-                                          OTF2_MarkerSeverity severity );
-
+typedef OTF2_CallbackCode (*OTF2_MarkerReaderCallback_DefMarker)(void* userData,
+                                                                 OTF2_MarkerRef self,
+                                                                 const char* markerGroup,
+                                                                 const char* markerCategory,
+                                                                 OTF2_MarkerSeverity severity);
 
 /** @brief Registers the callback for the @eref{DefMarker} definition.
  *
@@ -151,11 +129,8 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_MarkerReaderCallbacks_SetDefMarkerCallback(
-    OTF2_MarkerReaderCallbacks*         markerReaderCallbacks,
-    OTF2_MarkerReaderCallback_DefMarker defMarkerCallback );
-
+OTF2_ErrorCode OTF2_MarkerReaderCallbacks_SetDefMarkerCallback(OTF2_MarkerReaderCallbacks* markerReaderCallbacks,
+                                                               OTF2_MarkerReaderCallback_DefMarker defMarkerCallback);
 
 /** @brief Function pointer definition for the callback which is triggered by
  *         a @eref{Marker} record.
@@ -176,15 +151,13 @@ OTF2_MarkerReaderCallbacks_SetDefMarkerCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( *OTF2_MarkerReaderCallback_Marker )( void*            userData,
-                                       OTF2_TimeStamp   timestamp,
-                                       OTF2_TimeStamp   duration,
-                                       OTF2_MarkerRef   marker,
-                                       OTF2_MarkerScope scope,
-                                       uint64_t         scopeRef,
-                                       const char*      text );
-
+typedef OTF2_CallbackCode (*OTF2_MarkerReaderCallback_Marker)(void* userData,
+                                                              OTF2_TimeStamp timestamp,
+                                                              OTF2_TimeStamp duration,
+                                                              OTF2_MarkerRef marker,
+                                                              OTF2_MarkerScope scope,
+                                                              uint64_t scopeRef,
+                                                              const char* text);
 
 /** @brief Registers the callback for the @eref{Marker} record.
  *
@@ -199,15 +172,11 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_MarkerReaderCallbacks_SetMarkerCallback(
-    OTF2_MarkerReaderCallbacks*      markerReaderCallbacks,
-    OTF2_MarkerReaderCallback_Marker markerCallback );
-
+OTF2_ErrorCode OTF2_MarkerReaderCallbacks_SetMarkerCallback(OTF2_MarkerReaderCallbacks* markerReaderCallbacks,
+                                                            OTF2_MarkerReaderCallback_Marker markerCallback);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-
 
 #endif /* !OTF2_MARKER_READER_CALLBACKS_H */
