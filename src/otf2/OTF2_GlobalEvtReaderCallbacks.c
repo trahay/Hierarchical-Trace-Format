@@ -1,44 +1,35 @@
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 
+#include "OTF2_GlobalEvtReaderCallbacks.h"
 #include "htf.h"
 #include "otf2.h"
-#include "OTF2_GlobalEvtReaderCallbacks.h"
-
 
 /** @brief Allocates a new struct for the event callbacks.
  *
  *  @return A newly allocated struct of type @eref{OTF2_GlobalEvtReaderCallbacks}.
  */
-OTF2_GlobalEvtReaderCallbacks*
-OTF2_GlobalEvtReaderCallbacks_New( void ) {
+OTF2_GlobalEvtReaderCallbacks* OTF2_GlobalEvtReaderCallbacks_New(void) {
   NOT_IMPLEMENTED;
 }
-
 
 /** @brief Deallocates a struct for the global event callbacks.
  *
  *  @param globalEvtReaderCallbacks Handle to a struct previously allocated
  *                                  with @eref{OTF2_GlobalEvtReaderCallbacks_New}.
  */
-void
-OTF2_GlobalEvtReaderCallbacks_Delete( OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks ) {
+void OTF2_GlobalEvtReaderCallbacks_Delete(OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks) {
   NOT_IMPLEMENTED;
 }
-
 
 /** @brief Clears a struct for the global event callbacks.
  *
  *  @param globalEvtReaderCallbacks Handle to a struct previously allocated
  *                                  with @eref{OTF2_GlobalEvtReaderCallbacks_New}.
  */
-void
-OTF2_GlobalEvtReaderCallbacks_Clear( OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks ) {
+void OTF2_GlobalEvtReaderCallbacks_Clear(OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for unknown events.
  *
@@ -51,15 +42,10 @@ OTF2_GlobalEvtReaderCallbacks_Clear( OTF2_GlobalEvtReaderCallbacks* globalEvtRea
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetUnknownCallback(
-    OTF2_GlobalEvtReaderCallbacks*       globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_Unknown unknownCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetUnknownCallback(OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+                                                                OTF2_GlobalEvtReaderCallback_Unknown unknownCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the BufferFlush event.
  *
@@ -75,15 +61,11 @@ OTF2_GlobalEvtReaderCallbacks_SetUnknownCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetBufferFlushCallback(
-    OTF2_GlobalEvtReaderCallbacks*           globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_BufferFlush bufferFlushCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetBufferFlushCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_BufferFlush bufferFlushCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the MeasurementOnOff event.
  *
@@ -99,15 +81,11 @@ OTF2_GlobalEvtReaderCallbacks_SetBufferFlushCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetMeasurementOnOffCallback(
-    OTF2_GlobalEvtReaderCallbacks*                globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_MeasurementOnOff measurementOnOffCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetMeasurementOnOffCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_MeasurementOnOff measurementOnOffCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the Enter event.
  *
@@ -123,15 +101,10 @@ OTF2_GlobalEvtReaderCallbacks_SetMeasurementOnOffCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetEnterCallback(
-    OTF2_GlobalEvtReaderCallbacks*     globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_Enter enterCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetEnterCallback(OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+                                                              OTF2_GlobalEvtReaderCallback_Enter enterCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the Leave event.
  *
@@ -147,15 +120,10 @@ OTF2_GlobalEvtReaderCallbacks_SetEnterCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetLeaveCallback(
-    OTF2_GlobalEvtReaderCallbacks*     globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_Leave leaveCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetLeaveCallback(OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+                                                              OTF2_GlobalEvtReaderCallback_Leave leaveCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the MpiSend event.
  *
@@ -171,15 +139,10 @@ OTF2_GlobalEvtReaderCallbacks_SetLeaveCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetMpiSendCallback(
-    OTF2_GlobalEvtReaderCallbacks*       globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_MpiSend mpiSendCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetMpiSendCallback(OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+                                                                OTF2_GlobalEvtReaderCallback_MpiSend mpiSendCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the MpiIsend event.
  *
@@ -195,15 +158,11 @@ OTF2_GlobalEvtReaderCallbacks_SetMpiSendCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetMpiIsendCallback(
-    OTF2_GlobalEvtReaderCallbacks*        globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_MpiIsend mpiIsendCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetMpiIsendCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_MpiIsend mpiIsendCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the MpiIsendComplete event.
  *
@@ -219,15 +178,11 @@ OTF2_GlobalEvtReaderCallbacks_SetMpiIsendCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetMpiIsendCompleteCallback(
-    OTF2_GlobalEvtReaderCallbacks*                globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_MpiIsendComplete mpiIsendCompleteCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetMpiIsendCompleteCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_MpiIsendComplete mpiIsendCompleteCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the MpiIrecvRequest event.
  *
@@ -243,15 +198,11 @@ OTF2_GlobalEvtReaderCallbacks_SetMpiIsendCompleteCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetMpiIrecvRequestCallback(
-    OTF2_GlobalEvtReaderCallbacks*               globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_MpiIrecvRequest mpiIrecvRequestCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetMpiIrecvRequestCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_MpiIrecvRequest mpiIrecvRequestCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the MpiRecv event.
  *
@@ -267,15 +218,10 @@ OTF2_GlobalEvtReaderCallbacks_SetMpiIrecvRequestCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetMpiRecvCallback(
-    OTF2_GlobalEvtReaderCallbacks*       globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_MpiRecv mpiRecvCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetMpiRecvCallback(OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+                                                                OTF2_GlobalEvtReaderCallback_MpiRecv mpiRecvCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the MpiIrecv event.
  *
@@ -291,15 +237,11 @@ OTF2_GlobalEvtReaderCallbacks_SetMpiRecvCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetMpiIrecvCallback(
-    OTF2_GlobalEvtReaderCallbacks*        globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_MpiIrecv mpiIrecvCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetMpiIrecvCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_MpiIrecv mpiIrecvCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the MpiRequestTest event.
  *
@@ -315,15 +257,11 @@ OTF2_GlobalEvtReaderCallbacks_SetMpiIrecvCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetMpiRequestTestCallback(
-    OTF2_GlobalEvtReaderCallbacks*              globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_MpiRequestTest mpiRequestTestCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetMpiRequestTestCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_MpiRequestTest mpiRequestTestCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the MpiRequestCancelled event.
  *
@@ -340,15 +278,11 @@ OTF2_GlobalEvtReaderCallbacks_SetMpiRequestTestCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetMpiRequestCancelledCallback(
-    OTF2_GlobalEvtReaderCallbacks*                   globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_MpiRequestCancelled mpiRequestCancelledCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetMpiRequestCancelledCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_MpiRequestCancelled mpiRequestCancelledCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the MpiCollectiveBegin event.
  *
@@ -364,15 +298,11 @@ OTF2_GlobalEvtReaderCallbacks_SetMpiRequestCancelledCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetMpiCollectiveBeginCallback(
-    OTF2_GlobalEvtReaderCallbacks*                  globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_MpiCollectiveBegin mpiCollectiveBeginCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetMpiCollectiveBeginCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_MpiCollectiveBegin mpiCollectiveBeginCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the MpiCollectiveEnd event.
  *
@@ -388,15 +318,11 @@ OTF2_GlobalEvtReaderCallbacks_SetMpiCollectiveBeginCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetMpiCollectiveEndCallback(
-    OTF2_GlobalEvtReaderCallbacks*                globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_MpiCollectiveEnd mpiCollectiveEndCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetMpiCollectiveEndCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_MpiCollectiveEnd mpiCollectiveEndCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the OmpFork event.
  *
@@ -412,15 +338,10 @@ OTF2_GlobalEvtReaderCallbacks_SetMpiCollectiveEndCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetOmpForkCallback(
-    OTF2_GlobalEvtReaderCallbacks*       globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_OmpFork ompForkCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetOmpForkCallback(OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+                                                                OTF2_GlobalEvtReaderCallback_OmpFork ompForkCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the OmpJoin event.
  *
@@ -436,15 +357,10 @@ OTF2_GlobalEvtReaderCallbacks_SetOmpForkCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetOmpJoinCallback(
-    OTF2_GlobalEvtReaderCallbacks*       globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_OmpJoin ompJoinCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetOmpJoinCallback(OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+                                                                OTF2_GlobalEvtReaderCallback_OmpJoin ompJoinCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the OmpAcquireLock event.
  *
@@ -460,15 +376,11 @@ OTF2_GlobalEvtReaderCallbacks_SetOmpJoinCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetOmpAcquireLockCallback(
-    OTF2_GlobalEvtReaderCallbacks*              globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_OmpAcquireLock ompAcquireLockCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetOmpAcquireLockCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_OmpAcquireLock ompAcquireLockCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the OmpReleaseLock event.
  *
@@ -484,15 +396,11 @@ OTF2_GlobalEvtReaderCallbacks_SetOmpAcquireLockCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetOmpReleaseLockCallback(
-    OTF2_GlobalEvtReaderCallbacks*              globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_OmpReleaseLock ompReleaseLockCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetOmpReleaseLockCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_OmpReleaseLock ompReleaseLockCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the OmpTaskCreate event.
  *
@@ -508,15 +416,11 @@ OTF2_GlobalEvtReaderCallbacks_SetOmpReleaseLockCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetOmpTaskCreateCallback(
-    OTF2_GlobalEvtReaderCallbacks*             globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_OmpTaskCreate ompTaskCreateCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetOmpTaskCreateCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_OmpTaskCreate ompTaskCreateCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the OmpTaskSwitch event.
  *
@@ -532,15 +436,11 @@ OTF2_GlobalEvtReaderCallbacks_SetOmpTaskCreateCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetOmpTaskSwitchCallback(
-    OTF2_GlobalEvtReaderCallbacks*             globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_OmpTaskSwitch ompTaskSwitchCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetOmpTaskSwitchCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_OmpTaskSwitch ompTaskSwitchCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the OmpTaskComplete event.
  *
@@ -556,15 +456,11 @@ OTF2_GlobalEvtReaderCallbacks_SetOmpTaskSwitchCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetOmpTaskCompleteCallback(
-    OTF2_GlobalEvtReaderCallbacks*               globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_OmpTaskComplete ompTaskCompleteCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetOmpTaskCompleteCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_OmpTaskComplete ompTaskCompleteCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the Metric event.
  *
@@ -580,15 +476,10 @@ OTF2_GlobalEvtReaderCallbacks_SetOmpTaskCompleteCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetMetricCallback(
-    OTF2_GlobalEvtReaderCallbacks*      globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_Metric metricCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetMetricCallback(OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+                                                               OTF2_GlobalEvtReaderCallback_Metric metricCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the ParameterString event.
  *
@@ -604,15 +495,11 @@ OTF2_GlobalEvtReaderCallbacks_SetMetricCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetParameterStringCallback(
-    OTF2_GlobalEvtReaderCallbacks*               globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_ParameterString parameterStringCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetParameterStringCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_ParameterString parameterStringCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the ParameterInt event.
  *
@@ -628,15 +515,11 @@ OTF2_GlobalEvtReaderCallbacks_SetParameterStringCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetParameterIntCallback(
-    OTF2_GlobalEvtReaderCallbacks*            globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_ParameterInt parameterIntCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetParameterIntCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_ParameterInt parameterIntCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the ParameterUnsignedInt event.
  *
@@ -653,15 +536,11 @@ OTF2_GlobalEvtReaderCallbacks_SetParameterIntCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetParameterUnsignedIntCallback(
-    OTF2_GlobalEvtReaderCallbacks*                    globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_ParameterUnsignedInt parameterUnsignedIntCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetParameterUnsignedIntCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_ParameterUnsignedInt parameterUnsignedIntCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the RmaWinCreate event.
  *
@@ -677,15 +556,11 @@ OTF2_GlobalEvtReaderCallbacks_SetParameterUnsignedIntCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetRmaWinCreateCallback(
-    OTF2_GlobalEvtReaderCallbacks*            globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_RmaWinCreate rmaWinCreateCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetRmaWinCreateCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_RmaWinCreate rmaWinCreateCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the RmaWinDestroy event.
  *
@@ -701,15 +576,11 @@ OTF2_GlobalEvtReaderCallbacks_SetRmaWinCreateCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetRmaWinDestroyCallback(
-    OTF2_GlobalEvtReaderCallbacks*             globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_RmaWinDestroy rmaWinDestroyCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetRmaWinDestroyCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_RmaWinDestroy rmaWinDestroyCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the RmaCollectiveBegin event.
  *
@@ -725,15 +596,11 @@ OTF2_GlobalEvtReaderCallbacks_SetRmaWinDestroyCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetRmaCollectiveBeginCallback(
-    OTF2_GlobalEvtReaderCallbacks*                  globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_RmaCollectiveBegin rmaCollectiveBeginCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetRmaCollectiveBeginCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_RmaCollectiveBegin rmaCollectiveBeginCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the RmaCollectiveEnd event.
  *
@@ -749,15 +616,11 @@ OTF2_GlobalEvtReaderCallbacks_SetRmaCollectiveBeginCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetRmaCollectiveEndCallback(
-    OTF2_GlobalEvtReaderCallbacks*                globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_RmaCollectiveEnd rmaCollectiveEndCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetRmaCollectiveEndCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_RmaCollectiveEnd rmaCollectiveEndCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the RmaGroupSync event.
  *
@@ -773,15 +636,11 @@ OTF2_GlobalEvtReaderCallbacks_SetRmaCollectiveEndCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetRmaGroupSyncCallback(
-    OTF2_GlobalEvtReaderCallbacks*            globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_RmaGroupSync rmaGroupSyncCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetRmaGroupSyncCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_RmaGroupSync rmaGroupSyncCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the RmaRequestLock event.
  *
@@ -797,15 +656,11 @@ OTF2_GlobalEvtReaderCallbacks_SetRmaGroupSyncCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetRmaRequestLockCallback(
-    OTF2_GlobalEvtReaderCallbacks*              globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_RmaRequestLock rmaRequestLockCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetRmaRequestLockCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_RmaRequestLock rmaRequestLockCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the RmaAcquireLock event.
  *
@@ -821,15 +676,11 @@ OTF2_GlobalEvtReaderCallbacks_SetRmaRequestLockCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetRmaAcquireLockCallback(
-    OTF2_GlobalEvtReaderCallbacks*              globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_RmaAcquireLock rmaAcquireLockCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetRmaAcquireLockCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_RmaAcquireLock rmaAcquireLockCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the RmaTryLock event.
  *
@@ -845,15 +696,11 @@ OTF2_GlobalEvtReaderCallbacks_SetRmaAcquireLockCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetRmaTryLockCallback(
-    OTF2_GlobalEvtReaderCallbacks*          globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_RmaTryLock rmaTryLockCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetRmaTryLockCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_RmaTryLock rmaTryLockCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the RmaReleaseLock event.
  *
@@ -869,15 +716,11 @@ OTF2_GlobalEvtReaderCallbacks_SetRmaTryLockCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetRmaReleaseLockCallback(
-    OTF2_GlobalEvtReaderCallbacks*              globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_RmaReleaseLock rmaReleaseLockCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetRmaReleaseLockCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_RmaReleaseLock rmaReleaseLockCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the RmaSync event.
  *
@@ -893,15 +736,10 @@ OTF2_GlobalEvtReaderCallbacks_SetRmaReleaseLockCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetRmaSyncCallback(
-    OTF2_GlobalEvtReaderCallbacks*       globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_RmaSync rmaSyncCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetRmaSyncCallback(OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+                                                                OTF2_GlobalEvtReaderCallback_RmaSync rmaSyncCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the RmaWaitChange event.
  *
@@ -917,15 +755,11 @@ OTF2_GlobalEvtReaderCallbacks_SetRmaSyncCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetRmaWaitChangeCallback(
-    OTF2_GlobalEvtReaderCallbacks*             globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_RmaWaitChange rmaWaitChangeCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetRmaWaitChangeCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_RmaWaitChange rmaWaitChangeCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the RmaPut event.
  *
@@ -941,15 +775,10 @@ OTF2_GlobalEvtReaderCallbacks_SetRmaWaitChangeCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetRmaPutCallback(
-    OTF2_GlobalEvtReaderCallbacks*      globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_RmaPut rmaPutCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetRmaPutCallback(OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+                                                               OTF2_GlobalEvtReaderCallback_RmaPut rmaPutCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the RmaGet event.
  *
@@ -965,15 +794,10 @@ OTF2_GlobalEvtReaderCallbacks_SetRmaPutCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetRmaGetCallback(
-    OTF2_GlobalEvtReaderCallbacks*      globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_RmaGet rmaGetCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetRmaGetCallback(OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+                                                               OTF2_GlobalEvtReaderCallback_RmaGet rmaGetCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the RmaAtomic event.
  *
@@ -989,15 +813,11 @@ OTF2_GlobalEvtReaderCallbacks_SetRmaGetCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetRmaAtomicCallback(
-    OTF2_GlobalEvtReaderCallbacks*         globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_RmaAtomic rmaAtomicCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetRmaAtomicCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_RmaAtomic rmaAtomicCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the RmaOpCompleteBlocking event.
  *
@@ -1014,15 +834,11 @@ OTF2_GlobalEvtReaderCallbacks_SetRmaAtomicCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetRmaOpCompleteBlockingCallback(
-    OTF2_GlobalEvtReaderCallbacks*                     globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_RmaOpCompleteBlocking rmaOpCompleteBlockingCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetRmaOpCompleteBlockingCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_RmaOpCompleteBlocking rmaOpCompleteBlockingCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the RmaOpCompleteNonBlocking event.
  *
@@ -1040,15 +856,11 @@ OTF2_GlobalEvtReaderCallbacks_SetRmaOpCompleteBlockingCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetRmaOpCompleteNonBlockingCallback(
-    OTF2_GlobalEvtReaderCallbacks*                        globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_RmaOpCompleteNonBlocking rmaOpCompleteNonBlockingCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetRmaOpCompleteNonBlockingCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_RmaOpCompleteNonBlocking rmaOpCompleteNonBlockingCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the RmaOpTest event.
  *
@@ -1064,15 +876,11 @@ OTF2_GlobalEvtReaderCallbacks_SetRmaOpCompleteNonBlockingCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetRmaOpTestCallback(
-    OTF2_GlobalEvtReaderCallbacks*         globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_RmaOpTest rmaOpTestCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetRmaOpTestCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_RmaOpTest rmaOpTestCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the RmaOpCompleteRemote event.
  *
@@ -1089,15 +897,11 @@ OTF2_GlobalEvtReaderCallbacks_SetRmaOpTestCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetRmaOpCompleteRemoteCallback(
-    OTF2_GlobalEvtReaderCallbacks*                   globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_RmaOpCompleteRemote rmaOpCompleteRemoteCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetRmaOpCompleteRemoteCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_RmaOpCompleteRemote rmaOpCompleteRemoteCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the ThreadFork event.
  *
@@ -1113,15 +917,11 @@ OTF2_GlobalEvtReaderCallbacks_SetRmaOpCompleteRemoteCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetThreadForkCallback(
-    OTF2_GlobalEvtReaderCallbacks*          globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_ThreadFork threadForkCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetThreadForkCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_ThreadFork threadForkCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the ThreadJoin event.
  *
@@ -1137,15 +937,11 @@ OTF2_GlobalEvtReaderCallbacks_SetThreadForkCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetThreadJoinCallback(
-    OTF2_GlobalEvtReaderCallbacks*          globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_ThreadJoin threadJoinCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetThreadJoinCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_ThreadJoin threadJoinCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the ThreadTeamBegin event.
  *
@@ -1161,15 +957,11 @@ OTF2_GlobalEvtReaderCallbacks_SetThreadJoinCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetThreadTeamBeginCallback(
-    OTF2_GlobalEvtReaderCallbacks*               globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_ThreadTeamBegin threadTeamBeginCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetThreadTeamBeginCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_ThreadTeamBegin threadTeamBeginCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the ThreadTeamEnd event.
  *
@@ -1185,15 +977,11 @@ OTF2_GlobalEvtReaderCallbacks_SetThreadTeamBeginCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetThreadTeamEndCallback(
-    OTF2_GlobalEvtReaderCallbacks*             globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_ThreadTeamEnd threadTeamEndCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetThreadTeamEndCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_ThreadTeamEnd threadTeamEndCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the ThreadAcquireLock event.
  *
@@ -1209,15 +997,11 @@ OTF2_GlobalEvtReaderCallbacks_SetThreadTeamEndCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetThreadAcquireLockCallback(
-    OTF2_GlobalEvtReaderCallbacks*                 globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_ThreadAcquireLock threadAcquireLockCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetThreadAcquireLockCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_ThreadAcquireLock threadAcquireLockCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the ThreadReleaseLock event.
  *
@@ -1233,15 +1017,11 @@ OTF2_GlobalEvtReaderCallbacks_SetThreadAcquireLockCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetThreadReleaseLockCallback(
-    OTF2_GlobalEvtReaderCallbacks*                 globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_ThreadReleaseLock threadReleaseLockCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetThreadReleaseLockCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_ThreadReleaseLock threadReleaseLockCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the ThreadTaskCreate event.
  *
@@ -1257,15 +1037,11 @@ OTF2_GlobalEvtReaderCallbacks_SetThreadReleaseLockCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetThreadTaskCreateCallback(
-    OTF2_GlobalEvtReaderCallbacks*                globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_ThreadTaskCreate threadTaskCreateCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetThreadTaskCreateCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_ThreadTaskCreate threadTaskCreateCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the ThreadTaskSwitch event.
  *
@@ -1281,15 +1057,11 @@ OTF2_GlobalEvtReaderCallbacks_SetThreadTaskCreateCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetThreadTaskSwitchCallback(
-    OTF2_GlobalEvtReaderCallbacks*                globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_ThreadTaskSwitch threadTaskSwitchCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetThreadTaskSwitchCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_ThreadTaskSwitch threadTaskSwitchCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the ThreadTaskComplete event.
  *
@@ -1305,15 +1077,11 @@ OTF2_GlobalEvtReaderCallbacks_SetThreadTaskSwitchCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetThreadTaskCompleteCallback(
-    OTF2_GlobalEvtReaderCallbacks*                  globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_ThreadTaskComplete threadTaskCompleteCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetThreadTaskCompleteCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_ThreadTaskComplete threadTaskCompleteCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the ThreadCreate event.
  *
@@ -1329,15 +1097,11 @@ OTF2_GlobalEvtReaderCallbacks_SetThreadTaskCompleteCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetThreadCreateCallback(
-    OTF2_GlobalEvtReaderCallbacks*            globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_ThreadCreate threadCreateCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetThreadCreateCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_ThreadCreate threadCreateCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the ThreadBegin event.
  *
@@ -1353,15 +1117,11 @@ OTF2_GlobalEvtReaderCallbacks_SetThreadCreateCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetThreadBeginCallback(
-    OTF2_GlobalEvtReaderCallbacks*           globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_ThreadBegin threadBeginCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetThreadBeginCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_ThreadBegin threadBeginCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the ThreadWait event.
  *
@@ -1377,15 +1137,11 @@ OTF2_GlobalEvtReaderCallbacks_SetThreadBeginCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetThreadWaitCallback(
-    OTF2_GlobalEvtReaderCallbacks*          globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_ThreadWait threadWaitCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetThreadWaitCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_ThreadWait threadWaitCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the ThreadEnd event.
  *
@@ -1401,15 +1157,11 @@ OTF2_GlobalEvtReaderCallbacks_SetThreadWaitCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetThreadEndCallback(
-    OTF2_GlobalEvtReaderCallbacks*         globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_ThreadEnd threadEndCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetThreadEndCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_ThreadEnd threadEndCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the CallingContextEnter event.
  *
@@ -1426,15 +1178,11 @@ OTF2_GlobalEvtReaderCallbacks_SetThreadEndCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetCallingContextEnterCallback(
-    OTF2_GlobalEvtReaderCallbacks*                   globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_CallingContextEnter callingContextEnterCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetCallingContextEnterCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_CallingContextEnter callingContextEnterCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the CallingContextLeave event.
  *
@@ -1451,15 +1199,11 @@ OTF2_GlobalEvtReaderCallbacks_SetCallingContextEnterCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetCallingContextLeaveCallback(
-    OTF2_GlobalEvtReaderCallbacks*                   globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_CallingContextLeave callingContextLeaveCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetCallingContextLeaveCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_CallingContextLeave callingContextLeaveCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the CallingContextSample event.
  *
@@ -1476,15 +1220,11 @@ OTF2_GlobalEvtReaderCallbacks_SetCallingContextLeaveCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetCallingContextSampleCallback(
-    OTF2_GlobalEvtReaderCallbacks*                    globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_CallingContextSample callingContextSampleCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetCallingContextSampleCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_CallingContextSample callingContextSampleCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the IoCreateHandle event.
  *
@@ -1500,15 +1240,11 @@ OTF2_GlobalEvtReaderCallbacks_SetCallingContextSampleCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetIoCreateHandleCallback(
-    OTF2_GlobalEvtReaderCallbacks*              globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_IoCreateHandle ioCreateHandleCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetIoCreateHandleCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_IoCreateHandle ioCreateHandleCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the IoDestroyHandle event.
  *
@@ -1524,15 +1260,11 @@ OTF2_GlobalEvtReaderCallbacks_SetIoCreateHandleCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetIoDestroyHandleCallback(
-    OTF2_GlobalEvtReaderCallbacks*               globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_IoDestroyHandle ioDestroyHandleCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetIoDestroyHandleCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_IoDestroyHandle ioDestroyHandleCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the IoDuplicateHandle event.
  *
@@ -1548,15 +1280,11 @@ OTF2_GlobalEvtReaderCallbacks_SetIoDestroyHandleCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetIoDuplicateHandleCallback(
-    OTF2_GlobalEvtReaderCallbacks*                 globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_IoDuplicateHandle ioDuplicateHandleCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetIoDuplicateHandleCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_IoDuplicateHandle ioDuplicateHandleCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the IoSeek event.
  *
@@ -1572,15 +1300,10 @@ OTF2_GlobalEvtReaderCallbacks_SetIoDuplicateHandleCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetIoSeekCallback(
-    OTF2_GlobalEvtReaderCallbacks*      globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_IoSeek ioSeekCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetIoSeekCallback(OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+                                                               OTF2_GlobalEvtReaderCallback_IoSeek ioSeekCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the IoChangeStatusFlags event.
  *
@@ -1597,15 +1320,11 @@ OTF2_GlobalEvtReaderCallbacks_SetIoSeekCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetIoChangeStatusFlagsCallback(
-    OTF2_GlobalEvtReaderCallbacks*                   globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_IoChangeStatusFlags ioChangeStatusFlagsCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetIoChangeStatusFlagsCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_IoChangeStatusFlags ioChangeStatusFlagsCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the IoDeleteFile event.
  *
@@ -1621,15 +1340,11 @@ OTF2_GlobalEvtReaderCallbacks_SetIoChangeStatusFlagsCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetIoDeleteFileCallback(
-    OTF2_GlobalEvtReaderCallbacks*            globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_IoDeleteFile ioDeleteFileCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetIoDeleteFileCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_IoDeleteFile ioDeleteFileCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the IoOperationBegin event.
  *
@@ -1645,15 +1360,11 @@ OTF2_GlobalEvtReaderCallbacks_SetIoDeleteFileCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetIoOperationBeginCallback(
-    OTF2_GlobalEvtReaderCallbacks*                globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_IoOperationBegin ioOperationBeginCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetIoOperationBeginCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_IoOperationBegin ioOperationBeginCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the IoOperationTest event.
  *
@@ -1669,15 +1380,11 @@ OTF2_GlobalEvtReaderCallbacks_SetIoOperationBeginCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetIoOperationTestCallback(
-    OTF2_GlobalEvtReaderCallbacks*               globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_IoOperationTest ioOperationTestCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetIoOperationTestCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_IoOperationTest ioOperationTestCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the IoOperationIssued event.
  *
@@ -1693,15 +1400,11 @@ OTF2_GlobalEvtReaderCallbacks_SetIoOperationTestCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetIoOperationIssuedCallback(
-    OTF2_GlobalEvtReaderCallbacks*                 globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_IoOperationIssued ioOperationIssuedCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetIoOperationIssuedCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_IoOperationIssued ioOperationIssuedCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the IoOperationComplete event.
  *
@@ -1718,15 +1421,11 @@ OTF2_GlobalEvtReaderCallbacks_SetIoOperationIssuedCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetIoOperationCompleteCallback(
-    OTF2_GlobalEvtReaderCallbacks*                   globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_IoOperationComplete ioOperationCompleteCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetIoOperationCompleteCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_IoOperationComplete ioOperationCompleteCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the IoOperationCancelled event.
  *
@@ -1743,15 +1442,11 @@ OTF2_GlobalEvtReaderCallbacks_SetIoOperationCompleteCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetIoOperationCancelledCallback(
-    OTF2_GlobalEvtReaderCallbacks*                    globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_IoOperationCancelled ioOperationCancelledCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetIoOperationCancelledCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_IoOperationCancelled ioOperationCancelledCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the IoAcquireLock event.
  *
@@ -1767,15 +1462,11 @@ OTF2_GlobalEvtReaderCallbacks_SetIoOperationCancelledCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetIoAcquireLockCallback(
-    OTF2_GlobalEvtReaderCallbacks*             globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_IoAcquireLock ioAcquireLockCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetIoAcquireLockCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_IoAcquireLock ioAcquireLockCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the IoReleaseLock event.
  *
@@ -1791,15 +1482,11 @@ OTF2_GlobalEvtReaderCallbacks_SetIoAcquireLockCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetIoReleaseLockCallback(
-    OTF2_GlobalEvtReaderCallbacks*             globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_IoReleaseLock ioReleaseLockCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetIoReleaseLockCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_IoReleaseLock ioReleaseLockCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the IoTryLock event.
  *
@@ -1815,15 +1502,11 @@ OTF2_GlobalEvtReaderCallbacks_SetIoReleaseLockCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetIoTryLockCallback(
-    OTF2_GlobalEvtReaderCallbacks*         globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_IoTryLock ioTryLockCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetIoTryLockCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_IoTryLock ioTryLockCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the ProgramBegin event.
  *
@@ -1839,15 +1522,11 @@ OTF2_GlobalEvtReaderCallbacks_SetIoTryLockCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetProgramBeginCallback(
-    OTF2_GlobalEvtReaderCallbacks*            globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_ProgramBegin programBeginCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetProgramBeginCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_ProgramBegin programBeginCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the ProgramEnd event.
  *
@@ -1863,15 +1542,11 @@ OTF2_GlobalEvtReaderCallbacks_SetProgramBeginCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetProgramEndCallback(
-    OTF2_GlobalEvtReaderCallbacks*          globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_ProgramEnd programEndCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetProgramEndCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_ProgramEnd programEndCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the NonBlockingCollectiveRequest event.
  *
@@ -1889,15 +1564,11 @@ OTF2_GlobalEvtReaderCallbacks_SetProgramEndCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetNonBlockingCollectiveRequestCallback(
-    OTF2_GlobalEvtReaderCallbacks*                            globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_NonBlockingCollectiveRequest nonBlockingCollectiveRequestCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetNonBlockingCollectiveRequestCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_NonBlockingCollectiveRequest nonBlockingCollectiveRequestCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the NonBlockingCollectiveComplete event.
  *
@@ -1915,15 +1586,11 @@ OTF2_GlobalEvtReaderCallbacks_SetNonBlockingCollectiveRequestCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetNonBlockingCollectiveCompleteCallback(
-    OTF2_GlobalEvtReaderCallbacks*                             globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_NonBlockingCollectiveComplete nonBlockingCollectiveCompleteCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetNonBlockingCollectiveCompleteCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_NonBlockingCollectiveComplete nonBlockingCollectiveCompleteCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the CommCreate event.
  *
@@ -1939,13 +1606,11 @@ OTF2_GlobalEvtReaderCallbacks_SetNonBlockingCollectiveCompleteCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetCommCreateCallback(
-    OTF2_GlobalEvtReaderCallbacks*          globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_CommCreate commCreateCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetCommCreateCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_CommCreate commCreateCallback) {
   NOT_IMPLEMENTED;
 }
-
 
 /** @brief Registers the callback for the CommDestroy event.
  *
@@ -1961,9 +1626,8 @@ OTF2_GlobalEvtReaderCallbacks_SetCommCreateCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReaderCallbacks_SetCommDestroyCallback(
-    OTF2_GlobalEvtReaderCallbacks*           globalEvtReaderCallbacks,
-    OTF2_GlobalEvtReaderCallback_CommDestroy commDestroyCallback ) {
+OTF2_ErrorCode OTF2_GlobalEvtReaderCallbacks_SetCommDestroyCallback(
+  OTF2_GlobalEvtReaderCallbacks* globalEvtReaderCallbacks,
+  OTF2_GlobalEvtReaderCallback_CommDestroy commDestroyCallback) {
   NOT_IMPLEMENTED;
 }

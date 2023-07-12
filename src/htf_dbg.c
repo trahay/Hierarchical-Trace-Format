@@ -1,9 +1,14 @@
-#include <stdlib.h>
+/*
+ * Copyright (C) Telecom SudParis
+ * See LICENSE in top-level directory.
+ */
+
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
-#include "htf_dbg.h"
 #include "htf.h"
+#include "htf_dbg.h"
 
 enum htf_debug_level htf_debug_level = htf_dbg_lvl_normal;
 
@@ -19,11 +24,11 @@ static void print_help() {
   exit(EXIT_SUCCESS);
 }
 
-void htf_debug_level_set(enum htf_debug_level  lvl) {
+void htf_debug_level_set(enum htf_debug_level lvl) {
   htf_debug_level = lvl;
 
-  switch(htf_debug_level)  {
-  case htf_dbg_lvl_error:   // only print errors
+  switch (htf_debug_level) {
+  case htf_dbg_lvl_error:  // only print errors
     htf_log(htf_dbg_lvl_normal, "Debug level: error\n");
     break;
   case htf_dbg_lvl_quiet:
@@ -50,15 +55,30 @@ void htf_debug_level_set(enum htf_debug_level  lvl) {
 
 void htf_debug_level_init() {
   char* verbose_str = getenv("VERBOSE");
-  if(verbose_str) {
-    enum htf_debug_level  lvl =  htf_dbg_lvl_verbose;
-    if(strcmp(verbose_str, "error") == 0)        lvl = htf_dbg_lvl_error;
-    else if(strcmp(verbose_str, "quiet") == 0)   lvl = htf_dbg_lvl_quiet;
-    else if(strcmp(verbose_str, "normal") == 0)  lvl = htf_dbg_lvl_normal;
-    else if(strcmp(verbose_str, "verbose") == 0) lvl = htf_dbg_lvl_verbose;
-    else if(strcmp(verbose_str, "debug") == 0)   lvl = htf_dbg_lvl_debug;
-    else if(strcmp(verbose_str, "help") == 0)    lvl = htf_dbg_lvl_help;
-    else if(strcmp(verbose_str, "max") == 0)     lvl = htf_dbg_lvl_max;
+  if (verbose_str) {
+    enum htf_debug_level lvl = htf_dbg_lvl_verbose;
+    if (strcmp(verbose_str, "error") == 0)
+      lvl = htf_dbg_lvl_error;
+    else if (strcmp(verbose_str, "quiet") == 0)
+      lvl = htf_dbg_lvl_quiet;
+    else if (strcmp(verbose_str, "normal") == 0)
+      lvl = htf_dbg_lvl_normal;
+    else if (strcmp(verbose_str, "verbose") == 0)
+      lvl = htf_dbg_lvl_verbose;
+    else if (strcmp(verbose_str, "debug") == 0)
+      lvl = htf_dbg_lvl_debug;
+    else if (strcmp(verbose_str, "help") == 0)
+      lvl = htf_dbg_lvl_help;
+    else if (strcmp(verbose_str, "max") == 0)
+      lvl = htf_dbg_lvl_max;
     htf_debug_level_set(lvl);
   }
 }
+
+/* -*-
+   mode: c;
+   c-file-style: "k&r";
+   c-basic-offset 2;
+   tab-width 2 ;
+   indent-tabs-mode nil
+   -*- */

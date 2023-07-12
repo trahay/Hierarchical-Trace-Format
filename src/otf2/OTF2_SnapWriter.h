@@ -9,10 +9,8 @@
  * directory for details.
  */
 
-
 #ifndef OTF2_SNAP_WRITER_H
 #define OTF2_SNAP_WRITER_H
-
 
 /**
  *  @file
@@ -22,25 +20,18 @@
  *              write snapshot records for a single location.
  */
 
-
-
 #include <stdint.h>
-
 
 #include "otf2_compiler.h"
 
-
 #include <otf2/OTF2_ErrorCodes.h>
 
-
-#include <otf2/OTF2_Events.h>
 #include <otf2/OTF2_AttributeList.h>
-
+#include <otf2/OTF2_Events.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
 
 /** @brief Keeps all necessary information about the snap writer.
  *  See OTF2_SnapWriter_struct for detailed information.
@@ -48,7 +39,6 @@ extern "C" {
  *  @since Version 1.2
  *  */
 typedef struct OTF2_SnapWriter_struct OTF2_SnapWriter;
-
 
 /** @brief
  *  Function to get the location ID of a snap writer object.
@@ -60,11 +50,7 @@ typedef struct OTF2_SnapWriter_struct OTF2_SnapWriter;
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_SnapWriter_GetLocationID( const OTF2_SnapWriter* writer,
-                               OTF2_LocationRef*      locationID );
-
-
+OTF2_ErrorCode OTF2_SnapWriter_GetLocationID(const OTF2_SnapWriter* writer, OTF2_LocationRef* locationID);
 
 /** @brief Records a SnapshotStart snapshot record.
  *
@@ -88,12 +74,10 @@ OTF2_SnapWriter_GetLocationID( const OTF2_SnapWriter* writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_SnapWriter_SnapshotStart( OTF2_SnapWriter*    writer,
-                               OTF2_AttributeList* attributeList,
-                               OTF2_TimeStamp      snapTime,
-                               uint64_t            numberOfRecords );
-
+OTF2_ErrorCode OTF2_SnapWriter_SnapshotStart(OTF2_SnapWriter* writer,
+                                             OTF2_AttributeList* attributeList,
+                                             OTF2_TimeStamp snapTime,
+                                             uint64_t numberOfRecords);
 
 /** @brief Records a SnapshotEnd snapshot record.
  *
@@ -110,12 +94,10 @@ OTF2_SnapWriter_SnapshotStart( OTF2_SnapWriter*    writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_SnapWriter_SnapshotEnd( OTF2_SnapWriter*    writer,
-                             OTF2_AttributeList* attributeList,
-                             OTF2_TimeStamp      snapTime,
-                             uint64_t            contReadPos );
-
+OTF2_ErrorCode OTF2_SnapWriter_SnapshotEnd(OTF2_SnapWriter* writer,
+                                           OTF2_AttributeList* attributeList,
+                                           OTF2_TimeStamp snapTime,
+                                           uint64_t contReadPos);
 
 /** @brief Records a MeasurementOnOff snapshot record.
  *
@@ -134,13 +116,11 @@ OTF2_SnapWriter_SnapshotEnd( OTF2_SnapWriter*    writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_SnapWriter_MeasurementOnOff( OTF2_SnapWriter*     writer,
-                                  OTF2_AttributeList*  attributeList,
-                                  OTF2_TimeStamp       snapTime,
-                                  OTF2_TimeStamp       origEventTime,
-                                  OTF2_MeasurementMode measurementMode );
-
+OTF2_ErrorCode OTF2_SnapWriter_MeasurementOnOff(OTF2_SnapWriter* writer,
+                                                OTF2_AttributeList* attributeList,
+                                                OTF2_TimeStamp snapTime,
+                                                OTF2_TimeStamp origEventTime,
+                                                OTF2_MeasurementMode measurementMode);
 
 /** @brief Records a Enter snapshot record.
  *
@@ -160,13 +140,11 @@ OTF2_SnapWriter_MeasurementOnOff( OTF2_SnapWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_SnapWriter_Enter( OTF2_SnapWriter*    writer,
-                       OTF2_AttributeList* attributeList,
-                       OTF2_TimeStamp      snapTime,
-                       OTF2_TimeStamp      origEventTime,
-                       OTF2_RegionRef      region );
-
+OTF2_ErrorCode OTF2_SnapWriter_Enter(OTF2_SnapWriter* writer,
+                                     OTF2_AttributeList* attributeList,
+                                     OTF2_TimeStamp snapTime,
+                                     OTF2_TimeStamp origEventTime,
+                                     OTF2_RegionRef region);
 
 /** @brief Records a MpiSend snapshot record.
  *
@@ -194,16 +172,14 @@ OTF2_SnapWriter_Enter( OTF2_SnapWriter*    writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_SnapWriter_MpiSend( OTF2_SnapWriter*    writer,
-                         OTF2_AttributeList* attributeList,
-                         OTF2_TimeStamp      snapTime,
-                         OTF2_TimeStamp      origEventTime,
-                         uint32_t            receiver,
-                         OTF2_CommRef        communicator,
-                         uint32_t            msgTag,
-                         uint64_t            msgLength );
-
+OTF2_ErrorCode OTF2_SnapWriter_MpiSend(OTF2_SnapWriter* writer,
+                                       OTF2_AttributeList* attributeList,
+                                       OTF2_TimeStamp snapTime,
+                                       OTF2_TimeStamp origEventTime,
+                                       uint32_t receiver,
+                                       OTF2_CommRef communicator,
+                                       uint32_t msgTag,
+                                       uint64_t msgLength);
 
 /** @brief Records a MpiIsend snapshot record.
  *
@@ -233,17 +209,15 @@ OTF2_SnapWriter_MpiSend( OTF2_SnapWriter*    writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_SnapWriter_MpiIsend( OTF2_SnapWriter*    writer,
-                          OTF2_AttributeList* attributeList,
-                          OTF2_TimeStamp      snapTime,
-                          OTF2_TimeStamp      origEventTime,
-                          uint32_t            receiver,
-                          OTF2_CommRef        communicator,
-                          uint32_t            msgTag,
-                          uint64_t            msgLength,
-                          uint64_t            requestID );
-
+OTF2_ErrorCode OTF2_SnapWriter_MpiIsend(OTF2_SnapWriter* writer,
+                                        OTF2_AttributeList* attributeList,
+                                        OTF2_TimeStamp snapTime,
+                                        OTF2_TimeStamp origEventTime,
+                                        uint32_t receiver,
+                                        OTF2_CommRef communicator,
+                                        uint32_t msgTag,
+                                        uint64_t msgLength,
+                                        uint64_t requestID);
 
 /** @brief Records a MpiIsendComplete snapshot record.
  *
@@ -263,13 +237,11 @@ OTF2_SnapWriter_MpiIsend( OTF2_SnapWriter*    writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_SnapWriter_MpiIsendComplete( OTF2_SnapWriter*    writer,
-                                  OTF2_AttributeList* attributeList,
-                                  OTF2_TimeStamp      snapTime,
-                                  OTF2_TimeStamp      origEventTime,
-                                  uint64_t            requestID );
-
+OTF2_ErrorCode OTF2_SnapWriter_MpiIsendComplete(OTF2_SnapWriter* writer,
+                                                OTF2_AttributeList* attributeList,
+                                                OTF2_TimeStamp snapTime,
+                                                OTF2_TimeStamp origEventTime,
+                                                uint64_t requestID);
 
 /** @brief Records a MpiRecv snapshot record.
  *
@@ -298,16 +270,14 @@ OTF2_SnapWriter_MpiIsendComplete( OTF2_SnapWriter*    writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_SnapWriter_MpiRecv( OTF2_SnapWriter*    writer,
-                         OTF2_AttributeList* attributeList,
-                         OTF2_TimeStamp      snapTime,
-                         OTF2_TimeStamp      origEventTime,
-                         uint32_t            sender,
-                         OTF2_CommRef        communicator,
-                         uint32_t            msgTag,
-                         uint64_t            msgLength );
-
+OTF2_ErrorCode OTF2_SnapWriter_MpiRecv(OTF2_SnapWriter* writer,
+                                       OTF2_AttributeList* attributeList,
+                                       OTF2_TimeStamp snapTime,
+                                       OTF2_TimeStamp origEventTime,
+                                       uint32_t sender,
+                                       OTF2_CommRef communicator,
+                                       uint32_t msgTag,
+                                       uint64_t msgLength);
 
 /** @brief Records a MpiIrecvRequest snapshot record.
  *
@@ -330,13 +300,11 @@ OTF2_SnapWriter_MpiRecv( OTF2_SnapWriter*    writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_SnapWriter_MpiIrecvRequest( OTF2_SnapWriter*    writer,
-                                 OTF2_AttributeList* attributeList,
-                                 OTF2_TimeStamp      snapTime,
-                                 OTF2_TimeStamp      origEventTime,
-                                 uint64_t            requestID );
-
+OTF2_ErrorCode OTF2_SnapWriter_MpiIrecvRequest(OTF2_SnapWriter* writer,
+                                               OTF2_AttributeList* attributeList,
+                                               OTF2_TimeStamp snapTime,
+                                               OTF2_TimeStamp origEventTime,
+                                               uint64_t requestID);
 
 /** @brief Records a MpiIrecv snapshot record.
  *
@@ -366,17 +334,15 @@ OTF2_SnapWriter_MpiIrecvRequest( OTF2_SnapWriter*    writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_SnapWriter_MpiIrecv( OTF2_SnapWriter*    writer,
-                          OTF2_AttributeList* attributeList,
-                          OTF2_TimeStamp      snapTime,
-                          OTF2_TimeStamp      origEventTime,
-                          uint32_t            sender,
-                          OTF2_CommRef        communicator,
-                          uint32_t            msgTag,
-                          uint64_t            msgLength,
-                          uint64_t            requestID );
-
+OTF2_ErrorCode OTF2_SnapWriter_MpiIrecv(OTF2_SnapWriter* writer,
+                                        OTF2_AttributeList* attributeList,
+                                        OTF2_TimeStamp snapTime,
+                                        OTF2_TimeStamp origEventTime,
+                                        uint32_t sender,
+                                        OTF2_CommRef communicator,
+                                        uint32_t msgTag,
+                                        uint64_t msgLength,
+                                        uint64_t requestID);
 
 /** @brief Records a MpiCollectiveBegin snapshot record.
  *
@@ -393,12 +359,10 @@ OTF2_SnapWriter_MpiIrecv( OTF2_SnapWriter*    writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_SnapWriter_MpiCollectiveBegin( OTF2_SnapWriter*    writer,
-                                    OTF2_AttributeList* attributeList,
-                                    OTF2_TimeStamp      snapTime,
-                                    OTF2_TimeStamp      origEventTime );
-
+OTF2_ErrorCode OTF2_SnapWriter_MpiCollectiveBegin(OTF2_SnapWriter* writer,
+                                                  OTF2_AttributeList* attributeList,
+                                                  OTF2_TimeStamp snapTime,
+                                                  OTF2_TimeStamp origEventTime);
 
 /** @brief Records a MpiCollectiveEnd snapshot record.
  *
@@ -425,17 +389,15 @@ OTF2_SnapWriter_MpiCollectiveBegin( OTF2_SnapWriter*    writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_SnapWriter_MpiCollectiveEnd( OTF2_SnapWriter*    writer,
-                                  OTF2_AttributeList* attributeList,
-                                  OTF2_TimeStamp      snapTime,
-                                  OTF2_TimeStamp      origEventTime,
-                                  OTF2_CollectiveOp   collectiveOp,
-                                  OTF2_CommRef        communicator,
-                                  uint32_t            root,
-                                  uint64_t            sizeSent,
-                                  uint64_t            sizeReceived );
-
+OTF2_ErrorCode OTF2_SnapWriter_MpiCollectiveEnd(OTF2_SnapWriter* writer,
+                                                OTF2_AttributeList* attributeList,
+                                                OTF2_TimeStamp snapTime,
+                                                OTF2_TimeStamp origEventTime,
+                                                OTF2_CollectiveOp collectiveOp,
+                                                OTF2_CommRef communicator,
+                                                uint32_t root,
+                                                uint64_t sizeSent,
+                                                uint64_t sizeReceived);
 
 /** @brief Records a OmpFork snapshot record.
  *
@@ -453,13 +415,11 @@ OTF2_SnapWriter_MpiCollectiveEnd( OTF2_SnapWriter*    writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_SnapWriter_OmpFork( OTF2_SnapWriter*    writer,
-                         OTF2_AttributeList* attributeList,
-                         OTF2_TimeStamp      snapTime,
-                         OTF2_TimeStamp      origEventTime,
-                         uint32_t            numberOfRequestedThreads );
-
+OTF2_ErrorCode OTF2_SnapWriter_OmpFork(OTF2_SnapWriter* writer,
+                                       OTF2_AttributeList* attributeList,
+                                       OTF2_TimeStamp snapTime,
+                                       OTF2_TimeStamp origEventTime,
+                                       uint32_t numberOfRequestedThreads);
 
 /** @brief Records a OmpAcquireLock snapshot record.
  *
@@ -482,14 +442,12 @@ OTF2_SnapWriter_OmpFork( OTF2_SnapWriter*    writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_SnapWriter_OmpAcquireLock( OTF2_SnapWriter*    writer,
-                                OTF2_AttributeList* attributeList,
-                                OTF2_TimeStamp      snapTime,
-                                OTF2_TimeStamp      origEventTime,
-                                uint32_t            lockID,
-                                uint32_t            acquisitionOrder );
-
+OTF2_ErrorCode OTF2_SnapWriter_OmpAcquireLock(OTF2_SnapWriter* writer,
+                                              OTF2_AttributeList* attributeList,
+                                              OTF2_TimeStamp snapTime,
+                                              OTF2_TimeStamp origEventTime,
+                                              uint32_t lockID,
+                                              uint32_t acquisitionOrder);
 
 /** @brief Records a OmpTaskCreate snapshot record.
  *
@@ -508,13 +466,11 @@ OTF2_SnapWriter_OmpAcquireLock( OTF2_SnapWriter*    writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_SnapWriter_OmpTaskCreate( OTF2_SnapWriter*    writer,
-                               OTF2_AttributeList* attributeList,
-                               OTF2_TimeStamp      snapTime,
-                               OTF2_TimeStamp      origEventTime,
-                               uint64_t            taskID );
-
+OTF2_ErrorCode OTF2_SnapWriter_OmpTaskCreate(OTF2_SnapWriter* writer,
+                                             OTF2_AttributeList* attributeList,
+                                             OTF2_TimeStamp snapTime,
+                                             OTF2_TimeStamp origEventTime,
+                                             uint64_t taskID);
 
 /** @brief Records a OmpTaskSwitch snapshot record.
  *
@@ -533,13 +489,11 @@ OTF2_SnapWriter_OmpTaskCreate( OTF2_SnapWriter*    writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_SnapWriter_OmpTaskSwitch( OTF2_SnapWriter*    writer,
-                               OTF2_AttributeList* attributeList,
-                               OTF2_TimeStamp      snapTime,
-                               OTF2_TimeStamp      origEventTime,
-                               uint64_t            taskID );
-
+OTF2_ErrorCode OTF2_SnapWriter_OmpTaskSwitch(OTF2_SnapWriter* writer,
+                                             OTF2_AttributeList* attributeList,
+                                             OTF2_TimeStamp snapTime,
+                                             OTF2_TimeStamp origEventTime,
+                                             uint64_t taskID);
 
 /** @brief Records a Metric snapshot record.
  *
@@ -569,16 +523,14 @@ OTF2_SnapWriter_OmpTaskSwitch( OTF2_SnapWriter*    writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_SnapWriter_Metric( OTF2_SnapWriter*        writer,
-                        OTF2_AttributeList*     attributeList,
-                        OTF2_TimeStamp          snapTime,
-                        OTF2_TimeStamp          origEventTime,
-                        OTF2_MetricRef          metric,
-                        uint8_t                 numberOfMetrics,
-                        const OTF2_Type*        typeIDs,
-                        const OTF2_MetricValue* metricValues );
-
+OTF2_ErrorCode OTF2_SnapWriter_Metric(OTF2_SnapWriter* writer,
+                                      OTF2_AttributeList* attributeList,
+                                      OTF2_TimeStamp snapTime,
+                                      OTF2_TimeStamp origEventTime,
+                                      OTF2_MetricRef metric,
+                                      uint8_t numberOfMetrics,
+                                      const OTF2_Type* typeIDs,
+                                      const OTF2_MetricValue* metricValues);
 
 /** @brief Records a ParameterString snapshot record.
  *
@@ -603,14 +555,12 @@ OTF2_SnapWriter_Metric( OTF2_SnapWriter*        writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_SnapWriter_ParameterString( OTF2_SnapWriter*    writer,
-                                 OTF2_AttributeList* attributeList,
-                                 OTF2_TimeStamp      snapTime,
-                                 OTF2_TimeStamp      origEventTime,
-                                 OTF2_ParameterRef   parameter,
-                                 OTF2_StringRef      string );
-
+OTF2_ErrorCode OTF2_SnapWriter_ParameterString(OTF2_SnapWriter* writer,
+                                               OTF2_AttributeList* attributeList,
+                                               OTF2_TimeStamp snapTime,
+                                               OTF2_TimeStamp origEventTime,
+                                               OTF2_ParameterRef parameter,
+                                               OTF2_StringRef string);
 
 /** @brief Records a ParameterInt snapshot record.
  *
@@ -632,14 +582,12 @@ OTF2_SnapWriter_ParameterString( OTF2_SnapWriter*    writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_SnapWriter_ParameterInt( OTF2_SnapWriter*    writer,
-                              OTF2_AttributeList* attributeList,
-                              OTF2_TimeStamp      snapTime,
-                              OTF2_TimeStamp      origEventTime,
-                              OTF2_ParameterRef   parameter,
-                              int64_t             value );
-
+OTF2_ErrorCode OTF2_SnapWriter_ParameterInt(OTF2_SnapWriter* writer,
+                                            OTF2_AttributeList* attributeList,
+                                            OTF2_TimeStamp snapTime,
+                                            OTF2_TimeStamp origEventTime,
+                                            OTF2_ParameterRef parameter,
+                                            int64_t value);
 
 /** @brief Records a ParameterUnsignedInt snapshot record.
  *
@@ -661,19 +609,15 @@ OTF2_SnapWriter_ParameterInt( OTF2_SnapWriter*    writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_SnapWriter_ParameterUnsignedInt( OTF2_SnapWriter*    writer,
-                                      OTF2_AttributeList* attributeList,
-                                      OTF2_TimeStamp      snapTime,
-                                      OTF2_TimeStamp      origEventTime,
-                                      OTF2_ParameterRef   parameter,
-                                      uint64_t            value );
-
-
+OTF2_ErrorCode OTF2_SnapWriter_ParameterUnsignedInt(OTF2_SnapWriter* writer,
+                                                    OTF2_AttributeList* attributeList,
+                                                    OTF2_TimeStamp snapTime,
+                                                    OTF2_TimeStamp origEventTime,
+                                                    OTF2_ParameterRef parameter,
+                                                    uint64_t value);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-
 
 #endif /* !OTF2_SNAP_WRITER_H */

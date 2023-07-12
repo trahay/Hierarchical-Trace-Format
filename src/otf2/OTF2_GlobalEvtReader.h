@@ -28,10 +28,8 @@
  *
  */
 
-
 #ifndef OTF2_GLOBAL_EVT_READER_H
 #define OTF2_GLOBAL_EVT_READER_H
-
 
 /**
  *  @file
@@ -42,23 +40,17 @@
  *  ordered sequence.
  */
 
-
 #include <stdint.h>
-
 
 #include <otf2/OTF2_ErrorCodes.h>
 
-
 #include <otf2/OTF2_EvtReader.h>
 
-
 #include <otf2/OTF2_GlobalEvtReaderCallbacks.h>
-
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
 
 /** @brief Sets the callback functions for the given reader object. Every time
  *         when OTF2 reads a record, a callback function is called and the records
@@ -75,11 +67,9 @@ extern "C" {
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReader_SetCallbacks( OTF2_GlobalEvtReader*                reader,
-                                   const OTF2_GlobalEvtReaderCallbacks* callbacks,
-                                   void*                                userData );
-
+OTF2_ErrorCode OTF2_GlobalEvtReader_SetCallbacks(OTF2_GlobalEvtReader* reader,
+                                                 const OTF2_GlobalEvtReaderCallbacks* callbacks,
+                                                 void* userData);
 
 /** @brief Triggers the callback for the next event record.
  *
@@ -88,9 +78,7 @@ OTF2_GlobalEvtReader_SetCallbacks( OTF2_GlobalEvtReader*                reader,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReader_ReadEvent( OTF2_GlobalEvtReader* reader );
-
+OTF2_ErrorCode OTF2_GlobalEvtReader_ReadEvent(OTF2_GlobalEvtReader* reader);
 
 /** @brief Has more events.
  *
@@ -101,9 +89,7 @@ OTF2_GlobalEvtReader_ReadEvent( OTF2_GlobalEvtReader* reader );
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReader_HasEvent( OTF2_GlobalEvtReader* reader,
-                               int*                  flag );
+OTF2_ErrorCode OTF2_GlobalEvtReader_HasEvent(OTF2_GlobalEvtReader* reader, int* flag);
 
 /** @brief Reads the given number of records from the global event reader.
  *
@@ -117,15 +103,12 @@ OTF2_GlobalEvtReader_HasEvent( OTF2_GlobalEvtReader* reader,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_GlobalEvtReader_ReadEvents( OTF2_GlobalEvtReader* reader,
-                                 uint64_t              recordsToRead,
-                                 uint64_t*             recordsRead );
-
+OTF2_ErrorCode OTF2_GlobalEvtReader_ReadEvents(OTF2_GlobalEvtReader* reader,
+                                               uint64_t recordsToRead,
+                                               uint64_t* recordsRead);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-
 
 #endif /* !OTF2_GLOBAL_EVT_READER_H */

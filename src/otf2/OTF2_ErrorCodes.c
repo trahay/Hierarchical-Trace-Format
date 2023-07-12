@@ -1,11 +1,10 @@
-#include "stdlib.h"
-#include "stdio.h"
 #include "otf2.h"
+#include "stdio.h"
+#include "stdlib.h"
 
-const char*
-OTF2_Error_GetName( OTF2_ErrorCode errorCode ) {
+const char* OTF2_Error_GetName(OTF2_ErrorCode errorCode) {
   char* str = malloc(128);
-  switch(errorCode) {
+  switch (errorCode) {
   case OTF2_DEPRECATED:
     snprintf(str, 128, "OTF2_DEPRECATED");
     break;
@@ -336,19 +335,17 @@ OTF2_Error_GetName( OTF2_ErrorCode errorCode ) {
   case OTF2_ERROR_HINT_INVALID_VALUE:
     snprintf(str, 128, "OTF2_ERROR_HINT_INVALID_VALUE");
     break;
-  default:    
+  default:
     snprintf(str, 128, "Unknown");
   }
   return str;
 }
 
-
-const char*
-OTF2_Error_GetDescription( OTF2_ErrorCode errorCode ) {
-  int len=1024;
+const char* OTF2_Error_GetDescription(OTF2_ErrorCode errorCode) {
+  int len = 1024;
   char* str = malloc(len);
 
-  switch(errorCode) {
+  switch (errorCode) {
   case OTF2_DEPRECATED:
     snprintf(str, len, "Special marker for error messages which indicates a deprecation");
     break;
@@ -680,7 +677,7 @@ OTF2_Error_GetDescription( OTF2_ErrorCode errorCode ) {
     break;
   case OTF2_ERROR_HINT_LOCKED:
     snprintf(str, len, "The hint was either already set by the user or at least once queried from OTF2");
-    break; 
+    break;
   case OTF2_ERROR_HINT_INVALID_VALUE:
     snprintf(str, len, "Invalid value for hint.");
     break;

@@ -28,10 +28,8 @@
  *
  */
 
-
 #ifndef OTF2_EVT_WRITER_H
 #define OTF2_EVT_WRITER_H
-
 
 /**
  *  @file
@@ -41,30 +39,22 @@
  *              write event data of a single location.
  */
 
-
-
 #include <stdint.h>
-
 
 #include "otf2_compiler.h"
 
-
 #include <otf2/OTF2_ErrorCodes.h>
 
-
-#include <otf2/OTF2_Events.h>
 #include <otf2/OTF2_AttributeList.h>
-
+#include <otf2/OTF2_Events.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-
 /** @brief Keeps all necessary information about the event writer.
  *  See OTF2_EvtWriter_struct for detailed information. */
 typedef struct OTF2_EvtWriter_struct OTF2_EvtWriter;
-
 
 /** @brief
  *  Function to get the location ID of a writer object.
@@ -74,10 +64,7 @@ typedef struct OTF2_EvtWriter_struct OTF2_EvtWriter;
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_GetLocationID( const OTF2_EvtWriter* writer,
-                              OTF2_LocationRef*     locationID );
-
+OTF2_ErrorCode OTF2_EvtWriter_GetLocationID(const OTF2_EvtWriter* writer, OTF2_LocationRef* locationID);
 
 /** @brief
  *  Function to set user defined data to a writer object.
@@ -88,10 +75,7 @@ OTF2_EvtWriter_GetLocationID( const OTF2_EvtWriter* writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_SetUserData( OTF2_EvtWriter* writer,
-                            void*           userData );
-
+OTF2_ErrorCode OTF2_EvtWriter_SetUserData(OTF2_EvtWriter* writer, void* userData);
 
 /** @brief
  *  Function to get the location of a writer object.
@@ -101,10 +85,7 @@ OTF2_EvtWriter_SetUserData( OTF2_EvtWriter* writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_GetUserData( const OTF2_EvtWriter* writer,
-                            void**                userData );
-
+OTF2_ErrorCode OTF2_EvtWriter_GetUserData(const OTF2_EvtWriter* writer, void** userData);
 
 /** @brief
  *  The location ID is not always known on measurement start, and only needed
@@ -116,10 +97,7 @@ OTF2_EvtWriter_GetUserData( const OTF2_EvtWriter* writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_SetLocationID( OTF2_EvtWriter*  writer,
-                              OTF2_LocationRef location );
-
+OTF2_ErrorCode OTF2_EvtWriter_SetLocationID(OTF2_EvtWriter* writer, OTF2_LocationRef location);
 
 /** @brief Get the number of events.
  *
@@ -132,10 +110,7 @@ OTF2_EvtWriter_SetLocationID( OTF2_EvtWriter*  writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_GetNumberOfEvents( OTF2_EvtWriter* writer,
-                                  uint64_t*       numberOfEvents );
-
+OTF2_ErrorCode OTF2_EvtWriter_GetNumberOfEvents(OTF2_EvtWriter* writer, uint64_t* numberOfEvents);
 
 /** @brief Records a BufferFlush event.
  *
@@ -151,12 +126,10 @@ OTF2_EvtWriter_GetNumberOfEvents( OTF2_EvtWriter* writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_BufferFlush( OTF2_EvtWriter*     writer,
-                            OTF2_AttributeList* attributeList,
-                            OTF2_TimeStamp      time,
-                            OTF2_TimeStamp      stopTime );
-
+OTF2_ErrorCode OTF2_EvtWriter_BufferFlush(OTF2_EvtWriter* writer,
+                                          OTF2_AttributeList* attributeList,
+                                          OTF2_TimeStamp time,
+                                          OTF2_TimeStamp stopTime);
 
 /** @brief Records a MeasurementOnOff event.
  *
@@ -174,12 +147,10 @@ OTF2_EvtWriter_BufferFlush( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_MeasurementOnOff( OTF2_EvtWriter*      writer,
-                                 OTF2_AttributeList*  attributeList,
-                                 OTF2_TimeStamp       time,
-                                 OTF2_MeasurementMode measurementMode );
-
+OTF2_ErrorCode OTF2_EvtWriter_MeasurementOnOff(OTF2_EvtWriter* writer,
+                                               OTF2_AttributeList* attributeList,
+                                               OTF2_TimeStamp time,
+                                               OTF2_MeasurementMode measurementMode);
 
 /** @brief Records a Enter event.
  *
@@ -197,12 +168,10 @@ OTF2_EvtWriter_MeasurementOnOff( OTF2_EvtWriter*      writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_Enter( OTF2_EvtWriter*     writer,
-                      OTF2_AttributeList* attributeList,
-                      OTF2_TimeStamp      time,
-                      OTF2_RegionRef      region );
-
+OTF2_ErrorCode OTF2_EvtWriter_Enter(OTF2_EvtWriter* writer,
+                                    OTF2_AttributeList* attributeList,
+                                    OTF2_TimeStamp time,
+                                    OTF2_RegionRef region);
 
 /** @brief Records a Leave event.
  *
@@ -220,12 +189,10 @@ OTF2_EvtWriter_Enter( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_Leave( OTF2_EvtWriter*     writer,
-                      OTF2_AttributeList* attributeList,
-                      OTF2_TimeStamp      time,
-                      OTF2_RegionRef      region );
-
+OTF2_ErrorCode OTF2_EvtWriter_Leave(OTF2_EvtWriter* writer,
+                                    OTF2_AttributeList* attributeList,
+                                    OTF2_TimeStamp time,
+                                    OTF2_RegionRef region);
 
 /** @brief Records a MpiSend event.
  *
@@ -250,15 +217,13 @@ OTF2_EvtWriter_Leave( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_MpiSend( OTF2_EvtWriter*     writer,
-                        OTF2_AttributeList* attributeList,
-                        OTF2_TimeStamp      time,
-                        uint32_t            receiver,
-                        OTF2_CommRef        communicator,
-                        uint32_t            msgTag,
-                        uint64_t            msgLength );
-
+OTF2_ErrorCode OTF2_EvtWriter_MpiSend(OTF2_EvtWriter* writer,
+                                      OTF2_AttributeList* attributeList,
+                                      OTF2_TimeStamp time,
+                                      uint32_t receiver,
+                                      OTF2_CommRef communicator,
+                                      uint32_t msgTag,
+                                      uint64_t msgLength);
 
 /** @brief Records a MpiIsend event.
  *
@@ -284,16 +249,14 @@ OTF2_EvtWriter_MpiSend( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_MpiIsend( OTF2_EvtWriter*     writer,
-                         OTF2_AttributeList* attributeList,
-                         OTF2_TimeStamp      time,
-                         uint32_t            receiver,
-                         OTF2_CommRef        communicator,
-                         uint32_t            msgTag,
-                         uint64_t            msgLength,
-                         uint64_t            requestID );
-
+OTF2_ErrorCode OTF2_EvtWriter_MpiIsend(OTF2_EvtWriter* writer,
+                                       OTF2_AttributeList* attributeList,
+                                       OTF2_TimeStamp time,
+                                       uint32_t receiver,
+                                       OTF2_CommRef communicator,
+                                       uint32_t msgTag,
+                                       uint64_t msgLength,
+                                       uint64_t requestID);
 
 /** @brief Records a MpiIsendComplete event.
  *
@@ -313,12 +276,10 @@ OTF2_EvtWriter_MpiIsend( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_MpiIsendComplete( OTF2_EvtWriter*     writer,
-                                 OTF2_AttributeList* attributeList,
-                                 OTF2_TimeStamp      time,
-                                 uint64_t            requestID );
-
+OTF2_ErrorCode OTF2_EvtWriter_MpiIsendComplete(OTF2_EvtWriter* writer,
+                                               OTF2_AttributeList* attributeList,
+                                               OTF2_TimeStamp time,
+                                               uint64_t requestID);
 
 /** @brief Records a MpiIrecvRequest event.
  *
@@ -334,12 +295,10 @@ OTF2_EvtWriter_MpiIsendComplete( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_MpiIrecvRequest( OTF2_EvtWriter*     writer,
-                                OTF2_AttributeList* attributeList,
-                                OTF2_TimeStamp      time,
-                                uint64_t            requestID );
-
+OTF2_ErrorCode OTF2_EvtWriter_MpiIrecvRequest(OTF2_EvtWriter* writer,
+                                              OTF2_AttributeList* attributeList,
+                                              OTF2_TimeStamp time,
+                                              uint64_t requestID);
 
 /** @brief Records a MpiRecv event.
  *
@@ -364,15 +323,13 @@ OTF2_EvtWriter_MpiIrecvRequest( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_MpiRecv( OTF2_EvtWriter*     writer,
-                        OTF2_AttributeList* attributeList,
-                        OTF2_TimeStamp      time,
-                        uint32_t            sender,
-                        OTF2_CommRef        communicator,
-                        uint32_t            msgTag,
-                        uint64_t            msgLength );
-
+OTF2_ErrorCode OTF2_EvtWriter_MpiRecv(OTF2_EvtWriter* writer,
+                                      OTF2_AttributeList* attributeList,
+                                      OTF2_TimeStamp time,
+                                      uint32_t sender,
+                                      OTF2_CommRef communicator,
+                                      uint32_t msgTag,
+                                      uint64_t msgLength);
 
 /** @brief Records a MpiIrecv event.
  *
@@ -398,16 +355,14 @@ OTF2_EvtWriter_MpiRecv( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_MpiIrecv( OTF2_EvtWriter*     writer,
-                         OTF2_AttributeList* attributeList,
-                         OTF2_TimeStamp      time,
-                         uint32_t            sender,
-                         OTF2_CommRef        communicator,
-                         uint32_t            msgTag,
-                         uint64_t            msgLength,
-                         uint64_t            requestID );
-
+OTF2_ErrorCode OTF2_EvtWriter_MpiIrecv(OTF2_EvtWriter* writer,
+                                       OTF2_AttributeList* attributeList,
+                                       OTF2_TimeStamp time,
+                                       uint32_t sender,
+                                       OTF2_CommRef communicator,
+                                       uint32_t msgTag,
+                                       uint64_t msgLength,
+                                       uint64_t requestID);
 
 /** @brief Records a MpiRequestTest event.
  *
@@ -423,12 +378,10 @@ OTF2_EvtWriter_MpiIrecv( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_MpiRequestTest( OTF2_EvtWriter*     writer,
-                               OTF2_AttributeList* attributeList,
-                               OTF2_TimeStamp      time,
-                               uint64_t            requestID );
-
+OTF2_ErrorCode OTF2_EvtWriter_MpiRequestTest(OTF2_EvtWriter* writer,
+                                             OTF2_AttributeList* attributeList,
+                                             OTF2_TimeStamp time,
+                                             uint64_t requestID);
 
 /** @brief Records a MpiRequestCancelled event.
  *
@@ -443,12 +396,10 @@ OTF2_EvtWriter_MpiRequestTest( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_MpiRequestCancelled( OTF2_EvtWriter*     writer,
-                                    OTF2_AttributeList* attributeList,
-                                    OTF2_TimeStamp      time,
-                                    uint64_t            requestID );
-
+OTF2_ErrorCode OTF2_EvtWriter_MpiRequestCancelled(OTF2_EvtWriter* writer,
+                                                  OTF2_AttributeList* attributeList,
+                                                  OTF2_TimeStamp time,
+                                                  uint64_t requestID);
 
 /** @brief Records a MpiCollectiveBegin event.
  *
@@ -463,11 +414,9 @@ OTF2_EvtWriter_MpiRequestCancelled( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_MpiCollectiveBegin( OTF2_EvtWriter*     writer,
-                                   OTF2_AttributeList* attributeList,
-                                   OTF2_TimeStamp      time );
-
+OTF2_ErrorCode OTF2_EvtWriter_MpiCollectiveBegin(OTF2_EvtWriter* writer,
+                                                 OTF2_AttributeList* attributeList,
+                                                 OTF2_TimeStamp time);
 
 /** @brief Records a MpiCollectiveEnd event.
  *
@@ -494,16 +443,14 @@ OTF2_EvtWriter_MpiCollectiveBegin( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_MpiCollectiveEnd( OTF2_EvtWriter*     writer,
-                                 OTF2_AttributeList* attributeList,
-                                 OTF2_TimeStamp      time,
-                                 OTF2_CollectiveOp   collectiveOp,
-                                 OTF2_CommRef        communicator,
-                                 uint32_t            root,
-                                 uint64_t            sizeSent,
-                                 uint64_t            sizeReceived );
-
+OTF2_ErrorCode OTF2_EvtWriter_MpiCollectiveEnd(OTF2_EvtWriter* writer,
+                                               OTF2_AttributeList* attributeList,
+                                               OTF2_TimeStamp time,
+                                               OTF2_CollectiveOp collectiveOp,
+                                               OTF2_CommRef communicator,
+                                               uint32_t root,
+                                               uint64_t sizeSent,
+                                               uint64_t sizeReceived);
 
 /** @brief Records a OmpFork event.
  *
@@ -524,12 +471,10 @@ OTF2_EvtWriter_MpiCollectiveEnd( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_OmpFork( OTF2_EvtWriter*     writer,
-                        OTF2_AttributeList* attributeList,
-                        OTF2_TimeStamp      time,
-                        uint32_t            numberOfRequestedThreads ) __otf2_deprecated__;
-
+OTF2_ErrorCode OTF2_EvtWriter_OmpFork(OTF2_EvtWriter* writer,
+                                      OTF2_AttributeList* attributeList,
+                                      OTF2_TimeStamp time,
+                                      uint32_t numberOfRequestedThreads) __otf2_deprecated__;
 
 /** @brief Records a OmpJoin event.
  *
@@ -550,11 +495,9 @@ OTF2_EvtWriter_OmpFork( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_OmpJoin( OTF2_EvtWriter*     writer,
-                        OTF2_AttributeList* attributeList,
-                        OTF2_TimeStamp      time ) __otf2_deprecated__;
-
+OTF2_ErrorCode OTF2_EvtWriter_OmpJoin(OTF2_EvtWriter* writer,
+                                      OTF2_AttributeList* attributeList,
+                                      OTF2_TimeStamp time) __otf2_deprecated__;
 
 /** @brief Records a OmpAcquireLock event.
  *
@@ -581,13 +524,11 @@ OTF2_EvtWriter_OmpJoin( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_OmpAcquireLock( OTF2_EvtWriter*     writer,
-                               OTF2_AttributeList* attributeList,
-                               OTF2_TimeStamp      time,
-                               uint32_t            lockID,
-                               uint32_t            acquisitionOrder ) __otf2_deprecated__;
-
+OTF2_ErrorCode OTF2_EvtWriter_OmpAcquireLock(OTF2_EvtWriter* writer,
+                                             OTF2_AttributeList* attributeList,
+                                             OTF2_TimeStamp time,
+                                             uint32_t lockID,
+                                             uint32_t acquisitionOrder) __otf2_deprecated__;
 
 /** @brief Records a OmpReleaseLock event.
  *
@@ -614,13 +555,11 @@ OTF2_EvtWriter_OmpAcquireLock( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_OmpReleaseLock( OTF2_EvtWriter*     writer,
-                               OTF2_AttributeList* attributeList,
-                               OTF2_TimeStamp      time,
-                               uint32_t            lockID,
-                               uint32_t            acquisitionOrder ) __otf2_deprecated__;
-
+OTF2_ErrorCode OTF2_EvtWriter_OmpReleaseLock(OTF2_EvtWriter* writer,
+                                             OTF2_AttributeList* attributeList,
+                                             OTF2_TimeStamp time,
+                                             uint32_t lockID,
+                                             uint32_t acquisitionOrder) __otf2_deprecated__;
 
 /** @brief Records a OmpTaskCreate event.
  *
@@ -642,12 +581,10 @@ OTF2_EvtWriter_OmpReleaseLock( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_OmpTaskCreate( OTF2_EvtWriter*     writer,
-                              OTF2_AttributeList* attributeList,
-                              OTF2_TimeStamp      time,
-                              uint64_t            taskID ) __otf2_deprecated__;
-
+OTF2_ErrorCode OTF2_EvtWriter_OmpTaskCreate(OTF2_EvtWriter* writer,
+                                            OTF2_AttributeList* attributeList,
+                                            OTF2_TimeStamp time,
+                                            uint64_t taskID) __otf2_deprecated__;
 
 /** @brief Records a OmpTaskSwitch event.
  *
@@ -671,12 +608,10 @@ OTF2_EvtWriter_OmpTaskCreate( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_OmpTaskSwitch( OTF2_EvtWriter*     writer,
-                              OTF2_AttributeList* attributeList,
-                              OTF2_TimeStamp      time,
-                              uint64_t            taskID ) __otf2_deprecated__;
-
+OTF2_ErrorCode OTF2_EvtWriter_OmpTaskSwitch(OTF2_EvtWriter* writer,
+                                            OTF2_AttributeList* attributeList,
+                                            OTF2_TimeStamp time,
+                                            uint64_t taskID) __otf2_deprecated__;
 
 /** @brief Records a OmpTaskComplete event.
  *
@@ -698,12 +633,10 @@ OTF2_EvtWriter_OmpTaskSwitch( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_OmpTaskComplete( OTF2_EvtWriter*     writer,
-                                OTF2_AttributeList* attributeList,
-                                OTF2_TimeStamp      time,
-                                uint64_t            taskID ) __otf2_deprecated__;
-
+OTF2_ErrorCode OTF2_EvtWriter_OmpTaskComplete(OTF2_EvtWriter* writer,
+                                              OTF2_AttributeList* attributeList,
+                                              OTF2_TimeStamp time,
+                                              uint64_t taskID) __otf2_deprecated__;
 
 /** @brief Records a Metric event.
  *
@@ -730,15 +663,13 @@ OTF2_EvtWriter_OmpTaskComplete( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_Metric( OTF2_EvtWriter*         writer,
-                       OTF2_AttributeList*     attributeList,
-                       OTF2_TimeStamp          time,
-                       OTF2_MetricRef          metric,
-                       uint8_t                 numberOfMetrics,
-                       const OTF2_Type*        typeIDs,
-                       const OTF2_MetricValue* metricValues );
-
+OTF2_ErrorCode OTF2_EvtWriter_Metric(OTF2_EvtWriter* writer,
+                                     OTF2_AttributeList* attributeList,
+                                     OTF2_TimeStamp time,
+                                     OTF2_MetricRef metric,
+                                     uint8_t numberOfMetrics,
+                                     const OTF2_Type* typeIDs,
+                                     const OTF2_MetricValue* metricValues);
 
 /** @brief Records a ParameterString event.
  *
@@ -761,13 +692,11 @@ OTF2_EvtWriter_Metric( OTF2_EvtWriter*         writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_ParameterString( OTF2_EvtWriter*     writer,
-                                OTF2_AttributeList* attributeList,
-                                OTF2_TimeStamp      time,
-                                OTF2_ParameterRef   parameter,
-                                OTF2_StringRef      string );
-
+OTF2_ErrorCode OTF2_EvtWriter_ParameterString(OTF2_EvtWriter* writer,
+                                              OTF2_AttributeList* attributeList,
+                                              OTF2_TimeStamp time,
+                                              OTF2_ParameterRef parameter,
+                                              OTF2_StringRef string);
 
 /** @brief Records a ParameterInt event.
  *
@@ -787,13 +716,11 @@ OTF2_EvtWriter_ParameterString( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_ParameterInt( OTF2_EvtWriter*     writer,
-                             OTF2_AttributeList* attributeList,
-                             OTF2_TimeStamp      time,
-                             OTF2_ParameterRef   parameter,
-                             int64_t             value );
-
+OTF2_ErrorCode OTF2_EvtWriter_ParameterInt(OTF2_EvtWriter* writer,
+                                           OTF2_AttributeList* attributeList,
+                                           OTF2_TimeStamp time,
+                                           OTF2_ParameterRef parameter,
+                                           int64_t value);
 
 /** @brief Records a ParameterUnsignedInt event.
  *
@@ -813,13 +740,11 @@ OTF2_EvtWriter_ParameterInt( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_ParameterUnsignedInt( OTF2_EvtWriter*     writer,
-                                     OTF2_AttributeList* attributeList,
-                                     OTF2_TimeStamp      time,
-                                     OTF2_ParameterRef   parameter,
-                                     uint64_t            value );
-
+OTF2_ErrorCode OTF2_EvtWriter_ParameterUnsignedInt(OTF2_EvtWriter* writer,
+                                                   OTF2_AttributeList* attributeList,
+                                                   OTF2_TimeStamp time,
+                                                   OTF2_ParameterRef parameter,
+                                                   uint64_t value);
 
 /** @brief Records a RmaWinCreate event.
  *
@@ -844,12 +769,10 @@ OTF2_EvtWriter_ParameterUnsignedInt( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_RmaWinCreate( OTF2_EvtWriter*     writer,
-                             OTF2_AttributeList* attributeList,
-                             OTF2_TimeStamp      time,
-                             OTF2_RmaWinRef      win );
-
+OTF2_ErrorCode OTF2_EvtWriter_RmaWinCreate(OTF2_EvtWriter* writer,
+                                           OTF2_AttributeList* attributeList,
+                                           OTF2_TimeStamp time,
+                                           OTF2_RmaWinRef win);
 
 /** @brief Records a RmaWinDestroy event.
  *
@@ -876,12 +799,10 @@ OTF2_EvtWriter_RmaWinCreate( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_RmaWinDestroy( OTF2_EvtWriter*     writer,
-                              OTF2_AttributeList* attributeList,
-                              OTF2_TimeStamp      time,
-                              OTF2_RmaWinRef      win );
-
+OTF2_ErrorCode OTF2_EvtWriter_RmaWinDestroy(OTF2_EvtWriter* writer,
+                                            OTF2_AttributeList* attributeList,
+                                            OTF2_TimeStamp time,
+                                            OTF2_RmaWinRef win);
 
 /** @brief Records a RmaCollectiveBegin event.
  *
@@ -896,11 +817,9 @@ OTF2_EvtWriter_RmaWinDestroy( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_RmaCollectiveBegin( OTF2_EvtWriter*     writer,
-                                   OTF2_AttributeList* attributeList,
-                                   OTF2_TimeStamp      time );
-
+OTF2_ErrorCode OTF2_EvtWriter_RmaCollectiveBegin(OTF2_EvtWriter* writer,
+                                                 OTF2_AttributeList* attributeList,
+                                                 OTF2_TimeStamp time);
 
 /** @brief Records a RmaCollectiveEnd event.
  *
@@ -925,17 +844,15 @@ OTF2_EvtWriter_RmaCollectiveBegin( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_RmaCollectiveEnd( OTF2_EvtWriter*     writer,
-                                 OTF2_AttributeList* attributeList,
-                                 OTF2_TimeStamp      time,
-                                 OTF2_CollectiveOp   collectiveOp,
-                                 OTF2_RmaSyncLevel   syncLevel,
-                                 OTF2_RmaWinRef      win,
-                                 uint32_t            root,
-                                 uint64_t            bytesSent,
-                                 uint64_t            bytesReceived );
-
+OTF2_ErrorCode OTF2_EvtWriter_RmaCollectiveEnd(OTF2_EvtWriter* writer,
+                                               OTF2_AttributeList* attributeList,
+                                               OTF2_TimeStamp time,
+                                               OTF2_CollectiveOp collectiveOp,
+                                               OTF2_RmaSyncLevel syncLevel,
+                                               OTF2_RmaWinRef win,
+                                               uint32_t root,
+                                               uint64_t bytesSent,
+                                               uint64_t bytesReceived);
 
 /** @brief Records a RmaGroupSync event.
  *
@@ -959,14 +876,12 @@ OTF2_EvtWriter_RmaCollectiveEnd( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_RmaGroupSync( OTF2_EvtWriter*     writer,
-                             OTF2_AttributeList* attributeList,
-                             OTF2_TimeStamp      time,
-                             OTF2_RmaSyncLevel   syncLevel,
-                             OTF2_RmaWinRef      win,
-                             OTF2_GroupRef       group );
-
+OTF2_ErrorCode OTF2_EvtWriter_RmaGroupSync(OTF2_EvtWriter* writer,
+                                           OTF2_AttributeList* attributeList,
+                                           OTF2_TimeStamp time,
+                                           OTF2_RmaSyncLevel syncLevel,
+                                           OTF2_RmaWinRef win,
+                                           OTF2_GroupRef group);
 
 /** @brief Records a RmaRequestLock event.
  *
@@ -993,15 +908,13 @@ OTF2_EvtWriter_RmaGroupSync( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_RmaRequestLock( OTF2_EvtWriter*     writer,
-                               OTF2_AttributeList* attributeList,
-                               OTF2_TimeStamp      time,
-                               OTF2_RmaWinRef      win,
-                               uint32_t            remote,
-                               uint64_t            lockId,
-                               OTF2_LockType       lockType );
-
+OTF2_ErrorCode OTF2_EvtWriter_RmaRequestLock(OTF2_EvtWriter* writer,
+                                             OTF2_AttributeList* attributeList,
+                                             OTF2_TimeStamp time,
+                                             OTF2_RmaWinRef win,
+                                             uint32_t remote,
+                                             uint64_t lockId,
+                                             OTF2_LockType lockType);
 
 /** @brief Records a RmaAcquireLock event.
  *
@@ -1026,15 +939,13 @@ OTF2_EvtWriter_RmaRequestLock( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_RmaAcquireLock( OTF2_EvtWriter*     writer,
-                               OTF2_AttributeList* attributeList,
-                               OTF2_TimeStamp      time,
-                               OTF2_RmaWinRef      win,
-                               uint32_t            remote,
-                               uint64_t            lockId,
-                               OTF2_LockType       lockType );
-
+OTF2_ErrorCode OTF2_EvtWriter_RmaAcquireLock(OTF2_EvtWriter* writer,
+                                             OTF2_AttributeList* attributeList,
+                                             OTF2_TimeStamp time,
+                                             OTF2_RmaWinRef win,
+                                             uint32_t remote,
+                                             uint64_t lockId,
+                                             OTF2_LockType lockType);
 
 /** @brief Records a RmaTryLock event.
  *
@@ -1059,15 +970,13 @@ OTF2_EvtWriter_RmaAcquireLock( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_RmaTryLock( OTF2_EvtWriter*     writer,
-                           OTF2_AttributeList* attributeList,
-                           OTF2_TimeStamp      time,
-                           OTF2_RmaWinRef      win,
-                           uint32_t            remote,
-                           uint64_t            lockId,
-                           OTF2_LockType       lockType );
-
+OTF2_ErrorCode OTF2_EvtWriter_RmaTryLock(OTF2_EvtWriter* writer,
+                                         OTF2_AttributeList* attributeList,
+                                         OTF2_TimeStamp time,
+                                         OTF2_RmaWinRef win,
+                                         uint32_t remote,
+                                         uint64_t lockId,
+                                         OTF2_LockType lockType);
 
 /** @brief Records a RmaReleaseLock event.
  *
@@ -1090,14 +999,12 @@ OTF2_EvtWriter_RmaTryLock( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_RmaReleaseLock( OTF2_EvtWriter*     writer,
-                               OTF2_AttributeList* attributeList,
-                               OTF2_TimeStamp      time,
-                               OTF2_RmaWinRef      win,
-                               uint32_t            remote,
-                               uint64_t            lockId );
-
+OTF2_ErrorCode OTF2_EvtWriter_RmaReleaseLock(OTF2_EvtWriter* writer,
+                                             OTF2_AttributeList* attributeList,
+                                             OTF2_TimeStamp time,
+                                             OTF2_RmaWinRef win,
+                                             uint32_t remote,
+                                             uint64_t lockId);
 
 /** @brief Records a RmaSync event.
  *
@@ -1118,14 +1025,12 @@ OTF2_EvtWriter_RmaReleaseLock( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_RmaSync( OTF2_EvtWriter*     writer,
-                        OTF2_AttributeList* attributeList,
-                        OTF2_TimeStamp      time,
-                        OTF2_RmaWinRef      win,
-                        uint32_t            remote,
-                        OTF2_RmaSyncType    syncType );
-
+OTF2_ErrorCode OTF2_EvtWriter_RmaSync(OTF2_EvtWriter* writer,
+                                      OTF2_AttributeList* attributeList,
+                                      OTF2_TimeStamp time,
+                                      OTF2_RmaWinRef win,
+                                      uint32_t remote,
+                                      OTF2_RmaSyncType syncType);
 
 /** @brief Records a RmaWaitChange event.
  *
@@ -1144,12 +1049,10 @@ OTF2_EvtWriter_RmaSync( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_RmaWaitChange( OTF2_EvtWriter*     writer,
-                              OTF2_AttributeList* attributeList,
-                              OTF2_TimeStamp      time,
-                              OTF2_RmaWinRef      win );
-
+OTF2_ErrorCode OTF2_EvtWriter_RmaWaitChange(OTF2_EvtWriter* writer,
+                                            OTF2_AttributeList* attributeList,
+                                            OTF2_TimeStamp time,
+                                            OTF2_RmaWinRef win);
 
 /** @brief Records a RmaPut event.
  *
@@ -1171,15 +1074,13 @@ OTF2_EvtWriter_RmaWaitChange( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_RmaPut( OTF2_EvtWriter*     writer,
-                       OTF2_AttributeList* attributeList,
-                       OTF2_TimeStamp      time,
-                       OTF2_RmaWinRef      win,
-                       uint32_t            remote,
-                       uint64_t            bytes,
-                       uint64_t            matchingId );
-
+OTF2_ErrorCode OTF2_EvtWriter_RmaPut(OTF2_EvtWriter* writer,
+                                     OTF2_AttributeList* attributeList,
+                                     OTF2_TimeStamp time,
+                                     OTF2_RmaWinRef win,
+                                     uint32_t remote,
+                                     uint64_t bytes,
+                                     uint64_t matchingId);
 
 /** @brief Records a RmaGet event.
  *
@@ -1201,15 +1102,13 @@ OTF2_EvtWriter_RmaPut( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_RmaGet( OTF2_EvtWriter*     writer,
-                       OTF2_AttributeList* attributeList,
-                       OTF2_TimeStamp      time,
-                       OTF2_RmaWinRef      win,
-                       uint32_t            remote,
-                       uint64_t            bytes,
-                       uint64_t            matchingId );
-
+OTF2_ErrorCode OTF2_EvtWriter_RmaGet(OTF2_EvtWriter* writer,
+                                     OTF2_AttributeList* attributeList,
+                                     OTF2_TimeStamp time,
+                                     OTF2_RmaWinRef win,
+                                     uint32_t remote,
+                                     uint64_t bytes,
+                                     uint64_t matchingId);
 
 /** @brief Records a RmaAtomic event.
  *
@@ -1234,17 +1133,15 @@ OTF2_EvtWriter_RmaGet( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_RmaAtomic( OTF2_EvtWriter*     writer,
-                          OTF2_AttributeList* attributeList,
-                          OTF2_TimeStamp      time,
-                          OTF2_RmaWinRef      win,
-                          uint32_t            remote,
-                          OTF2_RmaAtomicType  type,
-                          uint64_t            bytesSent,
-                          uint64_t            bytesReceived,
-                          uint64_t            matchingId );
-
+OTF2_ErrorCode OTF2_EvtWriter_RmaAtomic(OTF2_EvtWriter* writer,
+                                        OTF2_AttributeList* attributeList,
+                                        OTF2_TimeStamp time,
+                                        OTF2_RmaWinRef win,
+                                        uint32_t remote,
+                                        OTF2_RmaAtomicType type,
+                                        uint64_t bytesSent,
+                                        uint64_t bytesReceived,
+                                        uint64_t matchingId);
 
 /** @brief Records a RmaOpCompleteBlocking event.
  *
@@ -1265,13 +1162,11 @@ OTF2_EvtWriter_RmaAtomic( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_RmaOpCompleteBlocking( OTF2_EvtWriter*     writer,
-                                      OTF2_AttributeList* attributeList,
-                                      OTF2_TimeStamp      time,
-                                      OTF2_RmaWinRef      win,
-                                      uint64_t            matchingId );
-
+OTF2_ErrorCode OTF2_EvtWriter_RmaOpCompleteBlocking(OTF2_EvtWriter* writer,
+                                                    OTF2_AttributeList* attributeList,
+                                                    OTF2_TimeStamp time,
+                                                    OTF2_RmaWinRef win,
+                                                    uint64_t matchingId);
 
 /** @brief Records a RmaOpCompleteNonBlocking event.
  *
@@ -1292,13 +1187,11 @@ OTF2_EvtWriter_RmaOpCompleteBlocking( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_RmaOpCompleteNonBlocking( OTF2_EvtWriter*     writer,
-                                         OTF2_AttributeList* attributeList,
-                                         OTF2_TimeStamp      time,
-                                         OTF2_RmaWinRef      win,
-                                         uint64_t            matchingId );
-
+OTF2_ErrorCode OTF2_EvtWriter_RmaOpCompleteNonBlocking(OTF2_EvtWriter* writer,
+                                                       OTF2_AttributeList* attributeList,
+                                                       OTF2_TimeStamp time,
+                                                       OTF2_RmaWinRef win,
+                                                       uint64_t matchingId);
 
 /** @brief Records a RmaOpTest event.
  *
@@ -1319,13 +1212,11 @@ OTF2_EvtWriter_RmaOpCompleteNonBlocking( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_RmaOpTest( OTF2_EvtWriter*     writer,
-                          OTF2_AttributeList* attributeList,
-                          OTF2_TimeStamp      time,
-                          OTF2_RmaWinRef      win,
-                          uint64_t            matchingId );
-
+OTF2_ErrorCode OTF2_EvtWriter_RmaOpTest(OTF2_EvtWriter* writer,
+                                        OTF2_AttributeList* attributeList,
+                                        OTF2_TimeStamp time,
+                                        OTF2_RmaWinRef win,
+                                        uint64_t matchingId);
 
 /** @brief Records a RmaOpCompleteRemote event.
  *
@@ -1346,13 +1237,11 @@ OTF2_EvtWriter_RmaOpTest( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_RmaOpCompleteRemote( OTF2_EvtWriter*     writer,
-                                    OTF2_AttributeList* attributeList,
-                                    OTF2_TimeStamp      time,
-                                    OTF2_RmaWinRef      win,
-                                    uint64_t            matchingId );
-
+OTF2_ErrorCode OTF2_EvtWriter_RmaOpCompleteRemote(OTF2_EvtWriter* writer,
+                                                  OTF2_AttributeList* attributeList,
+                                                  OTF2_TimeStamp time,
+                                                  OTF2_RmaWinRef win,
+                                                  uint64_t matchingId);
 
 /** @brief Records a ThreadFork event.
  *
@@ -1368,13 +1257,11 @@ OTF2_EvtWriter_RmaOpCompleteRemote( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_ThreadFork( OTF2_EvtWriter*     writer,
-                           OTF2_AttributeList* attributeList,
-                           OTF2_TimeStamp      time,
-                           OTF2_Paradigm       model,
-                           uint32_t            numberOfRequestedThreads );
-
+OTF2_ErrorCode OTF2_EvtWriter_ThreadFork(OTF2_EvtWriter* writer,
+                                         OTF2_AttributeList* attributeList,
+                                         OTF2_TimeStamp time,
+                                         OTF2_Paradigm model,
+                                         uint32_t numberOfRequestedThreads);
 
 /** @brief Records a ThreadJoin event.
  *
@@ -1390,12 +1277,10 @@ OTF2_EvtWriter_ThreadFork( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_ThreadJoin( OTF2_EvtWriter*     writer,
-                           OTF2_AttributeList* attributeList,
-                           OTF2_TimeStamp      time,
-                           OTF2_Paradigm       model );
-
+OTF2_ErrorCode OTF2_EvtWriter_ThreadJoin(OTF2_EvtWriter* writer,
+                                         OTF2_AttributeList* attributeList,
+                                         OTF2_TimeStamp time,
+                                         OTF2_Paradigm model);
 
 /** @brief Records a ThreadTeamBegin event.
  *
@@ -1413,12 +1298,10 @@ OTF2_EvtWriter_ThreadJoin( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_ThreadTeamBegin( OTF2_EvtWriter*     writer,
-                                OTF2_AttributeList* attributeList,
-                                OTF2_TimeStamp      time,
-                                OTF2_CommRef        threadTeam );
-
+OTF2_ErrorCode OTF2_EvtWriter_ThreadTeamBegin(OTF2_EvtWriter* writer,
+                                              OTF2_AttributeList* attributeList,
+                                              OTF2_TimeStamp time,
+                                              OTF2_CommRef threadTeam);
 
 /** @brief Records a ThreadTeamEnd event.
  *
@@ -1436,12 +1319,10 @@ OTF2_EvtWriter_ThreadTeamBegin( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_ThreadTeamEnd( OTF2_EvtWriter*     writer,
-                              OTF2_AttributeList* attributeList,
-                              OTF2_TimeStamp      time,
-                              OTF2_CommRef        threadTeam );
-
+OTF2_ErrorCode OTF2_EvtWriter_ThreadTeamEnd(OTF2_EvtWriter* writer,
+                                            OTF2_AttributeList* attributeList,
+                                            OTF2_TimeStamp time,
+                                            OTF2_CommRef threadTeam);
 
 /** @brief Records a ThreadAcquireLock event.
  *
@@ -1462,14 +1343,12 @@ OTF2_EvtWriter_ThreadTeamEnd( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_ThreadAcquireLock( OTF2_EvtWriter*     writer,
-                                  OTF2_AttributeList* attributeList,
-                                  OTF2_TimeStamp      time,
-                                  OTF2_Paradigm       model,
-                                  uint32_t            lockID,
-                                  uint32_t            acquisitionOrder );
-
+OTF2_ErrorCode OTF2_EvtWriter_ThreadAcquireLock(OTF2_EvtWriter* writer,
+                                                OTF2_AttributeList* attributeList,
+                                                OTF2_TimeStamp time,
+                                                OTF2_Paradigm model,
+                                                uint32_t lockID,
+                                                uint32_t acquisitionOrder);
 
 /** @brief Records a ThreadReleaseLock event.
  *
@@ -1490,14 +1369,12 @@ OTF2_EvtWriter_ThreadAcquireLock( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_ThreadReleaseLock( OTF2_EvtWriter*     writer,
-                                  OTF2_AttributeList* attributeList,
-                                  OTF2_TimeStamp      time,
-                                  OTF2_Paradigm       model,
-                                  uint32_t            lockID,
-                                  uint32_t            acquisitionOrder );
-
+OTF2_ErrorCode OTF2_EvtWriter_ThreadReleaseLock(OTF2_EvtWriter* writer,
+                                                OTF2_AttributeList* attributeList,
+                                                OTF2_TimeStamp time,
+                                                OTF2_Paradigm model,
+                                                uint32_t lockID,
+                                                uint32_t acquisitionOrder);
 
 /** @brief Records a ThreadTaskCreate event.
  *
@@ -1519,14 +1396,12 @@ OTF2_EvtWriter_ThreadReleaseLock( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_ThreadTaskCreate( OTF2_EvtWriter*     writer,
-                                 OTF2_AttributeList* attributeList,
-                                 OTF2_TimeStamp      time,
-                                 OTF2_CommRef        threadTeam,
-                                 uint32_t            creatingThread,
-                                 uint32_t            generationNumber );
-
+OTF2_ErrorCode OTF2_EvtWriter_ThreadTaskCreate(OTF2_EvtWriter* writer,
+                                               OTF2_AttributeList* attributeList,
+                                               OTF2_TimeStamp time,
+                                               OTF2_CommRef threadTeam,
+                                               uint32_t creatingThread,
+                                               uint32_t generationNumber);
 
 /** @brief Records a ThreadTaskSwitch event.
  *
@@ -1550,14 +1425,12 @@ OTF2_EvtWriter_ThreadTaskCreate( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_ThreadTaskSwitch( OTF2_EvtWriter*     writer,
-                                 OTF2_AttributeList* attributeList,
-                                 OTF2_TimeStamp      time,
-                                 OTF2_CommRef        threadTeam,
-                                 uint32_t            creatingThread,
-                                 uint32_t            generationNumber );
-
+OTF2_ErrorCode OTF2_EvtWriter_ThreadTaskSwitch(OTF2_EvtWriter* writer,
+                                               OTF2_AttributeList* attributeList,
+                                               OTF2_TimeStamp time,
+                                               OTF2_CommRef threadTeam,
+                                               uint32_t creatingThread,
+                                               uint32_t generationNumber);
 
 /** @brief Records a ThreadTaskComplete event.
  *
@@ -1579,14 +1452,12 @@ OTF2_EvtWriter_ThreadTaskSwitch( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_ThreadTaskComplete( OTF2_EvtWriter*     writer,
-                                   OTF2_AttributeList* attributeList,
-                                   OTF2_TimeStamp      time,
-                                   OTF2_CommRef        threadTeam,
-                                   uint32_t            creatingThread,
-                                   uint32_t            generationNumber );
-
+OTF2_ErrorCode OTF2_EvtWriter_ThreadTaskComplete(OTF2_EvtWriter* writer,
+                                                 OTF2_AttributeList* attributeList,
+                                                 OTF2_TimeStamp time,
+                                                 OTF2_CommRef threadTeam,
+                                                 uint32_t creatingThread,
+                                                 uint32_t generationNumber);
 
 /** @brief Records a ThreadCreate event.
  *
@@ -1607,13 +1478,11 @@ OTF2_EvtWriter_ThreadTaskComplete( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_ThreadCreate( OTF2_EvtWriter*     writer,
-                             OTF2_AttributeList* attributeList,
-                             OTF2_TimeStamp      time,
-                             OTF2_CommRef        threadContingent,
-                             uint64_t            sequenceCount );
-
+OTF2_ErrorCode OTF2_EvtWriter_ThreadCreate(OTF2_EvtWriter* writer,
+                                           OTF2_AttributeList* attributeList,
+                                           OTF2_TimeStamp time,
+                                           OTF2_CommRef threadContingent,
+                                           uint64_t sequenceCount);
 
 /** @brief Records a ThreadBegin event.
  *
@@ -1634,13 +1503,11 @@ OTF2_EvtWriter_ThreadCreate( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_ThreadBegin( OTF2_EvtWriter*     writer,
-                            OTF2_AttributeList* attributeList,
-                            OTF2_TimeStamp      time,
-                            OTF2_CommRef        threadContingent,
-                            uint64_t            sequenceCount );
-
+OTF2_ErrorCode OTF2_EvtWriter_ThreadBegin(OTF2_EvtWriter* writer,
+                                          OTF2_AttributeList* attributeList,
+                                          OTF2_TimeStamp time,
+                                          OTF2_CommRef threadContingent,
+                                          uint64_t sequenceCount);
 
 /** @brief Records a ThreadWait event.
  *
@@ -1661,13 +1528,11 @@ OTF2_EvtWriter_ThreadBegin( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_ThreadWait( OTF2_EvtWriter*     writer,
-                           OTF2_AttributeList* attributeList,
-                           OTF2_TimeStamp      time,
-                           OTF2_CommRef        threadContingent,
-                           uint64_t            sequenceCount );
-
+OTF2_ErrorCode OTF2_EvtWriter_ThreadWait(OTF2_EvtWriter* writer,
+                                         OTF2_AttributeList* attributeList,
+                                         OTF2_TimeStamp time,
+                                         OTF2_CommRef threadContingent,
+                                         uint64_t sequenceCount);
 
 /** @brief Records a ThreadEnd event.
  *
@@ -1690,13 +1555,11 @@ OTF2_EvtWriter_ThreadWait( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_ThreadEnd( OTF2_EvtWriter*     writer,
-                          OTF2_AttributeList* attributeList,
-                          OTF2_TimeStamp      time,
-                          OTF2_CommRef        threadContingent,
-                          uint64_t            sequenceCount );
-
+OTF2_ErrorCode OTF2_EvtWriter_ThreadEnd(OTF2_EvtWriter* writer,
+                                        OTF2_AttributeList* attributeList,
+                                        OTF2_TimeStamp time,
+                                        OTF2_CommRef threadContingent,
+                                        uint64_t sequenceCount);
 
 /** @brief Records a CallingContextEnter event.
  *
@@ -1730,13 +1593,11 @@ OTF2_EvtWriter_ThreadEnd( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_CallingContextEnter( OTF2_EvtWriter*        writer,
-                                    OTF2_AttributeList*    attributeList,
-                                    OTF2_TimeStamp         time,
-                                    OTF2_CallingContextRef callingContext,
-                                    uint32_t               unwindDistance );
-
+OTF2_ErrorCode OTF2_EvtWriter_CallingContextEnter(OTF2_EvtWriter* writer,
+                                                  OTF2_AttributeList* attributeList,
+                                                  OTF2_TimeStamp time,
+                                                  OTF2_CallingContextRef callingContext,
+                                                  uint32_t unwindDistance);
 
 /** @brief Records a CallingContextLeave event.
  *
@@ -1775,12 +1636,10 @@ OTF2_EvtWriter_CallingContextEnter( OTF2_EvtWriter*        writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_CallingContextLeave( OTF2_EvtWriter*        writer,
-                                    OTF2_AttributeList*    attributeList,
-                                    OTF2_TimeStamp         time,
-                                    OTF2_CallingContextRef callingContext );
-
+OTF2_ErrorCode OTF2_EvtWriter_CallingContextLeave(OTF2_EvtWriter* writer,
+                                                  OTF2_AttributeList* attributeList,
+                                                  OTF2_TimeStamp time,
+                                                  OTF2_CallingContextRef callingContext);
 
 /** @brief Records a CallingContextSample event.
  *
@@ -1812,14 +1671,12 @@ OTF2_EvtWriter_CallingContextLeave( OTF2_EvtWriter*        writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_CallingContextSample( OTF2_EvtWriter*            writer,
-                                     OTF2_AttributeList*        attributeList,
-                                     OTF2_TimeStamp             time,
-                                     OTF2_CallingContextRef     callingContext,
-                                     uint32_t                   unwindDistance,
-                                     OTF2_InterruptGeneratorRef interruptGenerator );
-
+OTF2_ErrorCode OTF2_EvtWriter_CallingContextSample(OTF2_EvtWriter* writer,
+                                                   OTF2_AttributeList* attributeList,
+                                                   OTF2_TimeStamp time,
+                                                   OTF2_CallingContextRef callingContext,
+                                                   uint32_t unwindDistance,
+                                                   OTF2_InterruptGeneratorRef interruptGenerator);
 
 /** @brief Records a IoCreateHandle event.
  *
@@ -1856,15 +1713,13 @@ OTF2_EvtWriter_CallingContextSample( OTF2_EvtWriter*            writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_IoCreateHandle( OTF2_EvtWriter*     writer,
-                               OTF2_AttributeList* attributeList,
-                               OTF2_TimeStamp      time,
-                               OTF2_IoHandleRef    handle,
-                               OTF2_IoAccessMode   mode,
-                               OTF2_IoCreationFlag creationFlags,
-                               OTF2_IoStatusFlag   statusFlags );
-
+OTF2_ErrorCode OTF2_EvtWriter_IoCreateHandle(OTF2_EvtWriter* writer,
+                                             OTF2_AttributeList* attributeList,
+                                             OTF2_TimeStamp time,
+                                             OTF2_IoHandleRef handle,
+                                             OTF2_IoAccessMode mode,
+                                             OTF2_IoCreationFlag creationFlags,
+                                             OTF2_IoStatusFlag statusFlags);
 
 /** @brief Records a IoDestroyHandle event.
  *
@@ -1893,12 +1748,10 @@ OTF2_EvtWriter_IoCreateHandle( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_IoDestroyHandle( OTF2_EvtWriter*     writer,
-                                OTF2_AttributeList* attributeList,
-                                OTF2_TimeStamp      time,
-                                OTF2_IoHandleRef    handle );
-
+OTF2_ErrorCode OTF2_EvtWriter_IoDestroyHandle(OTF2_EvtWriter* writer,
+                                              OTF2_AttributeList* attributeList,
+                                              OTF2_TimeStamp time,
+                                              OTF2_IoHandleRef handle);
 
 /** @brief Records a IoDuplicateHandle event.
  *
@@ -1932,14 +1785,12 @@ OTF2_EvtWriter_IoDestroyHandle( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_IoDuplicateHandle( OTF2_EvtWriter*     writer,
-                                  OTF2_AttributeList* attributeList,
-                                  OTF2_TimeStamp      time,
-                                  OTF2_IoHandleRef    oldHandle,
-                                  OTF2_IoHandleRef    newHandle,
-                                  OTF2_IoStatusFlag   statusFlags );
-
+OTF2_ErrorCode OTF2_EvtWriter_IoDuplicateHandle(OTF2_EvtWriter* writer,
+                                                OTF2_AttributeList* attributeList,
+                                                OTF2_TimeStamp time,
+                                                OTF2_IoHandleRef oldHandle,
+                                                OTF2_IoHandleRef newHandle,
+                                                OTF2_IoStatusFlag statusFlags);
 
 /** @brief Records a IoSeek event.
  *
@@ -1964,15 +1815,13 @@ OTF2_EvtWriter_IoDuplicateHandle( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_IoSeek( OTF2_EvtWriter*     writer,
-                       OTF2_AttributeList* attributeList,
-                       OTF2_TimeStamp      time,
-                       OTF2_IoHandleRef    handle,
-                       int64_t             offsetRequest,
-                       OTF2_IoSeekOption   whence,
-                       uint64_t            offsetResult );
-
+OTF2_ErrorCode OTF2_EvtWriter_IoSeek(OTF2_EvtWriter* writer,
+                                     OTF2_AttributeList* attributeList,
+                                     OTF2_TimeStamp time,
+                                     OTF2_IoHandleRef handle,
+                                     int64_t offsetRequest,
+                                     OTF2_IoSeekOption whence,
+                                     uint64_t offsetResult);
 
 /** @brief Records a IoChangeStatusFlags event.
  *
@@ -1992,13 +1841,11 @@ OTF2_EvtWriter_IoSeek( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_IoChangeStatusFlags( OTF2_EvtWriter*     writer,
-                                    OTF2_AttributeList* attributeList,
-                                    OTF2_TimeStamp      time,
-                                    OTF2_IoHandleRef    handle,
-                                    OTF2_IoStatusFlag   statusFlags );
-
+OTF2_ErrorCode OTF2_EvtWriter_IoChangeStatusFlags(OTF2_EvtWriter* writer,
+                                                  OTF2_AttributeList* attributeList,
+                                                  OTF2_TimeStamp time,
+                                                  OTF2_IoHandleRef handle,
+                                                  OTF2_IoStatusFlag statusFlags);
 
 /** @brief Records a IoDeleteFile event.
  *
@@ -2018,13 +1865,11 @@ OTF2_EvtWriter_IoChangeStatusFlags( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_IoDeleteFile( OTF2_EvtWriter*     writer,
-                             OTF2_AttributeList* attributeList,
-                             OTF2_TimeStamp      time,
-                             OTF2_IoParadigmRef  ioParadigm,
-                             OTF2_IoFileRef      file );
-
+OTF2_ErrorCode OTF2_EvtWriter_IoDeleteFile(OTF2_EvtWriter* writer,
+                                           OTF2_AttributeList* attributeList,
+                                           OTF2_TimeStamp time,
+                                           OTF2_IoParadigmRef ioParadigm,
+                                           OTF2_IoFileRef file);
 
 /** @brief Records a IoOperationBegin event.
  *
@@ -2051,16 +1896,14 @@ OTF2_EvtWriter_IoDeleteFile( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_IoOperationBegin( OTF2_EvtWriter*      writer,
-                                 OTF2_AttributeList*  attributeList,
-                                 OTF2_TimeStamp       time,
-                                 OTF2_IoHandleRef     handle,
-                                 OTF2_IoOperationMode mode,
-                                 OTF2_IoOperationFlag operationFlags,
-                                 uint64_t             bytesRequest,
-                                 uint64_t             matchingId );
-
+OTF2_ErrorCode OTF2_EvtWriter_IoOperationBegin(OTF2_EvtWriter* writer,
+                                               OTF2_AttributeList* attributeList,
+                                               OTF2_TimeStamp time,
+                                               OTF2_IoHandleRef handle,
+                                               OTF2_IoOperationMode mode,
+                                               OTF2_IoOperationFlag operationFlags,
+                                               uint64_t bytesRequest,
+                                               uint64_t matchingId);
 
 /** @brief Records a IoOperationTest event.
  *
@@ -2084,13 +1927,11 @@ OTF2_EvtWriter_IoOperationBegin( OTF2_EvtWriter*      writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_IoOperationTest( OTF2_EvtWriter*     writer,
-                                OTF2_AttributeList* attributeList,
-                                OTF2_TimeStamp      time,
-                                OTF2_IoHandleRef    handle,
-                                uint64_t            matchingId );
-
+OTF2_ErrorCode OTF2_EvtWriter_IoOperationTest(OTF2_EvtWriter* writer,
+                                              OTF2_AttributeList* attributeList,
+                                              OTF2_TimeStamp time,
+                                              OTF2_IoHandleRef handle,
+                                              uint64_t matchingId);
 
 /** @brief Records a IoOperationIssued event.
  *
@@ -2115,13 +1956,11 @@ OTF2_EvtWriter_IoOperationTest( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_IoOperationIssued( OTF2_EvtWriter*     writer,
-                                  OTF2_AttributeList* attributeList,
-                                  OTF2_TimeStamp      time,
-                                  OTF2_IoHandleRef    handle,
-                                  uint64_t            matchingId );
-
+OTF2_ErrorCode OTF2_EvtWriter_IoOperationIssued(OTF2_EvtWriter* writer,
+                                                OTF2_AttributeList* attributeList,
+                                                OTF2_TimeStamp time,
+                                                OTF2_IoHandleRef handle,
+                                                uint64_t matchingId);
 
 /** @brief Records a IoOperationComplete event.
  *
@@ -2146,14 +1985,12 @@ OTF2_EvtWriter_IoOperationIssued( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_IoOperationComplete( OTF2_EvtWriter*     writer,
-                                    OTF2_AttributeList* attributeList,
-                                    OTF2_TimeStamp      time,
-                                    OTF2_IoHandleRef    handle,
-                                    uint64_t            bytesResult,
-                                    uint64_t            matchingId );
-
+OTF2_ErrorCode OTF2_EvtWriter_IoOperationComplete(OTF2_EvtWriter* writer,
+                                                  OTF2_AttributeList* attributeList,
+                                                  OTF2_TimeStamp time,
+                                                  OTF2_IoHandleRef handle,
+                                                  uint64_t bytesResult,
+                                                  uint64_t matchingId);
 
 /** @brief Records a IoOperationCancelled event.
  *
@@ -2178,13 +2015,11 @@ OTF2_EvtWriter_IoOperationComplete( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_IoOperationCancelled( OTF2_EvtWriter*     writer,
-                                     OTF2_AttributeList* attributeList,
-                                     OTF2_TimeStamp      time,
-                                     OTF2_IoHandleRef    handle,
-                                     uint64_t            matchingId );
-
+OTF2_ErrorCode OTF2_EvtWriter_IoOperationCancelled(OTF2_EvtWriter* writer,
+                                                   OTF2_AttributeList* attributeList,
+                                                   OTF2_TimeStamp time,
+                                                   OTF2_IoHandleRef handle,
+                                                   uint64_t matchingId);
 
 /** @brief Records a IoAcquireLock event.
  *
@@ -2203,13 +2038,11 @@ OTF2_EvtWriter_IoOperationCancelled( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_IoAcquireLock( OTF2_EvtWriter*     writer,
-                              OTF2_AttributeList* attributeList,
-                              OTF2_TimeStamp      time,
-                              OTF2_IoHandleRef    handle,
-                              OTF2_LockType       lockType );
-
+OTF2_ErrorCode OTF2_EvtWriter_IoAcquireLock(OTF2_EvtWriter* writer,
+                                            OTF2_AttributeList* attributeList,
+                                            OTF2_TimeStamp time,
+                                            OTF2_IoHandleRef handle,
+                                            OTF2_LockType lockType);
 
 /** @brief Records a IoReleaseLock event.
  *
@@ -2228,13 +2061,11 @@ OTF2_EvtWriter_IoAcquireLock( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_IoReleaseLock( OTF2_EvtWriter*     writer,
-                              OTF2_AttributeList* attributeList,
-                              OTF2_TimeStamp      time,
-                              OTF2_IoHandleRef    handle,
-                              OTF2_LockType       lockType );
-
+OTF2_ErrorCode OTF2_EvtWriter_IoReleaseLock(OTF2_EvtWriter* writer,
+                                            OTF2_AttributeList* attributeList,
+                                            OTF2_TimeStamp time,
+                                            OTF2_IoHandleRef handle,
+                                            OTF2_LockType lockType);
 
 /** @brief Records a IoTryLock event.
  *
@@ -2254,13 +2085,11 @@ OTF2_EvtWriter_IoReleaseLock( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_IoTryLock( OTF2_EvtWriter*     writer,
-                          OTF2_AttributeList* attributeList,
-                          OTF2_TimeStamp      time,
-                          OTF2_IoHandleRef    handle,
-                          OTF2_LockType       lockType );
-
+OTF2_ErrorCode OTF2_EvtWriter_IoTryLock(OTF2_EvtWriter* writer,
+                                        OTF2_AttributeList* attributeList,
+                                        OTF2_TimeStamp time,
+                                        OTF2_IoHandleRef handle,
+                                        OTF2_LockType lockType);
 
 /** @brief Records a ProgramBegin event.
  *
@@ -2291,14 +2120,12 @@ OTF2_EvtWriter_IoTryLock( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_ProgramBegin( OTF2_EvtWriter*       writer,
-                             OTF2_AttributeList*   attributeList,
-                             OTF2_TimeStamp        time,
-                             OTF2_StringRef        programName,
-                             uint32_t              numberOfArguments,
-                             const OTF2_StringRef* programArguments );
-
+OTF2_ErrorCode OTF2_EvtWriter_ProgramBegin(OTF2_EvtWriter* writer,
+                                           OTF2_AttributeList* attributeList,
+                                           OTF2_TimeStamp time,
+                                           OTF2_StringRef programName,
+                                           uint32_t numberOfArguments,
+                                           const OTF2_StringRef* programArguments);
 
 /** @brief Records a ProgramEnd event.
  *
@@ -2328,12 +2155,10 @@ OTF2_EvtWriter_ProgramBegin( OTF2_EvtWriter*       writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_ProgramEnd( OTF2_EvtWriter*     writer,
-                           OTF2_AttributeList* attributeList,
-                           OTF2_TimeStamp      time,
-                           int64_t             exitStatus );
-
+OTF2_ErrorCode OTF2_EvtWriter_ProgramEnd(OTF2_EvtWriter* writer,
+                                         OTF2_AttributeList* attributeList,
+                                         OTF2_TimeStamp time,
+                                         int64_t exitStatus);
 
 /** @brief Records a NonBlockingCollectiveRequest event.
  *
@@ -2349,12 +2174,10 @@ OTF2_EvtWriter_ProgramEnd( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_NonBlockingCollectiveRequest( OTF2_EvtWriter*     writer,
-                                             OTF2_AttributeList* attributeList,
-                                             OTF2_TimeStamp      time,
-                                             uint64_t            requestID );
-
+OTF2_ErrorCode OTF2_EvtWriter_NonBlockingCollectiveRequest(OTF2_EvtWriter* writer,
+                                                           OTF2_AttributeList* attributeList,
+                                                           OTF2_TimeStamp time,
+                                                           uint64_t requestID);
 
 /** @brief Records a NonBlockingCollectiveComplete event.
  *
@@ -2379,17 +2202,15 @@ OTF2_EvtWriter_NonBlockingCollectiveRequest( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_NonBlockingCollectiveComplete( OTF2_EvtWriter*     writer,
-                                              OTF2_AttributeList* attributeList,
-                                              OTF2_TimeStamp      time,
-                                              OTF2_CollectiveOp   collectiveOp,
-                                              OTF2_CommRef        communicator,
-                                              uint32_t            root,
-                                              uint64_t            sizeSent,
-                                              uint64_t            sizeReceived,
-                                              uint64_t            requestID );
-
+OTF2_ErrorCode OTF2_EvtWriter_NonBlockingCollectiveComplete(OTF2_EvtWriter* writer,
+                                                            OTF2_AttributeList* attributeList,
+                                                            OTF2_TimeStamp time,
+                                                            OTF2_CollectiveOp collectiveOp,
+                                                            OTF2_CommRef communicator,
+                                                            uint32_t root,
+                                                            uint64_t sizeSent,
+                                                            uint64_t sizeReceived,
+                                                            uint64_t requestID);
 
 /** @brief Records a CommCreate event.
  *
@@ -2413,12 +2234,10 @@ OTF2_EvtWriter_NonBlockingCollectiveComplete( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_CommCreate( OTF2_EvtWriter*     writer,
-                           OTF2_AttributeList* attributeList,
-                           OTF2_TimeStamp      time,
-                           OTF2_CommRef        communicator );
-
+OTF2_ErrorCode OTF2_EvtWriter_CommCreate(OTF2_EvtWriter* writer,
+                                         OTF2_AttributeList* attributeList,
+                                         OTF2_TimeStamp time,
+                                         OTF2_CommRef communicator);
 
 /** @brief Records a CommDestroy event.
  *
@@ -2443,12 +2262,10 @@ OTF2_EvtWriter_CommCreate( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_CommDestroy( OTF2_EvtWriter*     writer,
-                            OTF2_AttributeList* attributeList,
-                            OTF2_TimeStamp      time,
-                            OTF2_CommRef        communicator );
-
+OTF2_ErrorCode OTF2_EvtWriter_CommDestroy(OTF2_EvtWriter* writer,
+                                          OTF2_AttributeList* attributeList,
+                                          OTF2_TimeStamp time,
+                                          OTF2_CommRef communicator);
 
 /** @brief Please give me a documentation.
  *
@@ -2459,10 +2276,7 @@ OTF2_EvtWriter_CommDestroy( OTF2_EvtWriter*     writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_StoreRewindPoint( OTF2_EvtWriter* writer,
-                                 uint32_t        rewindId );
-
+OTF2_ErrorCode OTF2_EvtWriter_StoreRewindPoint(OTF2_EvtWriter* writer, uint32_t rewindId);
 
 /** @brief Please give me a documentation.
  *
@@ -2473,10 +2287,7 @@ OTF2_EvtWriter_StoreRewindPoint( OTF2_EvtWriter* writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_Rewind( OTF2_EvtWriter* writer,
-                       uint32_t        rewindId );
-
+OTF2_ErrorCode OTF2_EvtWriter_Rewind(OTF2_EvtWriter* writer, uint32_t rewindId);
 
 /** @brief Please give me a documentation.
  *
@@ -2487,14 +2298,10 @@ OTF2_EvtWriter_Rewind( OTF2_EvtWriter* writer,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_EvtWriter_ClearRewindPoint( OTF2_EvtWriter* writer,
-                                 uint32_t        rewindId );
-
+OTF2_ErrorCode OTF2_EvtWriter_ClearRewindPoint(OTF2_EvtWriter* writer, uint32_t rewindId);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-
 
 #endif /* !OTF2_EVT_WRITER_H */

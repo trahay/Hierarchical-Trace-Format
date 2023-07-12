@@ -28,10 +28,8 @@
  *
  */
 
-
 #ifndef OTF2_EVT_READER_CALLBACKS_H
 #define OTF2_EVT_READER_CALLBACKS_H
-
 
 /**
  *  @file
@@ -40,53 +38,41 @@
  *  @brief      This defines the callbacks for the event reader.
  */
 
-
 #include <stdint.h>
-
 
 #include <otf2/OTF2_ErrorCodes.h>
 
-
-#include <otf2/OTF2_GeneralDefinitions.h>
 #include <otf2/OTF2_AttributeList.h>
 #include <otf2/OTF2_Events.h>
-
+#include <otf2/OTF2_GeneralDefinitions.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-
 /** @brief Opaque struct which holds all event record callbacks.
  */
 typedef struct OTF2_EvtReaderCallbacks_struct OTF2_EvtReaderCallbacks;
-
 
 /** @brief Allocates a new struct for the event callbacks.
  *
  *  @return A newly allocated struct of type @eref{OTF2_EvtReaderCallbacks}.
  */
-OTF2_EvtReaderCallbacks*
-OTF2_EvtReaderCallbacks_New( void );
-
+OTF2_EvtReaderCallbacks* OTF2_EvtReaderCallbacks_New(void);
 
 /** @brief Deallocates a struct for the event callbacks.
  *
  *  @param evtReaderCallbacks Handle to a struct previously allocated
  *                            with @eref{OTF2_EvtReaderCallbacks_New}.
  */
-void
-OTF2_EvtReaderCallbacks_Delete( OTF2_EvtReaderCallbacks* evtReaderCallbacks );
-
+void OTF2_EvtReaderCallbacks_Delete(OTF2_EvtReaderCallbacks* evtReaderCallbacks);
 
 /** @brief Clears a struct for the event callbacks.
  *
  *  @param evtReaderCallbacks Handle to a struct previously allocated
  *                            with @eref{OTF2_EvtReaderCallbacks_New}.
  */
-void
-OTF2_EvtReaderCallbacks_Clear( OTF2_EvtReaderCallbacks* evtReaderCallbacks );
-
+void OTF2_EvtReaderCallbacks_Clear(OTF2_EvtReaderCallbacks* evtReaderCallbacks);
 
 /** @brief Callback for an unknown event record.
  *
@@ -101,13 +87,11 @@ OTF2_EvtReaderCallbacks_Clear( OTF2_EvtReaderCallbacks* evtReaderCallbacks );
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_Unknown )( OTF2_LocationRef    location,
-                                      OTF2_TimeStamp      time,
-                                      uint64_t            eventPosition,
-                                      void*               userData,
-                                      OTF2_AttributeList* attributeList );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_Unknown)(OTF2_LocationRef location,
+                                                            OTF2_TimeStamp time,
+                                                            uint64_t eventPosition,
+                                                            void* userData,
+                                                            OTF2_AttributeList* attributeList);
 
 /** @brief Registers the callback for the Unknown event.
  *
@@ -121,11 +105,8 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetUnknownCallback(
-    OTF2_EvtReaderCallbacks*       evtReaderCallbacks,
-    OTF2_EvtReaderCallback_Unknown unknownCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetUnknownCallback(OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+                                                          OTF2_EvtReaderCallback_Unknown unknownCallback);
 
 /** @brief Callback for the BufferFlush event record.
  *
@@ -146,14 +127,12 @@ OTF2_EvtReaderCallbacks_SetUnknownCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_BufferFlush )( OTF2_LocationRef    location,
-                                          OTF2_TimeStamp      time,
-                                          uint64_t            eventPosition,
-                                          void*               userData,
-                                          OTF2_AttributeList* attributeList,
-                                          OTF2_TimeStamp      stopTime );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_BufferFlush)(OTF2_LocationRef location,
+                                                                OTF2_TimeStamp time,
+                                                                uint64_t eventPosition,
+                                                                void* userData,
+                                                                OTF2_AttributeList* attributeList,
+                                                                OTF2_TimeStamp stopTime);
 
 /** @brief Registers the callback for the BufferFlush event.
  *
@@ -169,11 +148,8 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetBufferFlushCallback(
-    OTF2_EvtReaderCallbacks*           evtReaderCallbacks,
-    OTF2_EvtReaderCallback_BufferFlush bufferFlushCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetBufferFlushCallback(OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+                                                              OTF2_EvtReaderCallback_BufferFlush bufferFlushCallback);
 
 /** @brief Callback for the MeasurementOnOff event record.
  *
@@ -196,14 +172,12 @@ OTF2_EvtReaderCallbacks_SetBufferFlushCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_MeasurementOnOff )( OTF2_LocationRef     location,
-                                               OTF2_TimeStamp       time,
-                                               uint64_t             eventPosition,
-                                               void*                userData,
-                                               OTF2_AttributeList*  attributeList,
-                                               OTF2_MeasurementMode measurementMode );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_MeasurementOnOff)(OTF2_LocationRef location,
+                                                                     OTF2_TimeStamp time,
+                                                                     uint64_t eventPosition,
+                                                                     void* userData,
+                                                                     OTF2_AttributeList* attributeList,
+                                                                     OTF2_MeasurementMode measurementMode);
 
 /** @brief Registers the callback for the MeasurementOnOff event.
  *
@@ -219,11 +193,9 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetMeasurementOnOffCallback(
-    OTF2_EvtReaderCallbacks*                evtReaderCallbacks,
-    OTF2_EvtReaderCallback_MeasurementOnOff measurementOnOffCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetMeasurementOnOffCallback(
+  OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+  OTF2_EvtReaderCallback_MeasurementOnOff measurementOnOffCallback);
 
 /** @brief Callback for the Enter event record.
  *
@@ -246,14 +218,12 @@ OTF2_EvtReaderCallbacks_SetMeasurementOnOffCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_Enter )( OTF2_LocationRef    location,
-                                    OTF2_TimeStamp      time,
-                                    uint64_t            eventPosition,
-                                    void*               userData,
-                                    OTF2_AttributeList* attributeList,
-                                    OTF2_RegionRef      region );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_Enter)(OTF2_LocationRef location,
+                                                          OTF2_TimeStamp time,
+                                                          uint64_t eventPosition,
+                                                          void* userData,
+                                                          OTF2_AttributeList* attributeList,
+                                                          OTF2_RegionRef region);
 
 /** @brief Registers the callback for the Enter event.
  *
@@ -269,11 +239,8 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetEnterCallback(
-    OTF2_EvtReaderCallbacks*     evtReaderCallbacks,
-    OTF2_EvtReaderCallback_Enter enterCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetEnterCallback(OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+                                                        OTF2_EvtReaderCallback_Enter enterCallback);
 
 /** @brief Callback for the Leave event record.
  *
@@ -296,14 +263,12 @@ OTF2_EvtReaderCallbacks_SetEnterCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_Leave )( OTF2_LocationRef    location,
-                                    OTF2_TimeStamp      time,
-                                    uint64_t            eventPosition,
-                                    void*               userData,
-                                    OTF2_AttributeList* attributeList,
-                                    OTF2_RegionRef      region );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_Leave)(OTF2_LocationRef location,
+                                                          OTF2_TimeStamp time,
+                                                          uint64_t eventPosition,
+                                                          void* userData,
+                                                          OTF2_AttributeList* attributeList,
+                                                          OTF2_RegionRef region);
 
 /** @brief Registers the callback for the Leave event.
  *
@@ -319,11 +284,8 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetLeaveCallback(
-    OTF2_EvtReaderCallbacks*     evtReaderCallbacks,
-    OTF2_EvtReaderCallback_Leave leaveCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetLeaveCallback(OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+                                                        OTF2_EvtReaderCallback_Leave leaveCallback);
 
 /** @brief Callback for the MpiSend event record.
  *
@@ -353,17 +315,15 @@ OTF2_EvtReaderCallbacks_SetLeaveCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_MpiSend )( OTF2_LocationRef    location,
-                                      OTF2_TimeStamp      time,
-                                      uint64_t            eventPosition,
-                                      void*               userData,
-                                      OTF2_AttributeList* attributeList,
-                                      uint32_t            receiver,
-                                      OTF2_CommRef        communicator,
-                                      uint32_t            msgTag,
-                                      uint64_t            msgLength );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_MpiSend)(OTF2_LocationRef location,
+                                                            OTF2_TimeStamp time,
+                                                            uint64_t eventPosition,
+                                                            void* userData,
+                                                            OTF2_AttributeList* attributeList,
+                                                            uint32_t receiver,
+                                                            OTF2_CommRef communicator,
+                                                            uint32_t msgTag,
+                                                            uint64_t msgLength);
 
 /** @brief Registers the callback for the MpiSend event.
  *
@@ -379,11 +339,8 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetMpiSendCallback(
-    OTF2_EvtReaderCallbacks*       evtReaderCallbacks,
-    OTF2_EvtReaderCallback_MpiSend mpiSendCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetMpiSendCallback(OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+                                                          OTF2_EvtReaderCallback_MpiSend mpiSendCallback);
 
 /** @brief Callback for the MpiIsend event record.
  *
@@ -414,18 +371,16 @@ OTF2_EvtReaderCallbacks_SetMpiSendCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_MpiIsend )( OTF2_LocationRef    location,
-                                       OTF2_TimeStamp      time,
-                                       uint64_t            eventPosition,
-                                       void*               userData,
-                                       OTF2_AttributeList* attributeList,
-                                       uint32_t            receiver,
-                                       OTF2_CommRef        communicator,
-                                       uint32_t            msgTag,
-                                       uint64_t            msgLength,
-                                       uint64_t            requestID );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_MpiIsend)(OTF2_LocationRef location,
+                                                             OTF2_TimeStamp time,
+                                                             uint64_t eventPosition,
+                                                             void* userData,
+                                                             OTF2_AttributeList* attributeList,
+                                                             uint32_t receiver,
+                                                             OTF2_CommRef communicator,
+                                                             uint32_t msgTag,
+                                                             uint64_t msgLength,
+                                                             uint64_t requestID);
 
 /** @brief Registers the callback for the MpiIsend event.
  *
@@ -441,11 +396,8 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetMpiIsendCallback(
-    OTF2_EvtReaderCallbacks*        evtReaderCallbacks,
-    OTF2_EvtReaderCallback_MpiIsend mpiIsendCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetMpiIsendCallback(OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+                                                           OTF2_EvtReaderCallback_MpiIsend mpiIsendCallback);
 
 /** @brief Callback for the MpiIsendComplete event record.
  *
@@ -470,14 +422,12 @@ OTF2_EvtReaderCallbacks_SetMpiIsendCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_MpiIsendComplete )( OTF2_LocationRef    location,
-                                               OTF2_TimeStamp      time,
-                                               uint64_t            eventPosition,
-                                               void*               userData,
-                                               OTF2_AttributeList* attributeList,
-                                               uint64_t            requestID );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_MpiIsendComplete)(OTF2_LocationRef location,
+                                                                     OTF2_TimeStamp time,
+                                                                     uint64_t eventPosition,
+                                                                     void* userData,
+                                                                     OTF2_AttributeList* attributeList,
+                                                                     uint64_t requestID);
 
 /** @brief Registers the callback for the MpiIsendComplete event.
  *
@@ -493,11 +443,9 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetMpiIsendCompleteCallback(
-    OTF2_EvtReaderCallbacks*                evtReaderCallbacks,
-    OTF2_EvtReaderCallback_MpiIsendComplete mpiIsendCompleteCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetMpiIsendCompleteCallback(
+  OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+  OTF2_EvtReaderCallback_MpiIsendComplete mpiIsendCompleteCallback);
 
 /** @brief Callback for the MpiIrecvRequest event record.
  *
@@ -518,14 +466,12 @@ OTF2_EvtReaderCallbacks_SetMpiIsendCompleteCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_MpiIrecvRequest )( OTF2_LocationRef    location,
-                                              OTF2_TimeStamp      time,
-                                              uint64_t            eventPosition,
-                                              void*               userData,
-                                              OTF2_AttributeList* attributeList,
-                                              uint64_t            requestID );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_MpiIrecvRequest)(OTF2_LocationRef location,
+                                                                    OTF2_TimeStamp time,
+                                                                    uint64_t eventPosition,
+                                                                    void* userData,
+                                                                    OTF2_AttributeList* attributeList,
+                                                                    uint64_t requestID);
 
 /** @brief Registers the callback for the MpiIrecvRequest event.
  *
@@ -541,11 +487,9 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetMpiIrecvRequestCallback(
-    OTF2_EvtReaderCallbacks*               evtReaderCallbacks,
-    OTF2_EvtReaderCallback_MpiIrecvRequest mpiIrecvRequestCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetMpiIrecvRequestCallback(
+  OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+  OTF2_EvtReaderCallback_MpiIrecvRequest mpiIrecvRequestCallback);
 
 /** @brief Callback for the MpiRecv event record.
  *
@@ -575,17 +519,15 @@ OTF2_EvtReaderCallbacks_SetMpiIrecvRequestCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_MpiRecv )( OTF2_LocationRef    location,
-                                      OTF2_TimeStamp      time,
-                                      uint64_t            eventPosition,
-                                      void*               userData,
-                                      OTF2_AttributeList* attributeList,
-                                      uint32_t            sender,
-                                      OTF2_CommRef        communicator,
-                                      uint32_t            msgTag,
-                                      uint64_t            msgLength );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_MpiRecv)(OTF2_LocationRef location,
+                                                            OTF2_TimeStamp time,
+                                                            uint64_t eventPosition,
+                                                            void* userData,
+                                                            OTF2_AttributeList* attributeList,
+                                                            uint32_t sender,
+                                                            OTF2_CommRef communicator,
+                                                            uint32_t msgTag,
+                                                            uint64_t msgLength);
 
 /** @brief Registers the callback for the MpiRecv event.
  *
@@ -601,11 +543,8 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetMpiRecvCallback(
-    OTF2_EvtReaderCallbacks*       evtReaderCallbacks,
-    OTF2_EvtReaderCallback_MpiRecv mpiRecvCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetMpiRecvCallback(OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+                                                          OTF2_EvtReaderCallback_MpiRecv mpiRecvCallback);
 
 /** @brief Callback for the MpiIrecv event record.
  *
@@ -636,18 +575,16 @@ OTF2_EvtReaderCallbacks_SetMpiRecvCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_MpiIrecv )( OTF2_LocationRef    location,
-                                       OTF2_TimeStamp      time,
-                                       uint64_t            eventPosition,
-                                       void*               userData,
-                                       OTF2_AttributeList* attributeList,
-                                       uint32_t            sender,
-                                       OTF2_CommRef        communicator,
-                                       uint32_t            msgTag,
-                                       uint64_t            msgLength,
-                                       uint64_t            requestID );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_MpiIrecv)(OTF2_LocationRef location,
+                                                             OTF2_TimeStamp time,
+                                                             uint64_t eventPosition,
+                                                             void* userData,
+                                                             OTF2_AttributeList* attributeList,
+                                                             uint32_t sender,
+                                                             OTF2_CommRef communicator,
+                                                             uint32_t msgTag,
+                                                             uint64_t msgLength,
+                                                             uint64_t requestID);
 
 /** @brief Registers the callback for the MpiIrecv event.
  *
@@ -663,11 +600,8 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetMpiIrecvCallback(
-    OTF2_EvtReaderCallbacks*        evtReaderCallbacks,
-    OTF2_EvtReaderCallback_MpiIrecv mpiIrecvCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetMpiIrecvCallback(OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+                                                           OTF2_EvtReaderCallback_MpiIrecv mpiIrecvCallback);
 
 /** @brief Callback for the MpiRequestTest event record.
  *
@@ -688,14 +622,12 @@ OTF2_EvtReaderCallbacks_SetMpiIrecvCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_MpiRequestTest )( OTF2_LocationRef    location,
-                                             OTF2_TimeStamp      time,
-                                             uint64_t            eventPosition,
-                                             void*               userData,
-                                             OTF2_AttributeList* attributeList,
-                                             uint64_t            requestID );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_MpiRequestTest)(OTF2_LocationRef location,
+                                                                   OTF2_TimeStamp time,
+                                                                   uint64_t eventPosition,
+                                                                   void* userData,
+                                                                   OTF2_AttributeList* attributeList,
+                                                                   uint64_t requestID);
 
 /** @brief Registers the callback for the MpiRequestTest event.
  *
@@ -711,11 +643,9 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetMpiRequestTestCallback(
-    OTF2_EvtReaderCallbacks*              evtReaderCallbacks,
-    OTF2_EvtReaderCallback_MpiRequestTest mpiRequestTestCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetMpiRequestTestCallback(
+  OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+  OTF2_EvtReaderCallback_MpiRequestTest mpiRequestTestCallback);
 
 /** @brief Callback for the MpiRequestCancelled event record.
  *
@@ -735,14 +665,12 @@ OTF2_EvtReaderCallbacks_SetMpiRequestTestCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_MpiRequestCancelled )( OTF2_LocationRef    location,
-                                                  OTF2_TimeStamp      time,
-                                                  uint64_t            eventPosition,
-                                                  void*               userData,
-                                                  OTF2_AttributeList* attributeList,
-                                                  uint64_t            requestID );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_MpiRequestCancelled)(OTF2_LocationRef location,
+                                                                        OTF2_TimeStamp time,
+                                                                        uint64_t eventPosition,
+                                                                        void* userData,
+                                                                        OTF2_AttributeList* attributeList,
+                                                                        uint64_t requestID);
 
 /** @brief Registers the callback for the MpiRequestCancelled event.
  *
@@ -759,11 +687,9 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetMpiRequestCancelledCallback(
-    OTF2_EvtReaderCallbacks*                   evtReaderCallbacks,
-    OTF2_EvtReaderCallback_MpiRequestCancelled mpiRequestCancelledCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetMpiRequestCancelledCallback(
+  OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+  OTF2_EvtReaderCallback_MpiRequestCancelled mpiRequestCancelledCallback);
 
 /** @brief Callback for the MpiCollectiveBegin event record.
  *
@@ -783,13 +709,11 @@ OTF2_EvtReaderCallbacks_SetMpiRequestCancelledCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_MpiCollectiveBegin )( OTF2_LocationRef    location,
-                                                 OTF2_TimeStamp      time,
-                                                 uint64_t            eventPosition,
-                                                 void*               userData,
-                                                 OTF2_AttributeList* attributeList );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_MpiCollectiveBegin)(OTF2_LocationRef location,
+                                                                       OTF2_TimeStamp time,
+                                                                       uint64_t eventPosition,
+                                                                       void* userData,
+                                                                       OTF2_AttributeList* attributeList);
 
 /** @brief Registers the callback for the MpiCollectiveBegin event.
  *
@@ -805,11 +729,9 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetMpiCollectiveBeginCallback(
-    OTF2_EvtReaderCallbacks*                  evtReaderCallbacks,
-    OTF2_EvtReaderCallback_MpiCollectiveBegin mpiCollectiveBeginCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetMpiCollectiveBeginCallback(
+  OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+  OTF2_EvtReaderCallback_MpiCollectiveBegin mpiCollectiveBeginCallback);
 
 /** @brief Callback for the MpiCollectiveEnd event record.
  *
@@ -841,18 +763,16 @@ OTF2_EvtReaderCallbacks_SetMpiCollectiveBeginCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_MpiCollectiveEnd )( OTF2_LocationRef    location,
-                                               OTF2_TimeStamp      time,
-                                               uint64_t            eventPosition,
-                                               void*               userData,
-                                               OTF2_AttributeList* attributeList,
-                                               OTF2_CollectiveOp   collectiveOp,
-                                               OTF2_CommRef        communicator,
-                                               uint32_t            root,
-                                               uint64_t            sizeSent,
-                                               uint64_t            sizeReceived );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_MpiCollectiveEnd)(OTF2_LocationRef location,
+                                                                     OTF2_TimeStamp time,
+                                                                     uint64_t eventPosition,
+                                                                     void* userData,
+                                                                     OTF2_AttributeList* attributeList,
+                                                                     OTF2_CollectiveOp collectiveOp,
+                                                                     OTF2_CommRef communicator,
+                                                                     uint32_t root,
+                                                                     uint64_t sizeSent,
+                                                                     uint64_t sizeReceived);
 
 /** @brief Registers the callback for the MpiCollectiveEnd event.
  *
@@ -868,11 +788,9 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetMpiCollectiveEndCallback(
-    OTF2_EvtReaderCallbacks*                evtReaderCallbacks,
-    OTF2_EvtReaderCallback_MpiCollectiveEnd mpiCollectiveEndCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetMpiCollectiveEndCallback(
+  OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+  OTF2_EvtReaderCallback_MpiCollectiveEnd mpiCollectiveEndCallback);
 
 /** @brief Callback for the OmpFork event record.
  *
@@ -896,14 +814,12 @@ OTF2_EvtReaderCallbacks_SetMpiCollectiveEndCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_OmpFork )( OTF2_LocationRef    location,
-                                      OTF2_TimeStamp      time,
-                                      uint64_t            eventPosition,
-                                      void*               userData,
-                                      OTF2_AttributeList* attributeList,
-                                      uint32_t            numberOfRequestedThreads );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_OmpFork)(OTF2_LocationRef location,
+                                                            OTF2_TimeStamp time,
+                                                            uint64_t eventPosition,
+                                                            void* userData,
+                                                            OTF2_AttributeList* attributeList,
+                                                            uint32_t numberOfRequestedThreads);
 
 /** @brief Registers the callback for the OmpFork event.
  *
@@ -919,11 +835,8 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetOmpForkCallback(
-    OTF2_EvtReaderCallbacks*       evtReaderCallbacks,
-    OTF2_EvtReaderCallback_OmpFork ompForkCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetOmpForkCallback(OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+                                                          OTF2_EvtReaderCallback_OmpFork ompForkCallback);
 
 /** @brief Callback for the OmpJoin event record.
  *
@@ -947,13 +860,11 @@ OTF2_EvtReaderCallbacks_SetOmpForkCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_OmpJoin )( OTF2_LocationRef    location,
-                                      OTF2_TimeStamp      time,
-                                      uint64_t            eventPosition,
-                                      void*               userData,
-                                      OTF2_AttributeList* attributeList );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_OmpJoin)(OTF2_LocationRef location,
+                                                            OTF2_TimeStamp time,
+                                                            uint64_t eventPosition,
+                                                            void* userData,
+                                                            OTF2_AttributeList* attributeList);
 
 /** @brief Registers the callback for the OmpJoin event.
  *
@@ -969,11 +880,8 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetOmpJoinCallback(
-    OTF2_EvtReaderCallbacks*       evtReaderCallbacks,
-    OTF2_EvtReaderCallback_OmpJoin ompJoinCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetOmpJoinCallback(OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+                                                          OTF2_EvtReaderCallback_OmpJoin ompJoinCallback);
 
 /** @brief Callback for the OmpAcquireLock event record.
  *
@@ -1003,15 +911,13 @@ OTF2_EvtReaderCallbacks_SetOmpJoinCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_OmpAcquireLock )( OTF2_LocationRef    location,
-                                             OTF2_TimeStamp      time,
-                                             uint64_t            eventPosition,
-                                             void*               userData,
-                                             OTF2_AttributeList* attributeList,
-                                             uint32_t            lockID,
-                                             uint32_t            acquisitionOrder );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_OmpAcquireLock)(OTF2_LocationRef location,
+                                                                   OTF2_TimeStamp time,
+                                                                   uint64_t eventPosition,
+                                                                   void* userData,
+                                                                   OTF2_AttributeList* attributeList,
+                                                                   uint32_t lockID,
+                                                                   uint32_t acquisitionOrder);
 
 /** @brief Registers the callback for the OmpAcquireLock event.
  *
@@ -1027,11 +933,9 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetOmpAcquireLockCallback(
-    OTF2_EvtReaderCallbacks*              evtReaderCallbacks,
-    OTF2_EvtReaderCallback_OmpAcquireLock ompAcquireLockCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetOmpAcquireLockCallback(
+  OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+  OTF2_EvtReaderCallback_OmpAcquireLock ompAcquireLockCallback);
 
 /** @brief Callback for the OmpReleaseLock event record.
  *
@@ -1061,15 +965,13 @@ OTF2_EvtReaderCallbacks_SetOmpAcquireLockCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_OmpReleaseLock )( OTF2_LocationRef    location,
-                                             OTF2_TimeStamp      time,
-                                             uint64_t            eventPosition,
-                                             void*               userData,
-                                             OTF2_AttributeList* attributeList,
-                                             uint32_t            lockID,
-                                             uint32_t            acquisitionOrder );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_OmpReleaseLock)(OTF2_LocationRef location,
+                                                                   OTF2_TimeStamp time,
+                                                                   uint64_t eventPosition,
+                                                                   void* userData,
+                                                                   OTF2_AttributeList* attributeList,
+                                                                   uint32_t lockID,
+                                                                   uint32_t acquisitionOrder);
 
 /** @brief Registers the callback for the OmpReleaseLock event.
  *
@@ -1085,11 +987,9 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetOmpReleaseLockCallback(
-    OTF2_EvtReaderCallbacks*              evtReaderCallbacks,
-    OTF2_EvtReaderCallback_OmpReleaseLock ompReleaseLockCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetOmpReleaseLockCallback(
+  OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+  OTF2_EvtReaderCallback_OmpReleaseLock ompReleaseLockCallback);
 
 /** @brief Callback for the OmpTaskCreate event record.
  *
@@ -1114,14 +1014,12 @@ OTF2_EvtReaderCallbacks_SetOmpReleaseLockCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_OmpTaskCreate )( OTF2_LocationRef    location,
-                                            OTF2_TimeStamp      time,
-                                            uint64_t            eventPosition,
-                                            void*               userData,
-                                            OTF2_AttributeList* attributeList,
-                                            uint64_t            taskID );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_OmpTaskCreate)(OTF2_LocationRef location,
+                                                                  OTF2_TimeStamp time,
+                                                                  uint64_t eventPosition,
+                                                                  void* userData,
+                                                                  OTF2_AttributeList* attributeList,
+                                                                  uint64_t taskID);
 
 /** @brief Registers the callback for the OmpTaskCreate event.
  *
@@ -1137,11 +1035,9 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetOmpTaskCreateCallback(
-    OTF2_EvtReaderCallbacks*             evtReaderCallbacks,
-    OTF2_EvtReaderCallback_OmpTaskCreate ompTaskCreateCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetOmpTaskCreateCallback(
+  OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+  OTF2_EvtReaderCallback_OmpTaskCreate ompTaskCreateCallback);
 
 /** @brief Callback for the OmpTaskSwitch event record.
  *
@@ -1168,14 +1064,12 @@ OTF2_EvtReaderCallbacks_SetOmpTaskCreateCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_OmpTaskSwitch )( OTF2_LocationRef    location,
-                                            OTF2_TimeStamp      time,
-                                            uint64_t            eventPosition,
-                                            void*               userData,
-                                            OTF2_AttributeList* attributeList,
-                                            uint64_t            taskID );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_OmpTaskSwitch)(OTF2_LocationRef location,
+                                                                  OTF2_TimeStamp time,
+                                                                  uint64_t eventPosition,
+                                                                  void* userData,
+                                                                  OTF2_AttributeList* attributeList,
+                                                                  uint64_t taskID);
 
 /** @brief Registers the callback for the OmpTaskSwitch event.
  *
@@ -1191,11 +1085,9 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetOmpTaskSwitchCallback(
-    OTF2_EvtReaderCallbacks*             evtReaderCallbacks,
-    OTF2_EvtReaderCallback_OmpTaskSwitch ompTaskSwitchCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetOmpTaskSwitchCallback(
+  OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+  OTF2_EvtReaderCallback_OmpTaskSwitch ompTaskSwitchCallback);
 
 /** @brief Callback for the OmpTaskComplete event record.
  *
@@ -1220,14 +1112,12 @@ OTF2_EvtReaderCallbacks_SetOmpTaskSwitchCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_OmpTaskComplete )( OTF2_LocationRef    location,
-                                              OTF2_TimeStamp      time,
-                                              uint64_t            eventPosition,
-                                              void*               userData,
-                                              OTF2_AttributeList* attributeList,
-                                              uint64_t            taskID );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_OmpTaskComplete)(OTF2_LocationRef location,
+                                                                    OTF2_TimeStamp time,
+                                                                    uint64_t eventPosition,
+                                                                    void* userData,
+                                                                    OTF2_AttributeList* attributeList,
+                                                                    uint64_t taskID);
 
 /** @brief Registers the callback for the OmpTaskComplete event.
  *
@@ -1243,11 +1133,9 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetOmpTaskCompleteCallback(
-    OTF2_EvtReaderCallbacks*               evtReaderCallbacks,
-    OTF2_EvtReaderCallback_OmpTaskComplete ompTaskCompleteCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetOmpTaskCompleteCallback(
+  OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+  OTF2_EvtReaderCallback_OmpTaskComplete ompTaskCompleteCallback);
 
 /** @brief Callback for the Metric event record.
  *
@@ -1279,17 +1167,15 @@ OTF2_EvtReaderCallbacks_SetOmpTaskCompleteCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_Metric )( OTF2_LocationRef        location,
-                                     OTF2_TimeStamp          time,
-                                     uint64_t                eventPosition,
-                                     void*                   userData,
-                                     OTF2_AttributeList*     attributeList,
-                                     OTF2_MetricRef          metric,
-                                     uint8_t                 numberOfMetrics,
-                                     const OTF2_Type*        typeIDs,
-                                     const OTF2_MetricValue* metricValues );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_Metric)(OTF2_LocationRef location,
+                                                           OTF2_TimeStamp time,
+                                                           uint64_t eventPosition,
+                                                           void* userData,
+                                                           OTF2_AttributeList* attributeList,
+                                                           OTF2_MetricRef metric,
+                                                           uint8_t numberOfMetrics,
+                                                           const OTF2_Type* typeIDs,
+                                                           const OTF2_MetricValue* metricValues);
 
 /** @brief Registers the callback for the Metric event.
  *
@@ -1305,11 +1191,8 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetMetricCallback(
-    OTF2_EvtReaderCallbacks*      evtReaderCallbacks,
-    OTF2_EvtReaderCallback_Metric metricCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetMetricCallback(OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+                                                         OTF2_EvtReaderCallback_Metric metricCallback);
 
 /** @brief Callback for the ParameterString event record.
  *
@@ -1337,15 +1220,13 @@ OTF2_EvtReaderCallbacks_SetMetricCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_ParameterString )( OTF2_LocationRef    location,
-                                              OTF2_TimeStamp      time,
-                                              uint64_t            eventPosition,
-                                              void*               userData,
-                                              OTF2_AttributeList* attributeList,
-                                              OTF2_ParameterRef   parameter,
-                                              OTF2_StringRef      string );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_ParameterString)(OTF2_LocationRef location,
+                                                                    OTF2_TimeStamp time,
+                                                                    uint64_t eventPosition,
+                                                                    void* userData,
+                                                                    OTF2_AttributeList* attributeList,
+                                                                    OTF2_ParameterRef parameter,
+                                                                    OTF2_StringRef string);
 
 /** @brief Registers the callback for the ParameterString event.
  *
@@ -1361,11 +1242,9 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetParameterStringCallback(
-    OTF2_EvtReaderCallbacks*               evtReaderCallbacks,
-    OTF2_EvtReaderCallback_ParameterString parameterStringCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetParameterStringCallback(
+  OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+  OTF2_EvtReaderCallback_ParameterString parameterStringCallback);
 
 /** @brief Callback for the ParameterInt event record.
  *
@@ -1390,15 +1269,13 @@ OTF2_EvtReaderCallbacks_SetParameterStringCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_ParameterInt )( OTF2_LocationRef    location,
-                                           OTF2_TimeStamp      time,
-                                           uint64_t            eventPosition,
-                                           void*               userData,
-                                           OTF2_AttributeList* attributeList,
-                                           OTF2_ParameterRef   parameter,
-                                           int64_t             value );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_ParameterInt)(OTF2_LocationRef location,
+                                                                 OTF2_TimeStamp time,
+                                                                 uint64_t eventPosition,
+                                                                 void* userData,
+                                                                 OTF2_AttributeList* attributeList,
+                                                                 OTF2_ParameterRef parameter,
+                                                                 int64_t value);
 
 /** @brief Registers the callback for the ParameterInt event.
  *
@@ -1414,11 +1291,9 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetParameterIntCallback(
-    OTF2_EvtReaderCallbacks*            evtReaderCallbacks,
-    OTF2_EvtReaderCallback_ParameterInt parameterIntCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetParameterIntCallback(
+  OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+  OTF2_EvtReaderCallback_ParameterInt parameterIntCallback);
 
 /** @brief Callback for the ParameterUnsignedInt event record.
  *
@@ -1443,15 +1318,13 @@ OTF2_EvtReaderCallbacks_SetParameterIntCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_ParameterUnsignedInt )( OTF2_LocationRef    location,
-                                                   OTF2_TimeStamp      time,
-                                                   uint64_t            eventPosition,
-                                                   void*               userData,
-                                                   OTF2_AttributeList* attributeList,
-                                                   OTF2_ParameterRef   parameter,
-                                                   uint64_t            value );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_ParameterUnsignedInt)(OTF2_LocationRef location,
+                                                                         OTF2_TimeStamp time,
+                                                                         uint64_t eventPosition,
+                                                                         void* userData,
+                                                                         OTF2_AttributeList* attributeList,
+                                                                         OTF2_ParameterRef parameter,
+                                                                         uint64_t value);
 
 /** @brief Registers the callback for the ParameterUnsignedInt event.
  *
@@ -1468,11 +1341,9 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetParameterUnsignedIntCallback(
-    OTF2_EvtReaderCallbacks*                    evtReaderCallbacks,
-    OTF2_EvtReaderCallback_ParameterUnsignedInt parameterUnsignedIntCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetParameterUnsignedIntCallback(
+  OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+  OTF2_EvtReaderCallback_ParameterUnsignedInt parameterUnsignedIntCallback);
 
 /** @brief Callback for the RmaWinCreate event record.
  *
@@ -1502,14 +1373,12 @@ OTF2_EvtReaderCallbacks_SetParameterUnsignedIntCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_RmaWinCreate )( OTF2_LocationRef    location,
-                                           OTF2_TimeStamp      time,
-                                           uint64_t            eventPosition,
-                                           void*               userData,
-                                           OTF2_AttributeList* attributeList,
-                                           OTF2_RmaWinRef      win );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_RmaWinCreate)(OTF2_LocationRef location,
+                                                                 OTF2_TimeStamp time,
+                                                                 uint64_t eventPosition,
+                                                                 void* userData,
+                                                                 OTF2_AttributeList* attributeList,
+                                                                 OTF2_RmaWinRef win);
 
 /** @brief Registers the callback for the RmaWinCreate event.
  *
@@ -1525,11 +1394,9 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetRmaWinCreateCallback(
-    OTF2_EvtReaderCallbacks*            evtReaderCallbacks,
-    OTF2_EvtReaderCallback_RmaWinCreate rmaWinCreateCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetRmaWinCreateCallback(
+  OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+  OTF2_EvtReaderCallback_RmaWinCreate rmaWinCreateCallback);
 
 /** @brief Callback for the RmaWinDestroy event record.
  *
@@ -1561,14 +1428,12 @@ OTF2_EvtReaderCallbacks_SetRmaWinCreateCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_RmaWinDestroy )( OTF2_LocationRef    location,
-                                            OTF2_TimeStamp      time,
-                                            uint64_t            eventPosition,
-                                            void*               userData,
-                                            OTF2_AttributeList* attributeList,
-                                            OTF2_RmaWinRef      win );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_RmaWinDestroy)(OTF2_LocationRef location,
+                                                                  OTF2_TimeStamp time,
+                                                                  uint64_t eventPosition,
+                                                                  void* userData,
+                                                                  OTF2_AttributeList* attributeList,
+                                                                  OTF2_RmaWinRef win);
 
 /** @brief Registers the callback for the RmaWinDestroy event.
  *
@@ -1584,11 +1449,9 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetRmaWinDestroyCallback(
-    OTF2_EvtReaderCallbacks*             evtReaderCallbacks,
-    OTF2_EvtReaderCallback_RmaWinDestroy rmaWinDestroyCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetRmaWinDestroyCallback(
+  OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+  OTF2_EvtReaderCallback_RmaWinDestroy rmaWinDestroyCallback);
 
 /** @brief Callback for the RmaCollectiveBegin event record.
  *
@@ -1608,13 +1471,11 @@ OTF2_EvtReaderCallbacks_SetRmaWinDestroyCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_RmaCollectiveBegin )( OTF2_LocationRef    location,
-                                                 OTF2_TimeStamp      time,
-                                                 uint64_t            eventPosition,
-                                                 void*               userData,
-                                                 OTF2_AttributeList* attributeList );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_RmaCollectiveBegin)(OTF2_LocationRef location,
+                                                                       OTF2_TimeStamp time,
+                                                                       uint64_t eventPosition,
+                                                                       void* userData,
+                                                                       OTF2_AttributeList* attributeList);
 
 /** @brief Registers the callback for the RmaCollectiveBegin event.
  *
@@ -1630,11 +1491,9 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetRmaCollectiveBeginCallback(
-    OTF2_EvtReaderCallbacks*                  evtReaderCallbacks,
-    OTF2_EvtReaderCallback_RmaCollectiveBegin rmaCollectiveBeginCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetRmaCollectiveBeginCallback(
+  OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+  OTF2_EvtReaderCallback_RmaCollectiveBegin rmaCollectiveBeginCallback);
 
 /** @brief Callback for the RmaCollectiveEnd event record.
  *
@@ -1664,19 +1523,17 @@ OTF2_EvtReaderCallbacks_SetRmaCollectiveBeginCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_RmaCollectiveEnd )( OTF2_LocationRef    location,
-                                               OTF2_TimeStamp      time,
-                                               uint64_t            eventPosition,
-                                               void*               userData,
-                                               OTF2_AttributeList* attributeList,
-                                               OTF2_CollectiveOp   collectiveOp,
-                                               OTF2_RmaSyncLevel   syncLevel,
-                                               OTF2_RmaWinRef      win,
-                                               uint32_t            root,
-                                               uint64_t            bytesSent,
-                                               uint64_t            bytesReceived );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_RmaCollectiveEnd)(OTF2_LocationRef location,
+                                                                     OTF2_TimeStamp time,
+                                                                     uint64_t eventPosition,
+                                                                     void* userData,
+                                                                     OTF2_AttributeList* attributeList,
+                                                                     OTF2_CollectiveOp collectiveOp,
+                                                                     OTF2_RmaSyncLevel syncLevel,
+                                                                     OTF2_RmaWinRef win,
+                                                                     uint32_t root,
+                                                                     uint64_t bytesSent,
+                                                                     uint64_t bytesReceived);
 
 /** @brief Registers the callback for the RmaCollectiveEnd event.
  *
@@ -1692,11 +1549,9 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetRmaCollectiveEndCallback(
-    OTF2_EvtReaderCallbacks*                evtReaderCallbacks,
-    OTF2_EvtReaderCallback_RmaCollectiveEnd rmaCollectiveEndCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetRmaCollectiveEndCallback(
+  OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+  OTF2_EvtReaderCallback_RmaCollectiveEnd rmaCollectiveEndCallback);
 
 /** @brief Callback for the RmaGroupSync event record.
  *
@@ -1725,16 +1580,14 @@ OTF2_EvtReaderCallbacks_SetRmaCollectiveEndCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_RmaGroupSync )( OTF2_LocationRef    location,
-                                           OTF2_TimeStamp      time,
-                                           uint64_t            eventPosition,
-                                           void*               userData,
-                                           OTF2_AttributeList* attributeList,
-                                           OTF2_RmaSyncLevel   syncLevel,
-                                           OTF2_RmaWinRef      win,
-                                           OTF2_GroupRef       group );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_RmaGroupSync)(OTF2_LocationRef location,
+                                                                 OTF2_TimeStamp time,
+                                                                 uint64_t eventPosition,
+                                                                 void* userData,
+                                                                 OTF2_AttributeList* attributeList,
+                                                                 OTF2_RmaSyncLevel syncLevel,
+                                                                 OTF2_RmaWinRef win,
+                                                                 OTF2_GroupRef group);
 
 /** @brief Registers the callback for the RmaGroupSync event.
  *
@@ -1750,11 +1603,9 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetRmaGroupSyncCallback(
-    OTF2_EvtReaderCallbacks*            evtReaderCallbacks,
-    OTF2_EvtReaderCallback_RmaGroupSync rmaGroupSyncCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetRmaGroupSyncCallback(
+  OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+  OTF2_EvtReaderCallback_RmaGroupSync rmaGroupSyncCallback);
 
 /** @brief Callback for the RmaRequestLock event record.
  *
@@ -1786,17 +1637,15 @@ OTF2_EvtReaderCallbacks_SetRmaGroupSyncCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_RmaRequestLock )( OTF2_LocationRef    location,
-                                             OTF2_TimeStamp      time,
-                                             uint64_t            eventPosition,
-                                             void*               userData,
-                                             OTF2_AttributeList* attributeList,
-                                             OTF2_RmaWinRef      win,
-                                             uint32_t            remote,
-                                             uint64_t            lockId,
-                                             OTF2_LockType       lockType );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_RmaRequestLock)(OTF2_LocationRef location,
+                                                                   OTF2_TimeStamp time,
+                                                                   uint64_t eventPosition,
+                                                                   void* userData,
+                                                                   OTF2_AttributeList* attributeList,
+                                                                   OTF2_RmaWinRef win,
+                                                                   uint32_t remote,
+                                                                   uint64_t lockId,
+                                                                   OTF2_LockType lockType);
 
 /** @brief Registers the callback for the RmaRequestLock event.
  *
@@ -1812,11 +1661,9 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetRmaRequestLockCallback(
-    OTF2_EvtReaderCallbacks*              evtReaderCallbacks,
-    OTF2_EvtReaderCallback_RmaRequestLock rmaRequestLockCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetRmaRequestLockCallback(
+  OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+  OTF2_EvtReaderCallback_RmaRequestLock rmaRequestLockCallback);
 
 /** @brief Callback for the RmaAcquireLock event record.
  *
@@ -1846,17 +1693,15 @@ OTF2_EvtReaderCallbacks_SetRmaRequestLockCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_RmaAcquireLock )( OTF2_LocationRef    location,
-                                             OTF2_TimeStamp      time,
-                                             uint64_t            eventPosition,
-                                             void*               userData,
-                                             OTF2_AttributeList* attributeList,
-                                             OTF2_RmaWinRef      win,
-                                             uint32_t            remote,
-                                             uint64_t            lockId,
-                                             OTF2_LockType       lockType );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_RmaAcquireLock)(OTF2_LocationRef location,
+                                                                   OTF2_TimeStamp time,
+                                                                   uint64_t eventPosition,
+                                                                   void* userData,
+                                                                   OTF2_AttributeList* attributeList,
+                                                                   OTF2_RmaWinRef win,
+                                                                   uint32_t remote,
+                                                                   uint64_t lockId,
+                                                                   OTF2_LockType lockType);
 
 /** @brief Registers the callback for the RmaAcquireLock event.
  *
@@ -1872,11 +1717,9 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetRmaAcquireLockCallback(
-    OTF2_EvtReaderCallbacks*              evtReaderCallbacks,
-    OTF2_EvtReaderCallback_RmaAcquireLock rmaAcquireLockCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetRmaAcquireLockCallback(
+  OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+  OTF2_EvtReaderCallback_RmaAcquireLock rmaAcquireLockCallback);
 
 /** @brief Callback for the RmaTryLock event record.
  *
@@ -1906,17 +1749,15 @@ OTF2_EvtReaderCallbacks_SetRmaAcquireLockCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_RmaTryLock )( OTF2_LocationRef    location,
-                                         OTF2_TimeStamp      time,
-                                         uint64_t            eventPosition,
-                                         void*               userData,
-                                         OTF2_AttributeList* attributeList,
-                                         OTF2_RmaWinRef      win,
-                                         uint32_t            remote,
-                                         uint64_t            lockId,
-                                         OTF2_LockType       lockType );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_RmaTryLock)(OTF2_LocationRef location,
+                                                               OTF2_TimeStamp time,
+                                                               uint64_t eventPosition,
+                                                               void* userData,
+                                                               OTF2_AttributeList* attributeList,
+                                                               OTF2_RmaWinRef win,
+                                                               uint32_t remote,
+                                                               uint64_t lockId,
+                                                               OTF2_LockType lockType);
 
 /** @brief Registers the callback for the RmaTryLock event.
  *
@@ -1932,11 +1773,8 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetRmaTryLockCallback(
-    OTF2_EvtReaderCallbacks*          evtReaderCallbacks,
-    OTF2_EvtReaderCallback_RmaTryLock rmaTryLockCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetRmaTryLockCallback(OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+                                                             OTF2_EvtReaderCallback_RmaTryLock rmaTryLockCallback);
 
 /** @brief Callback for the RmaReleaseLock event record.
  *
@@ -1964,16 +1802,14 @@ OTF2_EvtReaderCallbacks_SetRmaTryLockCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_RmaReleaseLock )( OTF2_LocationRef    location,
-                                             OTF2_TimeStamp      time,
-                                             uint64_t            eventPosition,
-                                             void*               userData,
-                                             OTF2_AttributeList* attributeList,
-                                             OTF2_RmaWinRef      win,
-                                             uint32_t            remote,
-                                             uint64_t            lockId );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_RmaReleaseLock)(OTF2_LocationRef location,
+                                                                   OTF2_TimeStamp time,
+                                                                   uint64_t eventPosition,
+                                                                   void* userData,
+                                                                   OTF2_AttributeList* attributeList,
+                                                                   OTF2_RmaWinRef win,
+                                                                   uint32_t remote,
+                                                                   uint64_t lockId);
 
 /** @brief Registers the callback for the RmaReleaseLock event.
  *
@@ -1989,11 +1825,9 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetRmaReleaseLockCallback(
-    OTF2_EvtReaderCallbacks*              evtReaderCallbacks,
-    OTF2_EvtReaderCallback_RmaReleaseLock rmaReleaseLockCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetRmaReleaseLockCallback(
+  OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+  OTF2_EvtReaderCallback_RmaReleaseLock rmaReleaseLockCallback);
 
 /** @brief Callback for the RmaSync event record.
  *
@@ -2019,16 +1853,14 @@ OTF2_EvtReaderCallbacks_SetRmaReleaseLockCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_RmaSync )( OTF2_LocationRef    location,
-                                      OTF2_TimeStamp      time,
-                                      uint64_t            eventPosition,
-                                      void*               userData,
-                                      OTF2_AttributeList* attributeList,
-                                      OTF2_RmaWinRef      win,
-                                      uint32_t            remote,
-                                      OTF2_RmaSyncType    syncType );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_RmaSync)(OTF2_LocationRef location,
+                                                            OTF2_TimeStamp time,
+                                                            uint64_t eventPosition,
+                                                            void* userData,
+                                                            OTF2_AttributeList* attributeList,
+                                                            OTF2_RmaWinRef win,
+                                                            uint32_t remote,
+                                                            OTF2_RmaSyncType syncType);
 
 /** @brief Registers the callback for the RmaSync event.
  *
@@ -2044,11 +1876,8 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetRmaSyncCallback(
-    OTF2_EvtReaderCallbacks*       evtReaderCallbacks,
-    OTF2_EvtReaderCallback_RmaSync rmaSyncCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetRmaSyncCallback(OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+                                                          OTF2_EvtReaderCallback_RmaSync rmaSyncCallback);
 
 /** @brief Callback for the RmaWaitChange event record.
  *
@@ -2072,14 +1901,12 @@ OTF2_EvtReaderCallbacks_SetRmaSyncCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_RmaWaitChange )( OTF2_LocationRef    location,
-                                            OTF2_TimeStamp      time,
-                                            uint64_t            eventPosition,
-                                            void*               userData,
-                                            OTF2_AttributeList* attributeList,
-                                            OTF2_RmaWinRef      win );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_RmaWaitChange)(OTF2_LocationRef location,
+                                                                  OTF2_TimeStamp time,
+                                                                  uint64_t eventPosition,
+                                                                  void* userData,
+                                                                  OTF2_AttributeList* attributeList,
+                                                                  OTF2_RmaWinRef win);
 
 /** @brief Registers the callback for the RmaWaitChange event.
  *
@@ -2095,11 +1922,9 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetRmaWaitChangeCallback(
-    OTF2_EvtReaderCallbacks*             evtReaderCallbacks,
-    OTF2_EvtReaderCallback_RmaWaitChange rmaWaitChangeCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetRmaWaitChangeCallback(
+  OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+  OTF2_EvtReaderCallback_RmaWaitChange rmaWaitChangeCallback);
 
 /** @brief Callback for the RmaPut event record.
  *
@@ -2126,17 +1951,15 @@ OTF2_EvtReaderCallbacks_SetRmaWaitChangeCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_RmaPut )( OTF2_LocationRef    location,
-                                     OTF2_TimeStamp      time,
-                                     uint64_t            eventPosition,
-                                     void*               userData,
-                                     OTF2_AttributeList* attributeList,
-                                     OTF2_RmaWinRef      win,
-                                     uint32_t            remote,
-                                     uint64_t            bytes,
-                                     uint64_t            matchingId );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_RmaPut)(OTF2_LocationRef location,
+                                                           OTF2_TimeStamp time,
+                                                           uint64_t eventPosition,
+                                                           void* userData,
+                                                           OTF2_AttributeList* attributeList,
+                                                           OTF2_RmaWinRef win,
+                                                           uint32_t remote,
+                                                           uint64_t bytes,
+                                                           uint64_t matchingId);
 
 /** @brief Registers the callback for the RmaPut event.
  *
@@ -2152,11 +1975,8 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetRmaPutCallback(
-    OTF2_EvtReaderCallbacks*      evtReaderCallbacks,
-    OTF2_EvtReaderCallback_RmaPut rmaPutCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetRmaPutCallback(OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+                                                         OTF2_EvtReaderCallback_RmaPut rmaPutCallback);
 
 /** @brief Callback for the RmaGet event record.
  *
@@ -2183,17 +2003,15 @@ OTF2_EvtReaderCallbacks_SetRmaPutCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_RmaGet )( OTF2_LocationRef    location,
-                                     OTF2_TimeStamp      time,
-                                     uint64_t            eventPosition,
-                                     void*               userData,
-                                     OTF2_AttributeList* attributeList,
-                                     OTF2_RmaWinRef      win,
-                                     uint32_t            remote,
-                                     uint64_t            bytes,
-                                     uint64_t            matchingId );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_RmaGet)(OTF2_LocationRef location,
+                                                           OTF2_TimeStamp time,
+                                                           uint64_t eventPosition,
+                                                           void* userData,
+                                                           OTF2_AttributeList* attributeList,
+                                                           OTF2_RmaWinRef win,
+                                                           uint32_t remote,
+                                                           uint64_t bytes,
+                                                           uint64_t matchingId);
 
 /** @brief Registers the callback for the RmaGet event.
  *
@@ -2209,11 +2027,8 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetRmaGetCallback(
-    OTF2_EvtReaderCallbacks*      evtReaderCallbacks,
-    OTF2_EvtReaderCallback_RmaGet rmaGetCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetRmaGetCallback(OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+                                                         OTF2_EvtReaderCallback_RmaGet rmaGetCallback);
 
 /** @brief Callback for the RmaAtomic event record.
  *
@@ -2243,19 +2058,17 @@ OTF2_EvtReaderCallbacks_SetRmaGetCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_RmaAtomic )( OTF2_LocationRef    location,
-                                        OTF2_TimeStamp      time,
-                                        uint64_t            eventPosition,
-                                        void*               userData,
-                                        OTF2_AttributeList* attributeList,
-                                        OTF2_RmaWinRef      win,
-                                        uint32_t            remote,
-                                        OTF2_RmaAtomicType  type,
-                                        uint64_t            bytesSent,
-                                        uint64_t            bytesReceived,
-                                        uint64_t            matchingId );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_RmaAtomic)(OTF2_LocationRef location,
+                                                              OTF2_TimeStamp time,
+                                                              uint64_t eventPosition,
+                                                              void* userData,
+                                                              OTF2_AttributeList* attributeList,
+                                                              OTF2_RmaWinRef win,
+                                                              uint32_t remote,
+                                                              OTF2_RmaAtomicType type,
+                                                              uint64_t bytesSent,
+                                                              uint64_t bytesReceived,
+                                                              uint64_t matchingId);
 
 /** @brief Registers the callback for the RmaAtomic event.
  *
@@ -2271,11 +2084,8 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetRmaAtomicCallback(
-    OTF2_EvtReaderCallbacks*         evtReaderCallbacks,
-    OTF2_EvtReaderCallback_RmaAtomic rmaAtomicCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetRmaAtomicCallback(OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+                                                            OTF2_EvtReaderCallback_RmaAtomic rmaAtomicCallback);
 
 /** @brief Callback for the RmaOpCompleteBlocking event record.
  *
@@ -2301,15 +2111,13 @@ OTF2_EvtReaderCallbacks_SetRmaAtomicCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_RmaOpCompleteBlocking )( OTF2_LocationRef    location,
-                                                    OTF2_TimeStamp      time,
-                                                    uint64_t            eventPosition,
-                                                    void*               userData,
-                                                    OTF2_AttributeList* attributeList,
-                                                    OTF2_RmaWinRef      win,
-                                                    uint64_t            matchingId );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_RmaOpCompleteBlocking)(OTF2_LocationRef location,
+                                                                          OTF2_TimeStamp time,
+                                                                          uint64_t eventPosition,
+                                                                          void* userData,
+                                                                          OTF2_AttributeList* attributeList,
+                                                                          OTF2_RmaWinRef win,
+                                                                          uint64_t matchingId);
 
 /** @brief Registers the callback for the RmaOpCompleteBlocking event.
  *
@@ -2326,11 +2134,9 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetRmaOpCompleteBlockingCallback(
-    OTF2_EvtReaderCallbacks*                     evtReaderCallbacks,
-    OTF2_EvtReaderCallback_RmaOpCompleteBlocking rmaOpCompleteBlockingCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetRmaOpCompleteBlockingCallback(
+  OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+  OTF2_EvtReaderCallback_RmaOpCompleteBlocking rmaOpCompleteBlockingCallback);
 
 /** @brief Callback for the RmaOpCompleteNonBlocking event record.
  *
@@ -2356,15 +2162,13 @@ OTF2_EvtReaderCallbacks_SetRmaOpCompleteBlockingCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_RmaOpCompleteNonBlocking )( OTF2_LocationRef    location,
-                                                       OTF2_TimeStamp      time,
-                                                       uint64_t            eventPosition,
-                                                       void*               userData,
-                                                       OTF2_AttributeList* attributeList,
-                                                       OTF2_RmaWinRef      win,
-                                                       uint64_t            matchingId );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_RmaOpCompleteNonBlocking)(OTF2_LocationRef location,
+                                                                             OTF2_TimeStamp time,
+                                                                             uint64_t eventPosition,
+                                                                             void* userData,
+                                                                             OTF2_AttributeList* attributeList,
+                                                                             OTF2_RmaWinRef win,
+                                                                             uint64_t matchingId);
 
 /** @brief Registers the callback for the RmaOpCompleteNonBlocking event.
  *
@@ -2382,11 +2186,9 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetRmaOpCompleteNonBlockingCallback(
-    OTF2_EvtReaderCallbacks*                        evtReaderCallbacks,
-    OTF2_EvtReaderCallback_RmaOpCompleteNonBlocking rmaOpCompleteNonBlockingCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetRmaOpCompleteNonBlockingCallback(
+  OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+  OTF2_EvtReaderCallback_RmaOpCompleteNonBlocking rmaOpCompleteNonBlockingCallback);
 
 /** @brief Callback for the RmaOpTest event record.
  *
@@ -2412,15 +2214,13 @@ OTF2_EvtReaderCallbacks_SetRmaOpCompleteNonBlockingCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_RmaOpTest )( OTF2_LocationRef    location,
-                                        OTF2_TimeStamp      time,
-                                        uint64_t            eventPosition,
-                                        void*               userData,
-                                        OTF2_AttributeList* attributeList,
-                                        OTF2_RmaWinRef      win,
-                                        uint64_t            matchingId );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_RmaOpTest)(OTF2_LocationRef location,
+                                                              OTF2_TimeStamp time,
+                                                              uint64_t eventPosition,
+                                                              void* userData,
+                                                              OTF2_AttributeList* attributeList,
+                                                              OTF2_RmaWinRef win,
+                                                              uint64_t matchingId);
 
 /** @brief Registers the callback for the RmaOpTest event.
  *
@@ -2436,11 +2236,8 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetRmaOpTestCallback(
-    OTF2_EvtReaderCallbacks*         evtReaderCallbacks,
-    OTF2_EvtReaderCallback_RmaOpTest rmaOpTestCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetRmaOpTestCallback(OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+                                                            OTF2_EvtReaderCallback_RmaOpTest rmaOpTestCallback);
 
 /** @brief Callback for the RmaOpCompleteRemote event record.
  *
@@ -2466,15 +2263,13 @@ OTF2_EvtReaderCallbacks_SetRmaOpTestCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_RmaOpCompleteRemote )( OTF2_LocationRef    location,
-                                                  OTF2_TimeStamp      time,
-                                                  uint64_t            eventPosition,
-                                                  void*               userData,
-                                                  OTF2_AttributeList* attributeList,
-                                                  OTF2_RmaWinRef      win,
-                                                  uint64_t            matchingId );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_RmaOpCompleteRemote)(OTF2_LocationRef location,
+                                                                        OTF2_TimeStamp time,
+                                                                        uint64_t eventPosition,
+                                                                        void* userData,
+                                                                        OTF2_AttributeList* attributeList,
+                                                                        OTF2_RmaWinRef win,
+                                                                        uint64_t matchingId);
 
 /** @brief Registers the callback for the RmaOpCompleteRemote event.
  *
@@ -2491,11 +2286,9 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetRmaOpCompleteRemoteCallback(
-    OTF2_EvtReaderCallbacks*                   evtReaderCallbacks,
-    OTF2_EvtReaderCallback_RmaOpCompleteRemote rmaOpCompleteRemoteCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetRmaOpCompleteRemoteCallback(
+  OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+  OTF2_EvtReaderCallback_RmaOpCompleteRemote rmaOpCompleteRemoteCallback);
 
 /** @brief Callback for the ThreadFork event record.
  *
@@ -2516,15 +2309,13 @@ OTF2_EvtReaderCallbacks_SetRmaOpCompleteRemoteCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_ThreadFork )( OTF2_LocationRef    location,
-                                         OTF2_TimeStamp      time,
-                                         uint64_t            eventPosition,
-                                         void*               userData,
-                                         OTF2_AttributeList* attributeList,
-                                         OTF2_Paradigm       model,
-                                         uint32_t            numberOfRequestedThreads );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_ThreadFork)(OTF2_LocationRef location,
+                                                               OTF2_TimeStamp time,
+                                                               uint64_t eventPosition,
+                                                               void* userData,
+                                                               OTF2_AttributeList* attributeList,
+                                                               OTF2_Paradigm model,
+                                                               uint32_t numberOfRequestedThreads);
 
 /** @brief Registers the callback for the ThreadFork event.
  *
@@ -2540,11 +2331,8 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetThreadForkCallback(
-    OTF2_EvtReaderCallbacks*          evtReaderCallbacks,
-    OTF2_EvtReaderCallback_ThreadFork threadForkCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetThreadForkCallback(OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+                                                             OTF2_EvtReaderCallback_ThreadFork threadForkCallback);
 
 /** @brief Callback for the ThreadJoin event record.
  *
@@ -2565,14 +2353,12 @@ OTF2_EvtReaderCallbacks_SetThreadForkCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_ThreadJoin )( OTF2_LocationRef    location,
-                                         OTF2_TimeStamp      time,
-                                         uint64_t            eventPosition,
-                                         void*               userData,
-                                         OTF2_AttributeList* attributeList,
-                                         OTF2_Paradigm       model );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_ThreadJoin)(OTF2_LocationRef location,
+                                                               OTF2_TimeStamp time,
+                                                               uint64_t eventPosition,
+                                                               void* userData,
+                                                               OTF2_AttributeList* attributeList,
+                                                               OTF2_Paradigm model);
 
 /** @brief Registers the callback for the ThreadJoin event.
  *
@@ -2588,11 +2374,8 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetThreadJoinCallback(
-    OTF2_EvtReaderCallbacks*          evtReaderCallbacks,
-    OTF2_EvtReaderCallback_ThreadJoin threadJoinCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetThreadJoinCallback(OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+                                                             OTF2_EvtReaderCallback_ThreadJoin threadJoinCallback);
 
 /** @brief Callback for the ThreadTeamBegin event record.
  *
@@ -2615,14 +2398,12 @@ OTF2_EvtReaderCallbacks_SetThreadJoinCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_ThreadTeamBegin )( OTF2_LocationRef    location,
-                                              OTF2_TimeStamp      time,
-                                              uint64_t            eventPosition,
-                                              void*               userData,
-                                              OTF2_AttributeList* attributeList,
-                                              OTF2_CommRef        threadTeam );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_ThreadTeamBegin)(OTF2_LocationRef location,
+                                                                    OTF2_TimeStamp time,
+                                                                    uint64_t eventPosition,
+                                                                    void* userData,
+                                                                    OTF2_AttributeList* attributeList,
+                                                                    OTF2_CommRef threadTeam);
 
 /** @brief Registers the callback for the ThreadTeamBegin event.
  *
@@ -2638,11 +2419,9 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetThreadTeamBeginCallback(
-    OTF2_EvtReaderCallbacks*               evtReaderCallbacks,
-    OTF2_EvtReaderCallback_ThreadTeamBegin threadTeamBeginCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetThreadTeamBeginCallback(
+  OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+  OTF2_EvtReaderCallback_ThreadTeamBegin threadTeamBeginCallback);
 
 /** @brief Callback for the ThreadTeamEnd event record.
  *
@@ -2665,14 +2444,12 @@ OTF2_EvtReaderCallbacks_SetThreadTeamBeginCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_ThreadTeamEnd )( OTF2_LocationRef    location,
-                                            OTF2_TimeStamp      time,
-                                            uint64_t            eventPosition,
-                                            void*               userData,
-                                            OTF2_AttributeList* attributeList,
-                                            OTF2_CommRef        threadTeam );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_ThreadTeamEnd)(OTF2_LocationRef location,
+                                                                  OTF2_TimeStamp time,
+                                                                  uint64_t eventPosition,
+                                                                  void* userData,
+                                                                  OTF2_AttributeList* attributeList,
+                                                                  OTF2_CommRef threadTeam);
 
 /** @brief Registers the callback for the ThreadTeamEnd event.
  *
@@ -2688,11 +2465,9 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetThreadTeamEndCallback(
-    OTF2_EvtReaderCallbacks*             evtReaderCallbacks,
-    OTF2_EvtReaderCallback_ThreadTeamEnd threadTeamEndCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetThreadTeamEndCallback(
+  OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+  OTF2_EvtReaderCallback_ThreadTeamEnd threadTeamEndCallback);
 
 /** @brief Callback for the ThreadAcquireLock event record.
  *
@@ -2718,16 +2493,14 @@ OTF2_EvtReaderCallbacks_SetThreadTeamEndCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_ThreadAcquireLock )( OTF2_LocationRef    location,
-                                                OTF2_TimeStamp      time,
-                                                uint64_t            eventPosition,
-                                                void*               userData,
-                                                OTF2_AttributeList* attributeList,
-                                                OTF2_Paradigm       model,
-                                                uint32_t            lockID,
-                                                uint32_t            acquisitionOrder );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_ThreadAcquireLock)(OTF2_LocationRef location,
+                                                                      OTF2_TimeStamp time,
+                                                                      uint64_t eventPosition,
+                                                                      void* userData,
+                                                                      OTF2_AttributeList* attributeList,
+                                                                      OTF2_Paradigm model,
+                                                                      uint32_t lockID,
+                                                                      uint32_t acquisitionOrder);
 
 /** @brief Registers the callback for the ThreadAcquireLock event.
  *
@@ -2743,11 +2516,9 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetThreadAcquireLockCallback(
-    OTF2_EvtReaderCallbacks*                 evtReaderCallbacks,
-    OTF2_EvtReaderCallback_ThreadAcquireLock threadAcquireLockCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetThreadAcquireLockCallback(
+  OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+  OTF2_EvtReaderCallback_ThreadAcquireLock threadAcquireLockCallback);
 
 /** @brief Callback for the ThreadReleaseLock event record.
  *
@@ -2773,16 +2544,14 @@ OTF2_EvtReaderCallbacks_SetThreadAcquireLockCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_ThreadReleaseLock )( OTF2_LocationRef    location,
-                                                OTF2_TimeStamp      time,
-                                                uint64_t            eventPosition,
-                                                void*               userData,
-                                                OTF2_AttributeList* attributeList,
-                                                OTF2_Paradigm       model,
-                                                uint32_t            lockID,
-                                                uint32_t            acquisitionOrder );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_ThreadReleaseLock)(OTF2_LocationRef location,
+                                                                      OTF2_TimeStamp time,
+                                                                      uint64_t eventPosition,
+                                                                      void* userData,
+                                                                      OTF2_AttributeList* attributeList,
+                                                                      OTF2_Paradigm model,
+                                                                      uint32_t lockID,
+                                                                      uint32_t acquisitionOrder);
 
 /** @brief Registers the callback for the ThreadReleaseLock event.
  *
@@ -2798,11 +2567,9 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetThreadReleaseLockCallback(
-    OTF2_EvtReaderCallbacks*                 evtReaderCallbacks,
-    OTF2_EvtReaderCallback_ThreadReleaseLock threadReleaseLockCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetThreadReleaseLockCallback(
+  OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+  OTF2_EvtReaderCallback_ThreadReleaseLock threadReleaseLockCallback);
 
 /** @brief Callback for the ThreadTaskCreate event record.
  *
@@ -2829,16 +2596,14 @@ OTF2_EvtReaderCallbacks_SetThreadReleaseLockCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_ThreadTaskCreate )( OTF2_LocationRef    location,
-                                               OTF2_TimeStamp      time,
-                                               uint64_t            eventPosition,
-                                               void*               userData,
-                                               OTF2_AttributeList* attributeList,
-                                               OTF2_CommRef        threadTeam,
-                                               uint32_t            creatingThread,
-                                               uint32_t            generationNumber );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_ThreadTaskCreate)(OTF2_LocationRef location,
+                                                                     OTF2_TimeStamp time,
+                                                                     uint64_t eventPosition,
+                                                                     void* userData,
+                                                                     OTF2_AttributeList* attributeList,
+                                                                     OTF2_CommRef threadTeam,
+                                                                     uint32_t creatingThread,
+                                                                     uint32_t generationNumber);
 
 /** @brief Registers the callback for the ThreadTaskCreate event.
  *
@@ -2854,11 +2619,9 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetThreadTaskCreateCallback(
-    OTF2_EvtReaderCallbacks*                evtReaderCallbacks,
-    OTF2_EvtReaderCallback_ThreadTaskCreate threadTaskCreateCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetThreadTaskCreateCallback(
+  OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+  OTF2_EvtReaderCallback_ThreadTaskCreate threadTaskCreateCallback);
 
 /** @brief Callback for the ThreadTaskSwitch event record.
  *
@@ -2887,16 +2650,14 @@ OTF2_EvtReaderCallbacks_SetThreadTaskCreateCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_ThreadTaskSwitch )( OTF2_LocationRef    location,
-                                               OTF2_TimeStamp      time,
-                                               uint64_t            eventPosition,
-                                               void*               userData,
-                                               OTF2_AttributeList* attributeList,
-                                               OTF2_CommRef        threadTeam,
-                                               uint32_t            creatingThread,
-                                               uint32_t            generationNumber );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_ThreadTaskSwitch)(OTF2_LocationRef location,
+                                                                     OTF2_TimeStamp time,
+                                                                     uint64_t eventPosition,
+                                                                     void* userData,
+                                                                     OTF2_AttributeList* attributeList,
+                                                                     OTF2_CommRef threadTeam,
+                                                                     uint32_t creatingThread,
+                                                                     uint32_t generationNumber);
 
 /** @brief Registers the callback for the ThreadTaskSwitch event.
  *
@@ -2912,11 +2673,9 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetThreadTaskSwitchCallback(
-    OTF2_EvtReaderCallbacks*                evtReaderCallbacks,
-    OTF2_EvtReaderCallback_ThreadTaskSwitch threadTaskSwitchCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetThreadTaskSwitchCallback(
+  OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+  OTF2_EvtReaderCallback_ThreadTaskSwitch threadTaskSwitchCallback);
 
 /** @brief Callback for the ThreadTaskComplete event record.
  *
@@ -2943,16 +2702,14 @@ OTF2_EvtReaderCallbacks_SetThreadTaskSwitchCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_ThreadTaskComplete )( OTF2_LocationRef    location,
-                                                 OTF2_TimeStamp      time,
-                                                 uint64_t            eventPosition,
-                                                 void*               userData,
-                                                 OTF2_AttributeList* attributeList,
-                                                 OTF2_CommRef        threadTeam,
-                                                 uint32_t            creatingThread,
-                                                 uint32_t            generationNumber );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_ThreadTaskComplete)(OTF2_LocationRef location,
+                                                                       OTF2_TimeStamp time,
+                                                                       uint64_t eventPosition,
+                                                                       void* userData,
+                                                                       OTF2_AttributeList* attributeList,
+                                                                       OTF2_CommRef threadTeam,
+                                                                       uint32_t creatingThread,
+                                                                       uint32_t generationNumber);
 
 /** @brief Registers the callback for the ThreadTaskComplete event.
  *
@@ -2968,11 +2725,9 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetThreadTaskCompleteCallback(
-    OTF2_EvtReaderCallbacks*                  evtReaderCallbacks,
-    OTF2_EvtReaderCallback_ThreadTaskComplete threadTaskCompleteCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetThreadTaskCompleteCallback(
+  OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+  OTF2_EvtReaderCallback_ThreadTaskComplete threadTaskCompleteCallback);
 
 /** @brief Callback for the ThreadCreate event record.
  *
@@ -2998,15 +2753,13 @@ OTF2_EvtReaderCallbacks_SetThreadTaskCompleteCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_ThreadCreate )( OTF2_LocationRef    location,
-                                           OTF2_TimeStamp      time,
-                                           uint64_t            eventPosition,
-                                           void*               userData,
-                                           OTF2_AttributeList* attributeList,
-                                           OTF2_CommRef        threadContingent,
-                                           uint64_t            sequenceCount );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_ThreadCreate)(OTF2_LocationRef location,
+                                                                 OTF2_TimeStamp time,
+                                                                 uint64_t eventPosition,
+                                                                 void* userData,
+                                                                 OTF2_AttributeList* attributeList,
+                                                                 OTF2_CommRef threadContingent,
+                                                                 uint64_t sequenceCount);
 
 /** @brief Registers the callback for the ThreadCreate event.
  *
@@ -3022,11 +2775,9 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetThreadCreateCallback(
-    OTF2_EvtReaderCallbacks*            evtReaderCallbacks,
-    OTF2_EvtReaderCallback_ThreadCreate threadCreateCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetThreadCreateCallback(
+  OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+  OTF2_EvtReaderCallback_ThreadCreate threadCreateCallback);
 
 /** @brief Callback for the ThreadBegin event record.
  *
@@ -3052,15 +2803,13 @@ OTF2_EvtReaderCallbacks_SetThreadCreateCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_ThreadBegin )( OTF2_LocationRef    location,
-                                          OTF2_TimeStamp      time,
-                                          uint64_t            eventPosition,
-                                          void*               userData,
-                                          OTF2_AttributeList* attributeList,
-                                          OTF2_CommRef        threadContingent,
-                                          uint64_t            sequenceCount );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_ThreadBegin)(OTF2_LocationRef location,
+                                                                OTF2_TimeStamp time,
+                                                                uint64_t eventPosition,
+                                                                void* userData,
+                                                                OTF2_AttributeList* attributeList,
+                                                                OTF2_CommRef threadContingent,
+                                                                uint64_t sequenceCount);
 
 /** @brief Registers the callback for the ThreadBegin event.
  *
@@ -3076,11 +2825,8 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetThreadBeginCallback(
-    OTF2_EvtReaderCallbacks*           evtReaderCallbacks,
-    OTF2_EvtReaderCallback_ThreadBegin threadBeginCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetThreadBeginCallback(OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+                                                              OTF2_EvtReaderCallback_ThreadBegin threadBeginCallback);
 
 /** @brief Callback for the ThreadWait event record.
  *
@@ -3106,15 +2852,13 @@ OTF2_EvtReaderCallbacks_SetThreadBeginCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_ThreadWait )( OTF2_LocationRef    location,
-                                         OTF2_TimeStamp      time,
-                                         uint64_t            eventPosition,
-                                         void*               userData,
-                                         OTF2_AttributeList* attributeList,
-                                         OTF2_CommRef        threadContingent,
-                                         uint64_t            sequenceCount );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_ThreadWait)(OTF2_LocationRef location,
+                                                               OTF2_TimeStamp time,
+                                                               uint64_t eventPosition,
+                                                               void* userData,
+                                                               OTF2_AttributeList* attributeList,
+                                                               OTF2_CommRef threadContingent,
+                                                               uint64_t sequenceCount);
 
 /** @brief Registers the callback for the ThreadWait event.
  *
@@ -3130,11 +2874,8 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetThreadWaitCallback(
-    OTF2_EvtReaderCallbacks*          evtReaderCallbacks,
-    OTF2_EvtReaderCallback_ThreadWait threadWaitCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetThreadWaitCallback(OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+                                                             OTF2_EvtReaderCallback_ThreadWait threadWaitCallback);
 
 /** @brief Callback for the ThreadEnd event record.
  *
@@ -3162,15 +2903,13 @@ OTF2_EvtReaderCallbacks_SetThreadWaitCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_ThreadEnd )( OTF2_LocationRef    location,
-                                        OTF2_TimeStamp      time,
-                                        uint64_t            eventPosition,
-                                        void*               userData,
-                                        OTF2_AttributeList* attributeList,
-                                        OTF2_CommRef        threadContingent,
-                                        uint64_t            sequenceCount );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_ThreadEnd)(OTF2_LocationRef location,
+                                                              OTF2_TimeStamp time,
+                                                              uint64_t eventPosition,
+                                                              void* userData,
+                                                              OTF2_AttributeList* attributeList,
+                                                              OTF2_CommRef threadContingent,
+                                                              uint64_t sequenceCount);
 
 /** @brief Registers the callback for the ThreadEnd event.
  *
@@ -3186,11 +2925,8 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetThreadEndCallback(
-    OTF2_EvtReaderCallbacks*         evtReaderCallbacks,
-    OTF2_EvtReaderCallback_ThreadEnd threadEndCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetThreadEndCallback(OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+                                                            OTF2_EvtReaderCallback_ThreadEnd threadEndCallback);
 
 /** @brief Callback for the CallingContextEnter event record.
  *
@@ -3229,15 +2965,13 @@ OTF2_EvtReaderCallbacks_SetThreadEndCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_CallingContextEnter )( OTF2_LocationRef       location,
-                                                  OTF2_TimeStamp         time,
-                                                  uint64_t               eventPosition,
-                                                  void*                  userData,
-                                                  OTF2_AttributeList*    attributeList,
-                                                  OTF2_CallingContextRef callingContext,
-                                                  uint32_t               unwindDistance );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_CallingContextEnter)(OTF2_LocationRef location,
+                                                                        OTF2_TimeStamp time,
+                                                                        uint64_t eventPosition,
+                                                                        void* userData,
+                                                                        OTF2_AttributeList* attributeList,
+                                                                        OTF2_CallingContextRef callingContext,
+                                                                        uint32_t unwindDistance);
 
 /** @brief Registers the callback for the CallingContextEnter event.
  *
@@ -3254,11 +2988,9 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetCallingContextEnterCallback(
-    OTF2_EvtReaderCallbacks*                   evtReaderCallbacks,
-    OTF2_EvtReaderCallback_CallingContextEnter callingContextEnterCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetCallingContextEnterCallback(
+  OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+  OTF2_EvtReaderCallback_CallingContextEnter callingContextEnterCallback);
 
 /** @brief Callback for the CallingContextLeave event record.
  *
@@ -3302,14 +3034,12 @@ OTF2_EvtReaderCallbacks_SetCallingContextEnterCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_CallingContextLeave )( OTF2_LocationRef       location,
-                                                  OTF2_TimeStamp         time,
-                                                  uint64_t               eventPosition,
-                                                  void*                  userData,
-                                                  OTF2_AttributeList*    attributeList,
-                                                  OTF2_CallingContextRef callingContext );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_CallingContextLeave)(OTF2_LocationRef location,
+                                                                        OTF2_TimeStamp time,
+                                                                        uint64_t eventPosition,
+                                                                        void* userData,
+                                                                        OTF2_AttributeList* attributeList,
+                                                                        OTF2_CallingContextRef callingContext);
 
 /** @brief Registers the callback for the CallingContextLeave event.
  *
@@ -3326,11 +3056,9 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetCallingContextLeaveCallback(
-    OTF2_EvtReaderCallbacks*                   evtReaderCallbacks,
-    OTF2_EvtReaderCallback_CallingContextLeave callingContextLeaveCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetCallingContextLeaveCallback(
+  OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+  OTF2_EvtReaderCallback_CallingContextLeave callingContextLeaveCallback);
 
 /** @brief Callback for the CallingContextSample event record.
  *
@@ -3367,16 +3095,14 @@ OTF2_EvtReaderCallbacks_SetCallingContextLeaveCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_CallingContextSample )( OTF2_LocationRef           location,
-                                                   OTF2_TimeStamp             time,
-                                                   uint64_t                   eventPosition,
-                                                   void*                      userData,
-                                                   OTF2_AttributeList*        attributeList,
-                                                   OTF2_CallingContextRef     callingContext,
-                                                   uint32_t                   unwindDistance,
-                                                   OTF2_InterruptGeneratorRef interruptGenerator );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_CallingContextSample)(OTF2_LocationRef location,
+                                                                         OTF2_TimeStamp time,
+                                                                         uint64_t eventPosition,
+                                                                         void* userData,
+                                                                         OTF2_AttributeList* attributeList,
+                                                                         OTF2_CallingContextRef callingContext,
+                                                                         uint32_t unwindDistance,
+                                                                         OTF2_InterruptGeneratorRef interruptGenerator);
 
 /** @brief Registers the callback for the CallingContextSample event.
  *
@@ -3393,11 +3119,9 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetCallingContextSampleCallback(
-    OTF2_EvtReaderCallbacks*                    evtReaderCallbacks,
-    OTF2_EvtReaderCallback_CallingContextSample callingContextSampleCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetCallingContextSampleCallback(
+  OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+  OTF2_EvtReaderCallback_CallingContextSample callingContextSampleCallback);
 
 /** @brief Callback for the IoCreateHandle event record.
  *
@@ -3439,17 +3163,15 @@ OTF2_EvtReaderCallbacks_SetCallingContextSampleCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_IoCreateHandle )( OTF2_LocationRef    location,
-                                             OTF2_TimeStamp      time,
-                                             uint64_t            eventPosition,
-                                             void*               userData,
-                                             OTF2_AttributeList* attributeList,
-                                             OTF2_IoHandleRef    handle,
-                                             OTF2_IoAccessMode   mode,
-                                             OTF2_IoCreationFlag creationFlags,
-                                             OTF2_IoStatusFlag   statusFlags );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_IoCreateHandle)(OTF2_LocationRef location,
+                                                                   OTF2_TimeStamp time,
+                                                                   uint64_t eventPosition,
+                                                                   void* userData,
+                                                                   OTF2_AttributeList* attributeList,
+                                                                   OTF2_IoHandleRef handle,
+                                                                   OTF2_IoAccessMode mode,
+                                                                   OTF2_IoCreationFlag creationFlags,
+                                                                   OTF2_IoStatusFlag statusFlags);
 
 /** @brief Registers the callback for the IoCreateHandle event.
  *
@@ -3465,11 +3187,9 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetIoCreateHandleCallback(
-    OTF2_EvtReaderCallbacks*              evtReaderCallbacks,
-    OTF2_EvtReaderCallback_IoCreateHandle ioCreateHandleCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetIoCreateHandleCallback(
+  OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+  OTF2_EvtReaderCallback_IoCreateHandle ioCreateHandleCallback);
 
 /** @brief Callback for the IoDestroyHandle event record.
  *
@@ -3503,14 +3223,12 @@ OTF2_EvtReaderCallbacks_SetIoCreateHandleCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_IoDestroyHandle )( OTF2_LocationRef    location,
-                                              OTF2_TimeStamp      time,
-                                              uint64_t            eventPosition,
-                                              void*               userData,
-                                              OTF2_AttributeList* attributeList,
-                                              OTF2_IoHandleRef    handle );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_IoDestroyHandle)(OTF2_LocationRef location,
+                                                                    OTF2_TimeStamp time,
+                                                                    uint64_t eventPosition,
+                                                                    void* userData,
+                                                                    OTF2_AttributeList* attributeList,
+                                                                    OTF2_IoHandleRef handle);
 
 /** @brief Registers the callback for the IoDestroyHandle event.
  *
@@ -3526,11 +3244,9 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetIoDestroyHandleCallback(
-    OTF2_EvtReaderCallbacks*               evtReaderCallbacks,
-    OTF2_EvtReaderCallback_IoDestroyHandle ioDestroyHandleCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetIoDestroyHandleCallback(
+  OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+  OTF2_EvtReaderCallback_IoDestroyHandle ioDestroyHandleCallback);
 
 /** @brief Callback for the IoDuplicateHandle event record.
  *
@@ -3569,16 +3285,14 @@ OTF2_EvtReaderCallbacks_SetIoDestroyHandleCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_IoDuplicateHandle )( OTF2_LocationRef    location,
-                                                OTF2_TimeStamp      time,
-                                                uint64_t            eventPosition,
-                                                void*               userData,
-                                                OTF2_AttributeList* attributeList,
-                                                OTF2_IoHandleRef    oldHandle,
-                                                OTF2_IoHandleRef    newHandle,
-                                                OTF2_IoStatusFlag   statusFlags );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_IoDuplicateHandle)(OTF2_LocationRef location,
+                                                                      OTF2_TimeStamp time,
+                                                                      uint64_t eventPosition,
+                                                                      void* userData,
+                                                                      OTF2_AttributeList* attributeList,
+                                                                      OTF2_IoHandleRef oldHandle,
+                                                                      OTF2_IoHandleRef newHandle,
+                                                                      OTF2_IoStatusFlag statusFlags);
 
 /** @brief Registers the callback for the IoDuplicateHandle event.
  *
@@ -3594,11 +3308,9 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetIoDuplicateHandleCallback(
-    OTF2_EvtReaderCallbacks*                 evtReaderCallbacks,
-    OTF2_EvtReaderCallback_IoDuplicateHandle ioDuplicateHandleCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetIoDuplicateHandleCallback(
+  OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+  OTF2_EvtReaderCallback_IoDuplicateHandle ioDuplicateHandleCallback);
 
 /** @brief Callback for the IoSeek event record.
  *
@@ -3628,17 +3340,15 @@ OTF2_EvtReaderCallbacks_SetIoDuplicateHandleCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_IoSeek )( OTF2_LocationRef    location,
-                                     OTF2_TimeStamp      time,
-                                     uint64_t            eventPosition,
-                                     void*               userData,
-                                     OTF2_AttributeList* attributeList,
-                                     OTF2_IoHandleRef    handle,
-                                     int64_t             offsetRequest,
-                                     OTF2_IoSeekOption   whence,
-                                     uint64_t            offsetResult );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_IoSeek)(OTF2_LocationRef location,
+                                                           OTF2_TimeStamp time,
+                                                           uint64_t eventPosition,
+                                                           void* userData,
+                                                           OTF2_AttributeList* attributeList,
+                                                           OTF2_IoHandleRef handle,
+                                                           int64_t offsetRequest,
+                                                           OTF2_IoSeekOption whence,
+                                                           uint64_t offsetResult);
 
 /** @brief Registers the callback for the IoSeek event.
  *
@@ -3654,11 +3364,8 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetIoSeekCallback(
-    OTF2_EvtReaderCallbacks*      evtReaderCallbacks,
-    OTF2_EvtReaderCallback_IoSeek ioSeekCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetIoSeekCallback(OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+                                                         OTF2_EvtReaderCallback_IoSeek ioSeekCallback);
 
 /** @brief Callback for the IoChangeStatusFlags event record.
  *
@@ -3683,15 +3390,13 @@ OTF2_EvtReaderCallbacks_SetIoSeekCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_IoChangeStatusFlags )( OTF2_LocationRef    location,
-                                                  OTF2_TimeStamp      time,
-                                                  uint64_t            eventPosition,
-                                                  void*               userData,
-                                                  OTF2_AttributeList* attributeList,
-                                                  OTF2_IoHandleRef    handle,
-                                                  OTF2_IoStatusFlag   statusFlags );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_IoChangeStatusFlags)(OTF2_LocationRef location,
+                                                                        OTF2_TimeStamp time,
+                                                                        uint64_t eventPosition,
+                                                                        void* userData,
+                                                                        OTF2_AttributeList* attributeList,
+                                                                        OTF2_IoHandleRef handle,
+                                                                        OTF2_IoStatusFlag statusFlags);
 
 /** @brief Registers the callback for the IoChangeStatusFlags event.
  *
@@ -3708,11 +3413,9 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetIoChangeStatusFlagsCallback(
-    OTF2_EvtReaderCallbacks*                   evtReaderCallbacks,
-    OTF2_EvtReaderCallback_IoChangeStatusFlags ioChangeStatusFlagsCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetIoChangeStatusFlagsCallback(
+  OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+  OTF2_EvtReaderCallback_IoChangeStatusFlags ioChangeStatusFlagsCallback);
 
 /** @brief Callback for the IoDeleteFile event record.
  *
@@ -3737,15 +3440,13 @@ OTF2_EvtReaderCallbacks_SetIoChangeStatusFlagsCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_IoDeleteFile )( OTF2_LocationRef    location,
-                                           OTF2_TimeStamp      time,
-                                           uint64_t            eventPosition,
-                                           void*               userData,
-                                           OTF2_AttributeList* attributeList,
-                                           OTF2_IoParadigmRef  ioParadigm,
-                                           OTF2_IoFileRef      file );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_IoDeleteFile)(OTF2_LocationRef location,
+                                                                 OTF2_TimeStamp time,
+                                                                 uint64_t eventPosition,
+                                                                 void* userData,
+                                                                 OTF2_AttributeList* attributeList,
+                                                                 OTF2_IoParadigmRef ioParadigm,
+                                                                 OTF2_IoFileRef file);
 
 /** @brief Registers the callback for the IoDeleteFile event.
  *
@@ -3761,11 +3462,9 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetIoDeleteFileCallback(
-    OTF2_EvtReaderCallbacks*            evtReaderCallbacks,
-    OTF2_EvtReaderCallback_IoDeleteFile ioDeleteFileCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetIoDeleteFileCallback(
+  OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+  OTF2_EvtReaderCallback_IoDeleteFile ioDeleteFileCallback);
 
 /** @brief Callback for the IoOperationBegin event record.
  *
@@ -3797,18 +3496,16 @@ OTF2_EvtReaderCallbacks_SetIoDeleteFileCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_IoOperationBegin )( OTF2_LocationRef     location,
-                                               OTF2_TimeStamp       time,
-                                               uint64_t             eventPosition,
-                                               void*                userData,
-                                               OTF2_AttributeList*  attributeList,
-                                               OTF2_IoHandleRef     handle,
-                                               OTF2_IoOperationMode mode,
-                                               OTF2_IoOperationFlag operationFlags,
-                                               uint64_t             bytesRequest,
-                                               uint64_t             matchingId );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_IoOperationBegin)(OTF2_LocationRef location,
+                                                                     OTF2_TimeStamp time,
+                                                                     uint64_t eventPosition,
+                                                                     void* userData,
+                                                                     OTF2_AttributeList* attributeList,
+                                                                     OTF2_IoHandleRef handle,
+                                                                     OTF2_IoOperationMode mode,
+                                                                     OTF2_IoOperationFlag operationFlags,
+                                                                     uint64_t bytesRequest,
+                                                                     uint64_t matchingId);
 
 /** @brief Registers the callback for the IoOperationBegin event.
  *
@@ -3824,11 +3521,9 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetIoOperationBeginCallback(
-    OTF2_EvtReaderCallbacks*                evtReaderCallbacks,
-    OTF2_EvtReaderCallback_IoOperationBegin ioOperationBeginCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetIoOperationBeginCallback(
+  OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+  OTF2_EvtReaderCallback_IoOperationBegin ioOperationBeginCallback);
 
 /** @brief Callback for the IoOperationTest event record.
  *
@@ -3857,15 +3552,13 @@ OTF2_EvtReaderCallbacks_SetIoOperationBeginCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_IoOperationTest )( OTF2_LocationRef    location,
-                                              OTF2_TimeStamp      time,
-                                              uint64_t            eventPosition,
-                                              void*               userData,
-                                              OTF2_AttributeList* attributeList,
-                                              OTF2_IoHandleRef    handle,
-                                              uint64_t            matchingId );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_IoOperationTest)(OTF2_LocationRef location,
+                                                                    OTF2_TimeStamp time,
+                                                                    uint64_t eventPosition,
+                                                                    void* userData,
+                                                                    OTF2_AttributeList* attributeList,
+                                                                    OTF2_IoHandleRef handle,
+                                                                    uint64_t matchingId);
 
 /** @brief Registers the callback for the IoOperationTest event.
  *
@@ -3881,11 +3574,9 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetIoOperationTestCallback(
-    OTF2_EvtReaderCallbacks*               evtReaderCallbacks,
-    OTF2_EvtReaderCallback_IoOperationTest ioOperationTestCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetIoOperationTestCallback(
+  OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+  OTF2_EvtReaderCallback_IoOperationTest ioOperationTestCallback);
 
 /** @brief Callback for the IoOperationIssued event record.
  *
@@ -3915,15 +3606,13 @@ OTF2_EvtReaderCallbacks_SetIoOperationTestCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_IoOperationIssued )( OTF2_LocationRef    location,
-                                                OTF2_TimeStamp      time,
-                                                uint64_t            eventPosition,
-                                                void*               userData,
-                                                OTF2_AttributeList* attributeList,
-                                                OTF2_IoHandleRef    handle,
-                                                uint64_t            matchingId );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_IoOperationIssued)(OTF2_LocationRef location,
+                                                                      OTF2_TimeStamp time,
+                                                                      uint64_t eventPosition,
+                                                                      void* userData,
+                                                                      OTF2_AttributeList* attributeList,
+                                                                      OTF2_IoHandleRef handle,
+                                                                      uint64_t matchingId);
 
 /** @brief Registers the callback for the IoOperationIssued event.
  *
@@ -3939,11 +3628,9 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetIoOperationIssuedCallback(
-    OTF2_EvtReaderCallbacks*                 evtReaderCallbacks,
-    OTF2_EvtReaderCallback_IoOperationIssued ioOperationIssuedCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetIoOperationIssuedCallback(
+  OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+  OTF2_EvtReaderCallback_IoOperationIssued ioOperationIssuedCallback);
 
 /** @brief Callback for the IoOperationComplete event record.
  *
@@ -3973,16 +3660,14 @@ OTF2_EvtReaderCallbacks_SetIoOperationIssuedCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_IoOperationComplete )( OTF2_LocationRef    location,
-                                                  OTF2_TimeStamp      time,
-                                                  uint64_t            eventPosition,
-                                                  void*               userData,
-                                                  OTF2_AttributeList* attributeList,
-                                                  OTF2_IoHandleRef    handle,
-                                                  uint64_t            bytesResult,
-                                                  uint64_t            matchingId );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_IoOperationComplete)(OTF2_LocationRef location,
+                                                                        OTF2_TimeStamp time,
+                                                                        uint64_t eventPosition,
+                                                                        void* userData,
+                                                                        OTF2_AttributeList* attributeList,
+                                                                        OTF2_IoHandleRef handle,
+                                                                        uint64_t bytesResult,
+                                                                        uint64_t matchingId);
 
 /** @brief Registers the callback for the IoOperationComplete event.
  *
@@ -3999,11 +3684,9 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetIoOperationCompleteCallback(
-    OTF2_EvtReaderCallbacks*                   evtReaderCallbacks,
-    OTF2_EvtReaderCallback_IoOperationComplete ioOperationCompleteCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetIoOperationCompleteCallback(
+  OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+  OTF2_EvtReaderCallback_IoOperationComplete ioOperationCompleteCallback);
 
 /** @brief Callback for the IoOperationCancelled event record.
  *
@@ -4033,15 +3716,13 @@ OTF2_EvtReaderCallbacks_SetIoOperationCompleteCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_IoOperationCancelled )( OTF2_LocationRef    location,
-                                                   OTF2_TimeStamp      time,
-                                                   uint64_t            eventPosition,
-                                                   void*               userData,
-                                                   OTF2_AttributeList* attributeList,
-                                                   OTF2_IoHandleRef    handle,
-                                                   uint64_t            matchingId );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_IoOperationCancelled)(OTF2_LocationRef location,
+                                                                         OTF2_TimeStamp time,
+                                                                         uint64_t eventPosition,
+                                                                         void* userData,
+                                                                         OTF2_AttributeList* attributeList,
+                                                                         OTF2_IoHandleRef handle,
+                                                                         uint64_t matchingId);
 
 /** @brief Registers the callback for the IoOperationCancelled event.
  *
@@ -4058,11 +3739,9 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetIoOperationCancelledCallback(
-    OTF2_EvtReaderCallbacks*                    evtReaderCallbacks,
-    OTF2_EvtReaderCallback_IoOperationCancelled ioOperationCancelledCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetIoOperationCancelledCallback(
+  OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+  OTF2_EvtReaderCallback_IoOperationCancelled ioOperationCancelledCallback);
 
 /** @brief Callback for the IoAcquireLock event record.
  *
@@ -4086,15 +3765,13 @@ OTF2_EvtReaderCallbacks_SetIoOperationCancelledCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_IoAcquireLock )( OTF2_LocationRef    location,
-                                            OTF2_TimeStamp      time,
-                                            uint64_t            eventPosition,
-                                            void*               userData,
-                                            OTF2_AttributeList* attributeList,
-                                            OTF2_IoHandleRef    handle,
-                                            OTF2_LockType       lockType );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_IoAcquireLock)(OTF2_LocationRef location,
+                                                                  OTF2_TimeStamp time,
+                                                                  uint64_t eventPosition,
+                                                                  void* userData,
+                                                                  OTF2_AttributeList* attributeList,
+                                                                  OTF2_IoHandleRef handle,
+                                                                  OTF2_LockType lockType);
 
 /** @brief Registers the callback for the IoAcquireLock event.
  *
@@ -4110,11 +3787,9 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetIoAcquireLockCallback(
-    OTF2_EvtReaderCallbacks*             evtReaderCallbacks,
-    OTF2_EvtReaderCallback_IoAcquireLock ioAcquireLockCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetIoAcquireLockCallback(
+  OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+  OTF2_EvtReaderCallback_IoAcquireLock ioAcquireLockCallback);
 
 /** @brief Callback for the IoReleaseLock event record.
  *
@@ -4138,15 +3813,13 @@ OTF2_EvtReaderCallbacks_SetIoAcquireLockCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_IoReleaseLock )( OTF2_LocationRef    location,
-                                            OTF2_TimeStamp      time,
-                                            uint64_t            eventPosition,
-                                            void*               userData,
-                                            OTF2_AttributeList* attributeList,
-                                            OTF2_IoHandleRef    handle,
-                                            OTF2_LockType       lockType );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_IoReleaseLock)(OTF2_LocationRef location,
+                                                                  OTF2_TimeStamp time,
+                                                                  uint64_t eventPosition,
+                                                                  void* userData,
+                                                                  OTF2_AttributeList* attributeList,
+                                                                  OTF2_IoHandleRef handle,
+                                                                  OTF2_LockType lockType);
 
 /** @brief Registers the callback for the IoReleaseLock event.
  *
@@ -4162,11 +3835,9 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetIoReleaseLockCallback(
-    OTF2_EvtReaderCallbacks*             evtReaderCallbacks,
-    OTF2_EvtReaderCallback_IoReleaseLock ioReleaseLockCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetIoReleaseLockCallback(
+  OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+  OTF2_EvtReaderCallback_IoReleaseLock ioReleaseLockCallback);
 
 /** @brief Callback for the IoTryLock event record.
  *
@@ -4191,15 +3862,13 @@ OTF2_EvtReaderCallbacks_SetIoReleaseLockCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_IoTryLock )( OTF2_LocationRef    location,
-                                        OTF2_TimeStamp      time,
-                                        uint64_t            eventPosition,
-                                        void*               userData,
-                                        OTF2_AttributeList* attributeList,
-                                        OTF2_IoHandleRef    handle,
-                                        OTF2_LockType       lockType );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_IoTryLock)(OTF2_LocationRef location,
+                                                              OTF2_TimeStamp time,
+                                                              uint64_t eventPosition,
+                                                              void* userData,
+                                                              OTF2_AttributeList* attributeList,
+                                                              OTF2_IoHandleRef handle,
+                                                              OTF2_LockType lockType);
 
 /** @brief Registers the callback for the IoTryLock event.
  *
@@ -4215,11 +3884,8 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetIoTryLockCallback(
-    OTF2_EvtReaderCallbacks*         evtReaderCallbacks,
-    OTF2_EvtReaderCallback_IoTryLock ioTryLockCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetIoTryLockCallback(OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+                                                            OTF2_EvtReaderCallback_IoTryLock ioTryLockCallback);
 
 /** @brief Callback for the ProgramBegin event record.
  *
@@ -4255,16 +3921,14 @@ OTF2_EvtReaderCallbacks_SetIoTryLockCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_ProgramBegin )( OTF2_LocationRef      location,
-                                           OTF2_TimeStamp        time,
-                                           uint64_t              eventPosition,
-                                           void*                 userData,
-                                           OTF2_AttributeList*   attributeList,
-                                           OTF2_StringRef        programName,
-                                           uint32_t              numberOfArguments,
-                                           const OTF2_StringRef* programArguments );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_ProgramBegin)(OTF2_LocationRef location,
+                                                                 OTF2_TimeStamp time,
+                                                                 uint64_t eventPosition,
+                                                                 void* userData,
+                                                                 OTF2_AttributeList* attributeList,
+                                                                 OTF2_StringRef programName,
+                                                                 uint32_t numberOfArguments,
+                                                                 const OTF2_StringRef* programArguments);
 
 /** @brief Registers the callback for the ProgramBegin event.
  *
@@ -4280,11 +3944,9 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetProgramBeginCallback(
-    OTF2_EvtReaderCallbacks*            evtReaderCallbacks,
-    OTF2_EvtReaderCallback_ProgramBegin programBeginCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetProgramBeginCallback(
+  OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+  OTF2_EvtReaderCallback_ProgramBegin programBeginCallback);
 
 /** @brief Callback for the ProgramEnd event record.
  *
@@ -4319,14 +3981,12 @@ OTF2_EvtReaderCallbacks_SetProgramBeginCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_ProgramEnd )( OTF2_LocationRef    location,
-                                         OTF2_TimeStamp      time,
-                                         uint64_t            eventPosition,
-                                         void*               userData,
-                                         OTF2_AttributeList* attributeList,
-                                         int64_t             exitStatus );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_ProgramEnd)(OTF2_LocationRef location,
+                                                               OTF2_TimeStamp time,
+                                                               uint64_t eventPosition,
+                                                               void* userData,
+                                                               OTF2_AttributeList* attributeList,
+                                                               int64_t exitStatus);
 
 /** @brief Registers the callback for the ProgramEnd event.
  *
@@ -4342,11 +4002,8 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetProgramEndCallback(
-    OTF2_EvtReaderCallbacks*          evtReaderCallbacks,
-    OTF2_EvtReaderCallback_ProgramEnd programEndCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetProgramEndCallback(OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+                                                             OTF2_EvtReaderCallback_ProgramEnd programEndCallback);
 
 /** @brief Callback for the NonBlockingCollectiveRequest event record.
  *
@@ -4367,14 +4024,12 @@ OTF2_EvtReaderCallbacks_SetProgramEndCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_NonBlockingCollectiveRequest )( OTF2_LocationRef    location,
-                                                           OTF2_TimeStamp      time,
-                                                           uint64_t            eventPosition,
-                                                           void*               userData,
-                                                           OTF2_AttributeList* attributeList,
-                                                           uint64_t            requestID );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_NonBlockingCollectiveRequest)(OTF2_LocationRef location,
+                                                                                 OTF2_TimeStamp time,
+                                                                                 uint64_t eventPosition,
+                                                                                 void* userData,
+                                                                                 OTF2_AttributeList* attributeList,
+                                                                                 uint64_t requestID);
 
 /** @brief Registers the callback for the NonBlockingCollectiveRequest event.
  *
@@ -4392,11 +4047,9 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetNonBlockingCollectiveRequestCallback(
-    OTF2_EvtReaderCallbacks*                            evtReaderCallbacks,
-    OTF2_EvtReaderCallback_NonBlockingCollectiveRequest nonBlockingCollectiveRequestCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetNonBlockingCollectiveRequestCallback(
+  OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+  OTF2_EvtReaderCallback_NonBlockingCollectiveRequest nonBlockingCollectiveRequestCallback);
 
 /** @brief Callback for the NonBlockingCollectiveComplete event record.
  *
@@ -4426,19 +4079,17 @@ OTF2_EvtReaderCallbacks_SetNonBlockingCollectiveRequestCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_NonBlockingCollectiveComplete )( OTF2_LocationRef    location,
-                                                            OTF2_TimeStamp      time,
-                                                            uint64_t            eventPosition,
-                                                            void*               userData,
-                                                            OTF2_AttributeList* attributeList,
-                                                            OTF2_CollectiveOp   collectiveOp,
-                                                            OTF2_CommRef        communicator,
-                                                            uint32_t            root,
-                                                            uint64_t            sizeSent,
-                                                            uint64_t            sizeReceived,
-                                                            uint64_t            requestID );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_NonBlockingCollectiveComplete)(OTF2_LocationRef location,
+                                                                                  OTF2_TimeStamp time,
+                                                                                  uint64_t eventPosition,
+                                                                                  void* userData,
+                                                                                  OTF2_AttributeList* attributeList,
+                                                                                  OTF2_CollectiveOp collectiveOp,
+                                                                                  OTF2_CommRef communicator,
+                                                                                  uint32_t root,
+                                                                                  uint64_t sizeSent,
+                                                                                  uint64_t sizeReceived,
+                                                                                  uint64_t requestID);
 
 /** @brief Registers the callback for the NonBlockingCollectiveComplete event.
  *
@@ -4456,11 +4107,9 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetNonBlockingCollectiveCompleteCallback(
-    OTF2_EvtReaderCallbacks*                             evtReaderCallbacks,
-    OTF2_EvtReaderCallback_NonBlockingCollectiveComplete nonBlockingCollectiveCompleteCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetNonBlockingCollectiveCompleteCallback(
+  OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+  OTF2_EvtReaderCallback_NonBlockingCollectiveComplete nonBlockingCollectiveCompleteCallback);
 
 /** @brief Callback for the CommCreate event record.
  *
@@ -4489,14 +4138,12 @@ OTF2_EvtReaderCallbacks_SetNonBlockingCollectiveCompleteCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_CommCreate )( OTF2_LocationRef    location,
-                                         OTF2_TimeStamp      time,
-                                         uint64_t            eventPosition,
-                                         void*               userData,
-                                         OTF2_AttributeList* attributeList,
-                                         OTF2_CommRef        communicator );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_CommCreate)(OTF2_LocationRef location,
+                                                               OTF2_TimeStamp time,
+                                                               uint64_t eventPosition,
+                                                               void* userData,
+                                                               OTF2_AttributeList* attributeList,
+                                                               OTF2_CommRef communicator);
 
 /** @brief Registers the callback for the CommCreate event.
  *
@@ -4512,11 +4159,8 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetCommCreateCallback(
-    OTF2_EvtReaderCallbacks*          evtReaderCallbacks,
-    OTF2_EvtReaderCallback_CommCreate commCreateCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetCommCreateCallback(OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+                                                             OTF2_EvtReaderCallback_CommCreate commCreateCallback);
 
 /** @brief Callback for the CommDestroy event record.
  *
@@ -4546,14 +4190,12 @@ OTF2_EvtReaderCallbacks_SetCommCreateCallback(
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_INTERRUPT}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_EvtReaderCallback_CommDestroy )( OTF2_LocationRef    location,
-                                          OTF2_TimeStamp      time,
-                                          uint64_t            eventPosition,
-                                          void*               userData,
-                                          OTF2_AttributeList* attributeList,
-                                          OTF2_CommRef        communicator );
-
+typedef OTF2_CallbackCode (*OTF2_EvtReaderCallback_CommDestroy)(OTF2_LocationRef location,
+                                                                OTF2_TimeStamp time,
+                                                                uint64_t eventPosition,
+                                                                void* userData,
+                                                                OTF2_AttributeList* attributeList,
+                                                                OTF2_CommRef communicator);
 
 /** @brief Registers the callback for the CommDestroy event.
  *
@@ -4569,15 +4211,11 @@ typedef OTF2_CallbackCode
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_EvtReaderCallbacks_SetCommDestroyCallback(
-    OTF2_EvtReaderCallbacks*           evtReaderCallbacks,
-    OTF2_EvtReaderCallback_CommDestroy commDestroyCallback );
-
+OTF2_ErrorCode OTF2_EvtReaderCallbacks_SetCommDestroyCallback(OTF2_EvtReaderCallbacks* evtReaderCallbacks,
+                                                              OTF2_EvtReaderCallback_CommDestroy commDestroyCallback);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-
 
 #endif /* !OTF2_EVT_READER_CALLBACKS_H */

@@ -1,8 +1,13 @@
+/*
+ * Copyright (C) Telecom SudParis
+ * See LICENSE in top-level directory.
+ */
+
 #ifndef TIMESTAMP_H
 #define TIMESTAMP_H
 
-#include <stdint.h>
 #include <limits.h>
+#include <stdint.h>
 
 typedef uint64_t htf_timestamp_t;
 
@@ -21,3 +26,11 @@ void htf_delta_timestamp(htf_timestamp_t* t);
 /** Writes 0 to the last timestamp */
 void htf_finish_timestamp(void);
 #endif /* TIMESTAMP_H */
+
+/* -*-
+   mode: c;
+   c-file-style: "k&r";
+   c-basic-offset 2;
+   tab-width 2 ;
+   indent-tabs-mode nil
+   -*- */

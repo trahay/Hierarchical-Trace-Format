@@ -28,10 +28,8 @@
  *
  */
 
-
 #ifndef OTF2_ARCHIVE_H
 #define OTF2_ARCHIVE_H
-
 
 /**
  *  @file
@@ -165,52 +163,44 @@
  *  @}
  */
 
-
 #include <stdint.h>
-
 
 #include "otf2_compiler.h"
 
-
 #include <otf2/OTF2_ErrorCodes.h>
 
-
 #include <otf2/OTF2_Callbacks.h>
-#include <otf2/OTF2_DefWriter.h>
 #include <otf2/OTF2_DefReader.h>
-#include <otf2/OTF2_EvtWriter.h>
+#include <otf2/OTF2_DefWriter.h>
 #include <otf2/OTF2_EvtReader.h>
-#include <otf2/OTF2_SnapWriter.h>
-#include <otf2/OTF2_SnapReader.h>
-#include <otf2/OTF2_GlobalDefWriter.h>
+#include <otf2/OTF2_EvtWriter.h>
 #include <otf2/OTF2_GlobalDefReader.h>
+#include <otf2/OTF2_GlobalDefWriter.h>
 #include <otf2/OTF2_GlobalEvtReader.h>
 #include <otf2/OTF2_GlobalSnapReader.h>
-#include <otf2/OTF2_Thumbnail.h>
-#include <otf2/OTF2_MarkerWriter.h>
 #include <otf2/OTF2_MarkerReader.h>
-
+#include <otf2/OTF2_MarkerWriter.h>
+#include <otf2/OTF2_SnapReader.h>
+#include <otf2/OTF2_SnapWriter.h>
+#include <otf2/OTF2_Thumbnail.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
+/** @brief Default size for OTF2's internal event chunk memory handling.
+ *
+ *  If you are not sure which chunk size is the best to use, use this default
+ *  value.
+ */
+#define OTF2_CHUNK_SIZE_EVENTS_DEFAULT (1024 * 1024)
 
 /** @brief Default size for OTF2's internal event chunk memory handling.
  *
  *  If you are not sure which chunk size is the best to use, use this default
  *  value.
  */
-#define OTF2_CHUNK_SIZE_EVENTS_DEFAULT ( 1024 * 1024 )
-
-
-/** @brief Default size for OTF2's internal event chunk memory handling.
- *
- *  If you are not sure which chunk size is the best to use, use this default
- *  value.
- */
-#define OTF2_CHUNK_SIZE_DEFINITIONS_DEFAULT ( 4 * 1024 * 1024 )
-
+#define OTF2_CHUNK_SIZE_DEFINITIONS_DEFAULT (4 * 1024 * 1024)
 
 /** @brief Keeps all meta-data for an OTF2 archive.
  *
@@ -218,7 +208,6 @@ extern "C" {
  *  It is the central handle to get and set information about the archive and to
  *  request event and definition writer handles. */
 typedef struct OTF2_Archive_struct OTF2_Archive;
-
 
 /** @brief Create a new archive.
  *
@@ -278,15 +267,13 @@ typedef struct OTF2_Archive_struct OTF2_Archive;
  *  @return                 Returns an archive handle if successful, NULL
  *                          otherwise.
  */
-OTF2_Archive*
-OTF2_Archive_Open( const char*              archivePath,
-                   const char*              archiveName,
-                   const OTF2_FileMode      fileMode,
-                   const uint64_t           chunkSizeEvents,
-                   const uint64_t           chunkSizeDefs,
-                   const OTF2_FileSubstrate fileSubstrate,
-                   const OTF2_Compression   compression );
-
+OTF2_Archive* OTF2_Archive_Open(const char* archivePath,
+                                const char* archiveName,
+                                const OTF2_FileMode fileMode,
+                                const uint64_t chunkSizeEvents,
+                                const uint64_t chunkSizeDefs,
+                                const OTF2_FileSubstrate fileSubstrate,
+                                const OTF2_Compression compression);
 
 /** @brief Close an opened archive.
  *
@@ -298,9 +285,7 @@ OTF2_Archive_Open( const char*              archivePath,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Archive_Close( OTF2_Archive* archive );
-
+OTF2_ErrorCode OTF2_Archive_Close(OTF2_Archive* archive);
 
 /** @brief Switch file mode of the archive.
  *
@@ -316,10 +301,7 @@ OTF2_Archive_Close( OTF2_Archive* archive );
  *
  *  @since Version 1.2
  */
-OTF2_ErrorCode
-OTF2_Archive_SwitchFileMode( OTF2_Archive* archive,
-                             OTF2_FileMode newFileMode );
-
+OTF2_ErrorCode OTF2_Archive_SwitchFileMode(OTF2_Archive* archive, OTF2_FileMode newFileMode);
 
 /** @brief Set the definition chunksize.
  *
@@ -337,10 +319,7 @@ OTF2_Archive_SwitchFileMode( OTF2_Archive* archive,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Archive_SetDefChunkSize( OTF2_Archive* archive,
-                              uint64_t      chunkSize );
-
+OTF2_ErrorCode OTF2_Archive_SetDefChunkSize(OTF2_Archive* archive, uint64_t chunkSize);
 
 /** @brief Set machine name.
  *
@@ -353,10 +332,7 @@ OTF2_Archive_SetDefChunkSize( OTF2_Archive* archive,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Archive_SetMachineName( OTF2_Archive* archive,
-                             const char*   machineName );
-
+OTF2_ErrorCode OTF2_Archive_SetMachineName(OTF2_Archive* archive, const char* machineName);
 
 /** @brief Set a description.
  *
@@ -369,10 +345,7 @@ OTF2_Archive_SetMachineName( OTF2_Archive* archive,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Archive_SetDescription( OTF2_Archive* archive,
-                             const char*   description );
-
+OTF2_ErrorCode OTF2_Archive_SetDescription(OTF2_Archive* archive, const char* description);
 
 /** @brief Set creator.
  *
@@ -385,10 +358,7 @@ OTF2_Archive_SetDescription( OTF2_Archive* archive,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Archive_SetCreator( OTF2_Archive* archive,
-                         const char*   creator );
-
+OTF2_ErrorCode OTF2_Archive_SetCreator(OTF2_Archive* archive, const char* creator);
 
 /** @brief Set the flush callbacks for the archive.
  *
@@ -399,11 +369,9 @@ OTF2_Archive_SetCreator( OTF2_Archive* archive,
  *
  *  @return OTF2_ErrorCode, or error code.
  */
-OTF2_ErrorCode
-OTF2_Archive_SetFlushCallbacks( OTF2_Archive*              archive,
-                                const OTF2_FlushCallbacks* flushCallbacks,
-                                void*                      flushData );
-
+OTF2_ErrorCode OTF2_Archive_SetFlushCallbacks(OTF2_Archive* archive,
+                                              const OTF2_FlushCallbacks* flushCallbacks,
+                                              void* flushData);
 
 /** @brief Set the memory callbacks for the archive.
  *
@@ -414,11 +382,9 @@ OTF2_Archive_SetFlushCallbacks( OTF2_Archive*              archive,
  *
  *  @return OTF2_ErrorCode, or error code.
  */
-OTF2_ErrorCode
-OTF2_Archive_SetMemoryCallbacks( OTF2_Archive*               archive,
-                                 const OTF2_MemoryCallbacks* memoryCallbacks,
-                                 void*                       memoryData );
-
+OTF2_ErrorCode OTF2_Archive_SetMemoryCallbacks(OTF2_Archive* archive,
+                                               const OTF2_MemoryCallbacks* memoryCallbacks,
+                                               void* memoryData);
 
 /** @brief Set the collective callbacks for the archive.
  *
@@ -433,13 +399,11 @@ OTF2_Archive_SetMemoryCallbacks( OTF2_Archive*               archive,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Archive_SetCollectiveCallbacks( OTF2_Archive*                   archive,
-                                     const OTF2_CollectiveCallbacks* collectiveCallbacks,
-                                     void*                           collectiveData,
-                                     OTF2_CollectiveContext*         globalCommContext,
-                                     OTF2_CollectiveContext*         localCommContext );
-
+OTF2_ErrorCode OTF2_Archive_SetCollectiveCallbacks(OTF2_Archive* archive,
+                                                   const OTF2_CollectiveCallbacks* collectiveCallbacks,
+                                                   void* collectiveData,
+                                                   OTF2_CollectiveContext* globalCommContext,
+                                                   OTF2_CollectiveContext* localCommContext);
 
 /** @brief Convenient function to set the collective callbacks to an serial
  *         implementation.
@@ -448,9 +412,7 @@ OTF2_Archive_SetCollectiveCallbacks( OTF2_Archive*                   archive,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Archive_SetSerialCollectiveCallbacks( OTF2_Archive* archive );
-
+OTF2_ErrorCode OTF2_Archive_SetSerialCollectiveCallbacks(OTF2_Archive* archive);
 
 /** @brief Determines if this archive is the primary archive which handles the
  *  global archive state (anchor file, global definitions, marker, ...).
@@ -460,10 +422,7 @@ OTF2_Archive_SetSerialCollectiveCallbacks( OTF2_Archive* archive );
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Archive_IsPrimary( OTF2_Archive* archive,
-                        bool*         result );
-
+OTF2_ErrorCode OTF2_Archive_IsPrimary(OTF2_Archive* archive, bool* result);
 
 /** @brief Same as OTF2_Archive_IsPrimary.
  *
@@ -474,10 +433,7 @@ OTF2_Archive_IsPrimary( OTF2_Archive* archive,
  *
  * @deprecated In version 3.0
  */
-OTF2_ErrorCode
-OTF2_Archive_IsMaster( OTF2_Archive* archive,
-                       bool*         result );
-
+OTF2_ErrorCode OTF2_Archive_IsMaster(OTF2_Archive* archive, bool* result);
 
 /** @brief Set the locking callbacks for the archive.
  *
@@ -498,11 +454,9 @@ OTF2_Archive_IsMaster( OTF2_Archive* archive,
  *             in case there were locking callbacks already set}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_Archive_SetLockingCallbacks( OTF2_Archive*                archive,
-                                  const OTF2_LockingCallbacks* lockingCallbacks,
-                                  void*                        lockingData );
-
+OTF2_ErrorCode OTF2_Archive_SetLockingCallbacks(OTF2_Archive* archive,
+                                                const OTF2_LockingCallbacks* lockingCallbacks,
+                                                void* lockingData);
 
 /** @brief Set the @a hint in the @a archive to the given @a value.
  *
@@ -529,11 +483,7 @@ OTF2_Archive_SetLockingCallbacks( OTF2_Archive*                archive,
  *             in case the provided value is invalid for this hint}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_Archive_SetHint( OTF2_Archive* archive,
-                      OTF2_Hint     hint,
-                      void*         value );
-
+OTF2_ErrorCode OTF2_Archive_SetHint(OTF2_Archive* archive, OTF2_Hint hint, void* value);
 
 /** @brief Add or remove a trace file property to this archive.
  *
@@ -559,12 +509,7 @@ OTF2_Archive_SetHint( OTF2_Archive* archive,
  *             if property exists but overwrite was not set}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_Archive_SetProperty( OTF2_Archive* archive,
-                          const char*   name,
-                          const char*   value,
-                          bool          overwrite );
-
+OTF2_ErrorCode OTF2_Archive_SetProperty(OTF2_Archive* archive, const char* name, const char* value, bool overwrite);
 
 /** @brief Add or remove a boolean trace file property to this archive.
  *
@@ -587,12 +532,7 @@ OTF2_Archive_SetProperty( OTF2_Archive* archive,
  *             if property exists but overwrite was not set}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_Archive_SetBoolProperty( OTF2_Archive* archive,
-                              const char*   name,
-                              bool          value,
-                              bool          overwrite );
-
+OTF2_ErrorCode OTF2_Archive_SetBoolProperty(OTF2_Archive* archive, const char* name, bool value, bool overwrite);
 
 /** @brief Get the names of all trace file properties.
  *
@@ -604,11 +544,7 @@ OTF2_Archive_SetBoolProperty( OTF2_Archive* archive,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Archive_GetPropertyNames( OTF2_Archive* archive,
-                               uint32_t*     numberOfProperties,
-                               char***       names );
-
+OTF2_ErrorCode OTF2_Archive_GetPropertyNames(OTF2_Archive* archive, uint32_t* numberOfProperties, char*** names);
 
 /** @brief Get the value of the named trace file property.
  *
@@ -623,11 +559,7 @@ OTF2_Archive_GetPropertyNames( OTF2_Archive* archive,
  *             if the named property was not found}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_Archive_GetProperty( OTF2_Archive* archive,
-                          const char*   name,
-                          char**        value );
-
+OTF2_ErrorCode OTF2_Archive_GetProperty(OTF2_Archive* archive, const char* name, char** value);
 
 /** @brief Get the identifier of the trace file.
  *
@@ -639,10 +571,7 @@ OTF2_Archive_GetProperty( OTF2_Archive* archive,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Archive_GetTraceId( OTF2_Archive* archive,
-                         uint64_t*     id );
-
+OTF2_ErrorCode OTF2_Archive_GetTraceId(OTF2_Archive* archive, uint64_t* id);
 
 /** @brief Get the number of locations.
  *
@@ -651,10 +580,7 @@ OTF2_Archive_GetTraceId( OTF2_Archive* archive,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Archive_GetNumberOfLocations( OTF2_Archive* archive,
-                                   uint64_t*     numberOfLocations );
-
+OTF2_ErrorCode OTF2_Archive_GetNumberOfLocations(OTF2_Archive* archive, uint64_t* numberOfLocations);
 
 /** @brief Get the number of global definitions.
  *
@@ -663,10 +589,7 @@ OTF2_Archive_GetNumberOfLocations( OTF2_Archive* archive,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Archive_GetNumberOfGlobalDefinitions( OTF2_Archive* archive,
-                                           uint64_t*     numberOfDefinitions );
-
+OTF2_ErrorCode OTF2_Archive_GetNumberOfGlobalDefinitions(OTF2_Archive* archive, uint64_t* numberOfDefinitions);
 
 /** @brief Get machine name.
  *
@@ -675,10 +598,7 @@ OTF2_Archive_GetNumberOfGlobalDefinitions( OTF2_Archive* archive,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Archive_GetMachineName( OTF2_Archive* archive,
-                             char**        machineName );
-
+OTF2_ErrorCode OTF2_Archive_GetMachineName(OTF2_Archive* archive, char** machineName);
 
 /** @brief Get description.
  *
@@ -687,10 +607,7 @@ OTF2_Archive_GetMachineName( OTF2_Archive* archive,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Archive_GetDescription( OTF2_Archive* archive,
-                             char**        description );
-
+OTF2_ErrorCode OTF2_Archive_GetDescription(OTF2_Archive* archive, char** description);
 
 /** @brief Get creator information.
  *
@@ -699,10 +616,7 @@ OTF2_Archive_GetDescription( OTF2_Archive* archive,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Archive_GetCreator( OTF2_Archive* archive,
-                         char**        creator );
-
+OTF2_ErrorCode OTF2_Archive_GetCreator(OTF2_Archive* archive, char** creator);
 
 /** @brief Get format version.
  *
@@ -713,12 +627,7 @@ OTF2_Archive_GetCreator( OTF2_Archive* archive,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Archive_GetVersion( OTF2_Archive* archive,
-                         uint8_t*      major,
-                         uint8_t*      minor,
-                         uint8_t*      bugfix );
-
+OTF2_ErrorCode OTF2_Archive_GetVersion(OTF2_Archive* archive, uint8_t* major, uint8_t* minor, uint8_t* bugfix);
 
 /** @brief Get the chunksize.
  *
@@ -728,11 +637,7 @@ OTF2_Archive_GetVersion( OTF2_Archive* archive,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Archive_GetChunkSize( OTF2_Archive* archive,
-                           uint64_t*     chunkSizeEvents,
-                           uint64_t*     chunkSizeDefs );
-
+OTF2_ErrorCode OTF2_Archive_GetChunkSize(OTF2_Archive* archive, uint64_t* chunkSizeEvents, uint64_t* chunkSizeDefs);
 
 /** @brief Get the file substrate (posix, sion, none)
  *
@@ -741,10 +646,7 @@ OTF2_Archive_GetChunkSize( OTF2_Archive* archive,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Archive_GetFileSubstrate( OTF2_Archive*       archive,
-                               OTF2_FileSubstrate* substrate );
-
+OTF2_ErrorCode OTF2_Archive_GetFileSubstrate(OTF2_Archive* archive, OTF2_FileSubstrate* substrate);
 
 /** @brief Get compression mode (none or zlib)
  *
@@ -753,10 +655,7 @@ OTF2_Archive_GetFileSubstrate( OTF2_Archive*       archive,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Archive_GetCompression( OTF2_Archive*     archive,
-                             OTF2_Compression* compression );
-
+OTF2_ErrorCode OTF2_Archive_GetCompression(OTF2_Archive* archive, OTF2_Compression* compression);
 
 /** @brief Get a local event writer.
  *
@@ -766,10 +665,7 @@ OTF2_Archive_GetCompression( OTF2_Archive*     archive,
  *  @return                 Returns a local event writer handle if successful,
  *                          NULL if an error occurs.
  */
-OTF2_EvtWriter*
-OTF2_Archive_GetEvtWriter( OTF2_Archive*    archive,
-                           OTF2_LocationRef location );
-
+OTF2_EvtWriter* OTF2_Archive_GetEvtWriter(OTF2_Archive* archive, OTF2_LocationRef location);
 
 /** @brief Get a local definition writer.
  *
@@ -779,10 +675,7 @@ OTF2_Archive_GetEvtWriter( OTF2_Archive*    archive,
  *  @return                 Returns a local definition writer handle if
  *                          successful, NULL if an error occurs.
  */
-OTF2_DefWriter*
-OTF2_Archive_GetDefWriter( OTF2_Archive*    archive,
-                           OTF2_LocationRef location );
-
+OTF2_DefWriter* OTF2_Archive_GetDefWriter(OTF2_Archive* archive, OTF2_LocationRef location);
 
 /** @brief Get a global definition writer.
  *
@@ -793,9 +686,7 @@ OTF2_Archive_GetDefWriter( OTF2_Archive*    archive,
  *  @return                 Returns a global definition writer handle if
  *                          successful, NULL if an error occurs.
  */
-OTF2_GlobalDefWriter*
-OTF2_Archive_GetGlobalDefWriter( OTF2_Archive* archive );
-
+OTF2_GlobalDefWriter* OTF2_Archive_GetGlobalDefWriter(OTF2_Archive* archive);
 
 /** @brief Get a local snap writer.
  *
@@ -807,10 +698,7 @@ OTF2_Archive_GetGlobalDefWriter( OTF2_Archive* archive );
  *  @return                 Returns a local event writer handle if successful,
  *                          NULL if an error occurs.
  */
-OTF2_SnapWriter*
-OTF2_Archive_GetSnapWriter( OTF2_Archive*    archive,
-                            OTF2_LocationRef location );
-
+OTF2_SnapWriter* OTF2_Archive_GetSnapWriter(OTF2_Archive* archive, OTF2_LocationRef location);
 
 /** @brief Get a thumb writer.
  *
@@ -829,15 +717,13 @@ OTF2_Archive_GetSnapWriter( OTF2_Archive*    archive,
  *  @return                 Returns a thumb writer handle if
  *                          successful, NULL if an error occurs.
  */
-OTF2_ThumbWriter*
-OTF2_Archive_GetThumbWriter( OTF2_Archive*      archive,
-                             const char*        name,
-                             const char*        description,
-                             OTF2_ThumbnailType type,
-                             uint32_t           numberOfSamples,
-                             uint32_t           numberOfMetrics,
-                             const uint64_t*    refsToDefs );
-
+OTF2_ThumbWriter* OTF2_Archive_GetThumbWriter(OTF2_Archive* archive,
+                                              const char* name,
+                                              const char* description,
+                                              OTF2_ThumbnailType type,
+                                              uint32_t numberOfSamples,
+                                              uint32_t numberOfMetrics,
+                                              const uint64_t* refsToDefs);
 
 /** @brief Get a marker writer.
  *
@@ -848,9 +734,7 @@ OTF2_Archive_GetThumbWriter( OTF2_Archive*      archive,
  *  @return                 Returns a marker writer handle if
  *                          successful, NULL if an error occurs.
  */
-OTF2_MarkerWriter*
-OTF2_Archive_GetMarkerWriter( OTF2_Archive* archive );
-
+OTF2_MarkerWriter* OTF2_Archive_GetMarkerWriter(OTF2_Archive* archive);
 
 /** @brief Get a local event reader.
  *
@@ -860,10 +744,7 @@ OTF2_Archive_GetMarkerWriter( OTF2_Archive* archive );
  *  @return                 Returns a local event reader handle if successful,
  *                          NULL if an error occurs.
  */
-OTF2_EvtReader*
-OTF2_Archive_GetEvtReader( OTF2_Archive*    archive,
-                           OTF2_LocationRef location );
-
+OTF2_EvtReader* OTF2_Archive_GetEvtReader(OTF2_Archive* archive, OTF2_LocationRef location);
 
 /** @brief Get a global event reader.
  *
@@ -872,9 +753,7 @@ OTF2_Archive_GetEvtReader( OTF2_Archive*    archive,
  *  @return                 Returns a global event reader handle if successful,
  *                          NULL if an error occurs.
  */
-OTF2_GlobalEvtReader*
-OTF2_Archive_GetGlobalEvtReader( OTF2_Archive* archive );
-
+OTF2_GlobalEvtReader* OTF2_Archive_GetGlobalEvtReader(OTF2_Archive* archive);
 
 /** @brief Get a local definition reader.
  *
@@ -884,10 +763,7 @@ OTF2_Archive_GetGlobalEvtReader( OTF2_Archive* archive );
  *  @return                 Returns a local definition reader handle if
  *                          successful, NULL if an error occurs.
  */
-OTF2_DefReader*
-OTF2_Archive_GetDefReader( OTF2_Archive*    archive,
-                           OTF2_LocationRef location );
-
+OTF2_DefReader* OTF2_Archive_GetDefReader(OTF2_Archive* archive, OTF2_LocationRef location);
 
 /** @brief Get a global definition reader.
  *
@@ -896,9 +772,7 @@ OTF2_Archive_GetDefReader( OTF2_Archive*    archive,
  *  @return                 Returns a global definition reader handle if
  *                          successful, NULL if an error occurs.
  */
-OTF2_GlobalDefReader*
-OTF2_Archive_GetGlobalDefReader( OTF2_Archive* archive );
-
+OTF2_GlobalDefReader* OTF2_Archive_GetGlobalDefReader(OTF2_Archive* archive);
 
 /** @brief Get a local snap reader.
  *
@@ -910,10 +784,7 @@ OTF2_Archive_GetGlobalDefReader( OTF2_Archive* archive );
  *  @return                 Returns a local snap handle if successful,
  *                          NULL if an error occurs.
  */
-OTF2_SnapReader*
-OTF2_Archive_GetSnapReader( OTF2_Archive*    archive,
-                            OTF2_LocationRef location );
-
+OTF2_SnapReader* OTF2_Archive_GetSnapReader(OTF2_Archive* archive, OTF2_LocationRef location);
 
 /** @brief Get a global snap reader.
  *
@@ -924,9 +795,7 @@ OTF2_Archive_GetSnapReader( OTF2_Archive*    archive,
  *  @return                 Returns a global snap reader handle if successful,
  *                          NULL if an error occurs.
  */
-OTF2_GlobalSnapReader*
-OTF2_Archive_GetGlobalSnapReader( OTF2_Archive* archive );
-
+OTF2_GlobalSnapReader* OTF2_Archive_GetGlobalSnapReader(OTF2_Archive* archive);
 
 /** @brief Get a thumb reader.
  *
@@ -938,10 +807,7 @@ OTF2_Archive_GetGlobalSnapReader( OTF2_Archive* archive );
  *  @return                 Returns a global definition writer handle if
  *                          successful, NULL if an error occurs.
  */
-OTF2_ThumbReader*
-OTF2_Archive_GetThumbReader( OTF2_Archive* archive,
-                             uint32_t      number );
-
+OTF2_ThumbReader* OTF2_Archive_GetThumbReader(OTF2_Archive* archive, uint32_t number);
 
 /** @brief Get a marker reader.
  *
@@ -952,9 +818,7 @@ OTF2_Archive_GetThumbReader( OTF2_Archive* archive,
  *  @return                 Returns a marker reader handle if
  *                          successful, NULL if an error occurs.
  */
-OTF2_MarkerReader*
-OTF2_Archive_GetMarkerReader( OTF2_Archive* archive );
-
+OTF2_MarkerReader* OTF2_Archive_GetMarkerReader(OTF2_Archive* archive);
 
 /** @brief Close an opened local event writer.
  *
@@ -963,10 +827,7 @@ OTF2_Archive_GetMarkerReader( OTF2_Archive* archive );
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Archive_CloseEvtWriter( OTF2_Archive*   archive,
-                             OTF2_EvtWriter* writer );
-
+OTF2_ErrorCode OTF2_Archive_CloseEvtWriter(OTF2_Archive* archive, OTF2_EvtWriter* writer);
 
 /** @brief Close an opened local definition writer.
  *
@@ -975,10 +836,7 @@ OTF2_Archive_CloseEvtWriter( OTF2_Archive*   archive,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Archive_CloseDefWriter( OTF2_Archive*   archive,
-                             OTF2_DefWriter* writer );
-
+OTF2_ErrorCode OTF2_Archive_CloseDefWriter(OTF2_Archive* archive, OTF2_DefWriter* writer);
 
 /** @brief Close an opened marker writer.
  *
@@ -989,10 +847,7 @@ OTF2_Archive_CloseDefWriter( OTF2_Archive*   archive,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Archive_CloseMarkerWriter( OTF2_Archive*      archive,
-                                OTF2_MarkerWriter* writer );
-
+OTF2_ErrorCode OTF2_Archive_CloseMarkerWriter(OTF2_Archive* archive, OTF2_MarkerWriter* writer);
 
 /** @brief Close an opened local snap writer.
  *
@@ -1003,10 +858,7 @@ OTF2_Archive_CloseMarkerWriter( OTF2_Archive*      archive,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Archive_CloseSnapWriter( OTF2_Archive*    archive,
-                              OTF2_SnapWriter* writer );
-
+OTF2_ErrorCode OTF2_Archive_CloseSnapWriter(OTF2_Archive* archive, OTF2_SnapWriter* writer);
 
 /** @brief Close an opened global definition writer.
  *
@@ -1023,10 +875,7 @@ OTF2_Archive_CloseSnapWriter( OTF2_Archive*    archive,
  *             if this is not the primary archive}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_Archive_CloseGlobalDefWriter( OTF2_Archive*         archive,
-                                   OTF2_GlobalDefWriter* writer );
-
+OTF2_ErrorCode OTF2_Archive_CloseGlobalDefWriter(OTF2_Archive* archive, OTF2_GlobalDefWriter* writer);
 
 /** @brief Close an opened local event reader.
  *
@@ -1035,10 +884,7 @@ OTF2_Archive_CloseGlobalDefWriter( OTF2_Archive*         archive,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Archive_CloseEvtReader( OTF2_Archive*   archive,
-                             OTF2_EvtReader* reader );
-
+OTF2_ErrorCode OTF2_Archive_CloseEvtReader(OTF2_Archive* archive, OTF2_EvtReader* reader);
 
 /** @brief Close an opened thumbnail reader.
  *
@@ -1049,10 +895,7 @@ OTF2_Archive_CloseEvtReader( OTF2_Archive*   archive,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Archive_CloseThumbReader( OTF2_Archive*     archive,
-                               OTF2_ThumbReader* reader );
-
+OTF2_ErrorCode OTF2_Archive_CloseThumbReader(OTF2_Archive* archive, OTF2_ThumbReader* reader);
 
 /** @brief Closes the global event reader.
  *
@@ -1063,10 +906,7 @@ OTF2_Archive_CloseThumbReader( OTF2_Archive*     archive,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Archive_CloseGlobalEvtReader( OTF2_Archive*         archive,
-                                   OTF2_GlobalEvtReader* globalEvtReader );
-
+OTF2_ErrorCode OTF2_Archive_CloseGlobalEvtReader(OTF2_Archive* archive, OTF2_GlobalEvtReader* globalEvtReader);
 
 /** @brief Close an opened local definition reader.
  *
@@ -1075,10 +915,7 @@ OTF2_Archive_CloseGlobalEvtReader( OTF2_Archive*         archive,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Archive_CloseDefReader( OTF2_Archive*   archive,
-                             OTF2_DefReader* reader );
-
+OTF2_ErrorCode OTF2_Archive_CloseDefReader(OTF2_Archive* archive, OTF2_DefReader* reader);
 
 /** @brief Closes the global definition reader.
  *
@@ -1087,10 +924,7 @@ OTF2_Archive_CloseDefReader( OTF2_Archive*   archive,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Archive_CloseGlobalDefReader( OTF2_Archive*         archive,
-                                   OTF2_GlobalDefReader* globalDefReader );
-
+OTF2_ErrorCode OTF2_Archive_CloseGlobalDefReader(OTF2_Archive* archive, OTF2_GlobalDefReader* globalDefReader);
 
 /** @brief Close an opened local snap reader.
  *
@@ -1101,10 +935,7 @@ OTF2_Archive_CloseGlobalDefReader( OTF2_Archive*         archive,
  *
  *  @since Version 1.2
  */
-OTF2_ErrorCode
-OTF2_Archive_CloseSnapReader( OTF2_Archive*    archive,
-                              OTF2_SnapReader* reader );
-
+OTF2_ErrorCode OTF2_Archive_CloseSnapReader(OTF2_Archive* archive, OTF2_SnapReader* reader);
 
 /** @brief Close the opened global snapshot reader.
  *
@@ -1116,10 +947,7 @@ OTF2_Archive_CloseSnapReader( OTF2_Archive*    archive,
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  *
  */
-OTF2_ErrorCode
-OTF2_Archive_CloseGlobalSnapReader( OTF2_Archive*          archive,
-                                    OTF2_GlobalSnapReader* globalSnapReader );
-
+OTF2_ErrorCode OTF2_Archive_CloseGlobalSnapReader(OTF2_Archive* archive, OTF2_GlobalSnapReader* globalSnapReader);
 
 /** @brief Closes the marker reader.
  *
@@ -1130,10 +958,7 @@ OTF2_Archive_CloseGlobalSnapReader( OTF2_Archive*          archive,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_Archive_CloseMarkerReader( OTF2_Archive*      archive,
-                                OTF2_MarkerReader* markerReader );
-
+OTF2_ErrorCode OTF2_Archive_CloseMarkerReader(OTF2_Archive* archive, OTF2_MarkerReader* markerReader);
 
 /** @brief Get the number of thumbnails.
  *
@@ -1145,10 +970,7 @@ OTF2_Archive_CloseMarkerReader( OTF2_Archive*      archive,
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  *
  */
-OTF2_ErrorCode
-OTF2_Archive_GetNumberOfThumbnails( OTF2_Archive* archive,
-                                    uint32_t*     number );
-
+OTF2_ErrorCode OTF2_Archive_GetNumberOfThumbnails(OTF2_Archive* archive, uint32_t* number);
 
 /** @brief Set the number of snapshots.
  *
@@ -1160,10 +982,7 @@ OTF2_Archive_GetNumberOfThumbnails( OTF2_Archive* archive,
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  *
  */
-OTF2_ErrorCode
-OTF2_Archive_SetNumberOfSnapshots( OTF2_Archive* archive,
-                                   uint32_t      number );
-
+OTF2_ErrorCode OTF2_Archive_SetNumberOfSnapshots(OTF2_Archive* archive, uint32_t number);
 
 /** @brief Get the number of snapshots.
  *
@@ -1175,10 +994,7 @@ OTF2_Archive_SetNumberOfSnapshots( OTF2_Archive* archive,
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  *
  */
-OTF2_ErrorCode
-OTF2_Archive_GetNumberOfSnapshots( OTF2_Archive* archive,
-                                   uint32_t*     number );
-
+OTF2_ErrorCode OTF2_Archive_GetNumberOfSnapshots(OTF2_Archive* archive, uint32_t* number);
 
 /** @brief Open the events file container.
  *
@@ -1191,9 +1007,7 @@ OTF2_Archive_GetNumberOfSnapshots( OTF2_Archive* archive,
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  *
  */
-OTF2_ErrorCode
-OTF2_Archive_OpenEvtFiles( OTF2_Archive* archive );
-
+OTF2_ErrorCode OTF2_Archive_OpenEvtFiles(OTF2_Archive* archive);
 
 /** @brief Closes the events file container.
  *
@@ -1206,9 +1020,7 @@ OTF2_Archive_OpenEvtFiles( OTF2_Archive* archive );
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  *
  */
-OTF2_ErrorCode
-OTF2_Archive_CloseEvtFiles( OTF2_Archive* archive );
-
+OTF2_ErrorCode OTF2_Archive_CloseEvtFiles(OTF2_Archive* archive);
 
 /** @brief Open the local definitions file container.
  *
@@ -1221,9 +1033,7 @@ OTF2_Archive_CloseEvtFiles( OTF2_Archive* archive );
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  *
  */
-OTF2_ErrorCode
-OTF2_Archive_OpenDefFiles( OTF2_Archive* archive );
-
+OTF2_ErrorCode OTF2_Archive_OpenDefFiles(OTF2_Archive* archive);
 
 /** @brief Closes the local definitions file container.
  *
@@ -1236,9 +1046,7 @@ OTF2_Archive_OpenDefFiles( OTF2_Archive* archive );
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  *
  */
-OTF2_ErrorCode
-OTF2_Archive_CloseDefFiles( OTF2_Archive* archive );
-
+OTF2_ErrorCode OTF2_Archive_CloseDefFiles(OTF2_Archive* archive);
 
 /** @brief Open the snapshots file container.
  *
@@ -1251,9 +1059,7 @@ OTF2_Archive_CloseDefFiles( OTF2_Archive* archive );
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  *
  */
-OTF2_ErrorCode
-OTF2_Archive_OpenSnapFiles( OTF2_Archive* archive );
-
+OTF2_ErrorCode OTF2_Archive_OpenSnapFiles(OTF2_Archive* archive);
 
 /** @brief Closes the snapshots file container.
  *
@@ -1266,9 +1072,7 @@ OTF2_Archive_OpenSnapFiles( OTF2_Archive* archive );
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  *
  */
-OTF2_ErrorCode
-OTF2_Archive_CloseSnapFiles( OTF2_Archive* archive );
-
+OTF2_ErrorCode OTF2_Archive_CloseSnapFiles(OTF2_Archive* archive);
 
 /** @brief Select a location to be read.
  *
@@ -1280,14 +1084,10 @@ OTF2_Archive_CloseSnapFiles( OTF2_Archive* archive );
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  *
  */
-OTF2_ErrorCode
-OTF2_Archive_SelectLocation( OTF2_Archive*    archive,
-                             OTF2_LocationRef location );
-
+OTF2_ErrorCode OTF2_Archive_SelectLocation(OTF2_Archive* archive, OTF2_LocationRef location);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-
 
 #endif /* !OTF2_ARCHIVE_H */

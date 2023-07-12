@@ -9,10 +9,8 @@
  * directory for details.
  */
 
-
 #ifndef OTF2_GLOBAL_SNAP_READER_H
 #define OTF2_GLOBAL_SNAP_READER_H
-
 
 /**
  *  @file
@@ -25,23 +23,17 @@
  *  ordered sequence.
  */
 
-
 #include <stdint.h>
-
 
 #include <otf2/OTF2_ErrorCodes.h>
 
-
 #include <otf2/OTF2_SnapReader.h>
 
-
 #include <otf2/OTF2_GlobalSnapReaderCallbacks.h>
-
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
 
 /** @brief Sets the callback functions for the given reader object. Every time
  *         when OTF2 reads a record, a callback function is called and the records
@@ -61,11 +53,9 @@ extern "C" {
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  *
  */
-OTF2_ErrorCode
-OTF2_GlobalSnapReader_SetCallbacks( OTF2_GlobalSnapReader*                reader,
-                                    const OTF2_GlobalSnapReaderCallbacks* callbacks,
-                                    void*                                 userData );
-
+OTF2_ErrorCode OTF2_GlobalSnapReader_SetCallbacks(OTF2_GlobalSnapReader* reader,
+                                                  const OTF2_GlobalSnapReaderCallbacks* callbacks,
+                                                  void* userData);
 
 /** @brief Reads the given number of records from the global snap event reader.
  *
@@ -82,15 +72,12 @@ OTF2_GlobalSnapReader_SetCallbacks( OTF2_GlobalSnapReader*                reader
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  *
  */
-OTF2_ErrorCode
-OTF2_GlobalSnapReader_ReadSnapshots( OTF2_GlobalSnapReader* reader,
-                                     uint64_t               recordsToRead,
-                                     uint64_t*              recordsRead );
-
+OTF2_ErrorCode OTF2_GlobalSnapReader_ReadSnapshots(OTF2_GlobalSnapReader* reader,
+                                                   uint64_t recordsToRead,
+                                                   uint64_t* recordsRead);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-
 
 #endif /* !OTF2_GLOBAL_SNAP_READER_H */

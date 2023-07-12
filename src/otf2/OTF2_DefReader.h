@@ -28,10 +28,8 @@
  *
  */
 
-
 #ifndef OTF2_DEF_READER_H
 #define OTF2_DEF_READER_H
-
 
 /**
  *  @file
@@ -42,21 +40,16 @@
  *              are always assigned to a location.
  */
 
-
 #include <stdint.h>
-
 
 #include <otf2/OTF2_ErrorCodes.h>
 
-
-#include <otf2/OTF2_Definitions.h>
 #include <otf2/OTF2_DefReaderCallbacks.h>
-
+#include <otf2/OTF2_Definitions.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
 
 /** @brief Get the location ID of this reader object.
  *
@@ -66,10 +59,7 @@ extern "C" {
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_DefReader_GetLocationID( const OTF2_DefReader* reader,
-                              OTF2_LocationRef*     location );
-
+OTF2_ErrorCode OTF2_DefReader_GetLocationID(const OTF2_DefReader* reader, OTF2_LocationRef* location);
 
 /** @brief Sets the callback functions for the given reader object. Every time
  *         when OTF2 reads a record, a callback function is called and the records
@@ -86,11 +76,9 @@ OTF2_DefReader_GetLocationID( const OTF2_DefReader* reader,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_DefReader_SetCallbacks( OTF2_DefReader*                reader,
-                             const OTF2_DefReaderCallbacks* callbacks,
-                             void*                          userData );
-
+OTF2_ErrorCode OTF2_DefReader_SetCallbacks(OTF2_DefReader* reader,
+                                           const OTF2_DefReaderCallbacks* callbacks,
+                                           void* userData);
 
 /** @brief Reads the given number of records from the definition reader.
  *
@@ -111,15 +99,10 @@ OTF2_DefReader_SetCallbacks( OTF2_DefReader*                reader,
  *    @retelse{the error code}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_DefReader_ReadDefinitions( OTF2_DefReader* reader,
-                                uint64_t        recordsToRead,
-                                uint64_t*       recordsRead );
-
+OTF2_ErrorCode OTF2_DefReader_ReadDefinitions(OTF2_DefReader* reader, uint64_t recordsToRead, uint64_t* recordsRead);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-
 
 #endif /* !OTF2_DEF_READER_H */

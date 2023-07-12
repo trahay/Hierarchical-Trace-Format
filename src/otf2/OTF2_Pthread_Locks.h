@@ -10,8 +10,6 @@
  *
  */
 
-
-
 /**
  *  @file
  *
@@ -19,16 +17,12 @@
  *
  */
 
-
 #ifndef OTF2_PTHREAD_LOCKS_H
 #define OTF2_PTHREAD_LOCKS_H
 
-
 #include <otf2/otf2.h>
 
-
 #include <pthread.h>
-
 
 /** @brief Register callbacks to use Pthread mutexes for an OTF2 archive.
  *
@@ -43,10 +37,8 @@
  *
  *  @return Success or error code.
  */
-static OTF2_ErrorCode
-OTF2_Pthread_Archive_SetLockingCallbacks( OTF2_Archive*              archive,
-                                          const pthread_mutexattr_t* mutexAttribute );
-
+static OTF2_ErrorCode OTF2_Pthread_Archive_SetLockingCallbacks(OTF2_Archive* archive,
+                                                               const pthread_mutexattr_t* mutexAttribute);
 
 /** @brief Register callbacks to use Pthread mutexes for an OTF2 reader.
  *
@@ -61,213 +53,157 @@ OTF2_Pthread_Archive_SetLockingCallbacks( OTF2_Archive*              archive,
  *
  *  @return Success or error code.
  */
-static OTF2_ErrorCode
-OTF2_Pthread_Reader_SetLockingCallbacks( OTF2_Reader*               reader,
-                                         const pthread_mutexattr_t* mutexAttribute );
-
+static OTF2_ErrorCode OTF2_Pthread_Reader_SetLockingCallbacks(OTF2_Reader* reader,
+                                                              const pthread_mutexattr_t* mutexAttribute);
 
 /**
  * @cond IMPLEMENTATION_OF_THE_CALLBACKS__PLEASE_IGNORE
  */
 
-
 /** @brief The Pthread locking object type.
  */
-struct OTF2_LockObject
-{
-    pthread_mutex_t mutex;
+struct OTF2_LockObject {
+  pthread_mutex_t mutex;
 };
-
 
 /** @brief User data structure, which will be used by the Pthread locks.
  */
-typedef struct OTF2_Pthread_UserData
-{
-    const pthread_mutexattr_t* mutex_attribute;
+typedef struct OTF2_Pthread_UserData {
+  const pthread_mutexattr_t* mutex_attribute;
 } OTF2_Pthread_UserData;
 
+static void otf2_pthread_lock_release(void* userData) {
+  OTF2_Pthread_UserData* user_data = (OTF2_Pthread_UserData*)userData;
 
-static void
-otf2_pthread_lock_release( void* userData )
-{
-    OTF2_Pthread_UserData* user_data = ( OTF2_Pthread_UserData* )userData;
+  if (user_data->mutex_attribute) {
+    /* Ignore errors */
+    pthread_mutexattr_destroy((pthread_mutexattr_t*)user_data->mutex_attribute);
+  }
 
-    if ( user_data->mutex_attribute )
-    {
-        /* Ignore errors */
-        pthread_mutexattr_destroy( ( pthread_mutexattr_t* )user_data->mutex_attribute );
-    }
-
-    free( user_data );
+  free(user_data);
 }
 
+static OTF2_CallbackCode otf2_pthread_lock_create(void* userData, OTF2_Lock* lock) {
+  OTF2_Pthread_UserData* user_data = (OTF2_Pthread_UserData*)userData;
+  int err;
 
-static OTF2_CallbackCode
-otf2_pthread_lock_create( void*      userData,
-                          OTF2_Lock* lock )
-{
-    OTF2_Pthread_UserData* user_data = ( OTF2_Pthread_UserData* )userData;
-    int                    err;
+  if (!lock) {
+    return OTF2_CALLBACK_ERROR;
+  }
 
-    if ( !lock )
-    {
-        return OTF2_CALLBACK_ERROR;
-    }
+  *lock = (OTF2_Lock)malloc(sizeof(**lock));
+  if (!*lock) {
+    return OTF2_CALLBACK_ERROR;
+  }
 
-    *lock = (  OTF2_Lock )malloc( sizeof( **lock ) );
-    if ( !*lock )
-    {
-        return OTF2_CALLBACK_ERROR;
-    }
+  err = pthread_mutex_init(&(*lock)->mutex, user_data->mutex_attribute);
+  if (0 != err) {
+    free(*lock);
+    return OTF2_CALLBACK_ERROR;
+  }
 
-    err = pthread_mutex_init( &( *lock )->mutex, user_data->mutex_attribute );
-    if ( 0 != err )
-    {
-        free( *lock );
-        return OTF2_CALLBACK_ERROR;
-    }
-
-    return OTF2_CALLBACK_SUCCESS;
+  return OTF2_CALLBACK_SUCCESS;
 }
 
+static OTF2_CallbackCode otf2_pthread_lock_destroy(void* userData, OTF2_Lock lock) {
+  int err;
 
-static OTF2_CallbackCode
-otf2_pthread_lock_destroy( void*     userData,
-                           OTF2_Lock lock )
-{
-    int err;
+  (void)userData;
 
-    ( void )userData;
+  if (!lock) {
+    return OTF2_CALLBACK_ERROR;
+  }
 
-    if ( !lock )
-    {
-        return OTF2_CALLBACK_ERROR;
-    }
+  err = pthread_mutex_destroy(&lock->mutex);
+  free(lock);
 
-    err = pthread_mutex_destroy( &lock->mutex );
-    free( lock );
-
-    return 0 == err ? OTF2_CALLBACK_SUCCESS : OTF2_CALLBACK_ERROR;
+  return 0 == err ? OTF2_CALLBACK_SUCCESS : OTF2_CALLBACK_ERROR;
 }
 
+static OTF2_CallbackCode otf2_pthread_lock_lock(void* userData, OTF2_Lock lock) {
+  int err;
 
-static OTF2_CallbackCode
-otf2_pthread_lock_lock( void*     userData,
-                        OTF2_Lock lock )
-{
-    int err;
+  (void)userData;
 
-    ( void )userData;
+  if (!lock) {
+    return OTF2_CALLBACK_ERROR;
+  }
 
-    if ( !lock )
-    {
-        return OTF2_CALLBACK_ERROR;
-    }
+  err = pthread_mutex_lock(&lock->mutex);
 
-    err = pthread_mutex_lock( &lock->mutex );
-
-    return 0 == err ? OTF2_CALLBACK_SUCCESS : OTF2_CALLBACK_ERROR;
+  return 0 == err ? OTF2_CALLBACK_SUCCESS : OTF2_CALLBACK_ERROR;
 }
 
+static OTF2_CallbackCode otf2_pthread_lock_unlock(void* userData, OTF2_Lock lock) {
+  int err;
 
-static OTF2_CallbackCode
-otf2_pthread_lock_unlock( void*     userData,
-                          OTF2_Lock lock )
-{
-    int err;
+  (void)userData;
 
-    ( void )userData;
+  if (!lock) {
+    return OTF2_CALLBACK_ERROR;
+  }
 
-    if ( !lock )
-    {
-        return OTF2_CALLBACK_ERROR;
-    }
+  err = pthread_mutex_unlock(&lock->mutex);
 
-    err = pthread_mutex_unlock( &lock->mutex );
-
-    return 0 == err ? OTF2_CALLBACK_SUCCESS : OTF2_CALLBACK_ERROR;
+  return 0 == err ? OTF2_CALLBACK_SUCCESS : OTF2_CALLBACK_ERROR;
 }
 
+static const OTF2_LockingCallbacks otf2_pthread_locking_callbacks = {
+  otf2_pthread_lock_release, otf2_pthread_lock_create, otf2_pthread_lock_destroy, otf2_pthread_lock_lock,
+  otf2_pthread_lock_unlock};
 
-static const OTF2_LockingCallbacks otf2_pthread_locking_callbacks =
-{
-    otf2_pthread_lock_release,
-    otf2_pthread_lock_create,
-    otf2_pthread_lock_destroy,
-    otf2_pthread_lock_lock,
-    otf2_pthread_lock_unlock
-};
+static OTF2_ErrorCode OTF2_Pthread_Archive_SetLockingCallbacks(OTF2_Archive* archive,
+                                                               const pthread_mutexattr_t* mutexAttribute) {
+  OTF2_ErrorCode ret;
+  OTF2_Pthread_UserData* user_data = NULL;
 
+  (void)OTF2_Pthread_Reader_SetLockingCallbacks;
 
-static OTF2_ErrorCode
-OTF2_Pthread_Archive_SetLockingCallbacks( OTF2_Archive*              archive,
-                                          const pthread_mutexattr_t* mutexAttribute )
-{
-    OTF2_ErrorCode         ret;
-    OTF2_Pthread_UserData* user_data = NULL;
+  if (!archive) {
+    return OTF2_ERROR_INVALID_ARGUMENT;
+  }
 
-    ( void )OTF2_Pthread_Reader_SetLockingCallbacks;
+  user_data = (OTF2_Pthread_UserData*)calloc(1, sizeof(*user_data));
+  if (!user_data) {
+    return OTF2_ERROR_MEM_ALLOC_FAILED;
+  }
 
-    if ( !archive )
-    {
-        return OTF2_ERROR_INVALID_ARGUMENT;
-    }
+  user_data->mutex_attribute = mutexAttribute;
 
-    user_data = ( OTF2_Pthread_UserData* )calloc( 1, sizeof( *user_data ) );
-    if ( !user_data )
-    {
-        return OTF2_ERROR_MEM_ALLOC_FAILED;
-    }
-
-    user_data->mutex_attribute = mutexAttribute;
-
-    ret = OTF2_Archive_SetLockingCallbacks( archive,
-                                            &otf2_pthread_locking_callbacks,
-                                            user_data );
-    if ( OTF2_SUCCESS != ret )
-    {
-        free( user_data );
-    }
-    return ret;
+  ret = OTF2_Archive_SetLockingCallbacks(archive, &otf2_pthread_locking_callbacks, user_data);
+  if (OTF2_SUCCESS != ret) {
+    free(user_data);
+  }
+  return ret;
 }
 
+static OTF2_ErrorCode OTF2_Pthread_Reader_SetLockingCallbacks(OTF2_Reader* reader,
+                                                              const pthread_mutexattr_t* mutexAttribute) {
+  OTF2_ErrorCode ret;
+  OTF2_Pthread_UserData* user_data = NULL;
 
-static OTF2_ErrorCode
-OTF2_Pthread_Reader_SetLockingCallbacks( OTF2_Reader*               reader,
-                                         const pthread_mutexattr_t* mutexAttribute )
-{
-    OTF2_ErrorCode         ret;
-    OTF2_Pthread_UserData* user_data = NULL;
+  (void)OTF2_Pthread_Archive_SetLockingCallbacks;
 
-    ( void )OTF2_Pthread_Archive_SetLockingCallbacks;
+  if (!reader) {
+    return OTF2_ERROR_INVALID_ARGUMENT;
+  }
 
-    if ( !reader )
-    {
-        return OTF2_ERROR_INVALID_ARGUMENT;
-    }
+  user_data = (OTF2_Pthread_UserData*)calloc(1, sizeof(*user_data));
+  if (!user_data) {
+    return OTF2_ERROR_MEM_ALLOC_FAILED;
+  }
 
-    user_data = ( OTF2_Pthread_UserData* )calloc( 1, sizeof( *user_data ) );
-    if ( !user_data )
-    {
-        return OTF2_ERROR_MEM_ALLOC_FAILED;
-    }
+  user_data->mutex_attribute = mutexAttribute;
 
-    user_data->mutex_attribute = mutexAttribute;
-
-    ret = OTF2_Reader_SetLockingCallbacks( reader,
-                                           &otf2_pthread_locking_callbacks,
-                                           user_data );
-    if ( OTF2_SUCCESS != ret )
-    {
-        free( user_data );
-    }
-    return ret;
+  ret = OTF2_Reader_SetLockingCallbacks(reader, &otf2_pthread_locking_callbacks, user_data);
+  if (OTF2_SUCCESS != ret) {
+    free(user_data);
+  }
+  return ret;
 }
-
 
 /**
  * @endcond
  */
-
 
 #endif /* OTF2_PTHREAD_LOCKS_H */

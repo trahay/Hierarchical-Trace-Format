@@ -10,10 +10,8 @@
  *
  */
 
-
 #ifndef OTF2_ATTRIBUTE_VALUE_H
 #define OTF2_ATTRIBUTE_VALUE_H
-
 
 /**
  *  @file
@@ -24,145 +22,138 @@
  *
  */
 
-
 #include <stdint.h>
 #ifndef __cplusplus
 #include <stdbool.h>
 #endif
 
-
 #include <otf2/OTF2_ErrorCodes.h>
 
-
-#include <otf2/OTF2_GeneralDefinitions.h>
 #include <otf2/OTF2_Definitions.h>
 #include <otf2/OTF2_Events.h>
-
+#include <otf2/OTF2_GeneralDefinitions.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
 
 /** @brief Value container for an attributes.
  *
  * For definition references (@eref{OTF2_MappingType}) use the same data type as
  * the definition.
  */
-typedef union OTF2_AttributeValue_union
-{
-    /** @brief Arbitrary value of type uint8_t */
-    uint8_t  uint8;
-    /** @brief Arbitrary value of type uint16_t */
-    uint16_t uint16;
-    /** @brief Arbitrary value of type uint32_t */
-    uint32_t uint32;
-    /** @brief Arbitrary value of type uint64_t */
-    uint64_t uint64;
-    /** @brief Arbitrary value of type int8_t */
-    int8_t   int8;
-    /** @brief Arbitrary value of type int16_t */
-    int16_t  int16;
-    /** @brief Arbitrary value of type int32_t */
-    int32_t  int32;
-    /** @brief Arbitrary value of type int64_t */
-    int64_t  int64;
-    /** @brief Arbitrary value of type float */
-    float    float32;
-    /** @brief Arbitrary value of type double */
-    double   float64;
-    /**
-     * @brief References a @eref{String} definition
-     * and will be mapped to the global definition if a mapping table of
-     * type @eref{OTF2_MAPPING_STRING} is available.
-     */
-    OTF2_StringRef stringRef;
-    /**
-     * @brief References a @eref{Attribute} definition
-     * and will be mapped to the global definition if a mapping table of
-     * type @eref{OTF2_MAPPING_ATTRIBUTE} is available.
-     */
-    OTF2_AttributeRef attributeRef;
-    /**
-     * @brief References a @eref{Location} definition
-     * and will be mapped to the global definition if a mapping table of
-     * type @eref{OTF2_MAPPING_LOCATION} is available.
-     */
-    OTF2_LocationRef locationRef;
-    /**
-     * @brief References a @eref{Region} definition
-     * and will be mapped to the global definition if a mapping table of
-     * type @eref{OTF2_MAPPING_REGION} is available.
-     */
-    OTF2_RegionRef regionRef;
-    /**
-     * @brief References a @eref{Group} definition
-     * and will be mapped to the global definition if a mapping table of
-     * type @eref{OTF2_MAPPING_GROUP} is available.
-     */
-    OTF2_GroupRef groupRef;
-    /**
-     * @brief References a @eref{MetricClass}, or a @eref{MetricInstance} definition
-     * and will be mapped to the global definition if a mapping table of
-     * type @eref{OTF2_MAPPING_METRIC} is available.
-     */
-    OTF2_MetricRef metricRef;
-    /**
-     * @brief References a @eref{Comm}, or a @eref{InterComm} definition
-     * and will be mapped to the global definition if a mapping table of
-     * type @eref{OTF2_MAPPING_COMM} is available.
-     */
-    OTF2_CommRef commRef;
-    /**
-     * @brief References a @eref{Parameter} definition
-     * and will be mapped to the global definition if a mapping table of
-     * type @eref{OTF2_MAPPING_PARAMETER} is available.
-     */
-    OTF2_ParameterRef parameterRef;
-    /**
-     * @brief References a @eref{RmaWin} definition
-     * and will be mapped to the global definition if a mapping table of
-     * type @eref{OTF2_MAPPING_RMA_WIN} is available.
-     */
-    OTF2_RmaWinRef rmaWinRef;
-    /**
-     * @brief References a @eref{SourceCodeLocation} definition
-     * and will be mapped to the global definition if a mapping table of
-     * type @eref{OTF2_MAPPING_SOURCE_CODE_LOCATION} is available.
-     */
-    OTF2_SourceCodeLocationRef sourceCodeLocationRef;
-    /**
-     * @brief References a @eref{CallingContext} definition
-     * and will be mapped to the global definition if a mapping table of
-     * type @eref{OTF2_MAPPING_CALLING_CONTEXT} is available.
-     */
-    OTF2_CallingContextRef callingContextRef;
-    /**
-     * @brief References a @eref{InterruptGenerator} definition
-     * and will be mapped to the global definition if a mapping table of
-     * type @eref{OTF2_MAPPING_INTERRUPT_GENERATOR} is available.
-     */
-    OTF2_InterruptGeneratorRef interruptGeneratorRef;
-    /**
-     * @brief References a @eref{IoRegularFile}, or a @eref{IoDirectory} definition
-     * and will be mapped to the global definition if a mapping table of
-     * type @eref{OTF2_MAPPING_IO_FILE} is available.
-     */
-    OTF2_IoFileRef ioFileRef;
-    /**
-     * @brief References a @eref{IoHandle} definition
-     * and will be mapped to the global definition if a mapping table of
-     * type @eref{OTF2_MAPPING_IO_HANDLE} is available.
-     */
-    OTF2_IoHandleRef ioHandleRef;
-    /**
-     * @brief References a @eref{LocationGroup} definition
-     * and will be mapped to the global definition if a mapping table of
-     * type @eref{OTF2_MAPPING_LOCATION_GROUP} is available.
-     */
-    OTF2_LocationGroupRef locationGroupRef;
+typedef union OTF2_AttributeValue_union {
+  /** @brief Arbitrary value of type uint8_t */
+  uint8_t uint8;
+  /** @brief Arbitrary value of type uint16_t */
+  uint16_t uint16;
+  /** @brief Arbitrary value of type uint32_t */
+  uint32_t uint32;
+  /** @brief Arbitrary value of type uint64_t */
+  uint64_t uint64;
+  /** @brief Arbitrary value of type int8_t */
+  int8_t int8;
+  /** @brief Arbitrary value of type int16_t */
+  int16_t int16;
+  /** @brief Arbitrary value of type int32_t */
+  int32_t int32;
+  /** @brief Arbitrary value of type int64_t */
+  int64_t int64;
+  /** @brief Arbitrary value of type float */
+  float float32;
+  /** @brief Arbitrary value of type double */
+  double float64;
+  /**
+   * @brief References a @eref{String} definition
+   * and will be mapped to the global definition if a mapping table of
+   * type @eref{OTF2_MAPPING_STRING} is available.
+   */
+  OTF2_StringRef stringRef;
+  /**
+   * @brief References a @eref{Attribute} definition
+   * and will be mapped to the global definition if a mapping table of
+   * type @eref{OTF2_MAPPING_ATTRIBUTE} is available.
+   */
+  OTF2_AttributeRef attributeRef;
+  /**
+   * @brief References a @eref{Location} definition
+   * and will be mapped to the global definition if a mapping table of
+   * type @eref{OTF2_MAPPING_LOCATION} is available.
+   */
+  OTF2_LocationRef locationRef;
+  /**
+   * @brief References a @eref{Region} definition
+   * and will be mapped to the global definition if a mapping table of
+   * type @eref{OTF2_MAPPING_REGION} is available.
+   */
+  OTF2_RegionRef regionRef;
+  /**
+   * @brief References a @eref{Group} definition
+   * and will be mapped to the global definition if a mapping table of
+   * type @eref{OTF2_MAPPING_GROUP} is available.
+   */
+  OTF2_GroupRef groupRef;
+  /**
+   * @brief References a @eref{MetricClass}, or a @eref{MetricInstance} definition
+   * and will be mapped to the global definition if a mapping table of
+   * type @eref{OTF2_MAPPING_METRIC} is available.
+   */
+  OTF2_MetricRef metricRef;
+  /**
+   * @brief References a @eref{Comm}, or a @eref{InterComm} definition
+   * and will be mapped to the global definition if a mapping table of
+   * type @eref{OTF2_MAPPING_COMM} is available.
+   */
+  OTF2_CommRef commRef;
+  /**
+   * @brief References a @eref{Parameter} definition
+   * and will be mapped to the global definition if a mapping table of
+   * type @eref{OTF2_MAPPING_PARAMETER} is available.
+   */
+  OTF2_ParameterRef parameterRef;
+  /**
+   * @brief References a @eref{RmaWin} definition
+   * and will be mapped to the global definition if a mapping table of
+   * type @eref{OTF2_MAPPING_RMA_WIN} is available.
+   */
+  OTF2_RmaWinRef rmaWinRef;
+  /**
+   * @brief References a @eref{SourceCodeLocation} definition
+   * and will be mapped to the global definition if a mapping table of
+   * type @eref{OTF2_MAPPING_SOURCE_CODE_LOCATION} is available.
+   */
+  OTF2_SourceCodeLocationRef sourceCodeLocationRef;
+  /**
+   * @brief References a @eref{CallingContext} definition
+   * and will be mapped to the global definition if a mapping table of
+   * type @eref{OTF2_MAPPING_CALLING_CONTEXT} is available.
+   */
+  OTF2_CallingContextRef callingContextRef;
+  /**
+   * @brief References a @eref{InterruptGenerator} definition
+   * and will be mapped to the global definition if a mapping table of
+   * type @eref{OTF2_MAPPING_INTERRUPT_GENERATOR} is available.
+   */
+  OTF2_InterruptGeneratorRef interruptGeneratorRef;
+  /**
+   * @brief References a @eref{IoRegularFile}, or a @eref{IoDirectory} definition
+   * and will be mapped to the global definition if a mapping table of
+   * type @eref{OTF2_MAPPING_IO_FILE} is available.
+   */
+  OTF2_IoFileRef ioFileRef;
+  /**
+   * @brief References a @eref{IoHandle} definition
+   * and will be mapped to the global definition if a mapping table of
+   * type @eref{OTF2_MAPPING_IO_HANDLE} is available.
+   */
+  OTF2_IoHandleRef ioHandleRef;
+  /**
+   * @brief References a @eref{LocationGroup} definition
+   * and will be mapped to the global definition if a mapping table of
+   * type @eref{OTF2_MAPPING_LOCATION_GROUP} is available.
+   */
+  OTF2_LocationGroupRef locationGroupRef;
 } OTF2_AttributeValue;
-
 
 /** @brief Set @eref{OTF2_Type} and @eref{OTF2_AttributeValue} to the appropriate
  *  values for the given enum entry.  No value range checking done.
@@ -179,11 +170,7 @@ typedef union OTF2_AttributeValue_union
  *             if either @a type or @a value are NULL pointer}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_SetBoolean( OTF2_Boolean         enumValue,
-                                OTF2_Type*           type,
-                                OTF2_AttributeValue* value );
-
+OTF2_ErrorCode OTF2_AttributeValue_SetBoolean(OTF2_Boolean enumValue, OTF2_Type* type, OTF2_AttributeValue* value);
 
 /** @brief Set @eref{OTF2_Type} and @eref{OTF2_AttributeValue} to the appropriate
  *  values for the given enum entry.  No value range checking done.
@@ -200,11 +187,7 @@ OTF2_AttributeValue_SetBoolean( OTF2_Boolean         enumValue,
  *             if either @a type or @a value are NULL pointer}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_SetFileType( OTF2_FileType        enumValue,
-                                 OTF2_Type*           type,
-                                 OTF2_AttributeValue* value );
-
+OTF2_ErrorCode OTF2_AttributeValue_SetFileType(OTF2_FileType enumValue, OTF2_Type* type, OTF2_AttributeValue* value);
 
 /** @brief Set @eref{OTF2_Type} and @eref{OTF2_AttributeValue} to the appropriate
  *  values for the given enum entry.  No value range checking done.
@@ -221,11 +204,9 @@ OTF2_AttributeValue_SetFileType( OTF2_FileType        enumValue,
  *             if either @a type or @a value are NULL pointer}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_SetFileSubstrate( OTF2_FileSubstrate   enumValue,
-                                      OTF2_Type*           type,
-                                      OTF2_AttributeValue* value );
-
+OTF2_ErrorCode OTF2_AttributeValue_SetFileSubstrate(OTF2_FileSubstrate enumValue,
+                                                    OTF2_Type* type,
+                                                    OTF2_AttributeValue* value);
 
 /** @brief Set @eref{OTF2_Type} and @eref{OTF2_AttributeValue} to the appropriate
  *  values for the given enum entry.  No value range checking done.
@@ -242,11 +223,9 @@ OTF2_AttributeValue_SetFileSubstrate( OTF2_FileSubstrate   enumValue,
  *             if either @a type or @a value are NULL pointer}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_SetMappingType( OTF2_MappingType     enumValue,
-                                    OTF2_Type*           type,
-                                    OTF2_AttributeValue* value );
-
+OTF2_ErrorCode OTF2_AttributeValue_SetMappingType(OTF2_MappingType enumValue,
+                                                  OTF2_Type* type,
+                                                  OTF2_AttributeValue* value);
 
 /** @brief Set @eref{OTF2_Type} and @eref{OTF2_AttributeValue} to the appropriate
  *  values for the given enum entry.  No value range checking done.
@@ -263,11 +242,7 @@ OTF2_AttributeValue_SetMappingType( OTF2_MappingType     enumValue,
  *             if either @a type or @a value are NULL pointer}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_SetType( OTF2_Type            enumValue,
-                             OTF2_Type*           type,
-                             OTF2_AttributeValue* value );
-
+OTF2_ErrorCode OTF2_AttributeValue_SetType(OTF2_Type enumValue, OTF2_Type* type, OTF2_AttributeValue* value);
 
 /** @brief Set @eref{OTF2_Type} and @eref{OTF2_AttributeValue} to the appropriate
  *  values for the given enum entry.  No value range checking done.
@@ -284,11 +259,7 @@ OTF2_AttributeValue_SetType( OTF2_Type            enumValue,
  *             if either @a type or @a value are NULL pointer}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_SetParadigm( OTF2_Paradigm        enumValue,
-                                 OTF2_Type*           type,
-                                 OTF2_AttributeValue* value );
-
+OTF2_ErrorCode OTF2_AttributeValue_SetParadigm(OTF2_Paradigm enumValue, OTF2_Type* type, OTF2_AttributeValue* value);
 
 /** @brief Set @eref{OTF2_Type} and @eref{OTF2_AttributeValue} to the appropriate
  *  values for the given enum entry.  No value range checking done.
@@ -305,11 +276,9 @@ OTF2_AttributeValue_SetParadigm( OTF2_Paradigm        enumValue,
  *             if either @a type or @a value are NULL pointer}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_SetParadigmClass( OTF2_ParadigmClass   enumValue,
-                                      OTF2_Type*           type,
-                                      OTF2_AttributeValue* value );
-
+OTF2_ErrorCode OTF2_AttributeValue_SetParadigmClass(OTF2_ParadigmClass enumValue,
+                                                    OTF2_Type* type,
+                                                    OTF2_AttributeValue* value);
 
 /** @brief Set @eref{OTF2_Type} and @eref{OTF2_AttributeValue} to the appropriate
  *  values for the given enum entry.  No value range checking done.
@@ -326,11 +295,9 @@ OTF2_AttributeValue_SetParadigmClass( OTF2_ParadigmClass   enumValue,
  *             if either @a type or @a value are NULL pointer}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_SetParadigmProperty( OTF2_ParadigmProperty enumValue,
-                                         OTF2_Type*            type,
-                                         OTF2_AttributeValue*  value );
-
+OTF2_ErrorCode OTF2_AttributeValue_SetParadigmProperty(OTF2_ParadigmProperty enumValue,
+                                                       OTF2_Type* type,
+                                                       OTF2_AttributeValue* value);
 
 /** @brief Set @eref{OTF2_Type} and @eref{OTF2_AttributeValue} to the appropriate
  *  values for the given enum entry.  No value range checking done.
@@ -347,11 +314,9 @@ OTF2_AttributeValue_SetParadigmProperty( OTF2_ParadigmProperty enumValue,
  *             if either @a type or @a value are NULL pointer}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_SetThumbnailType( OTF2_ThumbnailType   enumValue,
-                                      OTF2_Type*           type,
-                                      OTF2_AttributeValue* value );
-
+OTF2_ErrorCode OTF2_AttributeValue_SetThumbnailType(OTF2_ThumbnailType enumValue,
+                                                    OTF2_Type* type,
+                                                    OTF2_AttributeValue* value);
 
 /** @brief Set @eref{OTF2_Type} and @eref{OTF2_AttributeValue} to the appropriate
  *  values for the given enum entry.  No value range checking done.
@@ -368,11 +333,9 @@ OTF2_AttributeValue_SetThumbnailType( OTF2_ThumbnailType   enumValue,
  *             if either @a type or @a value are NULL pointer}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_SetSystemTreeDomain( OTF2_SystemTreeDomain enumValue,
-                                         OTF2_Type*            type,
-                                         OTF2_AttributeValue*  value );
-
+OTF2_ErrorCode OTF2_AttributeValue_SetSystemTreeDomain(OTF2_SystemTreeDomain enumValue,
+                                                       OTF2_Type* type,
+                                                       OTF2_AttributeValue* value);
 
 /** @brief Set @eref{OTF2_Type} and @eref{OTF2_AttributeValue} to the appropriate
  *  values for the given enum entry.  No value range checking done.
@@ -389,11 +352,9 @@ OTF2_AttributeValue_SetSystemTreeDomain( OTF2_SystemTreeDomain enumValue,
  *             if either @a type or @a value are NULL pointer}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_SetLocationGroupType( OTF2_LocationGroupType enumValue,
-                                          OTF2_Type*             type,
-                                          OTF2_AttributeValue*   value );
-
+OTF2_ErrorCode OTF2_AttributeValue_SetLocationGroupType(OTF2_LocationGroupType enumValue,
+                                                        OTF2_Type* type,
+                                                        OTF2_AttributeValue* value);
 
 /** @brief Set @eref{OTF2_Type} and @eref{OTF2_AttributeValue} to the appropriate
  *  values for the given enum entry.  No value range checking done.
@@ -410,11 +371,9 @@ OTF2_AttributeValue_SetLocationGroupType( OTF2_LocationGroupType enumValue,
  *             if either @a type or @a value are NULL pointer}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_SetLocationType( OTF2_LocationType    enumValue,
-                                     OTF2_Type*           type,
-                                     OTF2_AttributeValue* value );
-
+OTF2_ErrorCode OTF2_AttributeValue_SetLocationType(OTF2_LocationType enumValue,
+                                                   OTF2_Type* type,
+                                                   OTF2_AttributeValue* value);
 
 /** @brief Set @eref{OTF2_Type} and @eref{OTF2_AttributeValue} to the appropriate
  *  values for the given enum entry.  No value range checking done.
@@ -431,11 +390,9 @@ OTF2_AttributeValue_SetLocationType( OTF2_LocationType    enumValue,
  *             if either @a type or @a value are NULL pointer}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_SetRegionRole( OTF2_RegionRole      enumValue,
-                                   OTF2_Type*           type,
-                                   OTF2_AttributeValue* value );
-
+OTF2_ErrorCode OTF2_AttributeValue_SetRegionRole(OTF2_RegionRole enumValue,
+                                                 OTF2_Type* type,
+                                                 OTF2_AttributeValue* value);
 
 /** @brief Set @eref{OTF2_Type} and @eref{OTF2_AttributeValue} to the appropriate
  *  values for the given enum entry.  No value range checking done.
@@ -452,11 +409,9 @@ OTF2_AttributeValue_SetRegionRole( OTF2_RegionRole      enumValue,
  *             if either @a type or @a value are NULL pointer}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_SetRegionFlag( OTF2_RegionFlag      enumValue,
-                                   OTF2_Type*           type,
-                                   OTF2_AttributeValue* value );
-
+OTF2_ErrorCode OTF2_AttributeValue_SetRegionFlag(OTF2_RegionFlag enumValue,
+                                                 OTF2_Type* type,
+                                                 OTF2_AttributeValue* value);
 
 /** @brief Set @eref{OTF2_Type} and @eref{OTF2_AttributeValue} to the appropriate
  *  values for the given enum entry.  No value range checking done.
@@ -473,11 +428,7 @@ OTF2_AttributeValue_SetRegionFlag( OTF2_RegionFlag      enumValue,
  *             if either @a type or @a value are NULL pointer}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_SetGroupType( OTF2_GroupType       enumValue,
-                                  OTF2_Type*           type,
-                                  OTF2_AttributeValue* value );
-
+OTF2_ErrorCode OTF2_AttributeValue_SetGroupType(OTF2_GroupType enumValue, OTF2_Type* type, OTF2_AttributeValue* value);
 
 /** @brief Set @eref{OTF2_Type} and @eref{OTF2_AttributeValue} to the appropriate
  *  values for the given enum entry.  No value range checking done.
@@ -494,11 +445,7 @@ OTF2_AttributeValue_SetGroupType( OTF2_GroupType       enumValue,
  *             if either @a type or @a value are NULL pointer}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_SetGroupFlag( OTF2_GroupFlag       enumValue,
-                                  OTF2_Type*           type,
-                                  OTF2_AttributeValue* value );
-
+OTF2_ErrorCode OTF2_AttributeValue_SetGroupFlag(OTF2_GroupFlag enumValue, OTF2_Type* type, OTF2_AttributeValue* value);
 
 /** @brief Set @eref{OTF2_Type} and @eref{OTF2_AttributeValue} to the appropriate
  *  values for the given enum entry.  No value range checking done.
@@ -515,11 +462,7 @@ OTF2_AttributeValue_SetGroupFlag( OTF2_GroupFlag       enumValue,
  *             if either @a type or @a value are NULL pointer}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_SetBase( OTF2_Base            enumValue,
-                             OTF2_Type*           type,
-                             OTF2_AttributeValue* value );
-
+OTF2_ErrorCode OTF2_AttributeValue_SetBase(OTF2_Base enumValue, OTF2_Type* type, OTF2_AttributeValue* value);
 
 /** @brief Set @eref{OTF2_Type} and @eref{OTF2_AttributeValue} to the appropriate
  *  values for the given enum entry.  No value range checking done.
@@ -536,11 +479,9 @@ OTF2_AttributeValue_SetBase( OTF2_Base            enumValue,
  *             if either @a type or @a value are NULL pointer}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_SetMetricOccurrence( OTF2_MetricOccurrence enumValue,
-                                         OTF2_Type*            type,
-                                         OTF2_AttributeValue*  value );
-
+OTF2_ErrorCode OTF2_AttributeValue_SetMetricOccurrence(OTF2_MetricOccurrence enumValue,
+                                                       OTF2_Type* type,
+                                                       OTF2_AttributeValue* value);
 
 /** @brief Set @eref{OTF2_Type} and @eref{OTF2_AttributeValue} to the appropriate
  *  values for the given enum entry.  No value range checking done.
@@ -557,11 +498,9 @@ OTF2_AttributeValue_SetMetricOccurrence( OTF2_MetricOccurrence enumValue,
  *             if either @a type or @a value are NULL pointer}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_SetMetricType( OTF2_MetricType      enumValue,
-                                   OTF2_Type*           type,
-                                   OTF2_AttributeValue* value );
-
+OTF2_ErrorCode OTF2_AttributeValue_SetMetricType(OTF2_MetricType enumValue,
+                                                 OTF2_Type* type,
+                                                 OTF2_AttributeValue* value);
 
 /** @brief Set @eref{OTF2_Type} and @eref{OTF2_AttributeValue} to the appropriate
  *  values for the given enum entry.  No value range checking done.
@@ -578,11 +517,9 @@ OTF2_AttributeValue_SetMetricType( OTF2_MetricType      enumValue,
  *             if either @a type or @a value are NULL pointer}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_SetMetricValueProperty( OTF2_MetricValueProperty enumValue,
-                                            OTF2_Type*               type,
-                                            OTF2_AttributeValue*     value );
-
+OTF2_ErrorCode OTF2_AttributeValue_SetMetricValueProperty(OTF2_MetricValueProperty enumValue,
+                                                          OTF2_Type* type,
+                                                          OTF2_AttributeValue* value);
 
 /** @brief Set @eref{OTF2_Type} and @eref{OTF2_AttributeValue} to the appropriate
  *  values for the given enum entry.  No value range checking done.
@@ -599,11 +536,9 @@ OTF2_AttributeValue_SetMetricValueProperty( OTF2_MetricValueProperty enumValue,
  *             if either @a type or @a value are NULL pointer}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_SetMetricTiming( OTF2_MetricTiming    enumValue,
-                                     OTF2_Type*           type,
-                                     OTF2_AttributeValue* value );
-
+OTF2_ErrorCode OTF2_AttributeValue_SetMetricTiming(OTF2_MetricTiming enumValue,
+                                                   OTF2_Type* type,
+                                                   OTF2_AttributeValue* value);
 
 /** @brief Set @eref{OTF2_Type} and @eref{OTF2_AttributeValue} to the appropriate
  *  values for the given enum entry.  No value range checking done.
@@ -620,11 +555,9 @@ OTF2_AttributeValue_SetMetricTiming( OTF2_MetricTiming    enumValue,
  *             if either @a type or @a value are NULL pointer}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_SetMetricMode( OTF2_MetricMode      enumValue,
-                                   OTF2_Type*           type,
-                                   OTF2_AttributeValue* value );
-
+OTF2_ErrorCode OTF2_AttributeValue_SetMetricMode(OTF2_MetricMode enumValue,
+                                                 OTF2_Type* type,
+                                                 OTF2_AttributeValue* value);
 
 /** @brief Set @eref{OTF2_Type} and @eref{OTF2_AttributeValue} to the appropriate
  *  values for the given enum entry.  No value range checking done.
@@ -641,11 +574,9 @@ OTF2_AttributeValue_SetMetricMode( OTF2_MetricMode      enumValue,
  *             if either @a type or @a value are NULL pointer}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_SetMetricScope( OTF2_MetricScope     enumValue,
-                                    OTF2_Type*           type,
-                                    OTF2_AttributeValue* value );
-
+OTF2_ErrorCode OTF2_AttributeValue_SetMetricScope(OTF2_MetricScope enumValue,
+                                                  OTF2_Type* type,
+                                                  OTF2_AttributeValue* value);
 
 /** @brief Set @eref{OTF2_Type} and @eref{OTF2_AttributeValue} to the appropriate
  *  values for the given enum entry.  No value range checking done.
@@ -662,11 +593,9 @@ OTF2_AttributeValue_SetMetricScope( OTF2_MetricScope     enumValue,
  *             if either @a type or @a value are NULL pointer}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_SetRecorderKind( OTF2_RecorderKind    enumValue,
-                                     OTF2_Type*           type,
-                                     OTF2_AttributeValue* value );
-
+OTF2_ErrorCode OTF2_AttributeValue_SetRecorderKind(OTF2_RecorderKind enumValue,
+                                                   OTF2_Type* type,
+                                                   OTF2_AttributeValue* value);
 
 /** @brief Set @eref{OTF2_Type} and @eref{OTF2_AttributeValue} to the appropriate
  *  values for the given enum entry.  No value range checking done.
@@ -683,11 +612,9 @@ OTF2_AttributeValue_SetRecorderKind( OTF2_RecorderKind    enumValue,
  *             if either @a type or @a value are NULL pointer}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_SetParameterType( OTF2_ParameterType   enumValue,
-                                      OTF2_Type*           type,
-                                      OTF2_AttributeValue* value );
-
+OTF2_ErrorCode OTF2_AttributeValue_SetParameterType(OTF2_ParameterType enumValue,
+                                                    OTF2_Type* type,
+                                                    OTF2_AttributeValue* value);
 
 /** @brief Set @eref{OTF2_Type} and @eref{OTF2_AttributeValue} to the appropriate
  *  values for the given enum entry.  No value range checking done.
@@ -704,11 +631,9 @@ OTF2_AttributeValue_SetParameterType( OTF2_ParameterType   enumValue,
  *             if either @a type or @a value are NULL pointer}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_SetCartPeriodicity( OTF2_CartPeriodicity enumValue,
-                                        OTF2_Type*           type,
-                                        OTF2_AttributeValue* value );
-
+OTF2_ErrorCode OTF2_AttributeValue_SetCartPeriodicity(OTF2_CartPeriodicity enumValue,
+                                                      OTF2_Type* type,
+                                                      OTF2_AttributeValue* value);
 
 /** @brief Set @eref{OTF2_Type} and @eref{OTF2_AttributeValue} to the appropriate
  *  values for the given enum entry.  No value range checking done.
@@ -725,11 +650,9 @@ OTF2_AttributeValue_SetCartPeriodicity( OTF2_CartPeriodicity enumValue,
  *             if either @a type or @a value are NULL pointer}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_SetInterruptGeneratorMode( OTF2_InterruptGeneratorMode enumValue,
-                                               OTF2_Type*                  type,
-                                               OTF2_AttributeValue*        value );
-
+OTF2_ErrorCode OTF2_AttributeValue_SetInterruptGeneratorMode(OTF2_InterruptGeneratorMode enumValue,
+                                                             OTF2_Type* type,
+                                                             OTF2_AttributeValue* value);
 
 /** @brief Set @eref{OTF2_Type} and @eref{OTF2_AttributeValue} to the appropriate
  *  values for the given enum entry.  No value range checking done.
@@ -746,11 +669,9 @@ OTF2_AttributeValue_SetInterruptGeneratorMode( OTF2_InterruptGeneratorMode enumV
  *             if either @a type or @a value are NULL pointer}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_SetMeasurementMode( OTF2_MeasurementMode enumValue,
-                                        OTF2_Type*           type,
-                                        OTF2_AttributeValue* value );
-
+OTF2_ErrorCode OTF2_AttributeValue_SetMeasurementMode(OTF2_MeasurementMode enumValue,
+                                                      OTF2_Type* type,
+                                                      OTF2_AttributeValue* value);
 
 /** @brief Set @eref{OTF2_Type} and @eref{OTF2_AttributeValue} to the appropriate
  *  values for the given enum entry.  No value range checking done.
@@ -767,11 +688,9 @@ OTF2_AttributeValue_SetMeasurementMode( OTF2_MeasurementMode enumValue,
  *             if either @a type or @a value are NULL pointer}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_SetCollectiveOp( OTF2_CollectiveOp    enumValue,
-                                     OTF2_Type*           type,
-                                     OTF2_AttributeValue* value );
-
+OTF2_ErrorCode OTF2_AttributeValue_SetCollectiveOp(OTF2_CollectiveOp enumValue,
+                                                   OTF2_Type* type,
+                                                   OTF2_AttributeValue* value);
 
 /** @brief Set @eref{OTF2_Type} and @eref{OTF2_AttributeValue} to the appropriate
  *  values for the given enum entry.  No value range checking done.
@@ -788,11 +707,9 @@ OTF2_AttributeValue_SetCollectiveOp( OTF2_CollectiveOp    enumValue,
  *             if either @a type or @a value are NULL pointer}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_SetRmaSyncType( OTF2_RmaSyncType     enumValue,
-                                    OTF2_Type*           type,
-                                    OTF2_AttributeValue* value );
-
+OTF2_ErrorCode OTF2_AttributeValue_SetRmaSyncType(OTF2_RmaSyncType enumValue,
+                                                  OTF2_Type* type,
+                                                  OTF2_AttributeValue* value);
 
 /** @brief Set @eref{OTF2_Type} and @eref{OTF2_AttributeValue} to the appropriate
  *  values for the given enum entry.  No value range checking done.
@@ -809,11 +726,9 @@ OTF2_AttributeValue_SetRmaSyncType( OTF2_RmaSyncType     enumValue,
  *             if either @a type or @a value are NULL pointer}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_SetRmaSyncLevel( OTF2_RmaSyncLevel    enumValue,
-                                     OTF2_Type*           type,
-                                     OTF2_AttributeValue* value );
-
+OTF2_ErrorCode OTF2_AttributeValue_SetRmaSyncLevel(OTF2_RmaSyncLevel enumValue,
+                                                   OTF2_Type* type,
+                                                   OTF2_AttributeValue* value);
 
 /** @brief Set @eref{OTF2_Type} and @eref{OTF2_AttributeValue} to the appropriate
  *  values for the given enum entry.  No value range checking done.
@@ -830,11 +745,7 @@ OTF2_AttributeValue_SetRmaSyncLevel( OTF2_RmaSyncLevel    enumValue,
  *             if either @a type or @a value are NULL pointer}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_SetLockType( OTF2_LockType        enumValue,
-                                 OTF2_Type*           type,
-                                 OTF2_AttributeValue* value );
-
+OTF2_ErrorCode OTF2_AttributeValue_SetLockType(OTF2_LockType enumValue, OTF2_Type* type, OTF2_AttributeValue* value);
 
 /** @brief Set @eref{OTF2_Type} and @eref{OTF2_AttributeValue} to the appropriate
  *  values for the given enum entry.  No value range checking done.
@@ -851,11 +762,9 @@ OTF2_AttributeValue_SetLockType( OTF2_LockType        enumValue,
  *             if either @a type or @a value are NULL pointer}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_SetRmaAtomicType( OTF2_RmaAtomicType   enumValue,
-                                      OTF2_Type*           type,
-                                      OTF2_AttributeValue* value );
-
+OTF2_ErrorCode OTF2_AttributeValue_SetRmaAtomicType(OTF2_RmaAtomicType enumValue,
+                                                    OTF2_Type* type,
+                                                    OTF2_AttributeValue* value);
 
 /** @brief Set @eref{OTF2_Type} and @eref{OTF2_AttributeValue} to the appropriate
  *  values for the given enum entry.  No value range checking done.
@@ -872,11 +781,9 @@ OTF2_AttributeValue_SetRmaAtomicType( OTF2_RmaAtomicType   enumValue,
  *             if either @a type or @a value are NULL pointer}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_SetIoParadigmClass( OTF2_IoParadigmClass enumValue,
-                                        OTF2_Type*           type,
-                                        OTF2_AttributeValue* value );
-
+OTF2_ErrorCode OTF2_AttributeValue_SetIoParadigmClass(OTF2_IoParadigmClass enumValue,
+                                                      OTF2_Type* type,
+                                                      OTF2_AttributeValue* value);
 
 /** @brief Set @eref{OTF2_Type} and @eref{OTF2_AttributeValue} to the appropriate
  *  values for the given enum entry.  No value range checking done.
@@ -893,11 +800,9 @@ OTF2_AttributeValue_SetIoParadigmClass( OTF2_IoParadigmClass enumValue,
  *             if either @a type or @a value are NULL pointer}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_SetIoParadigmFlag( OTF2_IoParadigmFlag  enumValue,
-                                       OTF2_Type*           type,
-                                       OTF2_AttributeValue* value );
-
+OTF2_ErrorCode OTF2_AttributeValue_SetIoParadigmFlag(OTF2_IoParadigmFlag enumValue,
+                                                     OTF2_Type* type,
+                                                     OTF2_AttributeValue* value);
 
 /** @brief Set @eref{OTF2_Type} and @eref{OTF2_AttributeValue} to the appropriate
  *  values for the given enum entry.  No value range checking done.
@@ -914,11 +819,9 @@ OTF2_AttributeValue_SetIoParadigmFlag( OTF2_IoParadigmFlag  enumValue,
  *             if either @a type or @a value are NULL pointer}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_SetIoParadigmProperty( OTF2_IoParadigmProperty enumValue,
-                                           OTF2_Type*              type,
-                                           OTF2_AttributeValue*    value );
-
+OTF2_ErrorCode OTF2_AttributeValue_SetIoParadigmProperty(OTF2_IoParadigmProperty enumValue,
+                                                         OTF2_Type* type,
+                                                         OTF2_AttributeValue* value);
 
 /** @brief Set @eref{OTF2_Type} and @eref{OTF2_AttributeValue} to the appropriate
  *  values for the given enum entry.  No value range checking done.
@@ -935,11 +838,9 @@ OTF2_AttributeValue_SetIoParadigmProperty( OTF2_IoParadigmProperty enumValue,
  *             if either @a type or @a value are NULL pointer}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_SetIoHandleFlag( OTF2_IoHandleFlag    enumValue,
-                                     OTF2_Type*           type,
-                                     OTF2_AttributeValue* value );
-
+OTF2_ErrorCode OTF2_AttributeValue_SetIoHandleFlag(OTF2_IoHandleFlag enumValue,
+                                                   OTF2_Type* type,
+                                                   OTF2_AttributeValue* value);
 
 /** @brief Set @eref{OTF2_Type} and @eref{OTF2_AttributeValue} to the appropriate
  *  values for the given enum entry.  No value range checking done.
@@ -956,11 +857,9 @@ OTF2_AttributeValue_SetIoHandleFlag( OTF2_IoHandleFlag    enumValue,
  *             if either @a type or @a value are NULL pointer}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_SetIoAccessMode( OTF2_IoAccessMode    enumValue,
-                                     OTF2_Type*           type,
-                                     OTF2_AttributeValue* value );
-
+OTF2_ErrorCode OTF2_AttributeValue_SetIoAccessMode(OTF2_IoAccessMode enumValue,
+                                                   OTF2_Type* type,
+                                                   OTF2_AttributeValue* value);
 
 /** @brief Set @eref{OTF2_Type} and @eref{OTF2_AttributeValue} to the appropriate
  *  values for the given enum entry.  No value range checking done.
@@ -977,11 +876,9 @@ OTF2_AttributeValue_SetIoAccessMode( OTF2_IoAccessMode    enumValue,
  *             if either @a type or @a value are NULL pointer}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_SetIoCreationFlag( OTF2_IoCreationFlag  enumValue,
-                                       OTF2_Type*           type,
-                                       OTF2_AttributeValue* value );
-
+OTF2_ErrorCode OTF2_AttributeValue_SetIoCreationFlag(OTF2_IoCreationFlag enumValue,
+                                                     OTF2_Type* type,
+                                                     OTF2_AttributeValue* value);
 
 /** @brief Set @eref{OTF2_Type} and @eref{OTF2_AttributeValue} to the appropriate
  *  values for the given enum entry.  No value range checking done.
@@ -998,11 +895,9 @@ OTF2_AttributeValue_SetIoCreationFlag( OTF2_IoCreationFlag  enumValue,
  *             if either @a type or @a value are NULL pointer}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_SetIoStatusFlag( OTF2_IoStatusFlag    enumValue,
-                                     OTF2_Type*           type,
-                                     OTF2_AttributeValue* value );
-
+OTF2_ErrorCode OTF2_AttributeValue_SetIoStatusFlag(OTF2_IoStatusFlag enumValue,
+                                                   OTF2_Type* type,
+                                                   OTF2_AttributeValue* value);
 
 /** @brief Set @eref{OTF2_Type} and @eref{OTF2_AttributeValue} to the appropriate
  *  values for the given enum entry.  No value range checking done.
@@ -1019,11 +914,9 @@ OTF2_AttributeValue_SetIoStatusFlag( OTF2_IoStatusFlag    enumValue,
  *             if either @a type or @a value are NULL pointer}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_SetIoSeekOption( OTF2_IoSeekOption    enumValue,
-                                     OTF2_Type*           type,
-                                     OTF2_AttributeValue* value );
-
+OTF2_ErrorCode OTF2_AttributeValue_SetIoSeekOption(OTF2_IoSeekOption enumValue,
+                                                   OTF2_Type* type,
+                                                   OTF2_AttributeValue* value);
 
 /** @brief Set @eref{OTF2_Type} and @eref{OTF2_AttributeValue} to the appropriate
  *  values for the given enum entry.  No value range checking done.
@@ -1040,11 +933,9 @@ OTF2_AttributeValue_SetIoSeekOption( OTF2_IoSeekOption    enumValue,
  *             if either @a type or @a value are NULL pointer}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_SetIoOperationMode( OTF2_IoOperationMode enumValue,
-                                        OTF2_Type*           type,
-                                        OTF2_AttributeValue* value );
-
+OTF2_ErrorCode OTF2_AttributeValue_SetIoOperationMode(OTF2_IoOperationMode enumValue,
+                                                      OTF2_Type* type,
+                                                      OTF2_AttributeValue* value);
 
 /** @brief Set @eref{OTF2_Type} and @eref{OTF2_AttributeValue} to the appropriate
  *  values for the given enum entry.  No value range checking done.
@@ -1061,11 +952,9 @@ OTF2_AttributeValue_SetIoOperationMode( OTF2_IoOperationMode enumValue,
  *             if either @a type or @a value are NULL pointer}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_SetIoOperationFlag( OTF2_IoOperationFlag enumValue,
-                                        OTF2_Type*           type,
-                                        OTF2_AttributeValue* value );
-
+OTF2_ErrorCode OTF2_AttributeValue_SetIoOperationFlag(OTF2_IoOperationFlag enumValue,
+                                                      OTF2_Type* type,
+                                                      OTF2_AttributeValue* value);
 
 /** @brief Set @eref{OTF2_Type} and @eref{OTF2_AttributeValue} to the appropriate
  *  values for the given enum entry.  No value range checking done.
@@ -1082,11 +971,7 @@ OTF2_AttributeValue_SetIoOperationFlag( OTF2_IoOperationFlag enumValue,
  *             if either @a type or @a value are NULL pointer}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_SetCommFlag( OTF2_CommFlag        enumValue,
-                                 OTF2_Type*           type,
-                                 OTF2_AttributeValue* value );
-
+OTF2_ErrorCode OTF2_AttributeValue_SetCommFlag(OTF2_CommFlag enumValue, OTF2_Type* type, OTF2_AttributeValue* value);
 
 /** @brief Set @eref{OTF2_Type} and @eref{OTF2_AttributeValue} to the appropriate
  *  values for the given enum entry.  No value range checking done.
@@ -1103,11 +988,9 @@ OTF2_AttributeValue_SetCommFlag( OTF2_CommFlag        enumValue,
  *             if either @a type or @a value are NULL pointer}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_SetRmaWinFlag( OTF2_RmaWinFlag      enumValue,
-                                   OTF2_Type*           type,
-                                   OTF2_AttributeValue* value );
-
+OTF2_ErrorCode OTF2_AttributeValue_SetRmaWinFlag(OTF2_RmaWinFlag enumValue,
+                                                 OTF2_Type* type,
+                                                 OTF2_AttributeValue* value);
 
 /** @brief Set @eref{OTF2_Type} and @eref{OTF2_AttributeValue} to the appropriate
  *  values for the given enum entry.  No value range checking done.
@@ -1124,11 +1007,9 @@ OTF2_AttributeValue_SetRmaWinFlag( OTF2_RmaWinFlag      enumValue,
  *             if either @a type or @a value are NULL pointer}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_SetCollectiveRoot( OTF2_CollectiveRoot  enumValue,
-                                       OTF2_Type*           type,
-                                       OTF2_AttributeValue* value );
-
+OTF2_ErrorCode OTF2_AttributeValue_SetCollectiveRoot(OTF2_CollectiveRoot enumValue,
+                                                     OTF2_Type* type,
+                                                     OTF2_AttributeValue* value);
 
 /** @brief Converts a @eref{OTF2_Type} and @eref{OTF2_AttributeValue} pair to
  *  the appropriate value for the enum @eref{OTF2_Boolean}.  No value range
@@ -1146,11 +1027,7 @@ OTF2_AttributeValue_SetCollectiveRoot( OTF2_CollectiveRoot  enumValue,
  *             if @a type does not match the base type of the enum @eref{OTF2_Boolean}}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_GetBoolean( OTF2_Type           type,
-                                OTF2_AttributeValue value,
-                                OTF2_Boolean*       enumValue );
-
+OTF2_ErrorCode OTF2_AttributeValue_GetBoolean(OTF2_Type type, OTF2_AttributeValue value, OTF2_Boolean* enumValue);
 
 /** @brief Converts a @eref{OTF2_Type} and @eref{OTF2_AttributeValue} pair to
  *  the appropriate value for the enum @eref{OTF2_FileType}.  No value range
@@ -1168,11 +1045,7 @@ OTF2_AttributeValue_GetBoolean( OTF2_Type           type,
  *             if @a type does not match the base type of the enum @eref{OTF2_FileType}}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_GetFileType( OTF2_Type           type,
-                                 OTF2_AttributeValue value,
-                                 OTF2_FileType*      enumValue );
-
+OTF2_ErrorCode OTF2_AttributeValue_GetFileType(OTF2_Type type, OTF2_AttributeValue value, OTF2_FileType* enumValue);
 
 /** @brief Converts a @eref{OTF2_Type} and @eref{OTF2_AttributeValue} pair to
  *  the appropriate value for the enum @eref{OTF2_FileSubstrate}.  No value range
@@ -1190,11 +1063,9 @@ OTF2_AttributeValue_GetFileType( OTF2_Type           type,
  *             if @a type does not match the base type of the enum @eref{OTF2_FileSubstrate}}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_GetFileSubstrate( OTF2_Type           type,
-                                      OTF2_AttributeValue value,
-                                      OTF2_FileSubstrate* enumValue );
-
+OTF2_ErrorCode OTF2_AttributeValue_GetFileSubstrate(OTF2_Type type,
+                                                    OTF2_AttributeValue value,
+                                                    OTF2_FileSubstrate* enumValue);
 
 /** @brief Converts a @eref{OTF2_Type} and @eref{OTF2_AttributeValue} pair to
  *  the appropriate value for the enum @eref{OTF2_MappingType}.  No value range
@@ -1212,11 +1083,9 @@ OTF2_AttributeValue_GetFileSubstrate( OTF2_Type           type,
  *             if @a type does not match the base type of the enum @eref{OTF2_MappingType}}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_GetMappingType( OTF2_Type           type,
-                                    OTF2_AttributeValue value,
-                                    OTF2_MappingType*   enumValue );
-
+OTF2_ErrorCode OTF2_AttributeValue_GetMappingType(OTF2_Type type,
+                                                  OTF2_AttributeValue value,
+                                                  OTF2_MappingType* enumValue);
 
 /** @brief Converts a @eref{OTF2_Type} and @eref{OTF2_AttributeValue} pair to
  *  the appropriate value for the enum @eref{OTF2_Type}.  No value range
@@ -1234,11 +1103,7 @@ OTF2_AttributeValue_GetMappingType( OTF2_Type           type,
  *             if @a type does not match the base type of the enum @eref{OTF2_Type}}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_GetType( OTF2_Type           type,
-                             OTF2_AttributeValue value,
-                             OTF2_Type*          enumValue );
-
+OTF2_ErrorCode OTF2_AttributeValue_GetType(OTF2_Type type, OTF2_AttributeValue value, OTF2_Type* enumValue);
 
 /** @brief Converts a @eref{OTF2_Type} and @eref{OTF2_AttributeValue} pair to
  *  the appropriate value for the enum @eref{OTF2_Paradigm}.  No value range
@@ -1256,11 +1121,7 @@ OTF2_AttributeValue_GetType( OTF2_Type           type,
  *             if @a type does not match the base type of the enum @eref{OTF2_Paradigm}}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_GetParadigm( OTF2_Type           type,
-                                 OTF2_AttributeValue value,
-                                 OTF2_Paradigm*      enumValue );
-
+OTF2_ErrorCode OTF2_AttributeValue_GetParadigm(OTF2_Type type, OTF2_AttributeValue value, OTF2_Paradigm* enumValue);
 
 /** @brief Converts a @eref{OTF2_Type} and @eref{OTF2_AttributeValue} pair to
  *  the appropriate value for the enum @eref{OTF2_ParadigmClass}.  No value range
@@ -1278,11 +1139,9 @@ OTF2_AttributeValue_GetParadigm( OTF2_Type           type,
  *             if @a type does not match the base type of the enum @eref{OTF2_ParadigmClass}}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_GetParadigmClass( OTF2_Type           type,
-                                      OTF2_AttributeValue value,
-                                      OTF2_ParadigmClass* enumValue );
-
+OTF2_ErrorCode OTF2_AttributeValue_GetParadigmClass(OTF2_Type type,
+                                                    OTF2_AttributeValue value,
+                                                    OTF2_ParadigmClass* enumValue);
 
 /** @brief Converts a @eref{OTF2_Type} and @eref{OTF2_AttributeValue} pair to
  *  the appropriate value for the enum @eref{OTF2_ParadigmProperty}.  No value range
@@ -1300,11 +1159,9 @@ OTF2_AttributeValue_GetParadigmClass( OTF2_Type           type,
  *             if @a type does not match the base type of the enum @eref{OTF2_ParadigmProperty}}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_GetParadigmProperty( OTF2_Type              type,
-                                         OTF2_AttributeValue    value,
-                                         OTF2_ParadigmProperty* enumValue );
-
+OTF2_ErrorCode OTF2_AttributeValue_GetParadigmProperty(OTF2_Type type,
+                                                       OTF2_AttributeValue value,
+                                                       OTF2_ParadigmProperty* enumValue);
 
 /** @brief Converts a @eref{OTF2_Type} and @eref{OTF2_AttributeValue} pair to
  *  the appropriate value for the enum @eref{OTF2_ThumbnailType}.  No value range
@@ -1322,11 +1179,9 @@ OTF2_AttributeValue_GetParadigmProperty( OTF2_Type              type,
  *             if @a type does not match the base type of the enum @eref{OTF2_ThumbnailType}}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_GetThumbnailType( OTF2_Type           type,
-                                      OTF2_AttributeValue value,
-                                      OTF2_ThumbnailType* enumValue );
-
+OTF2_ErrorCode OTF2_AttributeValue_GetThumbnailType(OTF2_Type type,
+                                                    OTF2_AttributeValue value,
+                                                    OTF2_ThumbnailType* enumValue);
 
 /** @brief Converts a @eref{OTF2_Type} and @eref{OTF2_AttributeValue} pair to
  *  the appropriate value for the enum @eref{OTF2_SystemTreeDomain}.  No value range
@@ -1344,11 +1199,9 @@ OTF2_AttributeValue_GetThumbnailType( OTF2_Type           type,
  *             if @a type does not match the base type of the enum @eref{OTF2_SystemTreeDomain}}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_GetSystemTreeDomain( OTF2_Type              type,
-                                         OTF2_AttributeValue    value,
-                                         OTF2_SystemTreeDomain* enumValue );
-
+OTF2_ErrorCode OTF2_AttributeValue_GetSystemTreeDomain(OTF2_Type type,
+                                                       OTF2_AttributeValue value,
+                                                       OTF2_SystemTreeDomain* enumValue);
 
 /** @brief Converts a @eref{OTF2_Type} and @eref{OTF2_AttributeValue} pair to
  *  the appropriate value for the enum @eref{OTF2_LocationGroupType}.  No value range
@@ -1366,11 +1219,9 @@ OTF2_AttributeValue_GetSystemTreeDomain( OTF2_Type              type,
  *             if @a type does not match the base type of the enum @eref{OTF2_LocationGroupType}}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_GetLocationGroupType( OTF2_Type               type,
-                                          OTF2_AttributeValue     value,
-                                          OTF2_LocationGroupType* enumValue );
-
+OTF2_ErrorCode OTF2_AttributeValue_GetLocationGroupType(OTF2_Type type,
+                                                        OTF2_AttributeValue value,
+                                                        OTF2_LocationGroupType* enumValue);
 
 /** @brief Converts a @eref{OTF2_Type} and @eref{OTF2_AttributeValue} pair to
  *  the appropriate value for the enum @eref{OTF2_LocationType}.  No value range
@@ -1388,11 +1239,9 @@ OTF2_AttributeValue_GetLocationGroupType( OTF2_Type               type,
  *             if @a type does not match the base type of the enum @eref{OTF2_LocationType}}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_GetLocationType( OTF2_Type           type,
-                                     OTF2_AttributeValue value,
-                                     OTF2_LocationType*  enumValue );
-
+OTF2_ErrorCode OTF2_AttributeValue_GetLocationType(OTF2_Type type,
+                                                   OTF2_AttributeValue value,
+                                                   OTF2_LocationType* enumValue);
 
 /** @brief Converts a @eref{OTF2_Type} and @eref{OTF2_AttributeValue} pair to
  *  the appropriate value for the enum @eref{OTF2_RegionRole}.  No value range
@@ -1410,11 +1259,7 @@ OTF2_AttributeValue_GetLocationType( OTF2_Type           type,
  *             if @a type does not match the base type of the enum @eref{OTF2_RegionRole}}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_GetRegionRole( OTF2_Type           type,
-                                   OTF2_AttributeValue value,
-                                   OTF2_RegionRole*    enumValue );
-
+OTF2_ErrorCode OTF2_AttributeValue_GetRegionRole(OTF2_Type type, OTF2_AttributeValue value, OTF2_RegionRole* enumValue);
 
 /** @brief Converts a @eref{OTF2_Type} and @eref{OTF2_AttributeValue} pair to
  *  the appropriate value for the enum @eref{OTF2_RegionFlag}.  No value range
@@ -1432,11 +1277,7 @@ OTF2_AttributeValue_GetRegionRole( OTF2_Type           type,
  *             if @a type does not match the base type of the enum @eref{OTF2_RegionFlag}}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_GetRegionFlag( OTF2_Type           type,
-                                   OTF2_AttributeValue value,
-                                   OTF2_RegionFlag*    enumValue );
-
+OTF2_ErrorCode OTF2_AttributeValue_GetRegionFlag(OTF2_Type type, OTF2_AttributeValue value, OTF2_RegionFlag* enumValue);
 
 /** @brief Converts a @eref{OTF2_Type} and @eref{OTF2_AttributeValue} pair to
  *  the appropriate value for the enum @eref{OTF2_GroupType}.  No value range
@@ -1454,11 +1295,7 @@ OTF2_AttributeValue_GetRegionFlag( OTF2_Type           type,
  *             if @a type does not match the base type of the enum @eref{OTF2_GroupType}}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_GetGroupType( OTF2_Type           type,
-                                  OTF2_AttributeValue value,
-                                  OTF2_GroupType*     enumValue );
-
+OTF2_ErrorCode OTF2_AttributeValue_GetGroupType(OTF2_Type type, OTF2_AttributeValue value, OTF2_GroupType* enumValue);
 
 /** @brief Converts a @eref{OTF2_Type} and @eref{OTF2_AttributeValue} pair to
  *  the appropriate value for the enum @eref{OTF2_GroupFlag}.  No value range
@@ -1476,11 +1313,7 @@ OTF2_AttributeValue_GetGroupType( OTF2_Type           type,
  *             if @a type does not match the base type of the enum @eref{OTF2_GroupFlag}}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_GetGroupFlag( OTF2_Type           type,
-                                  OTF2_AttributeValue value,
-                                  OTF2_GroupFlag*     enumValue );
-
+OTF2_ErrorCode OTF2_AttributeValue_GetGroupFlag(OTF2_Type type, OTF2_AttributeValue value, OTF2_GroupFlag* enumValue);
 
 /** @brief Converts a @eref{OTF2_Type} and @eref{OTF2_AttributeValue} pair to
  *  the appropriate value for the enum @eref{OTF2_Base}.  No value range
@@ -1498,11 +1331,7 @@ OTF2_AttributeValue_GetGroupFlag( OTF2_Type           type,
  *             if @a type does not match the base type of the enum @eref{OTF2_Base}}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_GetBase( OTF2_Type           type,
-                             OTF2_AttributeValue value,
-                             OTF2_Base*          enumValue );
-
+OTF2_ErrorCode OTF2_AttributeValue_GetBase(OTF2_Type type, OTF2_AttributeValue value, OTF2_Base* enumValue);
 
 /** @brief Converts a @eref{OTF2_Type} and @eref{OTF2_AttributeValue} pair to
  *  the appropriate value for the enum @eref{OTF2_MetricOccurrence}.  No value range
@@ -1520,11 +1349,9 @@ OTF2_AttributeValue_GetBase( OTF2_Type           type,
  *             if @a type does not match the base type of the enum @eref{OTF2_MetricOccurrence}}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_GetMetricOccurrence( OTF2_Type              type,
-                                         OTF2_AttributeValue    value,
-                                         OTF2_MetricOccurrence* enumValue );
-
+OTF2_ErrorCode OTF2_AttributeValue_GetMetricOccurrence(OTF2_Type type,
+                                                       OTF2_AttributeValue value,
+                                                       OTF2_MetricOccurrence* enumValue);
 
 /** @brief Converts a @eref{OTF2_Type} and @eref{OTF2_AttributeValue} pair to
  *  the appropriate value for the enum @eref{OTF2_MetricType}.  No value range
@@ -1542,11 +1369,7 @@ OTF2_AttributeValue_GetMetricOccurrence( OTF2_Type              type,
  *             if @a type does not match the base type of the enum @eref{OTF2_MetricType}}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_GetMetricType( OTF2_Type           type,
-                                   OTF2_AttributeValue value,
-                                   OTF2_MetricType*    enumValue );
-
+OTF2_ErrorCode OTF2_AttributeValue_GetMetricType(OTF2_Type type, OTF2_AttributeValue value, OTF2_MetricType* enumValue);
 
 /** @brief Converts a @eref{OTF2_Type} and @eref{OTF2_AttributeValue} pair to
  *  the appropriate value for the enum @eref{OTF2_MetricValueProperty}.  No value range
@@ -1564,11 +1387,9 @@ OTF2_AttributeValue_GetMetricType( OTF2_Type           type,
  *             if @a type does not match the base type of the enum @eref{OTF2_MetricValueProperty}}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_GetMetricValueProperty( OTF2_Type                 type,
-                                            OTF2_AttributeValue       value,
-                                            OTF2_MetricValueProperty* enumValue );
-
+OTF2_ErrorCode OTF2_AttributeValue_GetMetricValueProperty(OTF2_Type type,
+                                                          OTF2_AttributeValue value,
+                                                          OTF2_MetricValueProperty* enumValue);
 
 /** @brief Converts a @eref{OTF2_Type} and @eref{OTF2_AttributeValue} pair to
  *  the appropriate value for the enum @eref{OTF2_MetricTiming}.  No value range
@@ -1586,11 +1407,9 @@ OTF2_AttributeValue_GetMetricValueProperty( OTF2_Type                 type,
  *             if @a type does not match the base type of the enum @eref{OTF2_MetricTiming}}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_GetMetricTiming( OTF2_Type           type,
-                                     OTF2_AttributeValue value,
-                                     OTF2_MetricTiming*  enumValue );
-
+OTF2_ErrorCode OTF2_AttributeValue_GetMetricTiming(OTF2_Type type,
+                                                   OTF2_AttributeValue value,
+                                                   OTF2_MetricTiming* enumValue);
 
 /** @brief Converts a @eref{OTF2_Type} and @eref{OTF2_AttributeValue} pair to
  *  the appropriate value for the enum @eref{OTF2_MetricMode}.  No value range
@@ -1608,11 +1427,7 @@ OTF2_AttributeValue_GetMetricTiming( OTF2_Type           type,
  *             if @a type does not match the base type of the enum @eref{OTF2_MetricMode}}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_GetMetricMode( OTF2_Type           type,
-                                   OTF2_AttributeValue value,
-                                   OTF2_MetricMode*    enumValue );
-
+OTF2_ErrorCode OTF2_AttributeValue_GetMetricMode(OTF2_Type type, OTF2_AttributeValue value, OTF2_MetricMode* enumValue);
 
 /** @brief Converts a @eref{OTF2_Type} and @eref{OTF2_AttributeValue} pair to
  *  the appropriate value for the enum @eref{OTF2_MetricScope}.  No value range
@@ -1630,11 +1445,9 @@ OTF2_AttributeValue_GetMetricMode( OTF2_Type           type,
  *             if @a type does not match the base type of the enum @eref{OTF2_MetricScope}}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_GetMetricScope( OTF2_Type           type,
-                                    OTF2_AttributeValue value,
-                                    OTF2_MetricScope*   enumValue );
-
+OTF2_ErrorCode OTF2_AttributeValue_GetMetricScope(OTF2_Type type,
+                                                  OTF2_AttributeValue value,
+                                                  OTF2_MetricScope* enumValue);
 
 /** @brief Converts a @eref{OTF2_Type} and @eref{OTF2_AttributeValue} pair to
  *  the appropriate value for the enum @eref{OTF2_RecorderKind}.  No value range
@@ -1652,11 +1465,9 @@ OTF2_AttributeValue_GetMetricScope( OTF2_Type           type,
  *             if @a type does not match the base type of the enum @eref{OTF2_RecorderKind}}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_GetRecorderKind( OTF2_Type           type,
-                                     OTF2_AttributeValue value,
-                                     OTF2_RecorderKind*  enumValue );
-
+OTF2_ErrorCode OTF2_AttributeValue_GetRecorderKind(OTF2_Type type,
+                                                   OTF2_AttributeValue value,
+                                                   OTF2_RecorderKind* enumValue);
 
 /** @brief Converts a @eref{OTF2_Type} and @eref{OTF2_AttributeValue} pair to
  *  the appropriate value for the enum @eref{OTF2_ParameterType}.  No value range
@@ -1674,11 +1485,9 @@ OTF2_AttributeValue_GetRecorderKind( OTF2_Type           type,
  *             if @a type does not match the base type of the enum @eref{OTF2_ParameterType}}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_GetParameterType( OTF2_Type           type,
-                                      OTF2_AttributeValue value,
-                                      OTF2_ParameterType* enumValue );
-
+OTF2_ErrorCode OTF2_AttributeValue_GetParameterType(OTF2_Type type,
+                                                    OTF2_AttributeValue value,
+                                                    OTF2_ParameterType* enumValue);
 
 /** @brief Converts a @eref{OTF2_Type} and @eref{OTF2_AttributeValue} pair to
  *  the appropriate value for the enum @eref{OTF2_CartPeriodicity}.  No value range
@@ -1696,11 +1505,9 @@ OTF2_AttributeValue_GetParameterType( OTF2_Type           type,
  *             if @a type does not match the base type of the enum @eref{OTF2_CartPeriodicity}}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_GetCartPeriodicity( OTF2_Type             type,
-                                        OTF2_AttributeValue   value,
-                                        OTF2_CartPeriodicity* enumValue );
-
+OTF2_ErrorCode OTF2_AttributeValue_GetCartPeriodicity(OTF2_Type type,
+                                                      OTF2_AttributeValue value,
+                                                      OTF2_CartPeriodicity* enumValue);
 
 /** @brief Converts a @eref{OTF2_Type} and @eref{OTF2_AttributeValue} pair to
  *  the appropriate value for the enum @eref{OTF2_InterruptGeneratorMode}.  No value range
@@ -1718,11 +1525,9 @@ OTF2_AttributeValue_GetCartPeriodicity( OTF2_Type             type,
  *             if @a type does not match the base type of the enum @eref{OTF2_InterruptGeneratorMode}}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_GetInterruptGeneratorMode( OTF2_Type                    type,
-                                               OTF2_AttributeValue          value,
-                                               OTF2_InterruptGeneratorMode* enumValue );
-
+OTF2_ErrorCode OTF2_AttributeValue_GetInterruptGeneratorMode(OTF2_Type type,
+                                                             OTF2_AttributeValue value,
+                                                             OTF2_InterruptGeneratorMode* enumValue);
 
 /** @brief Converts a @eref{OTF2_Type} and @eref{OTF2_AttributeValue} pair to
  *  the appropriate value for the enum @eref{OTF2_MeasurementMode}.  No value range
@@ -1740,11 +1545,9 @@ OTF2_AttributeValue_GetInterruptGeneratorMode( OTF2_Type                    type
  *             if @a type does not match the base type of the enum @eref{OTF2_MeasurementMode}}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_GetMeasurementMode( OTF2_Type             type,
-                                        OTF2_AttributeValue   value,
-                                        OTF2_MeasurementMode* enumValue );
-
+OTF2_ErrorCode OTF2_AttributeValue_GetMeasurementMode(OTF2_Type type,
+                                                      OTF2_AttributeValue value,
+                                                      OTF2_MeasurementMode* enumValue);
 
 /** @brief Converts a @eref{OTF2_Type} and @eref{OTF2_AttributeValue} pair to
  *  the appropriate value for the enum @eref{OTF2_CollectiveOp}.  No value range
@@ -1762,11 +1565,9 @@ OTF2_AttributeValue_GetMeasurementMode( OTF2_Type             type,
  *             if @a type does not match the base type of the enum @eref{OTF2_CollectiveOp}}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_GetCollectiveOp( OTF2_Type           type,
-                                     OTF2_AttributeValue value,
-                                     OTF2_CollectiveOp*  enumValue );
-
+OTF2_ErrorCode OTF2_AttributeValue_GetCollectiveOp(OTF2_Type type,
+                                                   OTF2_AttributeValue value,
+                                                   OTF2_CollectiveOp* enumValue);
 
 /** @brief Converts a @eref{OTF2_Type} and @eref{OTF2_AttributeValue} pair to
  *  the appropriate value for the enum @eref{OTF2_RmaSyncType}.  No value range
@@ -1784,11 +1585,9 @@ OTF2_AttributeValue_GetCollectiveOp( OTF2_Type           type,
  *             if @a type does not match the base type of the enum @eref{OTF2_RmaSyncType}}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_GetRmaSyncType( OTF2_Type           type,
-                                    OTF2_AttributeValue value,
-                                    OTF2_RmaSyncType*   enumValue );
-
+OTF2_ErrorCode OTF2_AttributeValue_GetRmaSyncType(OTF2_Type type,
+                                                  OTF2_AttributeValue value,
+                                                  OTF2_RmaSyncType* enumValue);
 
 /** @brief Converts a @eref{OTF2_Type} and @eref{OTF2_AttributeValue} pair to
  *  the appropriate value for the enum @eref{OTF2_RmaSyncLevel}.  No value range
@@ -1806,11 +1605,9 @@ OTF2_AttributeValue_GetRmaSyncType( OTF2_Type           type,
  *             if @a type does not match the base type of the enum @eref{OTF2_RmaSyncLevel}}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_GetRmaSyncLevel( OTF2_Type           type,
-                                     OTF2_AttributeValue value,
-                                     OTF2_RmaSyncLevel*  enumValue );
-
+OTF2_ErrorCode OTF2_AttributeValue_GetRmaSyncLevel(OTF2_Type type,
+                                                   OTF2_AttributeValue value,
+                                                   OTF2_RmaSyncLevel* enumValue);
 
 /** @brief Converts a @eref{OTF2_Type} and @eref{OTF2_AttributeValue} pair to
  *  the appropriate value for the enum @eref{OTF2_LockType}.  No value range
@@ -1828,11 +1625,7 @@ OTF2_AttributeValue_GetRmaSyncLevel( OTF2_Type           type,
  *             if @a type does not match the base type of the enum @eref{OTF2_LockType}}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_GetLockType( OTF2_Type           type,
-                                 OTF2_AttributeValue value,
-                                 OTF2_LockType*      enumValue );
-
+OTF2_ErrorCode OTF2_AttributeValue_GetLockType(OTF2_Type type, OTF2_AttributeValue value, OTF2_LockType* enumValue);
 
 /** @brief Converts a @eref{OTF2_Type} and @eref{OTF2_AttributeValue} pair to
  *  the appropriate value for the enum @eref{OTF2_RmaAtomicType}.  No value range
@@ -1850,11 +1643,9 @@ OTF2_AttributeValue_GetLockType( OTF2_Type           type,
  *             if @a type does not match the base type of the enum @eref{OTF2_RmaAtomicType}}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_GetRmaAtomicType( OTF2_Type           type,
-                                      OTF2_AttributeValue value,
-                                      OTF2_RmaAtomicType* enumValue );
-
+OTF2_ErrorCode OTF2_AttributeValue_GetRmaAtomicType(OTF2_Type type,
+                                                    OTF2_AttributeValue value,
+                                                    OTF2_RmaAtomicType* enumValue);
 
 /** @brief Converts a @eref{OTF2_Type} and @eref{OTF2_AttributeValue} pair to
  *  the appropriate value for the enum @eref{OTF2_IoParadigmClass}.  No value range
@@ -1872,11 +1663,9 @@ OTF2_AttributeValue_GetRmaAtomicType( OTF2_Type           type,
  *             if @a type does not match the base type of the enum @eref{OTF2_IoParadigmClass}}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_GetIoParadigmClass( OTF2_Type             type,
-                                        OTF2_AttributeValue   value,
-                                        OTF2_IoParadigmClass* enumValue );
-
+OTF2_ErrorCode OTF2_AttributeValue_GetIoParadigmClass(OTF2_Type type,
+                                                      OTF2_AttributeValue value,
+                                                      OTF2_IoParadigmClass* enumValue);
 
 /** @brief Converts a @eref{OTF2_Type} and @eref{OTF2_AttributeValue} pair to
  *  the appropriate value for the enum @eref{OTF2_IoParadigmFlag}.  No value range
@@ -1894,11 +1683,9 @@ OTF2_AttributeValue_GetIoParadigmClass( OTF2_Type             type,
  *             if @a type does not match the base type of the enum @eref{OTF2_IoParadigmFlag}}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_GetIoParadigmFlag( OTF2_Type            type,
-                                       OTF2_AttributeValue  value,
-                                       OTF2_IoParadigmFlag* enumValue );
-
+OTF2_ErrorCode OTF2_AttributeValue_GetIoParadigmFlag(OTF2_Type type,
+                                                     OTF2_AttributeValue value,
+                                                     OTF2_IoParadigmFlag* enumValue);
 
 /** @brief Converts a @eref{OTF2_Type} and @eref{OTF2_AttributeValue} pair to
  *  the appropriate value for the enum @eref{OTF2_IoParadigmProperty}.  No value range
@@ -1916,11 +1703,9 @@ OTF2_AttributeValue_GetIoParadigmFlag( OTF2_Type            type,
  *             if @a type does not match the base type of the enum @eref{OTF2_IoParadigmProperty}}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_GetIoParadigmProperty( OTF2_Type                type,
-                                           OTF2_AttributeValue      value,
-                                           OTF2_IoParadigmProperty* enumValue );
-
+OTF2_ErrorCode OTF2_AttributeValue_GetIoParadigmProperty(OTF2_Type type,
+                                                         OTF2_AttributeValue value,
+                                                         OTF2_IoParadigmProperty* enumValue);
 
 /** @brief Converts a @eref{OTF2_Type} and @eref{OTF2_AttributeValue} pair to
  *  the appropriate value for the enum @eref{OTF2_IoHandleFlag}.  No value range
@@ -1938,11 +1723,9 @@ OTF2_AttributeValue_GetIoParadigmProperty( OTF2_Type                type,
  *             if @a type does not match the base type of the enum @eref{OTF2_IoHandleFlag}}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_GetIoHandleFlag( OTF2_Type           type,
-                                     OTF2_AttributeValue value,
-                                     OTF2_IoHandleFlag*  enumValue );
-
+OTF2_ErrorCode OTF2_AttributeValue_GetIoHandleFlag(OTF2_Type type,
+                                                   OTF2_AttributeValue value,
+                                                   OTF2_IoHandleFlag* enumValue);
 
 /** @brief Converts a @eref{OTF2_Type} and @eref{OTF2_AttributeValue} pair to
  *  the appropriate value for the enum @eref{OTF2_IoAccessMode}.  No value range
@@ -1960,11 +1743,9 @@ OTF2_AttributeValue_GetIoHandleFlag( OTF2_Type           type,
  *             if @a type does not match the base type of the enum @eref{OTF2_IoAccessMode}}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_GetIoAccessMode( OTF2_Type           type,
-                                     OTF2_AttributeValue value,
-                                     OTF2_IoAccessMode*  enumValue );
-
+OTF2_ErrorCode OTF2_AttributeValue_GetIoAccessMode(OTF2_Type type,
+                                                   OTF2_AttributeValue value,
+                                                   OTF2_IoAccessMode* enumValue);
 
 /** @brief Converts a @eref{OTF2_Type} and @eref{OTF2_AttributeValue} pair to
  *  the appropriate value for the enum @eref{OTF2_IoCreationFlag}.  No value range
@@ -1982,11 +1763,9 @@ OTF2_AttributeValue_GetIoAccessMode( OTF2_Type           type,
  *             if @a type does not match the base type of the enum @eref{OTF2_IoCreationFlag}}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_GetIoCreationFlag( OTF2_Type            type,
-                                       OTF2_AttributeValue  value,
-                                       OTF2_IoCreationFlag* enumValue );
-
+OTF2_ErrorCode OTF2_AttributeValue_GetIoCreationFlag(OTF2_Type type,
+                                                     OTF2_AttributeValue value,
+                                                     OTF2_IoCreationFlag* enumValue);
 
 /** @brief Converts a @eref{OTF2_Type} and @eref{OTF2_AttributeValue} pair to
  *  the appropriate value for the enum @eref{OTF2_IoStatusFlag}.  No value range
@@ -2004,11 +1783,9 @@ OTF2_AttributeValue_GetIoCreationFlag( OTF2_Type            type,
  *             if @a type does not match the base type of the enum @eref{OTF2_IoStatusFlag}}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_GetIoStatusFlag( OTF2_Type           type,
-                                     OTF2_AttributeValue value,
-                                     OTF2_IoStatusFlag*  enumValue );
-
+OTF2_ErrorCode OTF2_AttributeValue_GetIoStatusFlag(OTF2_Type type,
+                                                   OTF2_AttributeValue value,
+                                                   OTF2_IoStatusFlag* enumValue);
 
 /** @brief Converts a @eref{OTF2_Type} and @eref{OTF2_AttributeValue} pair to
  *  the appropriate value for the enum @eref{OTF2_IoSeekOption}.  No value range
@@ -2026,11 +1803,9 @@ OTF2_AttributeValue_GetIoStatusFlag( OTF2_Type           type,
  *             if @a type does not match the base type of the enum @eref{OTF2_IoSeekOption}}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_GetIoSeekOption( OTF2_Type           type,
-                                     OTF2_AttributeValue value,
-                                     OTF2_IoSeekOption*  enumValue );
-
+OTF2_ErrorCode OTF2_AttributeValue_GetIoSeekOption(OTF2_Type type,
+                                                   OTF2_AttributeValue value,
+                                                   OTF2_IoSeekOption* enumValue);
 
 /** @brief Converts a @eref{OTF2_Type} and @eref{OTF2_AttributeValue} pair to
  *  the appropriate value for the enum @eref{OTF2_IoOperationMode}.  No value range
@@ -2048,11 +1823,9 @@ OTF2_AttributeValue_GetIoSeekOption( OTF2_Type           type,
  *             if @a type does not match the base type of the enum @eref{OTF2_IoOperationMode}}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_GetIoOperationMode( OTF2_Type             type,
-                                        OTF2_AttributeValue   value,
-                                        OTF2_IoOperationMode* enumValue );
-
+OTF2_ErrorCode OTF2_AttributeValue_GetIoOperationMode(OTF2_Type type,
+                                                      OTF2_AttributeValue value,
+                                                      OTF2_IoOperationMode* enumValue);
 
 /** @brief Converts a @eref{OTF2_Type} and @eref{OTF2_AttributeValue} pair to
  *  the appropriate value for the enum @eref{OTF2_IoOperationFlag}.  No value range
@@ -2070,11 +1843,9 @@ OTF2_AttributeValue_GetIoOperationMode( OTF2_Type             type,
  *             if @a type does not match the base type of the enum @eref{OTF2_IoOperationFlag}}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_GetIoOperationFlag( OTF2_Type             type,
-                                        OTF2_AttributeValue   value,
-                                        OTF2_IoOperationFlag* enumValue );
-
+OTF2_ErrorCode OTF2_AttributeValue_GetIoOperationFlag(OTF2_Type type,
+                                                      OTF2_AttributeValue value,
+                                                      OTF2_IoOperationFlag* enumValue);
 
 /** @brief Converts a @eref{OTF2_Type} and @eref{OTF2_AttributeValue} pair to
  *  the appropriate value for the enum @eref{OTF2_CommFlag}.  No value range
@@ -2092,11 +1863,7 @@ OTF2_AttributeValue_GetIoOperationFlag( OTF2_Type             type,
  *             if @a type does not match the base type of the enum @eref{OTF2_CommFlag}}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_GetCommFlag( OTF2_Type           type,
-                                 OTF2_AttributeValue value,
-                                 OTF2_CommFlag*      enumValue );
-
+OTF2_ErrorCode OTF2_AttributeValue_GetCommFlag(OTF2_Type type, OTF2_AttributeValue value, OTF2_CommFlag* enumValue);
 
 /** @brief Converts a @eref{OTF2_Type} and @eref{OTF2_AttributeValue} pair to
  *  the appropriate value for the enum @eref{OTF2_RmaWinFlag}.  No value range
@@ -2114,11 +1881,7 @@ OTF2_AttributeValue_GetCommFlag( OTF2_Type           type,
  *             if @a type does not match the base type of the enum @eref{OTF2_RmaWinFlag}}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_GetRmaWinFlag( OTF2_Type           type,
-                                   OTF2_AttributeValue value,
-                                   OTF2_RmaWinFlag*    enumValue );
-
+OTF2_ErrorCode OTF2_AttributeValue_GetRmaWinFlag(OTF2_Type type, OTF2_AttributeValue value, OTF2_RmaWinFlag* enumValue);
 
 /** @brief Converts a @eref{OTF2_Type} and @eref{OTF2_AttributeValue} pair to
  *  the appropriate value for the enum @eref{OTF2_CollectiveRoot}.  No value range
@@ -2136,15 +1899,12 @@ OTF2_AttributeValue_GetRmaWinFlag( OTF2_Type           type,
  *             if @a type does not match the base type of the enum @eref{OTF2_CollectiveRoot}}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_AttributeValue_GetCollectiveRoot( OTF2_Type            type,
-                                       OTF2_AttributeValue  value,
-                                       OTF2_CollectiveRoot* enumValue );
-
+OTF2_ErrorCode OTF2_AttributeValue_GetCollectiveRoot(OTF2_Type type,
+                                                     OTF2_AttributeValue value,
+                                                     OTF2_CollectiveRoot* enumValue);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-
 
 #endif /* !OTF2_ATTRIBUTE_VALUE_H */

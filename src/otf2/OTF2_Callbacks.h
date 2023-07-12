@@ -28,10 +28,8 @@
  *
  */
 
-
 #ifndef OTF2_CALLBACKS_H
 #define OTF2_CALLBACKS_H
-
 
 /**
  *  @file
@@ -39,28 +37,22 @@
  *  @brief      This header file provides all user callbacks.
  */
 
-
 #ifndef __cplusplus
 #include <stdbool.h>
 #endif
 
-
 #include <otf2/OTF2_ErrorCodes.h>
 
-
 #include <otf2/OTF2_GeneralDefinitions.h>
-
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-
 /**
  *  @defgroup callbacks OTF2 callbacks
  *  @{
  */
-
 
 /**
  *  @defgroup callbacks_flush Controlling OTF2 flush behavior in writing mode
@@ -87,7 +79,6 @@ extern "C" {
  *  @{
  */
 
-
 /** @brief Definition for the pre flush callback.
  *
  *  This callback is triggered right before flushing the recorded data into
@@ -113,13 +104,11 @@ extern "C" {
  *
  *  @return            Returns @eref{OTF2_FLUSH} or @eref{OTF2_NO_FLUSH}.
  */
-typedef OTF2_FlushType
-( * OTF2_PreFlushCallback )( void*            userData,
-                             OTF2_FileType    fileType,
-                             OTF2_LocationRef location,
-                             void*            callerData,
-                             bool final );
-
+typedef OTF2_FlushType (*OTF2_PreFlushCallback)(void* userData,
+                                                OTF2_FileType fileType,
+                                                OTF2_LocationRef location,
+                                                void* callerData,
+                                                bool final);
 
 /** @brief Definition for the post flush callback.
  *
@@ -136,11 +125,7 @@ typedef OTF2_FlushType
  *
  *  @return Returns a timestamp for the end of flushing data into a file.
  */
-typedef OTF2_TimeStamp
-( * OTF2_PostFlushCallback )( void*            userData,
-                              OTF2_FileType    fileType,
-                              OTF2_LocationRef location );
-
+typedef OTF2_TimeStamp (*OTF2_PostFlushCallback)(void* userData, OTF2_FileType fileType, OTF2_LocationRef location);
 
 /** @brief Structure holding the flush callbacks.
  *
@@ -149,19 +134,16 @@ typedef OTF2_TimeStamp
  *  otf2_post_flush callback may be NULL to suppress writing a
  *  BufferFlush record.
  */
-typedef struct OTF2_FlushCallbacks
-{
-    /** @brief Callback which is called prior a flush. */
-    OTF2_PreFlushCallback  otf2_pre_flush;
-    /** @brief Callback which is called after a flush. */
-    OTF2_PostFlushCallback otf2_post_flush;
+typedef struct OTF2_FlushCallbacks {
+  /** @brief Callback which is called prior a flush. */
+  OTF2_PreFlushCallback otf2_pre_flush;
+  /** @brief Callback which is called after a flush. */
+  OTF2_PostFlushCallback otf2_post_flush;
 } OTF2_FlushCallbacks;
-
 
 /**
  * @}
  */
-
 
 /**
  *  @defgroup callbacks_memory Memory pooling for OTF2
@@ -175,7 +157,6 @@ typedef struct OTF2_FlushCallbacks
  *
  *  @{
  */
-
 
 /** @brief Function pointer for allocating memory for chunks.
  *
@@ -200,13 +181,11 @@ typedef struct OTF2_FlushCallbacks
  *  @return              Returns a the allocated memory on success, @p NULL if
  *                       an error occurs.
  */
-typedef void*
-( * OTF2_MemoryAllocate )( void*            userData,
-                           OTF2_FileType    fileType,
-                           OTF2_LocationRef location,
-                           void**           perBufferData,
-                           uint64_t         chunkSize );
-
+typedef void* (*OTF2_MemoryAllocate)(void* userData,
+                                     OTF2_FileType fileType,
+                                     OTF2_LocationRef location,
+                                     void** perBufferData,
+                                     uint64_t chunkSize);
 
 /** @brief Function pointer to release all allocated chunks.
  *
@@ -231,31 +210,26 @@ typedef void*
  *                       the writer objects. @p perBufferData should be handled
  *                       than.
  */
-typedef void
-( * OTF2_MemoryFreeAll )( void*            userData,
-                          OTF2_FileType    fileType,
-                          OTF2_LocationRef location,
-                          void**           perBufferData,
-                          bool final );
-
+typedef void (*OTF2_MemoryFreeAll)(void* userData,
+                                   OTF2_FileType fileType,
+                                   OTF2_LocationRef location,
+                                   void** perBufferData,
+                                   bool final);
 
 /** @brief Structure holding the memory callbacks.
  *
  *  To be used in a call to @eref{OTF2_Archive_SetMemoryCallbacks}.
  */
-typedef struct OTF2_MemoryCallbacks
-{
-    /** @brief Callback which is called to allocate a new chunk. */
-    OTF2_MemoryAllocate otf2_allocate;
-    /** @brief Callback which is called to release all previous allocated chunks. */
-    OTF2_MemoryFreeAll  otf2_free_all;
+typedef struct OTF2_MemoryCallbacks {
+  /** @brief Callback which is called to allocate a new chunk. */
+  OTF2_MemoryAllocate otf2_allocate;
+  /** @brief Callback which is called to release all previous allocated chunks. */
+  OTF2_MemoryFreeAll otf2_free_all;
 } OTF2_MemoryCallbacks;
-
 
 /**
  * @}
  */
-
 
 /**
  *  @defgroup callbacks_collective Operating OTF2 in a collective context
@@ -301,7 +275,6 @@ typedef struct OTF2_MemoryCallbacks
  * @{
  */
 
-
 /**
  * @brief User provided type for collective groups.
  *
@@ -314,7 +287,6 @@ typedef struct OTF2_CollectiveContext OTF2_CollectiveContext;
  */
 #define OTF2_COLLECTIVES_ROOT 0
 
-
 /** @brief Returns the number of OTF2_Archive objects operating in this
  *  communication context.
  *
@@ -322,11 +294,9 @@ typedef struct OTF2_CollectiveContext OTF2_CollectiveContext;
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_ERROR}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_Collectives_GetSize )( void*                   userData,
-                                OTF2_CollectiveContext* commContext,
-                                uint32_t*               size );
-
+typedef OTF2_CallbackCode (*OTF2_Collectives_GetSize)(void* userData,
+                                                      OTF2_CollectiveContext* commContext,
+                                                      uint32_t* size);
 
 /** @brief Returns the rank of this OTF2_Archive objects in this
  *  communication context. A number between 0 and one less of the size
@@ -336,11 +306,9 @@ typedef OTF2_CallbackCode
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_ERROR}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_Collectives_GetRank )( void*                   userData,
-                                OTF2_CollectiveContext* commContext,
-                                uint32_t*               rank );
-
+typedef OTF2_CallbackCode (*OTF2_Collectives_GetRank)(void* userData,
+                                                      OTF2_CollectiveContext* commContext,
+                                                      uint32_t* rank);
 
 /** @brief Create a new disjoint partitioning of the the @a globalCommContext
  *  communication context. @a numberOfFiles denotes the number of the partitions.
@@ -352,17 +320,15 @@ typedef OTF2_CallbackCode
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_ERROR}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_Collectives_CreateLocalComm )( void*                    userData,
-                                        OTF2_CollectiveContext** localCommContext,
-                                        OTF2_CollectiveContext*  globalCommContext,
-                                        uint32_t                 globalRank,
-                                        uint32_t                 globalSize,
-                                        uint32_t                 localRank,
-                                        uint32_t                 localSize,
-                                        uint32_t                 fileNumber,
-                                        uint32_t                 numberOfFiles );
-
+typedef OTF2_CallbackCode (*OTF2_Collectives_CreateLocalComm)(void* userData,
+                                                              OTF2_CollectiveContext** localCommContext,
+                                                              OTF2_CollectiveContext* globalCommContext,
+                                                              uint32_t globalRank,
+                                                              uint32_t globalSize,
+                                                              uint32_t localRank,
+                                                              uint32_t localSize,
+                                                              uint32_t fileNumber,
+                                                              uint32_t numberOfFiles);
 
 /** @brief Destroys the communication context previous created by the
  *  @eref{OTF2_Collectives_CreateLocalComm} callback.
@@ -371,10 +337,7 @@ typedef OTF2_CallbackCode
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_ERROR}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_Collectives_FreeLocalComm )( void*                   userData,
-                                      OTF2_CollectiveContext* localCommContext );
-
+typedef OTF2_CallbackCode (*OTF2_Collectives_FreeLocalComm)(void* userData, OTF2_CollectiveContext* localCommContext);
 
 /** @brief Performs a barrier collective on the given communication context.
  *
@@ -382,10 +345,7 @@ typedef OTF2_CallbackCode
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_ERROR}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_Collectives_Barrier )( void*                   userData,
-                                OTF2_CollectiveContext* commContext );
-
+typedef OTF2_CallbackCode (*OTF2_Collectives_Barrier)(void* userData, OTF2_CollectiveContext* commContext);
 
 /** @brief Performs a broadcast collective on the given communication context.
  *
@@ -393,14 +353,12 @@ typedef OTF2_CallbackCode
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_ERROR}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_Collectives_Bcast )( void*                   userData,
-                              OTF2_CollectiveContext* commContext,
-                              void*                   data,
-                              uint32_t                numberElements,
-                              OTF2_Type               type,
-                              uint32_t                root );
-
+typedef OTF2_CallbackCode (*OTF2_Collectives_Bcast)(void* userData,
+                                                    OTF2_CollectiveContext* commContext,
+                                                    void* data,
+                                                    uint32_t numberElements,
+                                                    OTF2_Type type,
+                                                    uint32_t root);
 
 /** @brief Performs a gather collective on the given communication context
  *  where each ranks contribute the same number of elements.
@@ -410,15 +368,13 @@ typedef OTF2_CallbackCode
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_ERROR}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_Collectives_Gather )( void*                   userData,
-                               OTF2_CollectiveContext* commContext,
-                               const void*             inData,
-                               void*                   outData,
-                               uint32_t                numberElements,
-                               OTF2_Type               type,
-                               uint32_t                root );
-
+typedef OTF2_CallbackCode (*OTF2_Collectives_Gather)(void* userData,
+                                                     OTF2_CollectiveContext* commContext,
+                                                     const void* inData,
+                                                     void* outData,
+                                                     uint32_t numberElements,
+                                                     OTF2_Type type,
+                                                     uint32_t root);
 
 /** @brief Performs a gather collective on the given communication context
  *  where each ranks contribute different number of elements.
@@ -428,16 +384,14 @@ typedef OTF2_CallbackCode
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_ERROR}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_Collectives_Gatherv )( void*                   userData,
-                                OTF2_CollectiveContext* commContext,
-                                const void*             inData,
-                                uint32_t                inElements,
-                                void*                   outData,
-                                const uint32_t*         outElements,
-                                OTF2_Type               type,
-                                uint32_t                root );
-
+typedef OTF2_CallbackCode (*OTF2_Collectives_Gatherv)(void* userData,
+                                                      OTF2_CollectiveContext* commContext,
+                                                      const void* inData,
+                                                      uint32_t inElements,
+                                                      void* outData,
+                                                      const uint32_t* outElements,
+                                                      OTF2_Type type,
+                                                      uint32_t root);
 
 /** @brief Performs a scatter collective on the given communication context
  *  where each ranks contribute the same number of elements.
@@ -447,15 +401,13 @@ typedef OTF2_CallbackCode
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_ERROR}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_Collectives_Scatter )( void*                   userData,
-                                OTF2_CollectiveContext* commContext,
-                                const void*             inData,
-                                void*                   outData,
-                                uint32_t                numberElements,
-                                OTF2_Type               type,
-                                uint32_t                root );
-
+typedef OTF2_CallbackCode (*OTF2_Collectives_Scatter)(void* userData,
+                                                      OTF2_CollectiveContext* commContext,
+                                                      const void* inData,
+                                                      void* outData,
+                                                      uint32_t numberElements,
+                                                      OTF2_Type type,
+                                                      uint32_t root);
 
 /** @brief Performs a scatter collective on the given communication context
  *  where each ranks contribute different number of elements.
@@ -465,16 +417,14 @@ typedef OTF2_CallbackCode
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_ERROR}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_Collectives_Scatterv )( void*                   userData,
-                                 OTF2_CollectiveContext* commContext,
-                                 const void*             inData,
-                                 const uint32_t*         inElements,
-                                 void*                   outData,
-                                 uint32_t                outElements,
-                                 OTF2_Type               type,
-                                 uint32_t                root );
-
+typedef OTF2_CallbackCode (*OTF2_Collectives_Scatterv)(void* userData,
+                                                       OTF2_CollectiveContext* commContext,
+                                                       const void* inData,
+                                                       const uint32_t* inElements,
+                                                       void* outData,
+                                                       uint32_t outElements,
+                                                       OTF2_Type type,
+                                                       uint32_t root);
 
 /** @brief Optionally called in @eref{OTF2_Archive_Close} or
  *  @eref{OTF2_Reader_Close} respectively.
@@ -484,36 +434,31 @@ typedef OTF2_CallbackCode
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_ERROR}.
  */
-typedef void
-( * OTF2_Collectives_Release )( void*                   userData,
-                                OTF2_CollectiveContext* globalCommContext,
-                                OTF2_CollectiveContext* localCommContext );
-
+typedef void (*OTF2_Collectives_Release)(void* userData,
+                                         OTF2_CollectiveContext* globalCommContext,
+                                         OTF2_CollectiveContext* localCommContext);
 
 /** @brief Struct which holds all collective callbacks.
  *
  *  @since Version 1.3
  */
-typedef struct OTF2_CollectiveCallbacks
-{
-    OTF2_Collectives_Release         otf2_release;
-    OTF2_Collectives_GetSize         otf2_get_size;
-    OTF2_Collectives_GetRank         otf2_get_rank;
-    OTF2_Collectives_CreateLocalComm otf2_create_local_comm;
-    OTF2_Collectives_FreeLocalComm   otf2_free_local_comm;
-    OTF2_Collectives_Barrier         otf2_barrier;
-    OTF2_Collectives_Bcast           otf2_bcast;
-    OTF2_Collectives_Gather          otf2_gather;
-    OTF2_Collectives_Gatherv         otf2_gatherv;
-    OTF2_Collectives_Scatter         otf2_scatter;
-    OTF2_Collectives_Scatterv        otf2_scatterv;
+typedef struct OTF2_CollectiveCallbacks {
+  OTF2_Collectives_Release otf2_release;
+  OTF2_Collectives_GetSize otf2_get_size;
+  OTF2_Collectives_GetRank otf2_get_rank;
+  OTF2_Collectives_CreateLocalComm otf2_create_local_comm;
+  OTF2_Collectives_FreeLocalComm otf2_free_local_comm;
+  OTF2_Collectives_Barrier otf2_barrier;
+  OTF2_Collectives_Bcast otf2_bcast;
+  OTF2_Collectives_Gather otf2_gather;
+  OTF2_Collectives_Gatherv otf2_gatherv;
+  OTF2_Collectives_Scatter otf2_scatter;
+  OTF2_Collectives_Scatterv otf2_scatterv;
 } OTF2_CollectiveCallbacks;
-
 
 /**
  * @}
  */
-
 
 /**
  *  @defgroup callbacks_locking Operating OTF2 in a multi-threads context
@@ -541,7 +486,6 @@ typedef struct OTF2_CollectiveCallbacks
  * @{
  */
 
-
 /**
  *  @brief Opaque type for a locking object.
  *
@@ -550,7 +494,6 @@ typedef struct OTF2_CollectiveCallbacks
  *  @since Version 1.5
  */
 typedef struct OTF2_LockObject* OTF2_Lock;
-
 
 /** @brief Creates a new locking object.
  *
@@ -563,10 +506,7 @@ typedef struct OTF2_LockObject* OTF2_Lock;
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_ERROR}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_Locking_Create )( void*      userData,
-                           OTF2_Lock* lock );
-
+typedef OTF2_CallbackCode (*OTF2_Locking_Create)(void* userData, OTF2_Lock* lock);
 
 /** @brief Destroys a locking object.
  *
@@ -579,10 +519,7 @@ typedef OTF2_CallbackCode
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_ERROR}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_Locking_Destroy )( void*     userData,
-                            OTF2_Lock lock );
-
+typedef OTF2_CallbackCode (*OTF2_Locking_Destroy)(void* userData, OTF2_Lock lock);
 
 /** @brief Locks a locking object.
  *
@@ -595,10 +532,7 @@ typedef OTF2_CallbackCode
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_ERROR}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_Locking_Lock )( void*     userData,
-                         OTF2_Lock lock );
-
+typedef OTF2_CallbackCode (*OTF2_Locking_Lock)(void* userData, OTF2_Lock lock);
 
 /** @brief Unlocks a locking object.
  *
@@ -611,10 +545,7 @@ typedef OTF2_CallbackCode
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_ERROR}.
  */
-typedef OTF2_CallbackCode
-( * OTF2_Locking_Unlock )( void*     userData,
-                           OTF2_Lock lock );
-
+typedef OTF2_CallbackCode (*OTF2_Locking_Unlock)(void* userData, OTF2_Lock lock);
 
 /** @brief Signals the end of life of the @eref{OTF2_Archive} or
  *  @eref{OTF2_Reader} object to the locking callbacks.
@@ -632,37 +563,30 @@ typedef OTF2_CallbackCode
  *
  *  @return @eref{OTF2_CALLBACK_SUCCESS} or @eref{OTF2_CALLBACK_ERROR}.
  */
-typedef void
-( * OTF2_Locking_Release )( void* userData );
-
+typedef void (*OTF2_Locking_Release)(void* userData);
 
 /** @brief Struct which holds all locking callbacks.
  *
  *  @since Version 1.5
  */
-typedef struct OTF2_LockingCallbacks
-{
-    OTF2_Locking_Release otf2_release;
-    OTF2_Locking_Create  otf2_create;
-    OTF2_Locking_Destroy otf2_destroy;
-    OTF2_Locking_Lock    otf2_lock;
-    OTF2_Locking_Unlock  otf2_unlock;
+typedef struct OTF2_LockingCallbacks {
+  OTF2_Locking_Release otf2_release;
+  OTF2_Locking_Create otf2_create;
+  OTF2_Locking_Destroy otf2_destroy;
+  OTF2_Locking_Lock otf2_lock;
+  OTF2_Locking_Unlock otf2_unlock;
 } OTF2_LockingCallbacks;
 
-
 /**
  * @}
  */
 
-
 /**
  * @}
  */
-
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-
 
 #endif /* !OTF2_CALLBACKS_H */

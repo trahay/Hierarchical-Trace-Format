@@ -1,40 +1,31 @@
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 
+#include "OTF2_DefReaderCallbacks.h"
 #include "htf.h"
 #include "otf2.h"
-#include "OTF2_DefReaderCallbacks.h"
 
-
-OTF2_DefReaderCallbacks*
-OTF2_DefReaderCallbacks_New( void ) {
+OTF2_DefReaderCallbacks* OTF2_DefReaderCallbacks_New(void) {
   NOT_IMPLEMENTED;
 }
-
-
 
 /** @brief Deallocates a struct for the definition callbacks.
  *
  *  @param defReaderCallbacks Handle to a struct previously allocated
  *                            with @eref{OTF2_DefReaderCallbacks_New}.
  */
-void
-OTF2_DefReaderCallbacks_Delete( OTF2_DefReaderCallbacks* defReaderCallbacks ) {
+void OTF2_DefReaderCallbacks_Delete(OTF2_DefReaderCallbacks* defReaderCallbacks) {
   NOT_IMPLEMENTED;
 }
-
-
 
 /** @brief Clears a struct for the definition callbacks.
  *
  *  @param defReaderCallbacks Handle to a struct previously allocated
  *                            with @eref{OTF2_DefReaderCallbacks_New}.
  */
-void
-OTF2_DefReaderCallbacks_Clear( OTF2_DefReaderCallbacks* defReaderCallbacks ) {
+void OTF2_DefReaderCallbacks_Clear(OTF2_DefReaderCallbacks* defReaderCallbacks) {
   NOT_IMPLEMENTED;
 }
-
 
 /** @brief Registers the callback for an unknown definition.
  *
@@ -48,13 +39,10 @@ OTF2_DefReaderCallbacks_Clear( OTF2_DefReaderCallbacks* defReaderCallbacks ) {
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_DefReaderCallbacks_SetUnknownCallback(
-    OTF2_DefReaderCallbacks*       defReaderCallbacks,
-    OTF2_DefReaderCallback_Unknown unknownCallback ) {
+OTF2_ErrorCode OTF2_DefReaderCallbacks_SetUnknownCallback(OTF2_DefReaderCallbacks* defReaderCallbacks,
+                                                          OTF2_DefReaderCallback_Unknown unknownCallback) {
   NOT_IMPLEMENTED;
 }
-
 
 /** @brief Registers the callback for the @eref{MappingTable} definition.
  *
@@ -70,13 +58,11 @@ OTF2_DefReaderCallbacks_SetUnknownCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_DefReaderCallbacks_SetMappingTableCallback(
-    OTF2_DefReaderCallbacks*            defReaderCallbacks,
-    OTF2_DefReaderCallback_MappingTable mappingTableCallback ) {
+OTF2_ErrorCode OTF2_DefReaderCallbacks_SetMappingTableCallback(
+  OTF2_DefReaderCallbacks* defReaderCallbacks,
+  OTF2_DefReaderCallback_MappingTable mappingTableCallback) {
   NOT_IMPLEMENTED;
 }
-
 
 /** @brief Registers the callback for the @eref{ClockOffset} definition.
  *
@@ -92,14 +78,10 @@ OTF2_DefReaderCallbacks_SetMappingTableCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_DefReaderCallbacks_SetClockOffsetCallback(
-    OTF2_DefReaderCallbacks*           defReaderCallbacks,
-    OTF2_DefReaderCallback_ClockOffset clockOffsetCallback ) {
+OTF2_ErrorCode OTF2_DefReaderCallbacks_SetClockOffsetCallback(OTF2_DefReaderCallbacks* defReaderCallbacks,
+                                                              OTF2_DefReaderCallback_ClockOffset clockOffsetCallback) {
   NOT_IMPLEMENTED;
 }
-
-
 
 /** @brief Registers the callback for the @eref{String} definition.
  *
@@ -115,15 +97,10 @@ OTF2_DefReaderCallbacks_SetClockOffsetCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_DefReaderCallbacks_SetStringCallback(
-    OTF2_DefReaderCallbacks*      defReaderCallbacks,
-    OTF2_DefReaderCallback_String stringCallback ) {
+OTF2_ErrorCode OTF2_DefReaderCallbacks_SetStringCallback(OTF2_DefReaderCallbacks* defReaderCallbacks,
+                                                         OTF2_DefReaderCallback_String stringCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the @eref{Attribute} definition.
  *
@@ -139,15 +116,10 @@ OTF2_DefReaderCallbacks_SetStringCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_DefReaderCallbacks_SetAttributeCallback(
-    OTF2_DefReaderCallbacks*         defReaderCallbacks,
-    OTF2_DefReaderCallback_Attribute attributeCallback ) {
+OTF2_ErrorCode OTF2_DefReaderCallbacks_SetAttributeCallback(OTF2_DefReaderCallbacks* defReaderCallbacks,
+                                                            OTF2_DefReaderCallback_Attribute attributeCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the @eref{SystemTreeNode} definition.
  *
@@ -163,15 +135,11 @@ OTF2_DefReaderCallbacks_SetAttributeCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_DefReaderCallbacks_SetSystemTreeNodeCallback(
-    OTF2_DefReaderCallbacks*              defReaderCallbacks,
-    OTF2_DefReaderCallback_SystemTreeNode systemTreeNodeCallback ) {
+OTF2_ErrorCode OTF2_DefReaderCallbacks_SetSystemTreeNodeCallback(
+  OTF2_DefReaderCallbacks* defReaderCallbacks,
+  OTF2_DefReaderCallback_SystemTreeNode systemTreeNodeCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the @eref{LocationGroup} definition.
  *
@@ -187,15 +155,11 @@ OTF2_DefReaderCallbacks_SetSystemTreeNodeCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_DefReaderCallbacks_SetLocationGroupCallback(
-    OTF2_DefReaderCallbacks*             defReaderCallbacks,
-    OTF2_DefReaderCallback_LocationGroup locationGroupCallback ) {
+OTF2_ErrorCode OTF2_DefReaderCallbacks_SetLocationGroupCallback(
+  OTF2_DefReaderCallbacks* defReaderCallbacks,
+  OTF2_DefReaderCallback_LocationGroup locationGroupCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the @eref{Location} definition.
  *
@@ -211,15 +175,10 @@ OTF2_DefReaderCallbacks_SetLocationGroupCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_DefReaderCallbacks_SetLocationCallback(
-    OTF2_DefReaderCallbacks*        defReaderCallbacks,
-    OTF2_DefReaderCallback_Location locationCallback ) {
+OTF2_ErrorCode OTF2_DefReaderCallbacks_SetLocationCallback(OTF2_DefReaderCallbacks* defReaderCallbacks,
+                                                           OTF2_DefReaderCallback_Location locationCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the @eref{Region} definition.
  *
@@ -235,15 +194,10 @@ OTF2_DefReaderCallbacks_SetLocationCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_DefReaderCallbacks_SetRegionCallback(
-    OTF2_DefReaderCallbacks*      defReaderCallbacks,
-    OTF2_DefReaderCallback_Region regionCallback ) {
+OTF2_ErrorCode OTF2_DefReaderCallbacks_SetRegionCallback(OTF2_DefReaderCallbacks* defReaderCallbacks,
+                                                         OTF2_DefReaderCallback_Region regionCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the @eref{Callsite} definition.
  *
@@ -261,15 +215,10 @@ OTF2_DefReaderCallbacks_SetRegionCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_DefReaderCallbacks_SetCallsiteCallback(
-    OTF2_DefReaderCallbacks*        defReaderCallbacks,
-    OTF2_DefReaderCallback_Callsite callsiteCallback ) {
+OTF2_ErrorCode OTF2_DefReaderCallbacks_SetCallsiteCallback(OTF2_DefReaderCallbacks* defReaderCallbacks,
+                                                           OTF2_DefReaderCallback_Callsite callsiteCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the @eref{Callpath} definition.
  *
@@ -285,15 +234,10 @@ OTF2_DefReaderCallbacks_SetCallsiteCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_DefReaderCallbacks_SetCallpathCallback(
-    OTF2_DefReaderCallbacks*        defReaderCallbacks,
-    OTF2_DefReaderCallback_Callpath callpathCallback ) {
+OTF2_ErrorCode OTF2_DefReaderCallbacks_SetCallpathCallback(OTF2_DefReaderCallbacks* defReaderCallbacks,
+                                                           OTF2_DefReaderCallback_Callpath callpathCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the @eref{Group} definition.
  *
@@ -309,15 +253,10 @@ OTF2_DefReaderCallbacks_SetCallpathCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_DefReaderCallbacks_SetGroupCallback(
-    OTF2_DefReaderCallbacks*     defReaderCallbacks,
-    OTF2_DefReaderCallback_Group groupCallback ) {
+OTF2_ErrorCode OTF2_DefReaderCallbacks_SetGroupCallback(OTF2_DefReaderCallbacks* defReaderCallbacks,
+                                                        OTF2_DefReaderCallback_Group groupCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the @eref{MetricMember} definition.
  *
@@ -333,15 +272,11 @@ OTF2_DefReaderCallbacks_SetGroupCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_DefReaderCallbacks_SetMetricMemberCallback(
-    OTF2_DefReaderCallbacks*            defReaderCallbacks,
-    OTF2_DefReaderCallback_MetricMember metricMemberCallback ) {
+OTF2_ErrorCode OTF2_DefReaderCallbacks_SetMetricMemberCallback(
+  OTF2_DefReaderCallbacks* defReaderCallbacks,
+  OTF2_DefReaderCallback_MetricMember metricMemberCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the @eref{MetricClass} definition.
  *
@@ -357,15 +292,10 @@ OTF2_DefReaderCallbacks_SetMetricMemberCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_DefReaderCallbacks_SetMetricClassCallback(
-    OTF2_DefReaderCallbacks*           defReaderCallbacks,
-    OTF2_DefReaderCallback_MetricClass metricClassCallback ) {
+OTF2_ErrorCode OTF2_DefReaderCallbacks_SetMetricClassCallback(OTF2_DefReaderCallbacks* defReaderCallbacks,
+                                                              OTF2_DefReaderCallback_MetricClass metricClassCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the @eref{MetricInstance} definition.
  *
@@ -381,15 +311,11 @@ OTF2_DefReaderCallbacks_SetMetricClassCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_DefReaderCallbacks_SetMetricInstanceCallback(
-    OTF2_DefReaderCallbacks*              defReaderCallbacks,
-    OTF2_DefReaderCallback_MetricInstance metricInstanceCallback ) {
+OTF2_ErrorCode OTF2_DefReaderCallbacks_SetMetricInstanceCallback(
+  OTF2_DefReaderCallbacks* defReaderCallbacks,
+  OTF2_DefReaderCallback_MetricInstance metricInstanceCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the @eref{Comm} definition.
  *
@@ -405,15 +331,10 @@ OTF2_DefReaderCallbacks_SetMetricInstanceCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_DefReaderCallbacks_SetCommCallback(
-    OTF2_DefReaderCallbacks*    defReaderCallbacks,
-    OTF2_DefReaderCallback_Comm commCallback ) {
+OTF2_ErrorCode OTF2_DefReaderCallbacks_SetCommCallback(OTF2_DefReaderCallbacks* defReaderCallbacks,
+                                                       OTF2_DefReaderCallback_Comm commCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the @eref{Parameter} definition.
  *
@@ -429,15 +350,10 @@ OTF2_DefReaderCallbacks_SetCommCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_DefReaderCallbacks_SetParameterCallback(
-    OTF2_DefReaderCallbacks*         defReaderCallbacks,
-    OTF2_DefReaderCallback_Parameter parameterCallback ) {
+OTF2_ErrorCode OTF2_DefReaderCallbacks_SetParameterCallback(OTF2_DefReaderCallbacks* defReaderCallbacks,
+                                                            OTF2_DefReaderCallback_Parameter parameterCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the @eref{RmaWin} definition.
  *
@@ -453,15 +369,10 @@ OTF2_DefReaderCallbacks_SetParameterCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_DefReaderCallbacks_SetRmaWinCallback(
-    OTF2_DefReaderCallbacks*      defReaderCallbacks,
-    OTF2_DefReaderCallback_RmaWin rmaWinCallback ) {
+OTF2_ErrorCode OTF2_DefReaderCallbacks_SetRmaWinCallback(OTF2_DefReaderCallbacks* defReaderCallbacks,
+                                                         OTF2_DefReaderCallback_RmaWin rmaWinCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the @eref{MetricClassRecorder} definition.
  *
@@ -478,15 +389,11 @@ OTF2_DefReaderCallbacks_SetRmaWinCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_DefReaderCallbacks_SetMetricClassRecorderCallback(
-    OTF2_DefReaderCallbacks*                   defReaderCallbacks,
-    OTF2_DefReaderCallback_MetricClassRecorder metricClassRecorderCallback ) {
+OTF2_ErrorCode OTF2_DefReaderCallbacks_SetMetricClassRecorderCallback(
+  OTF2_DefReaderCallbacks* defReaderCallbacks,
+  OTF2_DefReaderCallback_MetricClassRecorder metricClassRecorderCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the @eref{SystemTreeNodeProperty} definition.
  *
@@ -503,15 +410,11 @@ OTF2_DefReaderCallbacks_SetMetricClassRecorderCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_DefReaderCallbacks_SetSystemTreeNodePropertyCallback(
-    OTF2_DefReaderCallbacks*                      defReaderCallbacks,
-    OTF2_DefReaderCallback_SystemTreeNodeProperty systemTreeNodePropertyCallback ) {
+OTF2_ErrorCode OTF2_DefReaderCallbacks_SetSystemTreeNodePropertyCallback(
+  OTF2_DefReaderCallbacks* defReaderCallbacks,
+  OTF2_DefReaderCallback_SystemTreeNodeProperty systemTreeNodePropertyCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the @eref{SystemTreeNodeDomain} definition.
  *
@@ -528,15 +431,11 @@ OTF2_DefReaderCallbacks_SetSystemTreeNodePropertyCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_DefReaderCallbacks_SetSystemTreeNodeDomainCallback(
-    OTF2_DefReaderCallbacks*                    defReaderCallbacks,
-    OTF2_DefReaderCallback_SystemTreeNodeDomain systemTreeNodeDomainCallback ) {
+OTF2_ErrorCode OTF2_DefReaderCallbacks_SetSystemTreeNodeDomainCallback(
+  OTF2_DefReaderCallbacks* defReaderCallbacks,
+  OTF2_DefReaderCallback_SystemTreeNodeDomain systemTreeNodeDomainCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the @eref{LocationGroupProperty} definition.
  *
@@ -553,15 +452,11 @@ OTF2_DefReaderCallbacks_SetSystemTreeNodeDomainCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_DefReaderCallbacks_SetLocationGroupPropertyCallback(
-    OTF2_DefReaderCallbacks*                     defReaderCallbacks,
-    OTF2_DefReaderCallback_LocationGroupProperty locationGroupPropertyCallback ) {
+OTF2_ErrorCode OTF2_DefReaderCallbacks_SetLocationGroupPropertyCallback(
+  OTF2_DefReaderCallbacks* defReaderCallbacks,
+  OTF2_DefReaderCallback_LocationGroupProperty locationGroupPropertyCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the @eref{LocationProperty} definition.
  *
@@ -577,15 +472,11 @@ OTF2_DefReaderCallbacks_SetLocationGroupPropertyCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_DefReaderCallbacks_SetLocationPropertyCallback(
-    OTF2_DefReaderCallbacks*                defReaderCallbacks,
-    OTF2_DefReaderCallback_LocationProperty locationPropertyCallback ) {
+OTF2_ErrorCode OTF2_DefReaderCallbacks_SetLocationPropertyCallback(
+  OTF2_DefReaderCallbacks* defReaderCallbacks,
+  OTF2_DefReaderCallback_LocationProperty locationPropertyCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the @eref{CartDimension} definition.
  *
@@ -601,15 +492,11 @@ OTF2_DefReaderCallbacks_SetLocationPropertyCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_DefReaderCallbacks_SetCartDimensionCallback(
-    OTF2_DefReaderCallbacks*             defReaderCallbacks,
-    OTF2_DefReaderCallback_CartDimension cartDimensionCallback ) {
+OTF2_ErrorCode OTF2_DefReaderCallbacks_SetCartDimensionCallback(
+  OTF2_DefReaderCallbacks* defReaderCallbacks,
+  OTF2_DefReaderCallback_CartDimension cartDimensionCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the @eref{CartTopology} definition.
  *
@@ -625,15 +512,11 @@ OTF2_DefReaderCallbacks_SetCartDimensionCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_DefReaderCallbacks_SetCartTopologyCallback(
-    OTF2_DefReaderCallbacks*            defReaderCallbacks,
-    OTF2_DefReaderCallback_CartTopology cartTopologyCallback ) {
+OTF2_ErrorCode OTF2_DefReaderCallbacks_SetCartTopologyCallback(
+  OTF2_DefReaderCallbacks* defReaderCallbacks,
+  OTF2_DefReaderCallback_CartTopology cartTopologyCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the @eref{CartCoordinate} definition.
  *
@@ -649,15 +532,11 @@ OTF2_DefReaderCallbacks_SetCartTopologyCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_DefReaderCallbacks_SetCartCoordinateCallback(
-    OTF2_DefReaderCallbacks*              defReaderCallbacks,
-    OTF2_DefReaderCallback_CartCoordinate cartCoordinateCallback ) {
+OTF2_ErrorCode OTF2_DefReaderCallbacks_SetCartCoordinateCallback(
+  OTF2_DefReaderCallbacks* defReaderCallbacks,
+  OTF2_DefReaderCallback_CartCoordinate cartCoordinateCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the @eref{SourceCodeLocation} definition.
  *
@@ -673,15 +552,11 @@ OTF2_DefReaderCallbacks_SetCartCoordinateCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_DefReaderCallbacks_SetSourceCodeLocationCallback(
-    OTF2_DefReaderCallbacks*                  defReaderCallbacks,
-    OTF2_DefReaderCallback_SourceCodeLocation sourceCodeLocationCallback ) {
+OTF2_ErrorCode OTF2_DefReaderCallbacks_SetSourceCodeLocationCallback(
+  OTF2_DefReaderCallbacks* defReaderCallbacks,
+  OTF2_DefReaderCallback_SourceCodeLocation sourceCodeLocationCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the @eref{CallingContext} definition.
  *
@@ -697,15 +572,11 @@ OTF2_DefReaderCallbacks_SetSourceCodeLocationCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_DefReaderCallbacks_SetCallingContextCallback(
-    OTF2_DefReaderCallbacks*              defReaderCallbacks,
-    OTF2_DefReaderCallback_CallingContext callingContextCallback ) {
+OTF2_ErrorCode OTF2_DefReaderCallbacks_SetCallingContextCallback(
+  OTF2_DefReaderCallbacks* defReaderCallbacks,
+  OTF2_DefReaderCallback_CallingContext callingContextCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the @eref{CallingContextProperty} definition.
  *
@@ -722,15 +593,11 @@ OTF2_DefReaderCallbacks_SetCallingContextCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_DefReaderCallbacks_SetCallingContextPropertyCallback(
-    OTF2_DefReaderCallbacks*                      defReaderCallbacks,
-    OTF2_DefReaderCallback_CallingContextProperty callingContextPropertyCallback ) {
+OTF2_ErrorCode OTF2_DefReaderCallbacks_SetCallingContextPropertyCallback(
+  OTF2_DefReaderCallbacks* defReaderCallbacks,
+  OTF2_DefReaderCallback_CallingContextProperty callingContextPropertyCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the @eref{InterruptGenerator} definition.
  *
@@ -746,15 +613,11 @@ OTF2_DefReaderCallbacks_SetCallingContextPropertyCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_DefReaderCallbacks_SetInterruptGeneratorCallback(
-    OTF2_DefReaderCallbacks*                  defReaderCallbacks,
-    OTF2_DefReaderCallback_InterruptGenerator interruptGeneratorCallback ) {
+OTF2_ErrorCode OTF2_DefReaderCallbacks_SetInterruptGeneratorCallback(
+  OTF2_DefReaderCallbacks* defReaderCallbacks,
+  OTF2_DefReaderCallback_InterruptGenerator interruptGeneratorCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the @eref{IoFileProperty} definition.
  *
@@ -770,15 +633,11 @@ OTF2_DefReaderCallbacks_SetInterruptGeneratorCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_DefReaderCallbacks_SetIoFilePropertyCallback(
-    OTF2_DefReaderCallbacks*              defReaderCallbacks,
-    OTF2_DefReaderCallback_IoFileProperty ioFilePropertyCallback ) {
+OTF2_ErrorCode OTF2_DefReaderCallbacks_SetIoFilePropertyCallback(
+  OTF2_DefReaderCallbacks* defReaderCallbacks,
+  OTF2_DefReaderCallback_IoFileProperty ioFilePropertyCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the @eref{IoRegularFile} definition.
  *
@@ -794,15 +653,11 @@ OTF2_DefReaderCallbacks_SetIoFilePropertyCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_DefReaderCallbacks_SetIoRegularFileCallback(
-    OTF2_DefReaderCallbacks*             defReaderCallbacks,
-    OTF2_DefReaderCallback_IoRegularFile ioRegularFileCallback ) {
+OTF2_ErrorCode OTF2_DefReaderCallbacks_SetIoRegularFileCallback(
+  OTF2_DefReaderCallbacks* defReaderCallbacks,
+  OTF2_DefReaderCallback_IoRegularFile ioRegularFileCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the @eref{IoDirectory} definition.
  *
@@ -818,15 +673,10 @@ OTF2_DefReaderCallbacks_SetIoRegularFileCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_DefReaderCallbacks_SetIoDirectoryCallback(
-    OTF2_DefReaderCallbacks*           defReaderCallbacks,
-    OTF2_DefReaderCallback_IoDirectory ioDirectoryCallback ) {
+OTF2_ErrorCode OTF2_DefReaderCallbacks_SetIoDirectoryCallback(OTF2_DefReaderCallbacks* defReaderCallbacks,
+                                                              OTF2_DefReaderCallback_IoDirectory ioDirectoryCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the @eref{IoHandle} definition.
  *
@@ -842,15 +692,10 @@ OTF2_DefReaderCallbacks_SetIoDirectoryCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_DefReaderCallbacks_SetIoHandleCallback(
-    OTF2_DefReaderCallbacks*        defReaderCallbacks,
-    OTF2_DefReaderCallback_IoHandle ioHandleCallback ) {
+OTF2_ErrorCode OTF2_DefReaderCallbacks_SetIoHandleCallback(OTF2_DefReaderCallbacks* defReaderCallbacks,
+                                                           OTF2_DefReaderCallback_IoHandle ioHandleCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the @eref{IoPreCreatedHandleState} definition.
  *
@@ -867,15 +712,11 @@ OTF2_DefReaderCallbacks_SetIoHandleCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_DefReaderCallbacks_SetIoPreCreatedHandleStateCallback(
-    OTF2_DefReaderCallbacks*                       defReaderCallbacks,
-    OTF2_DefReaderCallback_IoPreCreatedHandleState ioPreCreatedHandleStateCallback ) {
+OTF2_ErrorCode OTF2_DefReaderCallbacks_SetIoPreCreatedHandleStateCallback(
+  OTF2_DefReaderCallbacks* defReaderCallbacks,
+  OTF2_DefReaderCallback_IoPreCreatedHandleState ioPreCreatedHandleStateCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Registers the callback for the @eref{CallpathParameter} definition.
  *
@@ -891,15 +732,11 @@ OTF2_DefReaderCallbacks_SetIoPreCreatedHandleStateCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_DefReaderCallbacks_SetCallpathParameterCallback(
-    OTF2_DefReaderCallbacks*                 defReaderCallbacks,
-    OTF2_DefReaderCallback_CallpathParameter callpathParameterCallback ) {
+OTF2_ErrorCode OTF2_DefReaderCallbacks_SetCallpathParameterCallback(
+  OTF2_DefReaderCallbacks* defReaderCallbacks,
+  OTF2_DefReaderCallback_CallpathParameter callpathParameterCallback) {
   NOT_IMPLEMENTED;
 }
-
-
-
 
 /** @brief Regiseters the callback for the @eref{InterComm} definition.
  *
@@ -915,9 +752,7 @@ OTF2_DefReaderCallbacks_SetCallpathParameterCallback(
  *             for an invalid @p defReaderCallbacks argument}
  *  @retend
  */
-OTF2_ErrorCode
-OTF2_DefReaderCallbacks_SetInterCommCallback(
-    OTF2_DefReaderCallbacks*         defReaderCallbacks,
-    OTF2_DefReaderCallback_InterComm interCommCallback ) {
+OTF2_ErrorCode OTF2_DefReaderCallbacks_SetInterCommCallback(OTF2_DefReaderCallbacks* defReaderCallbacks,
+                                                            OTF2_DefReaderCallback_InterComm interCommCallback) {
   NOT_IMPLEMENTED;
 }

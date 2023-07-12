@@ -1,10 +1,9 @@
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 
+#include "OTF2_Thumbnail.h"
 #include "htf.h"
 #include "otf2.h"
-#include "OTF2_Thumbnail.h"
-
 
 /** @brief Reads a thumbnail header.
  *
@@ -25,17 +24,15 @@
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_ThumbReader_GetHeader( OTF2_ThumbReader*   reader,
-                            char** const        name,
-                            char** const        description,
-                            OTF2_ThumbnailType* type,
-                            uint32_t*           numberOfSamples,
-                            uint32_t*           numberOfMetrics,
-                            uint64_t**          refsToDefs ) {
+OTF2_ErrorCode OTF2_ThumbReader_GetHeader(OTF2_ThumbReader* reader,
+                                          char** const name,
+                                          char** const description,
+                                          OTF2_ThumbnailType* type,
+                                          uint32_t* numberOfSamples,
+                                          uint32_t* numberOfMetrics,
+                                          uint64_t** refsToDefs) {
   NOT_IMPLEMENTED;
 }
-
 
 /** @brief Reads a thumbnail sample.
  *
@@ -49,14 +46,12 @@ OTF2_ThumbReader_GetHeader( OTF2_ThumbReader*   reader,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_ThumbReader_ReadSample( OTF2_ThumbReader* reader,
-                             uint64_t*         baseline,
-                             uint32_t          numberOfMetrics,
-                             uint64_t*         metricSamples ) {
+OTF2_ErrorCode OTF2_ThumbReader_ReadSample(OTF2_ThumbReader* reader,
+                                           uint64_t* baseline,
+                                           uint32_t numberOfMetrics,
+                                           uint64_t* metricSamples) {
   NOT_IMPLEMENTED;
 }
-
 
 /** @brief Writes a thumbnail sample.
  *
@@ -70,10 +65,9 @@ OTF2_ThumbReader_ReadSample( OTF2_ThumbReader* reader,
  *
  *  @return @eref{OTF2_SUCCESS} if successful, an error code if an error occurs.
  */
-OTF2_ErrorCode
-OTF2_ThumbWriter_WriteSample( OTF2_ThumbWriter* writer,
-                              uint64_t          baseline,
-                              uint32_t          numberOfMetrics,
-                              const uint64_t*   metricSamples ) {
+OTF2_ErrorCode OTF2_ThumbWriter_WriteSample(OTF2_ThumbWriter* writer,
+                                            uint64_t baseline,
+                                            uint32_t numberOfMetrics,
+                                            const uint64_t* metricSamples) {
   NOT_IMPLEMENTED;
 }

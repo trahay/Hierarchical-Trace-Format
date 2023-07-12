@@ -1,20 +1,24 @@
-#include <stdio.h>
-#include <stdlib.h>
+/*
+ * Copyright (C) Telecom SudParis
+ * See LICENSE in top-level directory.
+ */
 #include <dlfcn.h>
 #include <pthread.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "tracer.h"
 
-int (*pthread_mutex_lock_original)(pthread_mutex_t *mutex);
-int (*pthread_mutex_trylock_original)(pthread_mutex_t *mutex);
-int (*pthread_mutex_unlock_original)(pthread_mutex_t *mutex);
-int (*pthread_mutex_init_original)(pthread_mutex_t *mutex, const pthread_mutexattr_t *attr);
-int (*pthread_mutex_destroy_original)(pthread_mutex_t *mutex);
+int (*pthread_mutex_lock_original)(pthread_mutex_t* mutex);
+int (*pthread_mutex_trylock_original)(pthread_mutex_t* mutex);
+int (*pthread_mutex_unlock_original)(pthread_mutex_t* mutex);
+int (*pthread_mutex_init_original)(pthread_mutex_t* mutex, const pthread_mutexattr_t* attr);
+int (*pthread_mutex_destroy_original)(pthread_mutex_t* mutex);
 
 static _Thread_local int recursion_guard = 0;
 
 int recursion_guard_enter() {
-  if(recursion_guard == 0) {
+  if (recursion_guard == 0) {
     recursion_guard = 1;
     return 1;
   }
@@ -33,11 +37,12 @@ void init_callbacks() {
   pthread_mutex_destroy_original = get_callback("pthread_mutex_destroy");
 }
 
-int pthread_mutex_lock(pthread_mutex_t *mutex) {
-  if(!pthread_mutex_lock_original) init_callbacks();
+int pthread_mutex_lock(pthread_mutex_t* mutex) {
+  if (!pthread_mutex_lock_original)
+    init_callbacks();
 
   int ret;
-  if(recursion_guard_enter()) {
+  if (recursion_guard_enter()) {
     enter_function(mutex_lock, mutex);
     ret = pthread_mutex_lock_original(mutex);
     leave_function(mutex_lock, mutex);
@@ -45,15 +50,16 @@ int pthread_mutex_lock(pthread_mutex_t *mutex) {
   } else {
     ret = pthread_mutex_lock_original(mutex);
   }
-  
+
   return ret;
 }
 
-int pthread_mutex_trylock(pthread_mutex_t *mutex) {
-  if(!pthread_mutex_trylock_original) init_callbacks();
+int pthread_mutex_trylock(pthread_mutex_t* mutex) {
+  if (!pthread_mutex_trylock_original)
+    init_callbacks();
 
   int ret;
-  if(recursion_guard_enter()) {
+  if (recursion_guard_enter()) {
     enter_function(mutex_trylock, mutex);
     ret = pthread_mutex_trylock_original(mutex);
     leave_function(mutex_unlock, mutex);
@@ -61,15 +67,16 @@ int pthread_mutex_trylock(pthread_mutex_t *mutex) {
   } else {
     ret = pthread_mutex_trylock_original(mutex);
   }
-  
+
   return ret;
 }
 
-int pthread_mutex_unlock(pthread_mutex_t *mutex){
-  if(!pthread_mutex_unlock_original) init_callbacks();
+int pthread_mutex_unlock(pthread_mutex_t* mutex) {
+  if (!pthread_mutex_unlock_original)
+    init_callbacks();
 
   int ret;
-  if(recursion_guard_enter()) {
+  if (recursion_guard_enter()) {
     enter_function(mutex_unlock, mutex);
     ret = pthread_mutex_unlock_original(mutex);
     leave_function(mutex_unlock, mutex);
@@ -80,10 +87,11 @@ int pthread_mutex_unlock(pthread_mutex_t *mutex){
   return ret;
 }
 
-int pthread_mutex_init(pthread_mutex_t *mutex, const pthread_mutexattr_t *attr){
-  if(!pthread_mutex_init_original) init_callbacks();
+int pthread_mutex_init(pthread_mutex_t* mutex, const pthread_mutexattr_t* attr) {
+  if (!pthread_mutex_init_original)
+    init_callbacks();
   int ret;
-  if(recursion_guard_enter()) {
+  if (recursion_guard_enter()) {
     enter_function(mutex_init, mutex);
     ret = pthread_mutex_init_original(mutex, attr);
     leave_function(mutex_init, mutex);
@@ -91,15 +99,16 @@ int pthread_mutex_init(pthread_mutex_t *mutex, const pthread_mutexattr_t *attr){
   } else {
     ret = pthread_mutex_init_original(mutex, attr);
   }
-  
+
   return ret;
 }
 
-int pthread_mutex_destroy(pthread_mutex_t *mutex){
-  if(!pthread_mutex_destroy_original) init_callbacks();
+int pthread_mutex_destroy(pthread_mutex_t* mutex) {
+  if (!pthread_mutex_destroy_original)
+    init_callbacks();
 
   int ret;
-  if(recursion_guard_enter()) {
+  if (recursion_guard_enter()) {
     enter_function(mutex_destroy, mutex);
     ret = pthread_mutex_destroy_original(mutex);
     leave_function(mutex_destroy, mutex);
@@ -120,3 +129,11 @@ static void __mutex_conclude(void) __attribute__((destructor));
 static void __mutex_conclude(void) {
   DEBUG_PRINTF("[LIBLOCK] finalizing the mutex library\n");
 }
+
+/* -*-
+   mode: c;
+   c-file-style: "k&r";
+   c-basic-offset 2;
+   tab-width 2 ;
+   indent-tabs-mode nil
+   -*- */
