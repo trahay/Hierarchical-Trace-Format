@@ -17,3 +17,6 @@ add_test(NAME find_loop COMMAND find_loop)
 
 add_executable(test_array test_array.c)
 add_test(NAME test_array COMMAND test_array)
+
+add_executable(test_hash test_hash.c)
+add_test(NAME test_hash COMMAND test_hash)
