@@ -54,7 +54,8 @@ target_link_libraries(htf
     ${CMAKE_DL_LIBS}
     rt
     m
-    )
+    ${zstd_LIBRARIES}
+)
 install(TARGETS htf EXPORT HTFLibTargets
   LIBRARY DESTINATION ${INSTALL_LIBDIR}
   PUBLIC_HEADER DESTINATION ${INSTALL_INCLUDEDIR})
