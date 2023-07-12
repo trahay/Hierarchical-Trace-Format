@@ -28,7 +28,7 @@ static inline htf_event_id_t _htf_get_event_id(struct htf_thread* thread_trace, 
 
 	if (thread_trace->nb_events >= thread_trace->nb_allocated_events) {
 		//		htf_error( "too many event data!\n");
-		htf_warn("Doubling mem space of events for thread trace %p\n", thread_trace);
+	        htf_warn("Doubling mem space of events for thread trace %p\n", (void*)thread_trace);
 		DOUBLE_MEMORY_SPACE(thread_trace->events, thread_trace->nb_allocated_events, struct htf_event_summary);
 	}
 
@@ -51,7 +51,8 @@ static void init_dummy_event(struct htf_thread_writer* thread_writer, enum htf_r
 	htf_store_event(thread_writer, htf_singleton, e_id);
 }
 int MAX_EVENT = 4;
-int main(int argc, char** argv) {
+int main(int argc __attribute__((unused)),
+	 char** argv  __attribute__((unused))) {
 	/* Make a dummy archive and a dummy thread writer. */
 	struct htf_archive archive;
 	htf_write_archive_open(&archive, "dummy_trace", "dummy_trace", 0);
@@ -64,7 +65,7 @@ int main(int argc, char** argv) {
 
 	/* Check they've been correctly registered. */
 	htf_assert(thread_writer.cur_depth == 0);
-	htf_assert(thread_writer.og_seq[0]->size == MAX_EVENT);
+	htf_assert(thread_writer.og_seq[0]->size == (unsigned int)MAX_EVENT);
 	for (int eid = 0; eid < MAX_EVENT; eid++) {
 		htf_assert(thread_writer.og_seq[0]->token[eid].type == HTF_TYPE_EVENT);
 		htf_assert(thread_writer.og_seq[0]->token[eid].id == eid);
@@ -81,13 +82,13 @@ int main(int argc, char** argv) {
 	/* Check that the loop is correct */
 	struct htf_loop* l = htf_get_loop(&thread_writer.thread_trace, HTF_LOOP_ID(thread_writer.og_seq[0]->token[0].id));
 	htf_assert(l->nb_iterations[l->nb_loops - 1] == 2);
-	htf_token_t supposed_id = HTF_TOKENIZE(HTF_TYPE_LOOP, 0);
+	// htf_token_t supposed_id = HTF_TOKENIZE(HTF_TYPE_LOOP, 0);
 	// htf_assert(memcmp(&l->id, &supposed_id, sizeof(l->id)) == 0);
 	/* Check that the sequence inside that loop is correct */
 	struct htf_sequence* s = htf_get_sequence(&thread_writer.thread_trace, HTF_SEQUENCE_ID(l->token.id));
-	supposed_id = HTF_TOKENIZE(HTF_TYPE_SEQUENCE, 1);	 // The first sequence is the main one
+	// supposed_id = HTF_TOKENIZE(HTF_TYPE_SEQUENCE, 1);	 // The first sequence is the main one
 	// htf_assert(memcmp(&s->id, &supposed_id, sizeof(s->id)) == 0);
-	htf_assert(s->size == MAX_EVENT);
+	htf_assert(s->size == (unsigned int) MAX_EVENT);
 
 	for (int eid = 0; eid < MAX_EVENT; eid++) {
 		htf_assert(s->token[eid].type == HTF_TYPE_EVENT);

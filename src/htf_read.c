@@ -484,7 +484,6 @@ htf_timestamp_t skip_sequence(struct htf_thread_reader* reader, htf_token_t toke
 		}
 		case HTF_TYPE_LOOP: {
 			htf_warn("Asked to skip a Loop, which is unusual\n");
-			int loop_index = reader->loop_index[HTF_TOKEN_ID(token)];
 			struct htf_loop* loop = htf_get_loop(reader->thread_trace, HTF_TOKEN_TO_LOOP_ID(token));
 			return skip_sequence(reader, loop->token);
 		}

@@ -169,7 +169,7 @@ static void free_occurence(htf_token_t token, htf_occurence* occurence) {
 	switch (token.type) {
 		case HTF_TYPE_SEQUENCE: {
 			struct htf_sequence_occurence seq = occurence->sequence_occurence;
-			DOFOR(i, seq.sequence->size) {
+			DOFOR(i, (int)seq.sequence->size) {
 				free_occurence(seq.sequence->token[i], &((htf_occurence*)seq.full_sequence)[i]);
 			}
 			free(seq.full_sequence);
@@ -178,7 +178,7 @@ static void free_occurence(htf_token_t token, htf_occurence* occurence) {
 		}
 		case HTF_TYPE_LOOP: {
 			struct htf_loop_occurence loop = occurence->loop_occurence;
-			DOFOR(i, loop.nb_iterations) {
+			DOFOR(i, (int)loop.nb_iterations) {
 				free_occurence(loop.loop->token, &loop.full_loop[i]);
 			}
 			free(loop.full_loop);
@@ -214,9 +214,9 @@ static void display_sequence(struct htf_thread_reader* reader,
 			}
 			if (current_level_token[i].type == HTF_TYPE_LOOP) {
 				struct htf_loop_occurence loop = current_level[i].loop_occurence;
-				DOFOR(j, loop.nb_iterations) {
+				DOFOR(j, (int) loop.nb_iterations) {
 					print_token(reader->thread_trace, &loop.loop->token, (htf_occurence*)&loop.full_loop[j], depth + 1,
-											j == (loop.nb_iterations - 1), &loop);
+						    j == ((int)loop.nb_iterations - 1), &loop);
 					// display_sequence(reader, loop.loop->token, &loop.full_loop[j], depth + 2);
 				}
 			}
@@ -286,9 +286,9 @@ void print_trace(struct htf_archive* trace) {
 
 	printf("Timestamp\tDuration\tThread Name\tTag\tEvent\n");
 
-	htf_occurence e;
-	struct htf_token t;
-	int thread_index = -1;
+	//	htf_occurence e;
+	//	struct htf_token t;
+	//	int thread_index = -1;
 	//	while ((thread_index = get_next_token(readers, trace->nb_threads, &t, &e)) >= 0) {
 	//		print_token(&readers[thread_index], &t, &e);
 	//	}
