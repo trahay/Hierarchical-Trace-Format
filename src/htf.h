@@ -4,7 +4,6 @@
 #include <pthread.h>
 #include <string.h>
 
-#include "htf.h"
 #include "htf_dbg.h"
 #include "htf_dynamic_array.h"
 #include "htf_timestamp.h"
@@ -12,78 +11,129 @@
 #ifndef NDEBUG
 #define DEBUG
 #endif
-/* A token is either:
-	 - an event
-	 - a sequence (ie a list of tokens)
-	 - a loop (a repetition of sequences)
-*/
 
-/* Token types */
+
+
+
+/*************************** Tokens **********************/
+
+
+
+/**
+ * A trace is composed of basic units called token.
+ * A token is either:
+ *   - an event
+ *   - a sequence (ie a list of tokens)
+ *   - a loop (a repetition of sequences)
+ */
+
+/** Enumeration of token types */
 typedef enum htf_token_type {
 	HTF_TYPE_INVALID = 0,
 	HTF_TYPE_EVENT = 1,
 	HTF_TYPE_SEQUENCE = 2,
-  HTF_TYPE_LOOP     = 3
+    HTF_TYPE_LOOP     = 3
 } htf_token_type_t;
 
+
+/**
+ * Match numerical token type with a character
+ * HTF_TYPE_INVALID = 'I'
+ * HTF_TYPE_EVENT = 'E'
+ * HTF_TYPE_SEQUENCE = 'S'
+ * HTF_TYPE_LOOP = 'L'
+ * 'U' otherwise
+ */
 #define HTF_TOKEN_TYPE_C(t) (HTF_TOKEN_TYPE(t))==HTF_TYPE_INVALID? 'I':	\
     (HTF_TOKEN_TYPE(t))==HTF_TYPE_EVENT? 'E':				\
     (HTF_TOKEN_TYPE(t))==HTF_TYPE_SEQUENCE? 'S':			\
     (HTF_TOKEN_TYPE(t))==HTF_TYPE_LOOP? 'L':'U'
 
+
+/** Definition of the type for a token ID */
 typedef uint32_t htf_token_id_t;
 
+
+/**
+ * A token is defined as a structure composed of
+ *  - its type (2bits)
+ *  - its id (30bits )
+ */
 typedef struct htf_token {
   enum htf_token_type type : 2;
   htf_token_id_t id : 30;
 } htf_token_t;
 
 
+/**
+ * A token of type Event is defined in a structure composed of
+ *  - its id (30bits )
+ */
 typedef struct htf_event_id {
   htf_token_id_t id : 30;
 } htf_event_id_t;
 
+/**
+ * A token of type Sequence is defined in a structure composed of
+ *  -its id (30bits )
+ */
 typedef struct htf_sequence_id {
   htf_token_id_t id : 30;
 } htf_sequence_id_t;
 
+/**
+ * A token of type Loop is defined in a structure composed of
+ *  - its id (30bits )
+ */
 typedef struct htf_loop_id {
   htf_token_id_t id : 30;
 } htf_loop_id_t;
 
+
+
+/** Useful macros */
 #define HTF_TOKEN_ID_INVALID    0x3fffffff
 #define HTF_EVENT_ID_INVALID    HTF_TOKEN_ID_INVALID
 #define HTF_SEQUENCE_ID_INVALID HTF_TOKEN_ID_INVALID
 #define HTF_LOOP_ID_INVALID     HTF_TOKEN_ID_INVALID
 
-/* convert an id to an integer */
+/** Convert an ID to an integer */
 #define HTF_ID(_id) ((_id).id)
 
-/* return the type/id of a token */
+/** Return the type/id of a token */
 #define HTF_TOKEN_TYPE(t) ( (t).type)
 #define HTF_TOKEN_ID(t) ( (t).id)
 
-/* build a token */
+/** Build a token */
 static inline htf_token_t HTF_TOKENIZE(htf_token_type_t t, htf_token_id_t id) { return (htf_token_t) {.type=t, .id=id};} 
 
-/* convert an index to an event_id_t */
+/** Convert an index to an event_id_t */
 static inline htf_event_id_t HTF_EVENT_ID(int index) { return (htf_event_id_t) {.id=index};}
 static inline htf_sequence_id_t HTF_SEQUENCE_ID(int index) {return (htf_sequence_id_t) {.id=index};}
 static inline htf_loop_id_t HTF_LOOP_ID(int index) { return (htf_loop_id_t) {.id=index};}
 
-/* convert a token_t to an event_id_t */
+/** Convert a token_t to an event_id_t */
 static inline htf_event_id_t HTF_TOKEN_TO_EVENT_ID(htf_token_t t) { return (htf_event_id_t) {.id=HTF_TOKEN_ID(t)};}
 static inline htf_sequence_id_t HTF_TOKEN_TO_SEQUENCE_ID(htf_token_t t) { return (htf_sequence_id_t) {.id=HTF_TOKEN_ID(t)};}
 static inline htf_loop_id_t HTF_TOKEN_TO_LOOP_ID(htf_token_t t) { return (htf_loop_id_t) {.id=HTF_TOKEN_ID(t)};}
 
 
+
+
+
+
+
+
 /*************************** Events **********************/
+
+/** Enumeration of event types */
 enum htf_event_type {
    htf_block_start,
    htf_block_end,
    htf_singleton,
 };
 
+/** Enumeration of the different events that are recorded by HTF */
 enum htf_record {
     HTF_EVENT_BUFFER_FLUSH                     = 0, /** Event record identifier for the BufferFlush event. */
     HTF_EVENT_MEASUREMENT_ON_OFF               = 1, /** Event record identifier for the MeasurementOnOff event. */
@@ -99,7 +149,7 @@ enum htf_record {
     HTF_EVENT_MPI_REQUEST_CANCELLED            = 11, /** Event record identifier for the MpiRequestCancelled event. */
     HTF_EVENT_MPI_COLLECTIVE_BEGIN             = 12, /** Event record identifier for the MpiCollectiveBegin event. */
     HTF_EVENT_MPI_COLLECTIVE_END               = 13, /** Event record identifier for the MpiCollectiveEnd event. */
-    HTF_EVENT_OMP_FORK                         = 14, /** Event record identifier for the OmpFork event. */
+    HTF_EVENT_OMP_FORK                         = 14, /** Event record idsequenceentifier for the OmpFork event. */
     HTF_EVENT_OMP_JOIN                         = 15, /** Event record identifier for the OmpJoin event. */
     HTF_EVENT_OMP_ACQUIRE_LOCK                 = 16, /** Event record identifier for the OmpAcquireLock event. */
     HTF_EVENT_OMP_RELEASE_LOCK                 = 17, /** Event record identifier for the OmpReleaseLock event. */
@@ -147,30 +197,61 @@ enum htf_record {
     HTF_EVENT_MAX_ID
 };
 
+/**
+ * Structure to store an event in HTF
+ * uint8_t event_size: the size of the event
+ * enum htf_record record: the ID of the event recorded in the above enumeration of events
+ * uint8_t event_data[256]: data related to the events (parameters of functions etc)
+ */
 struct htf_event {
   uint8_t event_size;
   enum htf_record record;
-  
   uint8_t event_data[256]; // todo: align on 256
 } __attribute__((packed));
 
-/*************************** Sequence **********************/
+
+
+
+
+
+
+
+/*************************** Sequences **********************/
+
+/**
+ * Structure to store a sequence in HTF format
+ * htf_token_t* token: Array to store the sequence of tokens
+ * unsigned size: Number of tokens in the seqie,ce
+ * unsigned allocated: Number of tokens allocated in token.
+ * htf_array_t timestamps: array of timestamps for the start of the events in the sequence(see htf_dynamic_array.h)
+ * htf_timestamp_t* durations: array of durations of the events in the sequence (see htf_timestamp.h)
+ */
 struct htf_sequence {
-	/** Store the sequence of tokens. */
 	htf_token_t* token;
-	/** Number of tokens in the sequence. */
 	unsigned size;
-	/** Number of tokens allocated in token. */
 	unsigned allocated;
-	/** Timestamps for the start of these types of sequence. */
 	htf_array_t timestamps;
-	/** Durations for these types of sequences. */
 	htf_timestamp_t* durations;
 };
 
+
+
+
+
+
+
+
 /*************************** Loop **********************/
+
+/**
+ * Structure to store a loop in HTF format
+ * unsigned* nb_iterations:  number of iterations for the loop
+ * unsigned nb_loops: Number of tokens in the seqie,ce
+ * unsigned nb_allocated: Number of tokens allocated in token.
+ * htf_token_t token: array of timestamps for the start of the events in the sequence(see htf_dynamic_array.h)
+ * struct htf_token id: array of durations of the events in the sequence (see htf_timestamp.h)
+ */
 struct htf_loop {
-	/* Number of iterations for these loops. */
 	unsigned* nb_iterations;
 	/** Number of registered loops. */
 	unsigned nb_loops;
@@ -182,8 +263,14 @@ struct htf_loop {
 	struct htf_token id;
 };
 
+
+
+
+
+
+
 /**
- * Summary for an event. The nth time the event appears, it is at timestamps timestamps[n].
+ * Summary for an event. The nth time the event appears, it is at timestamp timestamps[n].
  */
 struct htf_event_summary {
 	struct htf_event event;
@@ -377,6 +464,9 @@ static inline int _htf_sequences_equal(struct htf_sequence *s1,
   return _htf_arrays_equal(s1->token, s1->size, s2->token, s2->size);
 }
 
+
+
+
 /**
  * Given a buffer, a counter that indicates the number of object it holds, and this object's datatype,
  * doubles the size of the buffer using realloc, or if it fails, malloc and memmove then frees the old buffer.
@@ -396,6 +486,8 @@ static inline int _htf_sequences_equal(struct htf_sequence *s1,
 	buffer = new_buffer;                                                    \
   counter *= 2;                                                           \
 } while (0)
+
+
 /**
  * Given a buffer, a counter that indicates the number of object it holds, and this object's datatype,
  * Increments the size of the buffer by 1 using realloc, or if it fails, malloc and memmove then frees the old buffer.
@@ -416,6 +508,10 @@ static inline int _htf_sequences_equal(struct htf_sequence *s1,
 		counter++;                                                                \
 	} while (0)
 
+
+/**
+* Primitive for DOFOR loops
+*/
 #define DOFOR(var_name, max) for (int var_name = 0; var_name < max; var_name++)
 
 #endif /* EVENT_H */
