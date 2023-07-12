@@ -1,3 +1,15 @@
+/* -*-
+   mode: c;
+   c-file-style: "k&r";
+   c-basic-offset 2;
+   tab-width 2 ;
+   indent-tabs-mode nil
+   -*- */
+/*
+ * Copyright (C) Telecom SudParis
+ * See LICENSE in top-level directory.
+ */
+
 #include <time.h>
 #include <assert.h>
 #include <pthread.h>
@@ -30,8 +42,8 @@ struct htf_sequence* htf_get_sequence(struct htf_thread *thread_trace,
 				      htf_sequence_id_t seq_id) {
   struct htf_sequence* seq = NULL;
   if(HTF_ID(seq_id) < thread_trace->nb_sequences)
-		seq = thread_trace->sequences[HTF_ID(seq_id)];
-	return seq;
+    seq = thread_trace->sequences[HTF_ID(seq_id)];
+  return seq;
 }
 
 /** Returns the loop corresponding to the given loop id.
@@ -65,15 +77,15 @@ static htf_token_t _htf_get_token_in_sequence(struct htf_thread *thread_trace,
 static htf_token_t _htf_get_token_in_loop(struct htf_thread *thread_trace,
 					  htf_loop_id_t loop_id,
 					  int index) {
-	struct htf_loop* l = htf_get_loop(thread_trace, loop_id);
-	if (!l) {
-		htf_error("invalid loop id: %d\n", HTF_ID(loop_id));
-	}
+  struct htf_loop* l = htf_get_loop(thread_trace, loop_id);
+  if (!l) {
+    htf_error("invalid loop id: %d\n", HTF_ID(loop_id));
+  }
 
-	if (index >= l->nb_iterations[l->nb_loops - 1]) {
-		htf_error("invalid index (%d) in loop #%d\n", index, HTF_ID(loop_id));
-	}
-	return l->token;
+  if (index >= l->nb_iterations[l->nb_loops - 1]) {
+    htf_error("invalid index (%d) in loop #%d\n", index, HTF_ID(loop_id));
+  }
+  return l->token;
 }
 
 /** Prints the given token.*/
@@ -82,19 +94,19 @@ void htf_print_token(struct htf_thread *thread_trace, htf_token_t token) {
   case HTF_TYPE_EVENT: {
 #define ET2C(et) (((et) == HTF_EVENT_ENTER ? 'E' : (et) == HTF_EVENT_LEAVE ? 'L' : 'S'))
 
-			struct htf_event* e = htf_get_event(thread_trace, HTF_TOKEN_TO_EVENT_ID(token));
-			printf("E%x_%c", HTF_TOKEN_ID(token), ET2C(e->record));	 //, e->function_id);
-			break;
-		}
-		case HTF_TYPE_SEQUENCE:
-			printf("S%x", HTF_TOKEN_ID(token));
-			break;
+    struct htf_event* e = htf_get_event(thread_trace, HTF_TOKEN_TO_EVENT_ID(token));
+    printf("E%x_%c", HTF_TOKEN_ID(token), ET2C(e->record));	 //, e->function_id);
+    break;
+  }
+  case HTF_TYPE_SEQUENCE:
+    printf("S%x", HTF_TOKEN_ID(token));
+    break;
   case HTF_TYPE_LOOP:
-			printf("L%x", HTF_TOKEN_ID(token));
-			break;
+    printf("L%x", HTF_TOKEN_ID(token));
+    break;
   default:
-			printf("U%x_%x", HTF_TOKEN_TYPE(token), HTF_TOKEN_ID(token));
-			break;
+    printf("U%x_%x", HTF_TOKEN_TYPE(token), HTF_TOKEN_ID(token));
+    break;
   }
 }
 
@@ -164,7 +176,7 @@ struct htf_thread* htf_archive_get_thread(struct htf_archive* archive,
  * Returns NULL if the id does not have a match in the archive nor the global archive.
  */
 struct htf_location_group* htf_archive_get_location_group(struct htf_archive* archive,
-						htf_location_group_id_t location_group_id) {
+							  htf_location_group_id_t location_group_id) {
   for(int i = 0; i<archive->nb_location_groups; i++) {
     if(archive->location_groups[i].id == location_group_id)
       return &archive->location_groups[i];
@@ -173,7 +185,7 @@ struct htf_location_group* htf_archive_get_location_group(struct htf_archive* ar
   if(archive->global_archive)
     for(int i = 0; i<archive->global_archive->nb_location_groups; i++) {
       if(archive->global_archive->location_groups[i].id == location_group_id)
-				return &archive->global_archive->location_groups[i];
+	return &archive->global_archive->location_groups[i];
     }
 
   return NULL;  
@@ -193,7 +205,7 @@ struct htf_location* htf_archive_get_location(struct htf_archive* archive,
   if(archive->global_archive)
     for(int i = 0; i<archive->global_archive->nb_locations; i++) {
       if(archive->global_archive->locations[i].id == id)
-				return &archive->global_archive->locations[i];
+	return &archive->global_archive->locations[i];
     }
 
   return NULL;  
