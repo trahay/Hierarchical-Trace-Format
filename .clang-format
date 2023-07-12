@@ -4,6 +4,7 @@ BasedOnStyle: Chromium
 TabWidth: 2
 IndentWidth: 2
 ColumnLimit: 120
-UseTab: Always
+UseTab: Never
+IndentCaseLabels: false
 ...
 
