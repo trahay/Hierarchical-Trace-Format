@@ -12,6 +12,7 @@ make install
 ## Using HTF
 
 HTF implements a subset of the [OTF2](https://www.vi-hps.org/projects/score-p) API.
+It also implements the [Murmur3 hasing function](https://github.com/PeterScott/murmur3).
 
 
 ## Contributing
