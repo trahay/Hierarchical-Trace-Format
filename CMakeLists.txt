@@ -25,14 +25,14 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake_modules)
 # Options to enable/disable modules
 option(ENABLE_PTHREAD "Enable Pthread module" ON)
 option(ENABLE_MPI "Enable MPI module" OFF)
-#option(ENABLE_OMPT     "Enable OMPT module"     OFF)
-
 option(ENABLE_OTF2 "Enable OTF2 compatibilit layer" ON)
 
 
 if (ENABLE_MPI)
   find_program(MPICC mpicc REQUIRED)
 endif()
+
+find_package (zstd REQUIRED)
 
 ####################################################
 # Some flags for compilation
