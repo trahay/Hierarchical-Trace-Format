@@ -10,7 +10,7 @@
 #include <string.h>
 
 #include "htf_dbg.h"
-#include "htf_dynamic_array.h"
+#include "htf_vector.h"
 #include "htf_timestamp.h"
 
 #ifndef NDEBUG
@@ -270,14 +270,14 @@ struct htf_event {
  *  - htf_token_t* token: Array to store the sequence of tokens
  *  - unsigned size: Number of tokens in the sequence
  *  - unsigned allocated: Number of tokens allocated in this sequence token
- *  - htf_array_t timestamps: array of timestamps for the start of these types of sequence (see htf_dynamic_array.h)
+ *  - htf_vector_t timestamps: vector of timestamps for the start of these types of sequence (see htf_vector.h)
  *  - htf_timestamp_t* durations: array of durations for these types of sequences. (see htf_timestamp.h)
  */
 struct htf_sequence {
   htf_token_t* token;
   unsigned size;
   unsigned allocated;
-  htf_array_t timestamps;
+  htf_vector_t timestamps;
   htf_timestamp_t* durations;
 };
 

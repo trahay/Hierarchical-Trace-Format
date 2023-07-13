@@ -86,20 +86,20 @@ static FILE* _htf_file_open(char* filename, char* mode) {
       htf_error("fwrite failed\n");                \
   } while (0)
 
-#define _htf_array_fwrite(dyn_array, stream)                                         \
-  do {                                                                               \
-    _htf_fwrite(&dyn_array.size, sizeof(dyn_array.size), 1, stream);                 \
-    _htf_fwrite(&dyn_array.element_size, sizeof(dyn_array.element_size), 1, stream); \
-    _htf_fwrite(dyn_array.array, dyn_array.element_size, dyn_array.size, stream);    \
+#define _htf_vector_fwrite(_vector, stream)				\
+  do {									\
+    _htf_fwrite(&_vector.size, sizeof(_vector.size), 1, stream);		\
+    _htf_fwrite(&_vector.element_size, sizeof(_vector.element_size), 1, stream); \
+    _htf_fwrite(_vector.vector, _vector.element_size, _vector.size, stream); \
   } while (0)
 
-#define _htf_array_fread(dyn_array, stream)                                         \
-  do {                                                                              \
-    _htf_fread(&dyn_array.size, sizeof(dyn_array.size), 1, stream);                 \
-    _htf_fread(&dyn_array.element_size, sizeof(dyn_array.element_size), 1, stream); \
-    dyn_array.array = malloc(dyn_array.element_size * dyn_array.size);              \
-    dyn_array.allocated = dyn_array.size;                                           \
-    _htf_fread(dyn_array.array, dyn_array.element_size, dyn_array.size, stream);    \
+#define _htf_vector_fread(_vector, stream)				\
+  do {									\
+    _htf_fread(&_vector.size, sizeof(_vector.size), 1, stream);		\
+    _htf_fread(&_vector.element_size, sizeof(_vector.element_size), 1, stream); \
+    _vector.vector = malloc(_vector.element_size * _vector.size);		\
+    _vector.allocated = _vector.size;					\
+    _htf_fread(_vector.vector, _vector.element_size, _vector.size, stream); \
   } while (0)
 
 void htf_storage_init(struct htf_archive* archive) {
@@ -227,7 +227,7 @@ static void _htf_store_sequence(const char* base_dirname,
 
   _htf_fwrite(&s->size, sizeof(s->size), 1, file);
   _htf_fwrite(s->token, sizeof(s->token[0]), s->size, file);
-  _htf_array_fwrite(s->timestamps, file);
+  _htf_vector_fwrite(s->timestamps, file);
   fclose(file);
 }
 
@@ -240,7 +240,7 @@ static void _htf_read_sequence(const char* base_dirname,
   s->token = malloc(sizeof(htf_token_t) * s->size);
   s->allocated = s->size;
   _htf_fread(s->token, sizeof(htf_token_t), s->size, file);
-  _htf_array_fread(s->timestamps, file);
+  _htf_vector_fread(s->timestamps, file);
   s->durations = calloc(s->timestamps.size, sizeof(htf_timestamp_t));
   fclose(file);
 

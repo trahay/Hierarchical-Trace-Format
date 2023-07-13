@@ -16,7 +16,7 @@ set(HTF_HEADERS
         htf_dbg.h
         htf_timestamp.h
         htf_storage.h
-        htf_dynamic_array.h
+        htf_vector.h
         htf_hash.h
         )
 
@@ -30,7 +30,7 @@ target_sources(
         htf_storage.c
         htf_dbg.c
         htf.c
-        htf_dynamic_array.c
+        htf_vector.c
         htf_hash.c
         PUBLIC
         ${HTF_HEADERS}

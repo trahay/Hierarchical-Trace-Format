@@ -27,7 +27,7 @@ static inline htf_sequence_id_t _htf_get_sequence_id_from_array(struct htf_threa
     s->token = calloc(sizeof(htf_token_t), SEQUENCE_SIZE_DEFAULT); \
     s->size = 0;                                                   \
     s->allocated = SEQUENCE_SIZE_DEFAULT;                          \
-    htf_array_new(&s->timestamps, sizeof(htf_timestamp_t));            \
+    htf_vector_new(&s->timestamps, sizeof(htf_timestamp_t));            \
   } while (0)
 
 #define _init_loop(l)                                               \
@@ -228,7 +228,7 @@ static inline htf_timestamp_t _htf_get_timestamp(struct htf_thread* thread,
   }                                                                                       \
   case HTF_TYPE_SEQUENCE: {                                                               \
     struct htf_sequence* seq = htf_get_sequence(thread, HTF_TOKEN_TO_SEQUENCE_ID(token)); \
-    return *(htf_timestamp_t*)htf_array_get(&seq->timestamps, seq->timestamps.size - count);  \
+    return *(htf_timestamp_t*)htf_vector_get(&seq->timestamps, seq->timestamps.size - count);  \
   }
   switch (token.type) {
     CASE_EVENT_SEQUENCE(token, count)
@@ -272,9 +272,9 @@ static void _htf_create_loop(struct htf_thread_writer* thread_writer,
   htf_timestamp_t ts =
     _htf_get_timestamp(&thread_writer->thread_trace, first_token, &cur_seq->token[index_first_iteration], 2 * loop_len);
 
-  htf_array_add(&loop_seq->timestamps, &ts);
+  htf_vector_add(&loop_seq->timestamps, &ts);
   ts = _htf_get_timestamp(&thread_writer->thread_trace, first_token, &cur_seq->token[index_second_iteration], loop_len);
-  htf_array_add(&loop_seq->timestamps, &ts);
+  htf_vector_add(&loop_seq->timestamps, &ts);
 
   cur_seq->size = index_first_iteration;
   cur_seq->token[cur_seq->size] = loop->id;
@@ -315,7 +315,7 @@ static void _htf_find_loop(struct htf_thread_writer* thread_writer) {
           _htf_loop_add_iteration(loop);
           htf_timestamp_t ts = _htf_get_timestamp(&thread_writer->thread_trace, cur_seq->token[s1_start],
                                                   &cur_seq->token[s1_start], cur_seq->size - s1_start);
-          htf_array_add(&seq->timestamps, &ts);
+          htf_vector_add(&seq->timestamps, &ts);
           cur_seq->size = s1_start;
           return;
         }
@@ -419,7 +419,7 @@ void _htf_record_exit_function(struct htf_thread_writer* thread_writer) {
   htf_sequence_id_t seq_id = _htf_get_sequence_id(&thread_writer->thread_trace, cur_seq);
   struct htf_sequence* seq = thread_writer->thread_trace.sequences[seq_id.id];
   htf_timestamp_t ts = _htf_get_timestamp(&thread_writer->thread_trace, seq->token[0], seq->token, seq->size);
-  htf_array_add(&seq->timestamps, &ts);
+  htf_vector_add(&seq->timestamps, &ts);
   htf_log(htf_dbg_lvl_debug, "Exiting a function, closing sequence %d (%p)\n", seq_id.id, cur_seq);
 
   thread_writer->cur_depth--;
