@@ -5,7 +5,7 @@
 
 #include <inttypes.h>
 #include <malloc.h>
-#include "htf_murmur.h"
+#include "htf_hash.h"
 #include "stdlib.h"
 
 #define SEED 0
@@ -26,7 +26,7 @@ int main(int argc __attribute__((unused)), char** argv __attribute__((unused))) 
   printf("Testing all the events up to %d\n", MAX_EVENT);
   for (uint32_t i = 0; i < MAX_EVENT; i++) {
     htf_token_t token = {.type = HTF_TYPE_EVENT, .id = i};
-    htf_murmur_hash3_x64_32(&token, 1, SEED, &hash);
+    htf_hash_32(&token, 1, SEED, &hash);
     uint32_t new_key = hash % SIZE_COLLISION_ARRAY;
     int buffer;
     buffer = collisions[new_key]++;
@@ -37,7 +37,7 @@ int main(int argc __attribute__((unused)), char** argv __attribute__((unused))) 
   printf("Testing all the sequences up to %d\n", MAX_SEQUENCE);
   for (uint32_t i = 0; i < MAX_SEQUENCE; i++) {
     htf_token_t token = {.type = HTF_TYPE_SEQUENCE, .id = i};
-    htf_murmur_hash3_x64_32(&token, 1, SEED, &hash);
+    htf_hash_32(&token, 1, SEED, &hash);
     uint32_t new_key = hash % SIZE_COLLISION_ARRAY;
     if (collisions[new_key]++) {
       count_collision++;
@@ -46,7 +46,7 @@ int main(int argc __attribute__((unused)), char** argv __attribute__((unused))) 
   printf("Testing all the loops up to %d\n", MAX_LOOP);
   for (uint32_t i = 0; i < MAX_LOOP; i++) {
     htf_token_t token = {.type = HTF_TYPE_LOOP, .id = i};
-    htf_murmur_hash3_x64_32(&token, 1, SEED, &hash);
+    htf_hash_32(&token, 1, SEED, &hash);
     uint32_t new_key = hash % SIZE_COLLISION_ARRAY;
     if (collisions[new_key]++) {
       count_collision++;
@@ -75,7 +75,7 @@ int main(int argc __attribute__((unused)), char** argv __attribute__((unused))) 
         }
       }
 
-      htf_murmur_hash3_x64_32(&token, sequence_size, SEED, &hash);
+      htf_hash_32(&token, sequence_size, SEED, &hash);
       uint32_t new_key = hash % SIZE_COLLISION_ARRAY;
       if (collisions[new_key]) {
         count_collision++;

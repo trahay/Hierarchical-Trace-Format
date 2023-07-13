@@ -17,13 +17,12 @@ set(HTF_HEADERS
         htf_timestamp.h
         htf_storage.h
         htf_dynamic_array.h
-        htf_murmur.h
+        htf_hash.h
         )
 
 target_sources(
         htf
         PRIVATE
-        htf_murmur.c
         htf_read.c
         htf_write.c
         htf_archive.c
@@ -32,6 +31,7 @@ target_sources(
         htf_dbg.c
         htf.c
         htf_dynamic_array.c
+        htf_hash.c
         PUBLIC
         ${HTF_HEADERS}
 )

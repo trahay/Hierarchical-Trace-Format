@@ -9,7 +9,7 @@
 // This is actually the C port of the Murmur3 Hash algorithm, which I have further modified
 // So that it can hash efficiently the sequences.
 // The OG C implementation can be found here: https://github.com/PeterScott/murmur3
-#include "htf_murmur.h"
+#include "htf_hash.h"
 
 //-----------------------------------------------------------------------------
 // Platform-specific functions and macros
@@ -64,8 +64,7 @@ static FORCE_INLINE uint64_t fmix64(uint64_t k) {
 
 //-----------------------------------------------------------------------------
 
-void htf_murmur_hash3_x64_32 ( const void * key, int len, uint32_t seed, uint32_t * out )
-{
+void htf_hash_32 ( const void * key, int len, uint32_t seed, uint32_t * out ) {
   const uint8_t * data = (const uint8_t*)key;
   const int nblocks = len / 4;
 
@@ -119,7 +118,7 @@ void htf_murmur_hash3_x64_32 ( const void * key, int len, uint32_t seed, uint32_
   *(uint32_t*)out = h1;
 }
 
-void htf_murmur_hash3_x64_64(const void* key, const int len, const uint32_t seed, uint64_t* out) {
+void htf_hash64(const void* key, const int len, const uint32_t seed, uint64_t* out) {
   // Here's the issue: We'll be feeding it an array of htf_token
   // An htf_token is 32 bits long
   // So either we change every uint8_t here to a uint32_t
