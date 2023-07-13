@@ -429,7 +429,7 @@ htf_timestamp_t htf_get_duration(struct htf_thread_reader* reader, struct htf_to
 }
 
 /** Increments the counters in the reader, returns how much duration has been skipped. */
-htf_timestamp_t __skip_token(struct htf_thread_reader* reader, htf_token_t token, int nb_times) {
+htf_timestamp_t _skip_token(struct htf_thread_reader* reader, htf_token_t token, int nb_times) {
   htf_timestamp_t ts = 0;
   switch (token.type) {
   case HTF_TYPE_EVENT: {
@@ -442,7 +442,7 @@ htf_timestamp_t __skip_token(struct htf_thread_reader* reader, htf_token_t token
   case HTF_TYPE_SEQUENCE: {
     struct htf_sequence* seq = htf_get_sequence(reader->thread_trace, HTF_TOKEN_TO_SEQUENCE_ID(token));
     DOFOR(i, seq->size) {
-      ts += __skip_token(reader, seq->token[i], nb_times);
+      ts += _skip_token(reader, seq->token[i], nb_times);
     }
     reader->sequence_index[token.id] += nb_times;
     htf_assert(reader->sequence_index[token.id] <= seq->timestamps.size);
@@ -457,7 +457,7 @@ htf_timestamp_t __skip_token(struct htf_thread_reader* reader, htf_token_t token
       htf_assert(reader->sequence_index[loop->token.id] <= seq->timestamps.size);
 
       DOFOR(j, seq->size) {
-        ts += __skip_token(reader, seq->token[j], loop->nb_iterations[reader->loop_index[token.id]]);
+        ts += _skip_token(reader, seq->token[j], loop->nb_iterations[reader->loop_index[token.id]]);
       }
       reader->loop_index[token.id]++;
     }
@@ -474,7 +474,7 @@ htf_timestamp_t skip_sequence(struct htf_thread_reader* reader, htf_token_t toke
     int sequence_index = reader->sequence_index[HTF_TOKEN_ID(token)];
     struct htf_sequence* seq = htf_get_sequence(reader->thread_trace, HTF_TOKEN_TO_SEQUENCE_ID(token));
     htf_assert(sequence_index <= seq->timestamps.size);
-    seq->durations[sequence_index] = __skip_token(reader, token, 1);
+    seq->durations[sequence_index] = _skip_token(reader, token, 1);
     reader->referential_timestamp = ((htf_timestamp_t*)seq->timestamps.vector)[sequence_index];
     reader->referential_timestamp += seq->durations[sequence_index];
     return seq->durations[sequence_index];
