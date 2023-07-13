@@ -389,13 +389,13 @@ htf_timestamp_t htf_get_starting_timestamp(struct htf_thread_reader* reader, str
   case HTF_TYPE_SEQUENCE: {
     int sequence_index = reader->sequence_index[token.id];
     struct htf_sequence* seq = htf_get_sequence(reader->thread_trace, HTF_TOKEN_TO_SEQUENCE_ID(token));
-    return *(htf_timestamp_t*)array_get(&seq->timestamps, sequence_index);
+    return *(htf_timestamp_t*)htf_array_get(&seq->timestamps, sequence_index);
   }
   case HTF_TYPE_LOOP: {
     struct htf_loop* loop = htf_get_loop(reader->thread_trace, HTF_TOKEN_TO_LOOP_ID(token));
     struct htf_sequence* seq = htf_get_sequence(reader->thread_trace, HTF_TOKEN_TO_SEQUENCE_ID(loop->token));
     int sequence_index = reader->sequence_index[loop->token.id];
-    return *(htf_timestamp_t*)array_get(&seq->timestamps, sequence_index);
+    return *(htf_timestamp_t*)htf_array_get(&seq->timestamps, sequence_index);
   }
   case HTF_TYPE_INVALID:
     htf_error("Invalid token type\n");
