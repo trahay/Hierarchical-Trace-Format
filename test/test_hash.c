@@ -8,7 +8,6 @@
 #include "htf_hash.h"
 #include "stdlib.h"
 
-#define SEED 0
 #define MAX_EVENT (1000000)
 #define MAX_SEQUENCE (1 << 14)
 #define MAX_LOOP (MAX_SEQUENCE >> 1)
