@@ -65,8 +65,15 @@ static FORCE_INLINE uint64_t fmix64(uint64_t k) {
 //-----------------------------------------------------------------------------
 
 void htf_hash_32 ( const void * key, int len, uint32_t seed, uint32_t * out ) {
-  const uint8_t * data = (const uint8_t*)key;
-  const int nblocks = len / 4;
+  // Here's the issue: We'll be feeding it an array of htf_token
+  // An htf_token is 32 bits long
+  // So either we change every uint8_t here to a uint32_t
+  // But that might lead to some unforeseen consequences
+  // Or ! We simply take that into account, and change the "true_len" variable
+  // For now we'll try the second one, and see what it does.
+  const int true_len = len * (sizeof(htf_token_t) / sizeof(uint8_t));
+  const uint8_t* data = (const uint8_t*)key;
+  const int nblocks = true_len / 4;
 
   uint32_t h1 = seed;
 
@@ -98,27 +105,32 @@ void htf_hash_32 ( const void * key, int len, uint32_t seed, uint32_t * out ) {
 
   uint32_t k1 = 0;
 
-  switch(len & 3)
-  {
-  case 3: k1 ^= tail[2] << 16;
+  switch (true_len & 3) {
+  case 3:
+    k1 ^= tail[2] << 16;
     [[fallthrough]];
-  case 2: k1 ^= tail[1] << 8;
+  case 2:
+    k1 ^= tail[1] << 8;
     [[fallthrough]];
-  case 1: k1 ^= tail[0];
-          k1 *= c1; k1 = ROTL32(k1,15); k1 *= c2; h1 ^= k1;
+  case 1:
+    k1 ^= tail[0];
+    k1 *= c1;
+    k1 = ROTL32(k1, 15);
+    k1 *= c2;
+    h1 ^= k1;
   };
 
   //----------
   // finalization
 
-  h1 ^= len;
+  h1 ^= true_len;
 
   h1 = fmix32(h1);
 
-  *(uint32_t*)out = h1;
+  *out = h1;
 }
 
-void htf_hash64(const void* key, const int len, const uint32_t seed, uint64_t* out) {
+void htf_hash_64(const void* key, const int len, const uint32_t seed, uint64_t* out) {
   // Here's the issue: We'll be feeding it an array of htf_token
   // An htf_token is 32 bits long
   // So either we change every uint8_t here to a uint32_t
