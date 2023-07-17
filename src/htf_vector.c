@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "htf.h"
 #include "htf_dbg.h"
 
 void htf_vector_new(htf_vector_t* vector, size_t element_size) {
@@ -25,7 +26,7 @@ void htf_vector_new_with_size(htf_vector_t* vector, size_t element_size, uint si
 /** Adds an element to the vector. Copies the value of the element. */
 void htf_vector_add(htf_vector_t* vector, void* element) {
   if (vector->size >= vector->allocated) {
-    htf_warn("Reallocating memory \n");
+    htf_warn("Reallocating memory from %d to %d\n", vector->allocated, vector->allocated * 2);
     void* new_buffer = realloc(vector->vector, vector->size * 2 * vector->element_size);
     if (new_buffer == NULL) {
       new_buffer = malloc(vector->size * 2 * vector->element_size);
@@ -65,7 +66,23 @@ void htf_vector_remove_first(htf_vector_t* vector, void* element) {
       return;
     }
   }
-};
+}
+/* Prints the vector as a vector of ints.*/
+void htf_vector_print_as_int(htf_vector_t* vector) {
+  if (vector->element_size != sizeof(int)) {
+    htf_warn("Warning: printing a vector as vect of int where size is %lu\n", vector->element_size);
+  }
+  printf("[");
+  DOFOR(i, vector->size - 1) {
+    int value = *(int*)htf_vector_get(vector, i);
+    printf("%d, ", value);
+  }
+  if (vector->size > 0) {
+    int value = *(int*)htf_vector_get(vector, vector->size - 1);
+    printf("%d", value);
+  }
+  printf("]");
+}
 
 /* -*-
    mode: c;

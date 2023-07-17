@@ -33,10 +33,12 @@ void htf_vector_remove_at(htf_vector_t* vector, int index);
 /** Removes the first element whose memory is equal to the given element */
 void htf_vector_remove_first(htf_vector_t* vector, void* element);
 
+/* Prints the vector as a vector of ints.*/
+void htf_vector_print_as_int(htf_vector_t* vector);
+
 #define DEFAULT_VECTOR_SIZE 1000
 
 #endif  // HTF_VECTOR_H
-
 
 /* -*-
    mode: c;
