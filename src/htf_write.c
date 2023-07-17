@@ -221,21 +221,24 @@ static inline htf_timestamp_t _htf_get_timestamp(struct htf_thread* thread,
                                                  htf_token_t* array,
                                                  uint size) {
   uint count = _htf_count_token(thread, token, array, size);
-#define CASE_EVENT_SEQUENCE(token, count)                                                 \
-  case HTF_TYPE_EVENT: {                                                                  \
-    struct htf_event_summary es = thread->events[token.id];                               \
-    return es.timestamps[es.nb_events - count];                                           \
-  }                                                                                       \
-  case HTF_TYPE_SEQUENCE: {                                                               \
-    struct htf_sequence* seq = htf_get_sequence(thread, HTF_TOKEN_TO_SEQUENCE_ID(token)); \
-    return *(htf_timestamp_t*)htf_vector_get(&seq->timestamps, seq->timestamps.size - count);  \
+#define CASE_EVENT_SEQUENCE(token, count)                                                     \
+  case HTF_TYPE_EVENT: {                                                                      \
+    struct htf_event_summary es = thread->events[token.id];                                   \
+    return es.timestamps[es.nb_events - count];                                               \
+  }                                                                                           \
+  case HTF_TYPE_SEQUENCE: {                                                                   \
+    struct htf_sequence* seq = htf_get_sequence(thread, HTF_TOKEN_TO_SEQUENCE_ID(token));     \
+    return *(htf_timestamp_t*)htf_vector_get(&seq->timestamps, seq->timestamps.size - count); \
   }
   switch (token.type) {
     CASE_EVENT_SEQUENCE(token, count)
   case HTF_TYPE_LOOP: {
     struct htf_loop* loop = htf_get_loop(thread, HTF_TOKEN_TO_LOOP_ID(token));
-    uint second_count =
-      loop->nb_iterations[loop->nb_loops - 1] * count + _htf_count_token(thread, loop->token, array, size);
+    uint second_count = _htf_count_token(thread, loop->token, array, size);
+    DOFOR(i, count) {
+      second_count += loop->nb_iterations[loop->nb_loops - 1 - i];
+    }
+
     switch (loop->token.type) {
       CASE_EVENT_SEQUENCE(loop->token, second_count)
     case HTF_TYPE_LOOP:
