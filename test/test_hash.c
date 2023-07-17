@@ -20,13 +20,15 @@
 int main(int argc __attribute__((unused)), char** argv __attribute__((unused))) {
   short* collisions = calloc(SIZE_COLLISION_ARRAY, sizeof(int));
   htf_vector_t collision_indexes;
-  htf_vector_new(&collision_indexes, sizeof(uint32_t));
+  htf_vector_new_with_size(&collision_indexes, sizeof(uint32_t), 4000);
 
   htf_assert(collisions);
   int count_collision = 0;
   uint32_t hash[4] = {0};  // This is so that we can quickly test 64-bit and 128-bit hashing
   // Start with testing the single events and sequences and loops
   printf("Testing all the events up to %d\n", MAX_EVENT);
+  struct timespec start_time;
+  clock_gettime(CLOCK_MONOTONIC, &start_time);
   for (uint32_t i = 0; i < MAX_EVENT; i++) {
     htf_token_t token = {.type = HTF_TYPE_EVENT, .id = i};
     htf_hash_32(&token, 1, SEED, hash);
@@ -91,18 +93,21 @@ int main(int argc __attribute__((unused)), char** argv __attribute__((unused))) 
       htf_hash_32(token, sequence_size, SEED, hash);
       uint32_t new_key = hash[0] % SIZE_COLLISION_ARRAY;
       int buffer = collisions[new_key]++;
-      if (buffer) {
+      if (buffer == 1)
+        htf_vector_add(&collision_indexes, &new_key);
+      if (buffer)
         count_collision++;
-        if (buffer == 1) {
-          htf_vector_add(&collision_indexes, &new_key);
-        }
-      }
     }
     free(token);
   }
 
-  printf("Counted a total of %d collisions out of %d hits = %u%%\n", count_collision, NUM_HASHED,
-         (count_collision * 100) / NUM_HASHED);
+  struct timespec end_time;
+  clock_gettime(CLOCK_MONOTONIC, &end_time);
+  uint64_t time_per_hash =
+    ((end_time.tv_sec - start_time.tv_sec) * 1000000000 + (end_time.tv_nsec - start_time.tv_nsec)) / NUM_HASHED;
+  printf("Counted a total of %d collisions out of %d hits = %f%%\n", count_collision, NUM_HASHED,
+         (count_collision * 100.0) / NUM_HASHED);
+  printf("%lu ns/hash\n", time_per_hash);
 
   uint32_t max_index = 0;
   for (uint32_t i = 0; i < collision_indexes.size; i++) {
@@ -111,7 +116,14 @@ int main(int argc __attribute__((unused)), char** argv __attribute__((unused))) 
       max_index = *index;
     }
   }
-  printf("Max collision at %d: %d\n", max_index, collisions[max_index]);
+  printf("Max collision: %d\n", collisions[max_index]);
+  printf("Found at:\n");
+  for (uint32_t i = 0; i < collision_indexes.size; i++) {
+    uint32_t* index = htf_vector_get(&collision_indexes, i);
+    if (collisions[*index] == collisions[max_index]) {
+      printf("\t%u\n", *index);
+    }
+  }
 }
 
 /* -*-
