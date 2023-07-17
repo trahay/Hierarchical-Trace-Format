@@ -13,7 +13,7 @@ add_executable(write_benchmark write_benchmark.c)
 add_test(NAME write_benchmark COMMAND write_benchmark)
 
 add_executable(find_loop find_loop.c)
-add_test(NAME find_loop COMMAND find_loop)
+add_test(NAME find_loop COMMAND find_loop 50 100)
 
 add_executable(test_vector test_vector.c)
 add_test(NAME test_vector COMMAND test_vector)

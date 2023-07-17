@@ -9,12 +9,13 @@
 #include "htf.h"
 #include "htf_write.h"
 
-#define _init_event(e)                                                      \
-  do {                                                                      \
-    e->timestamps = malloc(sizeof(htf_timestamp_t) * NB_TIMESTAMP_DEFAULT); \
-    e->nb_allocated_events = NB_TIMESTAMP_DEFAULT;                          \
-    e->nb_events = 0;                                                       \
-  } while (0)
+static inline void _init_event_summary(struct htf_event_summary* e) {
+  e->timestamps = malloc(sizeof(htf_timestamp_t) * NB_TIMESTAMP_DEFAULT);
+  e->durations = malloc(sizeof(htf_timestamp_t) * NB_TIMESTAMP_DEFAULT);
+  e->nb_allocated_events = NB_TIMESTAMP_DEFAULT;
+  e->nb_events = 0;
+}
+
 static inline htf_event_id_t _htf_get_event_id(struct htf_thread* thread_trace, struct htf_event* e) {
   htf_log(htf_dbg_lvl_max, "Searching for event {.event_type=%d}\n", e->record);
 
@@ -38,7 +39,7 @@ static inline htf_event_id_t _htf_get_event_id(struct htf_thread* thread_trace, 
   struct htf_event_summary* es = &thread_trace->events[index];
 
   memcpy(&es->event, e, e->event_size);
-  _init_event(es);
+  _init_event_summary(es);
 
   return HTF_EVENT_ID(index);
 }
@@ -51,8 +52,17 @@ static void init_dummy_event(struct htf_thread_writer* thread_writer, enum htf_r
   htf_store_timestamp(thread_writer, e_id, htf_get_timestamp());
   htf_store_event(thread_writer, htf_singleton, e_id);
 }
-int MAX_EVENT = 4;
-int main(int argc __attribute__((unused)), char** argv __attribute__((unused))) {
+
+int main(int argc, char** argv __attribute__((unused))) {
+  if (argc < 2) {
+    htf_error("Not enough arguments ! 2 argument required.\n");
+  }
+  if (argc > 3) {
+    htf_error("Too many arguments ! 3 argument required.\n");
+  }
+  long MAX_EVENT = strtol(argv[1], NULL, 10);
+  long NUM_LOOPS = strtol(argv[2], NULL, 10);
+
   /* Make a dummy archive and a dummy thread writer. */
   struct htf_archive archive;
   htf_write_archive_open(&archive, "dummy_trace", "dummy_trace", 0);
@@ -71,7 +81,7 @@ int main(int argc __attribute__((unused)), char** argv __attribute__((unused))) 
     htf_assert(thread_writer.og_seq[0]->token[eid].id == eid);
   }
 
-  /* Start recording some more events.*/
+  /* Start recording some more events. This should make a first loop. */
   for (int eid = 0; eid < MAX_EVENT; eid++)
     init_dummy_event(&thread_writer, eid);
 
@@ -95,22 +105,23 @@ int main(int argc __attribute__((unused)), char** argv __attribute__((unused))) 
     htf_assert(s->token[eid].id == eid);
   }
 
-  /* Start recording even more events.*/
+  /* Start recording even more events. The first loop happens 3 times now.*/
   for (int eid = 0; eid < MAX_EVENT; eid++)
     init_dummy_event(&thread_writer, eid);
   htf_assert(thread_writer.cur_depth == 0);
   htf_assert(thread_writer.og_seq[0]->size == 1);
   htf_assert(l->nb_iterations[l->nb_loops - 1] == 3);
-  /* Now start recording one more event and then loop again */
+
+  /* Now start recording one more event and then loop again. */
   init_dummy_event(&thread_writer, MAX_EVENT);
-  DOFOR(i, 4) {
-    for (int eid = 0; eid < MAX_EVENT; eid++)
-      init_dummy_event(&thread_writer, eid);
+  DOFOR(loop_number, NUM_LOOPS) {
+    DOFOR(eid, MAX_EVENT)
+    init_dummy_event(&thread_writer, eid);
   }
   htf_assert(thread_writer.cur_depth == 0);
   htf_assert(thread_writer.og_seq[0]->size == 3);  // L0 E L0
-  htf_assert(l->nb_iterations[0] == 3);
-  htf_assert(l->nb_iterations[1] == 4);
+  htf_assert(l->nb_iterations[0] == 3);            // Shouldn't have changed
+  htf_assert(l->nb_iterations[1] == NUM_LOOPS);
 
   return 0;
 }
