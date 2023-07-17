@@ -11,6 +11,7 @@
 
 #include "htf.h"
 #include "htf_archive.h"
+#include "htf_hash.h"
 #include "htf_storage.h"
 #include "htf_timestamp.h"
 #include "htf_write.h"
@@ -27,7 +28,7 @@ static inline htf_sequence_id_t _htf_get_sequence_id_from_array(struct htf_threa
     s->token = calloc(sizeof(htf_token_t), SEQUENCE_SIZE_DEFAULT); \
     s->size = 0;                                                   \
     s->allocated = SEQUENCE_SIZE_DEFAULT;                          \
-    htf_vector_new(&s->timestamps, sizeof(htf_timestamp_t));            \
+    htf_vector_new(&s->timestamps, sizeof(htf_timestamp_t));       \
   } while (0)
 
 #define _init_loop(l)                                               \
@@ -67,12 +68,17 @@ static inline htf_sequence_id_t _htf_get_sequence_id_from_array(struct htf_threa
                                                                 htf_token_t* token_array,
                                                                 int array_len) {
   htf_log(htf_dbg_lvl_debug, "Searching for sequence {.size=%d}\n", array_len);
-
+  uint32_t hash;
+  htf_hash_32(token_array, array_len, SEED, &hash);
   for (unsigned i = 1; i < thread_trace->nb_sequences; i++) {
-    if (_htf_arrays_equal(token_array, array_len, thread_trace->sequences[i]->token,
-                          thread_trace->sequences[i]->size)) {
-      htf_log(htf_dbg_lvl_debug, "\t found with id=%u\n", i);
-      return HTF_SEQUENCE_ID(i);
+    if (thread_trace->sequences[i]->hash == hash) {
+      if (_htf_arrays_equal(token_array, array_len, thread_trace->sequences[i]->token,
+                            thread_trace->sequences[i]->size)) {
+        htf_log(htf_dbg_lvl_debug, "\t found with id=%u\n", i);
+        return HTF_SEQUENCE_ID(i);
+      } else {
+        htf_warn("Found two sequences with the same hash\n");
+      }
     }
   }
 
@@ -93,6 +99,7 @@ static inline htf_sequence_id_t _htf_get_sequence_id_from_array(struct htf_threa
   s->size = array_len;
   s->allocated = array_len;
   s->token = malloc(sizeof(htf_token_t) * s->allocated);
+  s->hash = hash;
   memcpy(s->token, token_array, sizeof(htf_token_t) * array_len);
 
   return sid;
@@ -404,10 +411,10 @@ void _htf_record_exit_function(struct htf_thread_writer* thread_writer) {
 
     if (last_event->record != expected_record) {
       htf_warn("Unexpected close event:\n");
-      htf_warn("\tstart_sequence event:\n");
+      htf_warn("\tStart_sequence event:\n");
       htf_print_event(&thread_writer->thread_trace, first_event);
       printf("\n");
-      htf_warn("\tend_sequence event:\n");
+      htf_warn("\tEnd_sequence event:\n");
       htf_print_event(&thread_writer->thread_trace, last_event);
       printf("\n");
     }

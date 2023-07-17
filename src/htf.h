@@ -272,6 +272,7 @@ struct htf_event {
  *  - unsigned allocated: Number of tokens allocated in this sequence token
  *  - htf_vector_t timestamps: vector of timestamps for the start of these types of sequence (see htf_vector.h)
  *  - htf_timestamp_t* durations: array of durations for these types of sequences. (see htf_timestamp.h)
+ *  - uint_32_t hash: Hash value according to the htf_hash_32 function. (see htf_hash.h)
  */
 struct htf_sequence {
   htf_token_t* token;
@@ -279,6 +280,7 @@ struct htf_sequence {
   unsigned allocated;
   htf_vector_t timestamps;
   htf_timestamp_t* durations;
+  uint32_t hash;
 };
 
 
