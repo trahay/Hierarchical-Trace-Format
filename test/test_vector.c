@@ -4,35 +4,36 @@
  */
 
 #include <stdlib.h>
+#include "htf.h"
 #include "htf_dbg.h"
 #include "htf_vector.h"
 
 int main(int argc __attribute__((unused)), char** argv __attribute__((unused))) {
+  if (argc < 1) {
+    htf_error("Not enough arguments ! 1 argument required.\n");
+  }
+  if (argc > 2) {
+    htf_error("Too many arguments ! 1 argument required.\n");
+  }
+  long VECTOR_SIZE = strtol(argv[1], NULL, 10);
+
   htf_vector_t vector;
-  int adding;
   htf_vector_new_with_size(&vector, sizeof(int), 1);
-  adding = 10;
-  htf_vector_add(&vector, &adding);
-  adding = 20;
-  htf_vector_add(&vector, &adding);
-  adding = 30;
-  htf_vector_add(&vector, &adding);
-  adding = 40;
-  htf_vector_add(&vector, &adding);
-  htf_assert(vector.size == 4);
-  for (unsigned int i = 0; i < vector.size; i++) {
-    int a = *(int*)htf_vector_get(&vector, i);
-    htf_assert(a == ((int)i + 1) * 10);
-    printf("%d -> %d\n", i, a);
+  int adding;
+  DOFOR(i, VECTOR_SIZE) {
+    adding = i;
+    htf_vector_add(&vector, &adding);
   }
+
+  htf_assert(vector.size == VECTOR_SIZE);
+  htf_vector_print_as_int(&vector);
   printf("\n");
-  htf_vector_remove_at(&vector, 0);
-  htf_assert(vector.size == 3);
-  for (unsigned int i = 0; i < vector.size; i++) {
-    int a = *(int*)htf_vector_get(&vector, i);
-    printf("%d -> %d\n", i, a);
-    htf_assert(a == ((int)i + 2) * 10);
+  DOFOR(i, VECTOR_SIZE / 2) {
+    htf_vector_remove_at(&vector, i);
+    // Should remove all the even numbers
   }
+  htf_assert(vector.size == VECTOR_SIZE - VECTOR_SIZE / 2);
+  htf_vector_print_as_int(&vector);
   return EXIT_SUCCESS;
 }
 
