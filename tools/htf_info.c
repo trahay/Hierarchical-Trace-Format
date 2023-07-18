@@ -40,12 +40,10 @@ void info_sequence(struct htf_sequence* s) {
 }
 
 void info_loop(struct htf_loop* l) {
-  printf("{.nb_loops: %d, .token: %x.%x, .nb_iterations: [", l->nb_loops, HTF_TOKEN_TYPE(l->token),
+  printf("{.nb_loops: %d, .token: %x.%x, .nb_iterations: ", l->nb_iterations.size, HTF_TOKEN_TYPE(l->token),
          HTF_TOKEN_ID(l->token));
-  DOFOR(i, (int)l->nb_loops - 1) {
-    printf("%d, ", l->nb_iterations[i]);
-  }
-  printf("%d]}\n", l->nb_iterations[l->nb_loops - 1]);
+  htf_vector_print_as_int(&l->nb_iterations);
+  printf("}\n");
 }
 
 void info_thread(struct htf_thread* t) {

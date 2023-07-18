@@ -86,7 +86,7 @@ static FILE* _htf_file_open(char* filename, char* mode) {
       htf_error("fwrite failed\n");                \
   } while (0)
 
-static void inline _htf_vector_fwrite(htf_vector_t* vector, FILE* stream) {
+inline static void _htf_vector_fwrite(htf_vector_t* vector, FILE* stream) {
   _htf_fwrite(&vector->size, sizeof(vector->size), 1, stream);
   _htf_fwrite(&vector->element_size, sizeof(vector->element_size), 1, stream);
   htf_vector_t* vec = vector;
@@ -95,7 +95,7 @@ static void inline _htf_vector_fwrite(htf_vector_t* vector, FILE* stream) {
     vec = vec->next;
   }
 }
-static void inline _htf_vector_fread(htf_vector_t* vector, FILE* stream) {
+inline static void _htf_vector_fread(htf_vector_t* vector, FILE* stream) {
   _htf_fread(&vector->size, sizeof(vector->size), 1, stream);
   _htf_fread(&vector->element_size, sizeof(vector->element_size), 1, stream);
   vector->array = malloc(vector->element_size * vector->size);
@@ -267,36 +267,27 @@ static void _htf_store_loop(const char* base_dirname,
                             htf_loop_id_t loop_id) {
   FILE* file = _htf_get_loop_file(base_dirname, th, loop_id, "w");
   if (htf_debug_level >= htf_dbg_lvl_debug) {
-    htf_log(htf_dbg_lvl_debug, "\tStore loops %x {.nb_loops=%d, .token=%x.%x, .nb_iterations: [", HTF_ID(loop_id),
-            l->nb_loops, l->token.type, l->token.id);
-    DOFOR(i, l->nb_loops - 1) {
-      printf("%d, ", l->nb_iterations[i]);
-    }
-    printf("%d]}\n", l->nb_iterations[l->nb_loops - 1]);
+    htf_log(htf_dbg_lvl_debug, "\tStore loops %x {.nb_loops=%d, .token=%x.%x, .nb_iterations:", HTF_ID(loop_id),
+            l->nb_iterations.size, l->token.type, l->token.id);
+    htf_vector_print_as_int(&l->nb_iterations);
+    printf("}\n");
   }
-
-  _htf_fwrite(&l->nb_loops, sizeof(l->nb_loops), 1, file);
-  _htf_fwrite(l->nb_iterations, sizeof(unsigned int), l->nb_loops, file);
   _htf_fwrite(&l->token, sizeof(l->token), 1, file);
+  _htf_vector_fwrite(&l->nb_iterations, file);
   fclose(file);
 }
 
 static void _htf_read_loop(const char* base_dirname, struct htf_thread* th, struct htf_loop* l, htf_loop_id_t loop_id) {
   FILE* file = _htf_get_loop_file(base_dirname, th, loop_id, "r");
-
-  _htf_fread(&l->nb_loops, sizeof(l->nb_loops), 1, file);
-  l->nb_iterations = calloc(l->nb_loops, sizeof(unsigned int));
   l->id = HTF_TOKENIZE(HTF_TYPE_LOOP, loop_id.id);
-  _htf_fread(l->nb_iterations, sizeof(unsigned int), l->nb_loops, file);
   _htf_fread(&l->token, sizeof(l->token), 1, file);
+  _htf_vector_fread(&l->nb_iterations, file);
   fclose(file);
   if (htf_debug_level >= htf_dbg_lvl_debug) {
-    htf_log(htf_dbg_lvl_debug, "\tLoad loops %x {.nb_loops=%d, .token=%x.%x, .nb_iterations: [", HTF_ID(loop_id),
-            l->nb_loops, l->token.type, l->token.id);
-    DOFOR(i, l->nb_loops - 1) {
-      printf("%d, ", l->nb_iterations[i]);
-    }
-    printf("%d]}\n", l->nb_iterations[l->nb_loops - 1]);
+    htf_log(htf_dbg_lvl_debug, "\tLoad loops %x {.nb_loops=%d, .token=%x.%x, .nb_iterations: ", HTF_ID(loop_id),
+            l->nb_iterations.size, l->token.type, l->token.id);
+    htf_vector_print_as_int(&l->nb_iterations);
+    printf("}\n");
   }
 }
 

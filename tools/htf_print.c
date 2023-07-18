@@ -167,7 +167,7 @@ static void print_token(struct htf_thread* thread,
   }
 }
 
-static void free_occurence(htf_token_t token, htf_occurence* occurence) {
+/*static void free_occurence(htf_token_t token, htf_occurence* occurence) {
   htf_error("This function does not work yet\n");
   // Not too sure what to do with all that tbf
   switch (token.type) {
@@ -196,7 +196,7 @@ static void free_occurence(htf_token_t token, htf_occurence* occurence) {
   default:
     htf_error("This shouldn't happen\n");
   }
-}
+}*/
 
 static void display_sequence(struct htf_thread_reader* reader,
                              htf_token_t token,

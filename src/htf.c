@@ -68,7 +68,7 @@ static htf_token_t _htf_get_token_in_loop(struct htf_thread* thread_trace, htf_l
     htf_error("invalid loop id: %d\n", HTF_ID(loop_id));
   }
 
-  if (index >= l->nb_iterations[l->nb_loops - 1]) {
+  if (index >= *(int*)htf_vector_get(&l->nb_iterations, l->nb_iterations.size - 1)) {
     htf_error("invalid index (%d) in loop #%d\n", index, HTF_ID(loop_id));
   }
   return l->token;

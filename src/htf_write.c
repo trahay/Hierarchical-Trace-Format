@@ -31,9 +31,7 @@ static inline void _init_sequence(struct htf_sequence* s) {
 }
 
 static inline void _init_loop(struct htf_loop* l) {
-  l->nb_iterations = calloc(LOOP_SIZE_DEFAULT, sizeof(unsigned));
-  l->nb_loops = 0;
-  l->nb_allocated = LOOP_SIZE_DEFAULT;
+  htf_vector_new_with_size(&l->nb_iterations, sizeof(int), LOOP_SIZE_DEFAULT);
 }
 
 static inline void _init_event(struct htf_event_summary* e) {
@@ -134,12 +132,8 @@ static inline struct htf_loop* _htf_create_loop_id(struct htf_thread_writer* thr
   }
 
   struct htf_loop* l = &thread_writer->thread_trace.loops[index];
-  if (l->nb_allocated <= l->nb_loops) {
-    htf_warn("Doubling loop space for L%x in thread %p to %d\n", l->id.id, thread_writer, l->nb_allocated * 2);
-    DOUBLE_MEMORY_SPACE(l->nb_iterations, l->nb_allocated, unsigned);
-  }
-
-  l->nb_iterations[l->nb_loops++] = 1;
+  int buff = 1;
+  htf_vector_add(&l->nb_iterations, &buff);
   l->token = HTF_TOKENIZE(HTF_TYPE_SEQUENCE, HTF_TOKEN_ID(sid));
   l->id = HTF_TOKENIZE(HTF_TYPE_LOOP, index);
   return l;
@@ -191,9 +185,10 @@ static inline void _htf_loop_add_iteration(struct htf_loop* loop) {
 					     HTF_TOKEN_TO_SEQUENCE_ID(loop->token));
   htf_assert(_htf_sequences_equal(s1, s2));
 #endif
-  htf_log(htf_dbg_lvl_debug, "Adding an iteration to L%x n°%d (to %u)\n", loop->id.id, loop->nb_loops - 1,
-          loop->nb_iterations[loop->nb_loops - 1] + 1);
-  loop->nb_iterations[loop->nb_loops - 1]++;
+  htf_log(htf_dbg_lvl_debug, "Adding an iteration to L%x n°%d (to %u)\n", loop->id.id, loop->nb_iterations.size - 1,
+          (*(int*)htf_vector_get(&loop->nb_iterations, loop->nb_iterations.size - 1)) + 1);
+  int* buff = htf_vector_get(&loop->nb_iterations, loop->nb_iterations.size - 1);
+  (*buff)++;
 }
 
 /** Count the number time the given token appears in the given array. */
@@ -208,7 +203,8 @@ static inline uint _htf_count_token(struct htf_thread* thread,
     if (token.type == HTF_TYPE_LOOP) {
       struct htf_loop* loop = htf_get_loop(thread, HTF_TOKEN_TO_LOOP_ID(token));
       struct htf_sequence* seq = htf_get_sequence(thread, HTF_TOKEN_TO_SEQUENCE_ID(loop->token));
-      count += loop->nb_iterations[loop->nb_loops - 1] * _htf_count_token(thread, event, seq->token, seq->size);
+      count += (*(int*)htf_vector_get(&loop->nb_iterations, loop->nb_iterations.size - 1)) *
+               _htf_count_token(thread, event, seq->token, seq->size);
     } else if (token.type == HTF_TYPE_SEQUENCE) {
       struct htf_sequence* seq = htf_get_sequence(thread, HTF_TOKEN_TO_SEQUENCE_ID(token));
       count += _htf_count_token(thread, event, seq->token, seq->size);
@@ -240,7 +236,7 @@ static inline htf_timestamp_t _htf_get_timestamp(struct htf_thread* thread,
     struct htf_loop* loop = htf_get_loop(thread, HTF_TOKEN_TO_LOOP_ID(token));
     uint second_count = _htf_count_token(thread, loop->token, array, size);
     DOFOR(i, count) {
-      second_count += loop->nb_iterations[loop->nb_loops - 1 - i];
+      second_count += *(int*)htf_vector_get(&loop->nb_iterations, loop->nb_iterations.size - 1 - i);
     }
 
     switch (loop->token.type) {
