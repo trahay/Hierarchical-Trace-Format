@@ -23,28 +23,25 @@ static inline htf_sequence_id_t _htf_get_sequence_id_from_array(struct htf_threa
                                                                 htf_token_t* token_array,
                                                                 int array_len);
 
-#define _init_sequence(s)                                          \
-  do {                                                             \
-    s->token = calloc(sizeof(htf_token_t), SEQUENCE_SIZE_DEFAULT); \
-    s->size = 0;                                                   \
-    s->allocated = SEQUENCE_SIZE_DEFAULT;                          \
-    htf_vector_new(&s->timestamps, sizeof(htf_timestamp_t));       \
-  } while (0)
+static inline void _init_sequence(struct htf_sequence* s) {
+  s->token = calloc(sizeof(htf_token_t), SEQUENCE_SIZE_DEFAULT);
+  s->size = 0;
+  s->allocated = SEQUENCE_SIZE_DEFAULT;
+  htf_vector_new(&s->timestamps, sizeof(htf_timestamp_t));
+}
 
-#define _init_loop(l)                                               \
-  do {                                                              \
-    l->nb_iterations = calloc(LOOP_SIZE_DEFAULT, sizeof(unsigned)); \
-    l->nb_loops = 0;                                                \
-    l->nb_allocated = LOOP_SIZE_DEFAULT;                            \
-  } while (0)
+static inline void _init_loop(struct htf_loop* l) {
+  l->nb_iterations = calloc(LOOP_SIZE_DEFAULT, sizeof(unsigned));
+  l->nb_loops = 0;
+  l->nb_allocated = LOOP_SIZE_DEFAULT;
+}
 
-#define _init_event(e)                                                      \
-  do {                                                                      \
-    e->timestamps = malloc(sizeof(htf_timestamp_t) * NB_TIMESTAMP_DEFAULT); \
-    e->durations = malloc(sizeof(htf_timestamp_t) * NB_TIMESTAMP_DEFAULT);  \
-    e->nb_allocated_events = NB_TIMESTAMP_DEFAULT;                          \
-    e->nb_events = 0;                                                       \
-  } while (0)
+static inline void _init_event(struct htf_event_summary* e) {
+  e->timestamps = malloc(sizeof(htf_timestamp_t) * NB_TIMESTAMP_DEFAULT);
+  e->durations = malloc(sizeof(htf_timestamp_t) * NB_TIMESTAMP_DEFAULT);
+  e->nb_allocated_events = NB_TIMESTAMP_DEFAULT;
+  e->nb_events = 0;
+}
 
 static inline struct htf_sequence* _htf_get_cur_sequence(struct htf_thread_writer* thread_writer) {
   struct htf_sequence* seq = thread_writer->og_seq[thread_writer->cur_depth];
