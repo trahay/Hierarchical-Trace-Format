@@ -13,7 +13,7 @@
 
 /**Tries to fill this vector with the next one's data.*/
 void _htf_vector_reorganize(htf_vector_t* vector) {
-  htf_warn("This array has too much unused memory, reorganizing\n");
+  htf_log(htf_dbg_lvl_debug, "Array at %p has too much unused memory, reorganizing\n", vector);
   // This means that the current array isn't using enough capacity, so we'll move the memory
   uint mem_to_move = vector->allocated - vector->_local_size;
   if (mem_to_move > vector->next->_local_size) {
@@ -43,7 +43,7 @@ void htf_vector_new_with_size(htf_vector_t* vector, size_t element_size, uint si
 void htf_vector_add(htf_vector_t* vector, void* element) {
   if (vector->_local_size >= vector->allocated) {
     if (vector->next == NULL) {
-      htf_warn("Extending the array size\n");
+      htf_log(htf_dbg_lvl_debug, "Adding a new tail to an array: %p\n", vector);
       vector->next = malloc(sizeof(htf_vector_t));
       htf_vector_new_with_size(vector->next, vector->element_size, vector->allocated);
     }
