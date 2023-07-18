@@ -25,6 +25,7 @@ void _htf_vector_reorganize(htf_vector_t* vector) {
           (vector->next->allocated - mem_to_move) * vector->element_size);
   vector->next->_local_size -= mem_to_move;
   vector->_local_size += mem_to_move;
+  // TODO If the next one is empty, we should put it at the end of the linked structure.
 }
 
 void htf_vector_new(htf_vector_t* vector, size_t element_size) {
