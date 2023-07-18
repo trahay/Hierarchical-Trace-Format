@@ -128,7 +128,8 @@ void enter_block(struct htf_thread_reader* reader, htf_token_t new_block) {
   reader->callstack_sequence[cur_frame] = new_block;
   if (new_block.type == HTF_TYPE_SEQUENCE) {
     struct htf_sequence* cur_seq = htf_get_sequence(reader->thread_trace, HTF_TOKEN_TO_SEQUENCE_ID(new_block));
-    reader->referential_timestamp = ((htf_timestamp_t*)cur_seq->timestamps.vector)[reader->sequence_index[new_block.id]];
+    reader->referential_timestamp =
+      *(htf_timestamp_t*)htf_vector_get(&cur_seq->timestamps, reader->sequence_index[new_block.id]);
 
     htf_log(htf_dbg_lvl_debug, "Setting up new referential timestamp: %.9lf\n", reader->referential_timestamp / 1e9);
   }
@@ -255,7 +256,7 @@ void _htf_write_sequence_occurence(struct htf_thread_reader* reader,
   struct htf_sequence* sequence = reader->thread_trace->sequences[token.id];
 
   // Write it to the occurence
-  occurence->timestamp = ((htf_timestamp_t*)sequence->timestamps.vector)[reader->sequence_index[token.id]];
+  occurence->timestamp = *(htf_timestamp_t*)htf_vector_get(&sequence->timestamps, reader->sequence_index[token.id]);
   occurence->sequence = sequence;
   occurence->full_sequence = NULL;
   reader->referential_timestamp = occurence->timestamp;
@@ -355,7 +356,7 @@ int htf_read_thread_cur_token(struct htf_thread_reader* reader, struct htf_token
   }
   case HTF_TYPE_SEQUENCE: {
     struct htf_sequence* seq = reader->thread_trace->sequences[index];
-    reader->referential_timestamp = ((htf_timestamp_t*)seq->timestamps.vector)[reader->sequence_index[index]];
+    reader->referential_timestamp = *(htf_timestamp_t*)htf_vector_get(&seq->timestamps, reader->sequence_index[index]);
     if (e) {
       e->sequence_occurence.timestamp = reader->referential_timestamp;
       e->sequence_occurence.duration = seq->durations[reader->sequence_index[index]];
@@ -475,7 +476,7 @@ htf_timestamp_t skip_sequence(struct htf_thread_reader* reader, htf_token_t toke
     struct htf_sequence* seq = htf_get_sequence(reader->thread_trace, HTF_TOKEN_TO_SEQUENCE_ID(token));
     htf_assert(sequence_index <= seq->timestamps.size);
     seq->durations[sequence_index] = _skip_token(reader, token, 1);
-    reader->referential_timestamp = ((htf_timestamp_t*)seq->timestamps.vector)[sequence_index];
+    reader->referential_timestamp = *(htf_timestamp_t*)htf_vector_get(&seq->timestamps, sequence_index);
     reader->referential_timestamp += seq->durations[sequence_index];
     return seq->durations[sequence_index];
   }
