@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.1)
 
 enable_testing()
+add_subdirectory(mpi)
 
 add_compile_options(-Wall -Wextra -Wpedantic)
 include_directories(${CMAKE_SOURCE_DIR}/src/)
