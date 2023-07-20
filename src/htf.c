@@ -17,7 +17,8 @@
 #include "htf_archive.h"
 #include "htf_timestamp.h"
 
-/** Returns the event corresponding to the given event id.
+/**
+ * Returns the event corresponding to the given event id.
  * Returns NULL if the id does not have a match.
  */
 struct htf_event* htf_get_event(struct htf_thread* thread_trace, htf_event_id_t evt_id) {
@@ -27,7 +28,8 @@ struct htf_event* htf_get_event(struct htf_thread* thread_trace, htf_event_id_t 
   return evt;
 }
 
-/** Returns the sequence corresponding to the given sequence id.
+/**
+ * Returns the sequence corresponding to the given sequence id.
  * Returns NULL if the id does not have a match.
  */
 struct htf_sequence* htf_get_sequence(struct htf_thread* thread_trace, htf_sequence_id_t seq_id) {
@@ -37,7 +39,8 @@ struct htf_sequence* htf_get_sequence(struct htf_thread* thread_trace, htf_seque
   return seq;
 }
 
-/** Returns the loop corresponding to the given loop id.
+/**
+ * Returns the loop corresponding to the given loop id.
  * Returns NULL if the id does not have a match.
  */
 struct htf_loop* htf_get_loop(struct htf_thread* thread_trace, htf_loop_id_t loop_id) {
@@ -47,7 +50,10 @@ struct htf_loop* htf_get_loop(struct htf_thread* thread_trace, htf_loop_id_t loo
   return loop;
 }
 
-/** Returns the index-th token in the given sequence.*/
+/**
+ * Returns the index-th token in the given sequence
+ * Abort if sequence id is invalid or index in the sequence is invalid
+ */
 static htf_token_t _htf_get_token_in_sequence(struct htf_thread* thread_trace, htf_sequence_id_t seq_id, int index) {
   int seq_index = HTF_ID(seq_id);
   struct htf_sequence* s = htf_get_sequence(thread_trace, seq_id);
@@ -61,7 +67,10 @@ static htf_token_t _htf_get_token_in_sequence(struct htf_thread* thread_trace, h
   return s->token[index];
 }
 
-/** Returns the index-th token in the given loop.*/
+/**
+ * Returns the index-th token in the given loop.
+ * Abort if loop id is invalid, or if index in loop is invalid
+ */
 static htf_token_t _htf_get_token_in_loop(struct htf_thread* thread_trace, htf_loop_id_t loop_id, int index) {
   struct htf_loop* l = htf_get_loop(thread_trace, loop_id);
   if (!l) {
@@ -74,7 +83,9 @@ static htf_token_t _htf_get_token_in_loop(struct htf_thread* thread_trace, htf_l
   return l->token;
 }
 
-/** Prints the given token.*/
+/**
+ * Prints a given token.
+ */
 void htf_print_token(struct htf_thread* thread_trace, htf_token_t token) {
   switch (HTF_TOKEN_TYPE(token)) {
   case HTF_TYPE_EVENT: {
@@ -96,7 +107,9 @@ void htf_print_token(struct htf_thread* thread_trace, htf_token_t token) {
   }
 }
 
-/** Returns the index-th token in the given sequence/loop.*/
+/**
+ * Returns the index-th token in the given sequence/loop.
+ */
 htf_token_t htf_get_token(struct htf_thread* trace, htf_token_t sequence, int index) {
   switch (HTF_TOKEN_TYPE(sequence)) {
   case HTF_TYPE_SEQUENCE: {
@@ -114,7 +127,9 @@ htf_token_t htf_get_token(struct htf_thread* trace, htf_token_t sequence, int in
   }
 }
 
-/** Prints an array of tokens.*/
+/**
+ * Prints an array of tokens.
+ */
 void htf_print_token_array(struct htf_thread* thread_trace, htf_token_t* token_array, int index_start, int index_stop) {
   if (index_start < 0)
     index_start = 0;
@@ -126,7 +141,9 @@ void htf_print_token_array(struct htf_thread* thread_trace, htf_token_t* token_a
   printf("\n");
 }
 
-/** Print information about a sequence.*/
+/**
+ * Print information about a sequence.
+ */
 void htf_print_sequence(struct htf_thread* thread, htf_sequence_id_t seq_id) {
   struct htf_sequence* seq = htf_get_sequence(thread, seq_id);
 
@@ -138,7 +155,8 @@ void htf_print_sequence(struct htf_thread* thread, htf_sequence_id_t seq_id) {
   printf("\n");
 }
 
-/** Returns the first thread corresponding to the given thread id.
+/**
+ * Returns the first thread corresponding to the given thread id.
  * Returns NULL if the id does not have a match.
  */
 struct htf_thread* htf_archive_get_thread(struct htf_archive* archive, htf_thread_id_t thread_id) {
@@ -149,7 +167,8 @@ struct htf_thread* htf_archive_get_thread(struct htf_archive* archive, htf_threa
   return NULL;
 }
 
-/** Returns the first location group corresponding to the given location group id in the archive.
+/**
+ * Returns the first location group corresponding to the given location group id in the archive.
  * If the id does not have a match, checks the global_archive.
  * Returns NULL if the id does not have a match in the archive nor the global archive.
  */
@@ -169,7 +188,8 @@ struct htf_location_group* htf_archive_get_location_group(struct htf_archive* ar
   return NULL;
 }
 
-/** Returns the first location corresponding to the given location id in the archive.
+/**
+ * Returns the first location corresponding to the given location id in the archive.
  * If the id does not have a match, checks the global_archive.
  * Returns NULL if the id does not have a match in the archive nor the global archive.
  */
@@ -188,7 +208,9 @@ struct htf_location* htf_archive_get_location(struct htf_archive* archive, htf_t
   return NULL;
 }
 
-/** Returns the thread's name */
+/**
+ * Returns a thread's name
+ */
 const char* htf_get_thread_name(struct htf_thread* thread) {
   struct htf_archive* archive = thread->archive;
   struct htf_location* location = htf_archive_get_location(archive, thread->id);

@@ -426,6 +426,9 @@ struct htf_location {
 };
 
 
+/**
+ * A definition describes a function
+ */
 struct htf_definition {
   struct htf_string* strings;
   int nb_strings;
@@ -436,7 +439,9 @@ struct htf_definition {
   int nb_allocated_regions;
 };
 
-
+/**
+ * An archive represents a program
+ */
 struct htf_archive {
   char* dir_name;
   char* trace_name;
