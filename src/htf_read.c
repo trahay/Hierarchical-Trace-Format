@@ -98,7 +98,7 @@ static void print_callstack(struct htf_thread_reader* reader) {
     if (HTF_TOKEN_TYPE(cur_seq_id) == HTF_TYPE_LOOP) {
       struct htf_loop* loop = htf_get_loop(reader->thread_trace, HTF_TOKEN_TO_LOOP_ID(cur_seq_id));
       printf(" iter %d/%d", reader->callstack_loop_iteration[i],
-             loop->nb_iterations[reader->loop_index[cur_seq_id.id]]);
+             *(int*)htf_vector_get(&loop->nb_iterations, reader->loop_index[cur_seq_id.id]));
       htf_assert(reader->callstack_loop_iteration[i] < MAX_CALLSTACK_DEPTH);
     } else if (HTF_TOKEN_TYPE(cur_seq_id) == HTF_TYPE_SEQUENCE) {
       struct htf_sequence* seq = htf_get_sequence(reader->thread_trace, HTF_TOKEN_TO_SEQUENCE_ID(cur_seq_id));
@@ -128,7 +128,8 @@ void enter_block(struct htf_thread_reader* reader, htf_token_t new_block) {
   reader->callstack_sequence[cur_frame] = new_block;
   if (new_block.type == HTF_TYPE_SEQUENCE) {
     struct htf_sequence* cur_seq = htf_get_sequence(reader->thread_trace, HTF_TOKEN_TO_SEQUENCE_ID(new_block));
-    reader->referential_timestamp = ((htf_timestamp_t*)cur_seq->timestamps.vector)[reader->sequence_index[new_block.id]];
+    reader->referential_timestamp =
+      *(htf_timestamp_t*)htf_vector_get(&cur_seq->timestamps, reader->sequence_index[new_block.id]);
 
     htf_log(htf_dbg_lvl_debug, "Setting up new referential timestamp: %.9lf\n", reader->referential_timestamp / 1e9);
   }
@@ -151,7 +152,7 @@ static int end_of_a_loop(struct htf_thread_reader* reader, int cur_index, htf_to
     htf_loop_id_t loop = HTF_TOKEN_TO_LOOP_ID(seq_id);
     struct htf_loop* l = htf_get_loop(reader->thread_trace, loop);
     /* we are in a loop and index is beyond the number of iterations */
-    return cur_index >= l->nb_iterations[reader->loop_index[seq_id.id] - 1];
+    return cur_index >= *(int*)htf_vector_get(&l->nb_iterations, reader->loop_index[seq_id.id] - 1);
   }
 
   return 0;
@@ -255,7 +256,7 @@ void _htf_write_sequence_occurence(struct htf_thread_reader* reader,
   struct htf_sequence* sequence = reader->thread_trace->sequences[token.id];
 
   // Write it to the occurence
-  occurence->timestamp = ((htf_timestamp_t*)sequence->timestamps.vector)[reader->sequence_index[token.id]];
+  occurence->timestamp = *(htf_timestamp_t*)htf_vector_get(&sequence->timestamps, reader->sequence_index[token.id]);
   occurence->sequence = sequence;
   occurence->full_sequence = NULL;
   reader->referential_timestamp = occurence->timestamp;
@@ -303,7 +304,7 @@ int htf_read_thread_cur_level(struct htf_thread_reader* reader,
 
       // Write it to the occurence
       occurence->loop = loop;
-      occurence->nb_iterations = loop->nb_iterations[reader->loop_index[token.id]];
+      occurence->nb_iterations = *(int*)htf_vector_get(&loop->nb_iterations, reader->loop_index[token.id]);
       occurence->timestamp = reader->referential_timestamp;
 
       // Write the loop
@@ -355,7 +356,7 @@ int htf_read_thread_cur_token(struct htf_thread_reader* reader, struct htf_token
   }
   case HTF_TYPE_SEQUENCE: {
     struct htf_sequence* seq = reader->thread_trace->sequences[index];
-    reader->referential_timestamp = ((htf_timestamp_t*)seq->timestamps.vector)[reader->sequence_index[index]];
+    reader->referential_timestamp = *(htf_timestamp_t*)htf_vector_get(&seq->timestamps, reader->sequence_index[index]);
     if (e) {
       e->sequence_occurence.timestamp = reader->referential_timestamp;
       e->sequence_occurence.duration = seq->durations[reader->sequence_index[index]];
@@ -368,7 +369,7 @@ int htf_read_thread_cur_token(struct htf_thread_reader* reader, struct htf_token
     struct htf_loop* loop = &reader->thread_trace->loops[index];
     if (e) {
       e->loop_occurence.loop = loop;
-      e->loop_occurence.nb_iterations = loop->nb_iterations[reader->loop_index[loop->id.id]];
+      e->loop_occurence.nb_iterations = *(int*)htf_vector_get(&loop->nb_iterations, reader->loop_index[loop->id.id]);
       e->loop_occurence.timestamp = htf_get_starting_timestamp(reader, *token);
       e->loop_occurence.duration = htf_get_duration(reader, *token);
     }
@@ -418,7 +419,7 @@ htf_timestamp_t htf_get_duration(struct htf_thread_reader* reader, struct htf_to
     struct htf_loop* loop = htf_get_loop(reader->thread_trace, HTF_TOKEN_TO_LOOP_ID(token));
     struct htf_sequence* seq = htf_get_sequence(reader->thread_trace, HTF_TOKEN_TO_SEQUENCE_ID(loop->token));
     int sequence_index = reader->sequence_index[loop->token.id];
-    DOFOR(i, loop->nb_iterations[reader->loop_index[token.id]]) {
+    DOFOR(i, *(int*)htf_vector_get(&loop->nb_iterations, reader->loop_index[token.id])) {
       sum += seq->durations[sequence_index + i];
     }
     return sum;
@@ -453,11 +454,13 @@ htf_timestamp_t _skip_token(struct htf_thread_reader* reader, htf_token_t token,
     struct htf_sequence* seq = htf_get_sequence(reader->thread_trace, HTF_TOKEN_TO_SEQUENCE_ID(loop->token));
     htf_assert(loop->token.type == HTF_TYPE_SEQUENCE);
     DOFOR(i, nb_times) {
-      reader->sequence_index[loop->token.id] += loop->nb_iterations[reader->loop_index[token.id]];
+      reader->sequence_index[loop->token.id] +=
+        *(int*)htf_vector_get(&loop->nb_iterations, reader->loop_index[token.id]);
       htf_assert(reader->sequence_index[loop->token.id] <= seq->timestamps.size);
 
       DOFOR(j, seq->size) {
-        ts += _skip_token(reader, seq->token[j], loop->nb_iterations[reader->loop_index[token.id]]);
+        ts +=
+          _skip_token(reader, seq->token[j], *(int*)htf_vector_get(&loop->nb_iterations, reader->loop_index[token.id]));
       }
       reader->loop_index[token.id]++;
     }
@@ -475,7 +478,7 @@ htf_timestamp_t skip_sequence(struct htf_thread_reader* reader, htf_token_t toke
     struct htf_sequence* seq = htf_get_sequence(reader->thread_trace, HTF_TOKEN_TO_SEQUENCE_ID(token));
     htf_assert(sequence_index <= seq->timestamps.size);
     seq->durations[sequence_index] = _skip_token(reader, token, 1);
-    reader->referential_timestamp = ((htf_timestamp_t*)seq->timestamps.vector)[sequence_index];
+    reader->referential_timestamp = *(htf_timestamp_t*)htf_vector_get(&seq->timestamps, sequence_index);
     reader->referential_timestamp += seq->durations[sequence_index];
     return seq->durations[sequence_index];
   }

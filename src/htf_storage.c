@@ -17,6 +17,18 @@
 #include "htf_read.h"
 #include "htf_storage.h"
 
+static enum storage_compression_option COMPRESSION_OPTIONS = ZSTD;
+void htf_storage_option_init() {
+  char* verbose_str = getenv("COMPRESSION");
+  if (verbose_str) {
+    if (strcmp(verbose_str, "ZSTD") == 0)
+      COMPRESSION_OPTIONS = ZSTD;
+    else if (strcmp(verbose_str, "MASKING") == 0)
+      COMPRESSION_OPTIONS = MASKING;
+    else if (strcmp(verbose_str, "MASKING_ZSTD") == 0)
+      COMPRESSION_OPTIONS = MASKING_ZSTD;
+  }
+}
 static void _htf_store_event(const char* base_dirname,
                              struct htf_thread* th,
                              struct htf_event_summary* e,
@@ -86,24 +98,175 @@ static FILE* _htf_file_open(char* filename, char* mode) {
       htf_error("fwrite failed\n");                \
   } while (0)
 
-#define _htf_vector_fwrite(_vector, stream)				\
-  do {									\
-    _htf_fwrite(&_vector.size, sizeof(_vector.size), 1, stream);		\
-    _htf_fwrite(&_vector.element_size, sizeof(_vector.element_size), 1, stream); \
-    _htf_fwrite(_vector.vector, _vector.element_size, _vector.size, stream); \
-  } while (0)
+/******************* Read/Write/Compression function for vectors and arrays *******************/
 
-#define _htf_vector_fread(_vector, stream)				\
-  do {									\
-    _htf_fread(&_vector.size, sizeof(_vector.size), 1, stream);		\
-    _htf_fread(&_vector.element_size, sizeof(_vector.element_size), 1, stream); \
-    _vector.vector = malloc(_vector.element_size * _vector.size);		\
-    _vector.allocated = _vector.size;					\
-    _htf_fread(_vector.vector, _vector.element_size, _vector.size, stream); \
-  } while (0)
+/** Writes a vector to the given file.*/
+inline static void _htf_vector_fwrite(htf_vector_t* vector, FILE* file) {
+  _htf_fwrite(&vector->size, sizeof(vector->size), 1, file);
+  _htf_fwrite(&vector->element_size, sizeof(vector->element_size), 1, file);
+  htf_vector_t* vec = vector;
+  while (vec != NULL) {
+    _htf_fwrite(vec->array, vector->element_size, vec->_local_size, file);
+    vec = vec->next;
+  }
+}
+
+/** Reads a vector from the given file.*/
+inline static void _htf_vector_fread(htf_vector_t* vector, FILE* file) {
+  _htf_fread(&vector->size, sizeof(vector->size), 1, file);
+  _htf_fread(&vector->element_size, sizeof(vector->element_size), 1, file);
+  vector->array = malloc(vector->element_size * vector->size);
+  vector->allocated = vector->size;
+  vector->next = NULL;
+  vector->_local_size = vector->size;
+  _htf_fread(vector->array, vector->element_size, vector->size, file);
+}
+
+/** Compresses the content in src using ZSTD and writes it to dest. Returns the size of the compressed array.
+ *  - void* src: what's going to be compressed.
+ *  - void* dest: a free array in which the compressed array will be written.
+ *  - size_t size: size of src (and of the allocated memory in dest).
+ */
+inline static size_t _htf_zstd_compress(void* src, void* dest, size_t size) {
+  return ZSTD_compress(dest, size, src, size, ZSTD_COMPRESSION_LEVEL);
+}
+enum uint64_size { bit8 = 0, bit16 = 1, bit32 = 2, bit64 = 3 };
+/** Compresses the content in src using a Masking technique and writes it to dest.
+ * Returns the size of the compressed array.
+ *  - void* src: what's going to be compressed.
+ *  - void* dest: a free array in which the compressed array will be written.
+ *  - size_t size: size of src (and of the allocated memory in dest).
+ */
+inline static size_t _htf_masking_compress(void* src, void* dest, size_t size) {
+  size_t n = size / sizeof(uint64_t);
+  uint64_t* new_src = src;
+  uint64_t mask = 0;
+  for (int i = 0; i < n; i++) {
+    mask |= new_src[i];
+  }
+  enum uint64_size mask_size = bit64;
+  if (mask < UINT8_MAX) {
+    mask_size = bit8;
+  } else if (mask < UINT16_MAX) {
+    mask_size = bit16;
+  } else if (mask < UINT32_MAX) {
+    mask_size = bit32;
+  }
+  if (mask_size != bit64) {
+    size_t width = 1 << mask_size;
+    for (int i = 0; i < n; i++) {
+      memcpy(&dest[size * i], &new_src[i], size);
+    }
+    return width * n;
+  } else {
+    memcpy(dest, src, size);
+    return size;
+  }
+}
+
+/** Writes the array to the given file, but compresses it before, according to the value of COMPRESSION_OPTIONS.
+ * - void* array: the array to be written.
+ * - size_t size: size of said array.
+ * - FILE*  file: file to write in.
+ */
+inline static void _htf_compress_write(void* array, size_t size, FILE* file) {
+  size_t compSize;
+  void* compArray = malloc(size);
+  switch (COMPRESSION_OPTIONS) {
+  case NO_COMPRESSION:
+    compSize = size;
+    memcpy(compArray, array, size);
+    break;
+  case ZSTD:
+    compSize = _htf_zstd_compress(array, compArray, size);
+    break;
+  case MASKING:
+    compSize = _htf_masking_compress(array, compArray, size);
+    break;
+  case MASKING_ZSTD: {
+    void* buffer = compArray;
+    size_t maskedSize = _htf_masking_compress(array, buffer, size);
+    compArray = malloc(maskedSize);
+    compSize = _htf_zstd_compress(buffer, compArray, maskedSize);
+    free(buffer);
+    break;
+  }
+  }
+  htf_log(htf_dbg_lvl_debug, "Writing %lu bytes as %lu bytes\n", size, compSize);
+  _htf_fwrite(&compSize, sizeof(compSize), 1, file);
+  _htf_fwrite(compArray, compSize, 1, file);
+}
+/** Decompresses an array that has been compressed by ZSTD. Returns the size of the uncompressed data.
+ * - void * array : the array in which the uncompressed data will be written.
+ * - void * compArray : the compressed array.
+ * - size_t compSize : size of the compressed array
+ */
+inline static size_t _htf_zstd_read(void* array, void* compArray, size_t compSize) {
+  size_t realSize = ZSTD_getFrameContentSize(compArray, compSize);
+  ZSTD_decompress(array, realSize, compArray, compSize);
+  return realSize;
+}
+
+/** Decompresses an array that has been compressed by the Masking technique. Returns the size of the uncompressed data.
+ * - void * array : the array in which the uncompressed data will be written.
+ * - size_t size: size of that array.
+ * - void * compArray : the compressed array.
+ * - size_t compSize : size of the compressed array
+ */
+inline static size_t _htf_masking_read(void* array, size_t size, void* compArray, size_t compSize) {
+  if (compSize == size) {
+    memcpy(array, compArray, size);
+    return compSize;
+  }
+  // Then we used ZSTD
+  size_t width = 1 << (size / compSize);
+  memset(array, 0, size);
+  for (int i = 0; i < size / sizeof(uint64_t); i++) {
+    memcpy(&array[i], &compArray[size * i], width);
+  }
+  return width * (size / sizeof(uint64_t));
+}
+
+/** Reads the array from the given file, but decompresses it before, according to the value of COMPRESSION_OPTIONS.
+ * - void* array: the array to be read.
+ * - size_t size: size of said array.
+ * - FILE*  file: file to read from.
+ */
+inline static void _htf_compress_read(void* array, size_t size, FILE* file) {
+  size_t compSize;
+  _htf_fread(&compSize, sizeof(compSize), 1, file);
+  // Then we used ZSTD
+  void* compArray = malloc(compSize);
+  _htf_fread(compArray, compSize, 1, file);
+  switch (COMPRESSION_OPTIONS) {
+  case NO_COMPRESSION:
+    memcpy(array, compArray, size);
+    break;
+  case ZSTD: {
+    size_t realSize = _htf_zstd_read(array, compArray, compSize);
+    htf_assert(realSize == size);
+    break;
+  }
+  case MASKING:
+    _htf_masking_read(array, size, compArray, compSize);
+    break;
+  case MASKING_ZSTD: {
+    void* buffer = compArray;
+    size_t maskedSize = _htf_zstd_read(array, buffer, compSize);
+    compArray = malloc(maskedSize);
+    _htf_masking_read(buffer, size, compArray, maskedSize);
+    free(buffer);
+    break;
+  }
+  }
+  free(compArray);
+}
+
+/**************** Storage Functions ****************/
 
 void htf_storage_init(struct htf_archive* archive) {
   _htf_mkdir(archive->dir_name, 0777);
+  htf_storage_option_init();
 }
 
 static const char* base_dirname(struct htf_archive* a) {
@@ -116,55 +279,16 @@ static FILE* _htf_get_event_file(const char* base_dirname, struct htf_thread* th
   return _htf_file_open(filename, mode);
 }
 
-enum timestamp_size { bit8 = 0, bit16 = 1, bit32 = 2, bit64 = 3 };
-
 static void _htf_store_event(const char* base_dirname,
                              struct htf_thread* th,
                              struct htf_event_summary* e,
                              htf_event_id_t event_id) {
   FILE* file = _htf_get_event_file(base_dirname, th, event_id, "w");
-  htf_timestamp_t ts = 0;
-  for (int i = 0; i < e->nb_events; i++) {
-    ts |= e->durations[i];
-  }
-  enum timestamp_size ts_size = bit64;
-  if (ts < UINT8_MAX) {
-    ts_size = bit8;
-  } else if (ts < UINT16_MAX) {
-    ts_size = bit16;
-  } else if (ts < UINT32_MAX) {
-    ts_size = bit32;
-  }
-  size_t size = (1 << ts_size);
-  htf_log(htf_dbg_lvl_debug, "\tStore event %x {.nb_events=%d} using %zu bytes, mask was %016lx \n", HTF_ID(event_id),
-          e->nb_events, size, ts);
+  htf_log(htf_dbg_lvl_debug, "\tStore event %x {.nb_events=%d}\n", HTF_ID(event_id), e->nb_events);
 
   _htf_fwrite(&e->event, sizeof(struct htf_event), 1, file);
   _htf_fwrite(&e->nb_events, sizeof(e->nb_events), 1, file);
-  _htf_fwrite(&ts_size, sizeof(ts_size), 1, file);
-
-  char* buffer = malloc(size * e->nb_events);
-  for (int i = 0; i < e->nb_events; i++) {
-    memcpy(&buffer[size * i], &e->durations[i], size);
-  }
-  size_t maxCSize = ZSTD_compressBound(size * e->nb_events);
-  void* cBuff = malloc(maxCSize);
-  size_t cSize = ZSTD_compress(cBuff, maxCSize, buffer, e->nb_events * size, ZSTD_COMPRESSION_LEVEL);
-  if (cSize < size * e->nb_events) {
-    // If the compression is worth it
-    _htf_fwrite(&cSize, sizeof(cSize), 1, file);
-    _htf_fwrite(cBuff, cSize, 1, file);
-    htf_log(htf_dbg_lvl_debug, "\t\tStored %zu bytes instead of %zu using ZSTD\n", cSize,
-            (e->nb_events * sizeof(htf_timestamp_t)));
-  } else {
-    cSize = 0;
-    _htf_fwrite(&cSize, sizeof(cSize), 1, file);
-    _htf_fwrite(buffer, size * e->nb_events, 1, file);
-    htf_log(htf_dbg_lvl_debug, "\t\tStored %zu bytes instead of %zu\n", size * e->nb_events,
-            (e->nb_events * sizeof(htf_timestamp_t)));
-  }
-  free(cBuff);
-  free(buffer);
+  _htf_compress_write(e->timestamps, e->nb_events * sizeof(htf_timestamp_t), file);
   fclose(file);
 }
 
@@ -176,33 +300,9 @@ static void _htf_read_event(const char* base_dirname,
 
   _htf_fread(&e->event, sizeof(struct htf_event), 1, file);
   _htf_fread(&e->nb_events, sizeof(e->nb_events), 1, file);
-  enum timestamp_size ts_size;
-  _htf_fread(&ts_size, sizeof(ts_size), 1, file);
-  size_t size = (1 << ts_size);
-
-  htf_log(htf_dbg_lvl_debug, "\tLoad event %x {.nb_events=%d} using %zu bytes\n", HTF_ID(event_id), e->nb_events, size);
-
-  size_t cSize;
-  _htf_fread(&cSize, sizeof(cSize), 1, file);
-  char* buffer = malloc(e->nb_events * size);
+  htf_log(htf_dbg_lvl_debug, "\tLoad event %x {.nb_events=%d}\n", HTF_ID(event_id), e->nb_events);
   e->durations = calloc(e->nb_events, sizeof(htf_timestamp_t));
-  if (cSize) {
-    // Then we used ZSTD
-    void* cBuffer = malloc(cSize);
-    _htf_fread(cBuffer, cSize, 1, file);
-    size_t rSize = ZSTD_getFrameContentSize(cBuffer, cSize);
-    htf_assert(rSize == e->nb_events * size);
-    ZSTD_decompress(buffer, rSize, cBuffer, cSize);
-    free(cBuffer);
-  } else {
-    // We didn't use ZSTD
-    _htf_fread(buffer, e->nb_events * size, 1, file);
-  }
-  fclose(file);
-  for (int i = 0; i < e->nb_events; i++) {
-    memcpy(&e->durations[i], &buffer[size * i], size);
-  }
-  free(buffer);
+  _htf_compress_read(e->durations, sizeof(htf_timestamp_t) * e->nb_events, file);
 }
 
 static FILE* _htf_get_sequence_file(const char* base_dirname,
@@ -227,7 +327,7 @@ static void _htf_store_sequence(const char* base_dirname,
 
   _htf_fwrite(&s->size, sizeof(s->size), 1, file);
   _htf_fwrite(s->token, sizeof(s->token[0]), s->size, file);
-  _htf_vector_fwrite(s->timestamps, file);
+  _htf_vector_fwrite(&s->timestamps, file);
   fclose(file);
 }
 
@@ -240,7 +340,7 @@ static void _htf_read_sequence(const char* base_dirname,
   s->token = malloc(sizeof(htf_token_t) * s->size);
   s->allocated = s->size;
   _htf_fread(s->token, sizeof(htf_token_t), s->size, file);
-  _htf_vector_fread(s->timestamps, file);
+  _htf_vector_fread(&s->timestamps, file);
   s->durations = calloc(s->timestamps.size, sizeof(htf_timestamp_t));
   fclose(file);
 
@@ -264,36 +364,27 @@ static void _htf_store_loop(const char* base_dirname,
                             htf_loop_id_t loop_id) {
   FILE* file = _htf_get_loop_file(base_dirname, th, loop_id, "w");
   if (htf_debug_level >= htf_dbg_lvl_debug) {
-    htf_log(htf_dbg_lvl_debug, "\tStore loops %x {.nb_loops=%d, .token=%x.%x, .nb_iterations: [", HTF_ID(loop_id),
-            l->nb_loops, l->token.type, l->token.id);
-    DOFOR(i, l->nb_loops - 1) {
-      printf("%d, ", l->nb_iterations[i]);
-    }
-    printf("%d]}\n", l->nb_iterations[l->nb_loops - 1]);
+    htf_log(htf_dbg_lvl_debug, "\tStore loops %x {.nb_loops=%d, .token=%x.%x, .nb_iterations:", HTF_ID(loop_id),
+            l->nb_iterations.size, l->token.type, l->token.id);
+    htf_vector_print_as_int(&l->nb_iterations);
+    printf("}\n");
   }
-
-  _htf_fwrite(&l->nb_loops, sizeof(l->nb_loops), 1, file);
-  _htf_fwrite(l->nb_iterations, sizeof(unsigned int), l->nb_loops, file);
   _htf_fwrite(&l->token, sizeof(l->token), 1, file);
+  _htf_vector_fwrite(&l->nb_iterations, file);
   fclose(file);
 }
 
 static void _htf_read_loop(const char* base_dirname, struct htf_thread* th, struct htf_loop* l, htf_loop_id_t loop_id) {
   FILE* file = _htf_get_loop_file(base_dirname, th, loop_id, "r");
-
-  _htf_fread(&l->nb_loops, sizeof(l->nb_loops), 1, file);
-  l->nb_iterations = calloc(l->nb_loops, sizeof(unsigned int));
   l->id = HTF_TOKENIZE(HTF_TYPE_LOOP, loop_id.id);
-  _htf_fread(l->nb_iterations, sizeof(unsigned int), l->nb_loops, file);
   _htf_fread(&l->token, sizeof(l->token), 1, file);
+  _htf_vector_fread(&l->nb_iterations, file);
   fclose(file);
   if (htf_debug_level >= htf_dbg_lvl_debug) {
-    htf_log(htf_dbg_lvl_debug, "\tLoad loops %x {.nb_loops=%d, .token=%x.%x, .nb_iterations: [", HTF_ID(loop_id),
-            l->nb_loops, l->token.type, l->token.id);
-    DOFOR(i, l->nb_loops - 1) {
-      printf("%d, ", l->nb_iterations[i]);
-    }
-    printf("%d]}\n", l->nb_iterations[l->nb_loops - 1]);
+    htf_log(htf_dbg_lvl_debug, "\tLoad loops %x {.nb_loops=%d, .token=%x.%x, .nb_iterations: ", HTF_ID(loop_id),
+            l->nb_iterations.size, l->token.type, l->token.id);
+    htf_vector_print_as_int(&l->nb_iterations);
+    printf("}\n");
   }
 }
 
@@ -551,6 +642,7 @@ void htf_storage_finalize(struct htf_archive* archive) {
   _htf_fwrite(&archive->nb_location_groups, sizeof(int), 1, f);
   _htf_fwrite(&archive->nb_locations, sizeof(int), 1, f);
   _htf_fwrite(&archive->nb_threads, sizeof(int), 1, f);
+  _htf_fwrite(&COMPRESSION_OPTIONS, sizeof(COMPRESSION_OPTIONS), 1, f);
 
   for (int i = 0; i < archive->definitions.nb_strings; i++) {
     _htf_store_string(archive, &archive->definitions.strings[i], i);
@@ -617,6 +709,7 @@ static void _htf_read_archive(struct htf_archive* global_archive,
   _htf_fread(&archive->nb_location_groups, sizeof(int), 1, f);
   _htf_fread(&archive->nb_locations, sizeof(int), 1, f);
   _htf_fread(&archive->nb_threads, sizeof(int), 1, f);
+  _htf_fread(&COMPRESSION_OPTIONS, sizeof(COMPRESSION_OPTIONS), 1, f);
 
   archive->definitions.nb_allocated_strings = archive->definitions.nb_strings;
   archive->definitions.strings = malloc(sizeof(struct htf_string) * archive->definitions.nb_allocated_strings);

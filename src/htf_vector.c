@@ -11,66 +11,102 @@
 #include "htf.h"
 #include "htf_dbg.h"
 
+/**Tries to fill this vector with the next one's data.*/
+void _htf_vector_reorganize(htf_vector_t* vector) {
+  htf_log(htf_dbg_lvl_debug, "Array at %p has too much unused memory, reorganizing\n", vector);
+  // This means that the current array isn't using enough capacity, so we'll move the memory
+  uint mem_to_move = vector->allocated - vector->_local_size;
+  if (mem_to_move > vector->next->_local_size) {
+    mem_to_move = vector->next->_local_size;
+  }
+  memmove(vector->array + vector->_local_size * vector->element_size, vector->next->array,
+          mem_to_move * vector->element_size);
+  memmove(vector->next->array, vector->next->array + mem_to_move * vector->element_size,
+          (vector->next->allocated - mem_to_move) * vector->element_size);
+  vector->next->_local_size -= mem_to_move;
+  vector->_local_size += mem_to_move;
+  // TODO If the next one is empty, we should put it at the end of the linked structure.
+}
+
 void htf_vector_new(htf_vector_t* vector, size_t element_size) {
   htf_vector_new_with_size(vector, element_size, DEFAULT_VECTOR_SIZE);
 };
 
-/** Creates a new vector with a default allocated size.*/
 void htf_vector_new_with_size(htf_vector_t* vector, size_t element_size, uint size) {
   vector->element_size = element_size;
   vector->size = 0;
   vector->allocated = size;
-  vector->vector = malloc(element_size * size);
-};
-
-/** Adds an element to the vector. Copies the value of the element. */
-void htf_vector_add(htf_vector_t* vector, void* element) {
-  if (vector->size >= vector->allocated) {
-    htf_warn("Reallocating memory from %d to %d\n", vector->allocated, vector->allocated * 2);
-    void* new_buffer = realloc(vector->vector, vector->size * 2 * vector->element_size);
-    if (new_buffer == NULL) {
-      new_buffer = malloc(vector->size * 2 * vector->element_size);
-      if (new_buffer == NULL) {
-        htf_error("Could not allocate memory\n");
-      }
-      memmove(new_buffer, vector->vector, vector->size * vector->element_size);
-      free(vector->vector);
-    }
-    vector->allocated *= 2;
-    vector->vector = new_buffer;
-  }
-  memcpy(vector->vector + vector->size * vector->element_size, element, vector->element_size);
-  vector->size++;
+  vector->array = malloc(element_size * size);
+  vector->next = NULL;
 }
 
-/** Gets te element at the given index. Returns a pointer to that element, NULL if the index is incorrect. */
+void htf_vector_add(htf_vector_t* vector, void* element) {
+  if (vector->_local_size >= vector->allocated) {
+    if (vector->next == NULL) {
+      htf_log(htf_dbg_lvl_debug, "Adding a new tail to an array: %p\n", vector);
+      vector->next = malloc(sizeof(htf_vector_t));
+      htf_vector_new_with_size(vector->next, vector->element_size, vector->allocated);
+    }
+    htf_vector_add(vector->next, element);
+    vector->size++;
+    return;
+  }
+  if (vector->next != NULL) {
+    // If this linked list has a next one, we prioritize putting it in the other one
+    // Except in the case where this one is becoming too small
+    // Or if the next one is empty
+    if (vector->_local_size <= vector->allocated / VECTOR_EMPTINESS_SWITCH && vector->next->_local_size) {
+      _htf_vector_reorganize(vector);
+    }
+    if (vector->_local_size >= vector->allocated || (vector->next->_local_size != 0 || vector->next->next != NULL)) {
+      htf_vector_add(vector->next, element);
+      vector->size++;
+      return;
+    }
+  }
+  memcpy(vector->array + vector->_local_size * vector->element_size, element, vector->element_size);
+  vector->size++;
+  vector->_local_size++;
+}
+
 void* htf_vector_get(htf_vector_t* vector, int index) {
-  if (index < vector->size)
-    return vector->vector + (index * vector->element_size);
-  else
+  if (index < vector->size) {
+    if (index < vector->_local_size) {
+      return vector->array + (index * vector->element_size);
+    } else {
+      return htf_vector_get(vector->next, index - vector->_local_size);
+    }
+  } else
     return NULL;
 };
 
-/** Removes the element at the given index. */
 void htf_vector_remove_at(htf_vector_t* vector, int index) {
-  memmove(vector->vector + (index)*vector->element_size, vector->vector + (index + 1) * vector->element_size,
-          (vector->size - 1 - index) * vector->element_size);
+  // ... Is there any way to remove a single element from a hybrid linked list
+  // Without doing some pretty nasty stuff ???
+  if (index < vector->size) {
+    if (index < vector->_local_size) {
+      memmove(vector->array + index * vector->element_size, vector->array + (index + 1) * vector->element_size,
+              (vector->_local_size - 1 - index) * vector->element_size);
+      vector->_local_size--;
+    } else
+      htf_vector_remove_at(vector->next, index - vector->_local_size);
+  }
   vector->size--;
 };
 
-/** Removes the first element whose memory is equal to the given element */
 void htf_vector_remove_first(htf_vector_t* vector, void* element) {
-  for (int i = 0; i < vector->size; i++) {
-    if (memcmp(element, vector->vector + i * vector->element_size, vector->element_size) == 0) {
+  for (int i = 0; i < vector->_local_size; i++) {
+    if (memcmp(element, vector->array + i * vector->element_size, vector->element_size) == 0) {
       htf_vector_remove_at(vector, i);
       return;
     }
   }
+  htf_vector_remove_first(vector->next, element);
 }
-/* Prints the vector as a vector of ints.*/
+
 void htf_vector_print_as_int(htf_vector_t* vector) {
   if (vector->element_size != sizeof(int)) {
-    htf_warn("Warning: printing a vector as vect of int where size is %lu\n", vector->element_size);
+    htf_warn("Warning: printing a array as vect of int where size is %lu\n", vector->element_size);
   }
   printf("[");
   DOFOR(i, vector->size - 1) {

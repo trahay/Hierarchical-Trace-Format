@@ -8,6 +8,8 @@
 
 #include "htf.h"
 
+enum storage_compression_option { NO_COMPRESSION = 0, ZSTD = 1, MASKING = 2, MASKING_ZSTD = 3 };
+
 void htf_storage_init(struct htf_archive* archive);
 void htf_storage_finalize_thread(struct htf_thread* thread);
 void htf_storage_finalize(struct htf_archive* archive);

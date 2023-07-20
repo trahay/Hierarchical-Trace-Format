@@ -301,9 +301,7 @@ struct htf_sequence {
  * - struct htf_token id: Self-id of the loop
  */
 struct htf_loop {
-  unsigned* nb_iterations;
-  unsigned nb_loops;
-  unsigned nb_allocated;
+  htf_vector_t nb_iterations;
   htf_token_t token;
   struct htf_token id;
 };
