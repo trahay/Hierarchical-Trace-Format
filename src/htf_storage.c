@@ -28,7 +28,7 @@ void htf_storage_option_init() {
     else if (strcmp(verbose_str, "MASKING_ZSTD") == 0)
       COMPRESSION_OPTIONS = MASKING_ZSTD;
   }
-};
+}
 static void _htf_store_event(const char* base_dirname,
                              struct htf_thread* th,
                              struct htf_event_summary* e,
@@ -196,8 +196,7 @@ inline static void _htf_compress_write(void* array, size_t size, FILE* file) {
   _htf_fwrite(&compSize, sizeof(compSize), 1, file);
   _htf_fwrite(compArray, compSize, 1, file);
 }
-/**
- * Decompress an array that has been compressed by ZSTD. Returns the size of the uncompressed data.
+/** Decompresses an array that has been compressed by ZSTD. Returns the size of the uncompressed data.
  * - void * array : the array in which the uncompressed data will be written.
  * - void * compArray : the compressed array.
  * - size_t compSize : size of the compressed array
@@ -208,8 +207,7 @@ inline static size_t _htf_zstd_read(void* array, void* compArray, size_t compSiz
   return realSize;
 }
 
-/**
- * Decompress an array that has been compressed by the Masking technique. Returns the size of the uncompressed data.
+/** Decompresses an array that has been compressed by the Masking technique. Returns the size of the uncompressed data.
  * - void * array : the array in which the uncompressed data will be written.
  * - size_t size: size of that array.
  * - void * compArray : the compressed array.
