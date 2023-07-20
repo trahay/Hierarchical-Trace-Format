@@ -29,7 +29,7 @@ option(ENABLE_OTF2 "Enable OTF2 compatibilit layer" ON)
 
 
 # if (ENABLE_MPI)
-  find_program(MPICC mpicc REQUIRED)
+#  find_program(MPICC mpicc REQUIRED)
 # endif()
 
 find_package (zstd REQUIRED)
