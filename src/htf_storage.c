@@ -100,29 +100,43 @@ static FILE* _htf_file_open(char* filename, char* mode) {
 
 /******************* Read/Write/Compression function for vectors and arrays *******************/
 
-inline static void _htf_vector_fwrite(htf_vector_t* vector, FILE* stream) {
-  _htf_fwrite(&vector->size, sizeof(vector->size), 1, stream);
-  _htf_fwrite(&vector->element_size, sizeof(vector->element_size), 1, stream);
+/** Writes a vector to the given file.*/
+inline static void _htf_vector_fwrite(htf_vector_t* vector, FILE* file) {
+  _htf_fwrite(&vector->size, sizeof(vector->size), 1, file);
+  _htf_fwrite(&vector->element_size, sizeof(vector->element_size), 1, file);
   htf_vector_t* vec = vector;
   while (vec != NULL) {
-    _htf_fwrite(vec->array, vector->element_size, vec->_local_size, stream);
+    _htf_fwrite(vec->array, vector->element_size, vec->_local_size, file);
     vec = vec->next;
   }
 }
-inline static void _htf_vector_fread(htf_vector_t* vector, FILE* stream) {
-  _htf_fread(&vector->size, sizeof(vector->size), 1, stream);
-  _htf_fread(&vector->element_size, sizeof(vector->element_size), 1, stream);
+
+/** Reads a vector from the given file.*/
+inline static void _htf_vector_fread(htf_vector_t* vector, FILE* file) {
+  _htf_fread(&vector->size, sizeof(vector->size), 1, file);
+  _htf_fread(&vector->element_size, sizeof(vector->element_size), 1, file);
   vector->array = malloc(vector->element_size * vector->size);
   vector->allocated = vector->size;
   vector->next = NULL;
   vector->_local_size = vector->size;
-  _htf_fread(vector->array, vector->element_size, vector->size, stream);
+  _htf_fread(vector->array, vector->element_size, vector->size, file);
 }
 
+/** Compresses the content in src using ZSTD and writes it to dest. Returns the size of the compressed array.
+ *  - void* src: what's going to be compressed.
+ *  - void* dest: a free array in which the compressed array will be written.
+ *  - size_t size: size of src (and of the allocated memory in dest).
+ */
 inline static size_t _htf_zstd_compress(void* src, void* dest, size_t size) {
   return ZSTD_compress(dest, size, src, size, ZSTD_COMPRESSION_LEVEL);
 }
 enum uint64_size { bit8 = 0, bit16 = 1, bit32 = 2, bit64 = 3 };
+/** Compresses the content in src using a Masking technique and writes it to dest.
+ * Returns the size of the compressed array.
+ *  - void* src: what's going to be compressed.
+ *  - void* dest: a free array in which the compressed array will be written.
+ *  - size_t size: size of src (and of the allocated memory in dest).
+ */
 inline static size_t _htf_masking_compress(void* src, void* dest, size_t size) {
   size_t n = size / sizeof(uint64_t);
   uint64_t* new_src = src;
@@ -150,6 +164,11 @@ inline static size_t _htf_masking_compress(void* src, void* dest, size_t size) {
   }
 }
 
+/** Writes the array to the given file, but compresses it before, according to the value of COMPRESSION_OPTIONS.
+ * - void* array: the array to be written.
+ * - size_t size: size of said array.
+ * - FILE*  file: file to write in.
+ */
 inline static void _htf_compress_write(void* array, size_t size, FILE* file) {
   size_t compSize;
   void* compArray = malloc(size);
@@ -177,16 +196,29 @@ inline static void _htf_compress_write(void* array, size_t size, FILE* file) {
   _htf_fwrite(&compSize, sizeof(compSize), 1, file);
   _htf_fwrite(compArray, compSize, 1, file);
 }
-
+/**
+ * Decompress an array that has been compressed by ZSTD. Returns the size of the uncompressed data.
+ * - void * array : the array in which the uncompressed data will be written.
+ * - void * compArray : the compressed array.
+ * - size_t compSize : size of the compressed array
+ */
 inline static size_t _htf_zstd_read(void* array, void* compArray, size_t compSize) {
   size_t realSize = ZSTD_getFrameContentSize(compArray, compSize);
   ZSTD_decompress(array, realSize, compArray, compSize);
   return realSize;
 }
-inline static void _htf_masking_read(void* array, size_t size, void* compArray, size_t compSize) {
+
+/**
+ * Decompress an array that has been compressed by the Masking technique. Returns the size of the uncompressed data.
+ * - void * array : the array in which the uncompressed data will be written.
+ * - size_t size: size of that array.
+ * - void * compArray : the compressed array.
+ * - size_t compSize : size of the compressed array
+ */
+inline static size_t _htf_masking_read(void* array, size_t size, void* compArray, size_t compSize) {
   if (compSize == size) {
     memcpy(array, compArray, size);
-    return;
+    return compSize;
   }
   // Then we used ZSTD
   size_t width = 1 << (size / compSize);
@@ -194,7 +226,14 @@ inline static void _htf_masking_read(void* array, size_t size, void* compArray, 
   for (int i = 0; i < size / sizeof(uint64_t); i++) {
     memcpy(&array[i], &compArray[size * i], width);
   }
+  return width * (size / sizeof(uint64_t));
 }
+
+/** Reads the array from the given file, but decompresses it before, according to the value of COMPRESSION_OPTIONS.
+ * - void* array: the array to be read.
+ * - size_t size: size of said array.
+ * - FILE*  file: file to read from.
+ */
 inline static void _htf_compress_read(void* array, size_t size, FILE* file) {
   size_t compSize;
   _htf_fread(&compSize, sizeof(compSize), 1, file);
