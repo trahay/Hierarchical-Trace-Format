@@ -20,6 +20,20 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+    - name: download-openmpi
+        run: wget https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.5.tar.gz
+
+    - name: extract-openmpi
+        run: tar -xvf ./openmpi-4.1.5.tar.gz
+
+    - name: configure-openmpi
+        run: ./openmpi-4.1.5/configure --prefix="/home/${USER}/.openmpi"
+
+    - name: install-openmpi
+       run: |
+        make -j
+        sudo make install
+
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory
       run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
