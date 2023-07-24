@@ -13,14 +13,16 @@
 #include "htf.h"
 #include "htf_archive.h"
 #include "htf_read.h"
+#include "htf_storage.h"
 
 static int show_structure = 0;
 static int per_thread = 0;
 static long max_depth = MAX_CALLSTACK_DEPTH;
-
+static short store_timestamps = 1;
 /* Print one event */
 static void print_event(struct htf_thread* thread, htf_token_t token, struct htf_event_occurence* e) {
-  printf("%.9lf\t%.9lf\t", e->timestamp / 1e9, e->duration / 1e9);
+  if (store_timestamps)
+    printf("%.9lf\t%.9lf\t", e->timestamp / 1e9, e->duration / 1e9);
   if (!per_thread)
     printf("%s\t", htf_get_thread_name(thread));
   htf_print_token(thread, token);
@@ -34,47 +36,58 @@ static void print_sequence(struct htf_thread* thread,
                            struct htf_sequence_occurence* seq,
                            struct htf_loop_occurence* containing_loop) {
   struct htf_sequence* s = seq->sequence;
-  htf_timestamp_t ts = seq->timestamp;
-  htf_timestamp_t duration = seq->duration;
-  if (containing_loop == NULL) {
-    printf("Sequence");
-    if (show_structure)
-      printf("   ");
+  if (store_timestamps) {
+    htf_timestamp_t ts = seq->timestamp;
+    htf_timestamp_t duration = seq->duration;
+    if (containing_loop == NULL) {
+      printf("Sequence");
+      if (show_structure)
+        printf("   ");
+    } else {
+      printf("%.9lf", ts / 1e9);
+    }
+    printf("\t%.9lf\t", duration / 1e9);
+    if (!per_thread)
+      printf("%s\t", htf_get_thread_name(thread));
+    if (containing_loop == NULL) {
+      htf_print_token(thread, token);
+      printf("\t");
+      for (unsigned i = 0; i < s->size; i++) {
+        htf_print_token(thread, s->token[i]);
+        printf(" ");
+      }
+    } else {
+      htf_timestamp_t mean = containing_loop->duration / containing_loop->nb_iterations;
+      if (mean < duration)
+        printf("-");
+      else
+        printf("+");
+      uint64_t diff = (mean < duration) ? duration - mean : mean - duration;
+      float percentile = (float)diff / (float)mean * 100;
+      printf("%5.2f%%", percentile);
+    }
   } else {
-    printf("%.9lf", ts / 1e9);
-  }
-  printf("\t%.9lf\t", duration / 1e9);
-  if (!per_thread)
-    printf("%s\t", htf_get_thread_name(thread));
-  if (containing_loop == NULL) {
     htf_print_token(thread, token);
     printf("\t");
     for (unsigned i = 0; i < s->size; i++) {
       htf_print_token(thread, s->token[i]);
       printf(" ");
     }
-  } else {
-    htf_timestamp_t mean = containing_loop->duration / containing_loop->nb_iterations;
-    if (mean < duration)
-      printf("-");
-    else
-      printf("+");
-    uint64_t diff = (mean < duration) ? duration - mean : mean - duration;
-    float percentile = (float)diff / (float)mean * 100;
-    printf("%5.2f%%", percentile);
   }
   printf("\n");
 }
 
 static void print_loop(struct htf_thread* thread, htf_token_t token, struct htf_loop_occurence* loop, int show_detail) {
-  if (show_detail) {
-    printf("%.9lf\t%.9lf\t", loop->timestamp / 1e9, loop->duration / 1e9);
-  } else {
-    printf("Loop");
-    if (show_structure)
-      printf("        ");
-    printf("\t%.6lf * %d", loop->duration / (1e9 * loop->nb_iterations), loop->nb_iterations);
-    printf("\t");
+  if (store_timestamps) {
+    if (show_detail) {
+      printf("%.9lf\t%.9lf\t", loop->timestamp / 1e9, loop->duration / 1e9);
+    } else {
+      printf("Loop");
+      if (show_structure)
+        printf("        ");
+      printf("\t%.6lf * %d", loop->duration / (1e9 * loop->nb_iterations), loop->nb_iterations);
+      printf("\t");
+    }
   }
   if (!per_thread)
     printf("%s\t", htf_get_thread_name(thread));
@@ -218,10 +231,14 @@ static void display_sequence(struct htf_thread_reader* reader,
       }
       if (current_level_token[i].type == HTF_TYPE_LOOP) {
         struct htf_loop_occurence loop = current_level[i].loop_occurence;
-        DOFOR(j, (int)loop.nb_iterations) {
-          print_token(reader->thread_trace, &loop.loop->token, (htf_occurence*)&loop.full_loop[j], depth + 1,
-                      j == ((int)loop.nb_iterations - 1), &loop);
-          // display_sequence(reader, loop.loop->token, &loop.full_loop[j], depth + 2);
+        if (store_timestamps) {
+          DOFOR(j, (int)loop.nb_iterations) {
+            print_token(reader->thread_trace, &loop.loop->token, (htf_occurence*)&loop.full_loop[j], depth + 1,
+                        j == ((int)loop.nb_iterations - 1), &loop);
+            // display_sequence(reader, loop.loop->token, &loop.full_loop[j], depth + 2);
+          }
+        } else {
+          display_sequence(reader, loop.loop->token, &loop.full_loop[0], depth + 1);
         }
       }
     }
@@ -239,12 +256,17 @@ static void display_sequence(struct htf_thread_reader* reader,
 /* Print all the events of a thread */
 static void print_thread(struct htf_archive* trace, struct htf_thread* thread) {
   printf("Reading events for thread %u (%s):\n", thread->id, htf_get_thread_name(thread));
-  printf("Timestamp\tDuration\tTag\tEvent\n");
+  if (store_timestamps) {
+    printf("Timestamp\t");
+  }
+  printf("Duration\tTag\tEvent\n");
 
   struct htf_thread_reader reader;
   int reader_options = OPTION_NONE;
   if (show_structure)
     reader_options |= OPTION_SHOW_STRUCTURE;
+  if (!store_timestamps || trace->store_timestamps == 0)
+    reader_options |= OPTION_NO_TIMESTAMPS;
 
   htf_read_thread_iterator_init(trace, &reader, thread->id, reader_options);
   display_sequence(&reader, HTF_TOKENIZE(HTF_TYPE_SEQUENCE, 0), NULL, 0);
@@ -321,6 +343,10 @@ int main(int argc, char** argv) {
     } else if (!strcmp(argv[i], "-S")) {
       show_structure = 1;
       nb_opts++;
+    } else if (!strcmp(argv[i], "--no-timestamps")) {
+      setenv("STORE_TIMESTAMPS", "FALSE", 0);
+      store_timestamps = 0;
+      nb_opts++;
     } else if (!strcmp(argv[i], "--max-depth")) {
       max_depth = strtol(argv[i + 1], NULL, 10);
       nb_opts += 2;
@@ -344,6 +370,7 @@ int main(int argc, char** argv) {
 
   struct htf_archive trace;
   htf_read_archive(&trace, trace_name);
+  store_timestamps = trace.store_timestamps;
 
   if (per_thread) {
     for (int i = 0; i < trace.nb_threads; i++) {

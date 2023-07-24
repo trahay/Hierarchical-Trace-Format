@@ -14,20 +14,36 @@
 
 #include "htf.h"
 #include "htf_dbg.h"
+#include "htf_hash.h"
 #include "htf_read.h"
 #include "htf_storage.h"
 
 static enum storage_compression_option COMPRESSION_OPTIONS = ZSTD;
+short STORE_TIMESTAMPS = 1;
+static short STORE_HASHING = 0;
 void htf_storage_option_init() {
-  char* verbose_str = getenv("COMPRESSION");
-  if (verbose_str) {
-    if (strcmp(verbose_str, "ZSTD") == 0)
+  // Compression options
+  char* compression_str = getenv("COMPRESSION");
+  if (compression_str) {
+    if (strcmp(compression_str, "ZSTD") == 0)
       COMPRESSION_OPTIONS = ZSTD;
-    else if (strcmp(verbose_str, "MASKING") == 0)
+    else if (strcmp(compression_str, "MASKING") == 0)
       COMPRESSION_OPTIONS = MASKING;
-    else if (strcmp(verbose_str, "MASKING_ZSTD") == 0)
+    else if (strcmp(compression_str, "MASKING_ZSTD") == 0)
       COMPRESSION_OPTIONS = MASKING_ZSTD;
+    else if (strcmp(compression_str, "NONE") == 0)
+      COMPRESSION_OPTIONS = NO_COMPRESSION;
   }
+
+  // Timestamp storage
+  char* store_timestamps_str = getenv("STORE_TIMESTAMPS");
+  if (store_timestamps_str && strcmp(store_timestamps_str, "TRUE") != 0)
+    STORE_TIMESTAMPS = 0;
+
+  // Store hash for sequences
+  char* store_hashing_str = getenv("STORE_HASHING");
+  if (store_hashing_str && strcmp(store_hashing_str, "FALSE") != 0)
+    STORE_HASHING = 1;
 }
 static void _htf_store_event(const char* base_dirname,
                              struct htf_thread* th,
@@ -288,7 +304,9 @@ static void _htf_store_event(const char* base_dirname,
 
   _htf_fwrite(&e->event, sizeof(struct htf_event), 1, file);
   _htf_fwrite(&e->nb_events, sizeof(e->nb_events), 1, file);
-  _htf_compress_write(e->timestamps, e->nb_events * sizeof(htf_timestamp_t), file);
+  if (STORE_TIMESTAMPS) {
+    _htf_compress_write(e->timestamps, e->nb_events * sizeof(htf_timestamp_t), file);
+  }
   fclose(file);
 }
 
@@ -301,8 +319,12 @@ static void _htf_read_event(const char* base_dirname,
   _htf_fread(&e->event, sizeof(struct htf_event), 1, file);
   _htf_fread(&e->nb_events, sizeof(e->nb_events), 1, file);
   htf_log(htf_dbg_lvl_debug, "\tLoad event %x {.nb_events=%d}\n", HTF_ID(event_id), e->nb_events);
-  e->durations = calloc(e->nb_events, sizeof(htf_timestamp_t));
-  _htf_compress_read(e->durations, sizeof(htf_timestamp_t) * e->nb_events, file);
+  if (STORE_TIMESTAMPS) {
+    e->durations = calloc(e->nb_events, sizeof(htf_timestamp_t));
+    _htf_compress_read(e->durations, sizeof(htf_timestamp_t) * e->nb_events, file);
+  } else {
+    e->durations = NULL;
+  }
 }
 
 static FILE* _htf_get_sequence_file(const char* base_dirname,
@@ -327,7 +349,15 @@ static void _htf_store_sequence(const char* base_dirname,
 
   _htf_fwrite(&s->size, sizeof(s->size), 1, file);
   _htf_fwrite(s->token, sizeof(s->token[0]), s->size, file);
-  _htf_vector_fwrite(&s->timestamps, file);
+  if (STORE_HASHING) {
+    if (!s->hash) {
+      htf_hash_32(s->token, s->size, SEED, &s->hash);
+    }
+    _htf_fwrite(&s->hash, sizeof(s->hash), 1, file);
+  }
+  if (STORE_TIMESTAMPS) {
+    _htf_vector_fwrite(&s->timestamps, file);
+  }
   fclose(file);
 }
 
@@ -340,8 +370,18 @@ static void _htf_read_sequence(const char* base_dirname,
   s->token = malloc(sizeof(htf_token_t) * s->size);
   s->allocated = s->size;
   _htf_fread(s->token, sizeof(htf_token_t), s->size, file);
-  _htf_vector_fread(&s->timestamps, file);
-  s->durations = calloc(s->timestamps.size, sizeof(htf_timestamp_t));
+  if (STORE_HASHING) {
+    uint32_t stored_hash;
+    _htf_fread(&stored_hash, sizeof(stored_hash), 1, file);
+    htf_hash_32(s->token, s->size, SEED, &s->hash);
+    htf_assert(stored_hash == s->hash);
+  }
+  if (STORE_TIMESTAMPS) {
+    _htf_vector_fread(&s->timestamps, file);
+    s->durations = calloc(s->timestamps.size, sizeof(htf_timestamp_t));
+  } else {
+    s->durations = NULL;
+  }
   fclose(file);
 
   htf_log(htf_dbg_lvl_debug, "\tLoad sequence %x {.size=%u, .nb_ts=%u}\n", HTF_ID(sequence_id), s->size,
@@ -643,6 +683,8 @@ void htf_storage_finalize(struct htf_archive* archive) {
   _htf_fwrite(&archive->nb_locations, sizeof(int), 1, f);
   _htf_fwrite(&archive->nb_threads, sizeof(int), 1, f);
   _htf_fwrite(&COMPRESSION_OPTIONS, sizeof(COMPRESSION_OPTIONS), 1, f);
+  _htf_fwrite(&STORE_HASHING, sizeof(STORE_HASHING), 1, f);
+  _htf_fwrite(&STORE_TIMESTAMPS, sizeof(STORE_TIMESTAMPS), 1, f);
 
   for (int i = 0; i < archive->definitions.nb_strings; i++) {
     _htf_store_string(archive, &archive->definitions.strings[i], i);
@@ -710,6 +752,14 @@ static void _htf_read_archive(struct htf_archive* global_archive,
   _htf_fread(&archive->nb_locations, sizeof(int), 1, f);
   _htf_fread(&archive->nb_threads, sizeof(int), 1, f);
   _htf_fread(&COMPRESSION_OPTIONS, sizeof(COMPRESSION_OPTIONS), 1, f);
+  _htf_fread(&STORE_HASHING, sizeof(STORE_HASHING), 1, f);
+  _htf_fread(&STORE_TIMESTAMPS, sizeof(STORE_TIMESTAMPS), 1, f);
+
+  char* store_timestamps_str = getenv("STORE_TIMESTAMPS");
+  if (store_timestamps_str && strcmp(store_timestamps_str, "FALSE") == 0) {
+    STORE_TIMESTAMPS = 0;
+  }
+  archive->store_timestamps = STORE_TIMESTAMPS;
 
   archive->definitions.nb_allocated_strings = archive->definitions.nb_strings;
   archive->definitions.strings = malloc(sizeof(struct htf_string) * archive->definitions.nb_allocated_strings);

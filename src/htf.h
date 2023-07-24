@@ -469,6 +469,9 @@ struct htf_archive {
   struct htf_archive** archive_list;
   int nb_archives;
   int nb_allocated_archives;
+
+  /* Indicates whether there are timestamps in there.*/
+  short store_timestamps;
 };
 
 

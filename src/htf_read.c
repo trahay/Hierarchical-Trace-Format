@@ -128,8 +128,9 @@ void enter_block(struct htf_thread_reader* reader, htf_token_t new_block) {
   reader->callstack_sequence[cur_frame] = new_block;
   if (new_block.type == HTF_TYPE_SEQUENCE) {
     struct htf_sequence* cur_seq = htf_get_sequence(reader->thread_trace, HTF_TOKEN_TO_SEQUENCE_ID(new_block));
-    reader->referential_timestamp =
-      *(htf_timestamp_t*)htf_vector_get(&cur_seq->timestamps, reader->sequence_index[new_block.id]);
+    if ((reader->options & OPTION_NO_TIMESTAMPS) == 0)
+      reader->referential_timestamp =
+        *(htf_timestamp_t*)htf_vector_get(&cur_seq->timestamps, reader->sequence_index[new_block.id]);
 
     htf_log(htf_dbg_lvl_debug, "Setting up new referential timestamp: %.9lf\n", reader->referential_timestamp / 1e9);
   }
@@ -243,7 +244,8 @@ int htf_move_to_next_token(struct htf_thread_reader* reader) {
   } else {
     // Don't forget to update the timestamp
     struct htf_event_summary* es = &reader->thread_trace->events[t.id];
-    reader->referential_timestamp += es->durations[reader->event_index[t.id]];
+    if ((reader->options & OPTION_NO_TIMESTAMPS) == 0)
+      reader->referential_timestamp += es->durations[reader->event_index[t.id]];
     reader->event_index[t.id]++;  // "consume" the event occurence
     _get_next_token(reader);
   }
@@ -256,10 +258,12 @@ void _htf_write_sequence_occurence(struct htf_thread_reader* reader,
   struct htf_sequence* sequence = reader->thread_trace->sequences[token.id];
 
   // Write it to the occurence
-  occurence->timestamp = *(htf_timestamp_t*)htf_vector_get(&sequence->timestamps, reader->sequence_index[token.id]);
+  if ((reader->options & OPTION_NO_TIMESTAMPS) == 0) {
+    occurence->timestamp = *(htf_timestamp_t*)htf_vector_get(&sequence->timestamps, reader->sequence_index[token.id]);
+    reader->referential_timestamp = occurence->timestamp;
+  }
   occurence->sequence = sequence;
   occurence->full_sequence = NULL;
-  reader->referential_timestamp = occurence->timestamp;
   occurence->savestate = create_savestate(reader);
 
   // Update the reader
@@ -289,11 +293,13 @@ int htf_read_thread_cur_level(struct htf_thread_reader* reader,
 
       // Write it to the occurence
       memcpy(&occurence->event, &es->event, sizeof(occurence->event));
-      occurence->timestamp = reader->referential_timestamp;
-      occurence->duration = es->durations[reader->event_index[token.id]];
+      if ((reader->options & OPTION_NO_TIMESTAMPS) == 0) {
+        occurence->timestamp = reader->referential_timestamp;
+        occurence->duration = es->durations[reader->event_index[token.id]];
+        // Update the reader
+        reader->referential_timestamp += occurence->duration;
+      }
 
-      // Update the reader
-      reader->referential_timestamp += occurence->duration;
       reader->event_index[token.id]++;
       break;
     }
@@ -305,7 +311,8 @@ int htf_read_thread_cur_level(struct htf_thread_reader* reader,
       // Write it to the occurence
       occurence->loop = loop;
       occurence->nb_iterations = *(int*)htf_vector_get(&loop->nb_iterations, reader->loop_index[token.id]);
-      occurence->timestamp = reader->referential_timestamp;
+      if ((reader->options & OPTION_NO_TIMESTAMPS) == 0)
+        occurence->timestamp = reader->referential_timestamp;
 
       // Write the loop
       enter_block(reader, token);
@@ -314,7 +321,9 @@ int htf_read_thread_cur_level(struct htf_thread_reader* reader,
       occurence->duration = 0;
       DOFOR(j, occurence->nb_iterations) {
         _htf_write_sequence_occurence(reader, &occurence->full_loop[j], loop->token);
-        occurence->duration += occurence->full_loop[j].duration;
+        if ((reader->options & OPTION_NO_TIMESTAMPS) == 0) {
+          occurence->duration += occurence->full_loop[j].duration;
+        }
       }
       leave_block(reader);
 
@@ -349,17 +358,23 @@ int htf_read_thread_cur_token(struct htf_thread_reader* reader, struct htf_token
     struct htf_event_summary* es = &reader->thread_trace->events[index];
     if (e) {
       memcpy(&e->event_occurence.event, &es->event, sizeof(e->event_occurence.event));
-      e->event_occurence.timestamp = reader->referential_timestamp;
-      e->event_occurence.duration = es->durations[reader->event_index[index]];
+      if ((reader->options & OPTION_NO_TIMESTAMPS) == 0) {
+        e->event_occurence.timestamp = reader->referential_timestamp;
+        e->event_occurence.duration = es->durations[reader->event_index[index]];
+      }
     }
     break;
   }
   case HTF_TYPE_SEQUENCE: {
     struct htf_sequence* seq = reader->thread_trace->sequences[index];
-    reader->referential_timestamp = *(htf_timestamp_t*)htf_vector_get(&seq->timestamps, reader->sequence_index[index]);
+    if ((reader->options & OPTION_NO_TIMESTAMPS) == 0)
+      reader->referential_timestamp =
+        *(htf_timestamp_t*)htf_vector_get(&seq->timestamps, reader->sequence_index[index]);
     if (e) {
-      e->sequence_occurence.timestamp = reader->referential_timestamp;
-      e->sequence_occurence.duration = seq->durations[reader->sequence_index[index]];
+      if ((reader->options & OPTION_NO_TIMESTAMPS) == 0) {
+        e->sequence_occurence.timestamp = reader->referential_timestamp;
+        e->sequence_occurence.duration = seq->durations[reader->sequence_index[index]];
+      }
       e->sequence_occurence.sequence = seq;
       e->sequence_occurence.savestate = create_savestate(reader);
     }
@@ -370,8 +385,10 @@ int htf_read_thread_cur_token(struct htf_thread_reader* reader, struct htf_token
     if (e) {
       e->loop_occurence.loop = loop;
       e->loop_occurence.nb_iterations = *(int*)htf_vector_get(&loop->nb_iterations, reader->loop_index[loop->id.id]);
-      e->loop_occurence.timestamp = htf_get_starting_timestamp(reader, *token);
-      e->loop_occurence.duration = htf_get_duration(reader, *token);
+      if ((reader->options & OPTION_NO_TIMESTAMPS) == 0) {
+        e->loop_occurence.timestamp = htf_get_starting_timestamp(reader, *token);
+        e->loop_occurence.duration = htf_get_duration(reader, *token);
+      }
     }
     break;
   }
@@ -435,8 +452,10 @@ htf_timestamp_t _skip_token(struct htf_thread_reader* reader, htf_token_t token,
   switch (token.type) {
   case HTF_TYPE_EVENT: {
     struct htf_event_summary es = reader->thread_trace->events[token.id];
-    DOFOR(i, nb_times) {
-      ts += es.durations[reader->event_index[token.id]++];
+    if ((reader->options & OPTION_NO_TIMESTAMPS) == 0) {
+      DOFOR(i, nb_times) {
+        ts += es.durations[reader->event_index[token.id]++];
+      }
     }
     break;
   }
@@ -446,7 +465,8 @@ htf_timestamp_t _skip_token(struct htf_thread_reader* reader, htf_token_t token,
       ts += _skip_token(reader, seq->token[i], nb_times);
     }
     reader->sequence_index[token.id] += nb_times;
-    htf_assert(reader->sequence_index[token.id] <= seq->timestamps.size);
+    htf_assert((reader->options & OPTION_NO_TIMESTAMPS) != 0 ||
+               reader->sequence_index[token.id] <= seq->timestamps.size);
     break;
   }
   case HTF_TYPE_LOOP: {
@@ -456,7 +476,9 @@ htf_timestamp_t _skip_token(struct htf_thread_reader* reader, htf_token_t token,
     DOFOR(i, nb_times) {
       reader->sequence_index[loop->token.id] +=
         *(int*)htf_vector_get(&loop->nb_iterations, reader->loop_index[token.id]);
-      htf_assert(reader->sequence_index[loop->token.id] <= seq->timestamps.size);
+
+      htf_assert(((reader->options & OPTION_NO_TIMESTAMPS) != 0) ||
+                 reader->sequence_index[loop->token.id] <= seq->timestamps.size);
 
       DOFOR(j, seq->size) {
         ts +=
@@ -476,11 +498,16 @@ htf_timestamp_t skip_sequence(struct htf_thread_reader* reader, htf_token_t toke
   case HTF_TYPE_SEQUENCE: {
     int sequence_index = reader->sequence_index[HTF_TOKEN_ID(token)];
     struct htf_sequence* seq = htf_get_sequence(reader->thread_trace, HTF_TOKEN_TO_SEQUENCE_ID(token));
-    htf_assert(sequence_index <= seq->timestamps.size);
-    seq->durations[sequence_index] = _skip_token(reader, token, 1);
-    reader->referential_timestamp = *(htf_timestamp_t*)htf_vector_get(&seq->timestamps, sequence_index);
-    reader->referential_timestamp += seq->durations[sequence_index];
-    return seq->durations[sequence_index];
+    if ((reader->options & OPTION_NO_TIMESTAMPS) == 0) {
+      htf_assert(sequence_index <= seq->timestamps.size);
+      seq->durations[sequence_index] = reader->referential_timestamp =
+        *(htf_timestamp_t*)htf_vector_get(&seq->timestamps, sequence_index);
+      reader->referential_timestamp += seq->durations[sequence_index];
+      return seq->durations[sequence_index];
+    } else {
+      _skip_token(reader, token, 1);
+      return 0;
+    }
   }
   case HTF_TYPE_LOOP: {
     htf_warn("Asked to skip a Loop, which is unusual\n");
@@ -495,7 +522,10 @@ htf_timestamp_t skip_sequence(struct htf_thread_reader* reader, htf_token_t toke
 _Thread_local size_t savestate_memory = 0;
 struct htf_savestate* create_savestate(struct htf_thread_reader* reader) {
   struct htf_savestate* new_savestate = malloc(sizeof(struct htf_savestate));
-  new_savestate->referential_timestamp = reader->referential_timestamp;
+  if ((reader->options & OPTION_NO_TIMESTAMPS) == 0) {
+    new_savestate->referential_timestamp = reader->referential_timestamp;
+  }
+  savestate_memory += sizeof(struct htf_savestate);
 
   new_savestate->callstack_sequence = malloc(sizeof(htf_token_t) * MAX_CALLSTACK_DEPTH);
   memcpy(new_savestate->callstack_sequence, reader->callstack_sequence, sizeof(int) * MAX_CALLSTACK_DEPTH);
@@ -505,24 +535,28 @@ struct htf_savestate* create_savestate(struct htf_thread_reader* reader) {
 
   new_savestate->callstack_loop_iteration = malloc(sizeof(int) * MAX_CALLSTACK_DEPTH);
   memcpy(new_savestate->callstack_loop_iteration, reader->callstack_loop_iteration, sizeof(int) * MAX_CALLSTACK_DEPTH);
+  savestate_memory += MAX_CALLSTACK_DEPTH * 3 * sizeof(int);
 
   new_savestate->current_frame = reader->current_frame;
 
   new_savestate->event_index = malloc(sizeof(int) * reader->thread_trace->nb_events);
   memcpy(new_savestate->event_index, reader->event_index, sizeof(int) * reader->thread_trace->nb_events);
+  savestate_memory += reader->thread_trace->nb_events * sizeof(int);
 
   new_savestate->sequence_index = malloc(sizeof(int) * reader->thread_trace->nb_sequences);
   memcpy(new_savestate->sequence_index, reader->sequence_index, sizeof(int) * reader->thread_trace->nb_sequences);
+  savestate_memory += reader->thread_trace->nb_sequences * sizeof(int);
 
   new_savestate->loop_index = malloc(sizeof(int) * reader->thread_trace->nb_loops);
   memcpy(new_savestate->loop_index, reader->loop_index, sizeof(int) * reader->thread_trace->nb_loops);
-  savestate_memory += MAX_CALLSTACK_DEPTH * 6 * sizeof(int);
-  savestate_memory += sizeof(new_savestate);
+  savestate_memory += reader->thread_trace->nb_loops * sizeof(int);
+
   return new_savestate;
 }
 
 void load_savestate(struct htf_thread_reader* reader, struct htf_savestate* savestate) {
-  reader->referential_timestamp = savestate->referential_timestamp;
+  if ((reader->options & OPTION_NO_TIMESTAMPS) == 0)
+    reader->referential_timestamp = savestate->referential_timestamp;
   memcpy(reader->callstack_sequence, savestate->callstack_sequence, sizeof(int) * MAX_CALLSTACK_DEPTH);
   memcpy(reader->callstack_index, savestate->callstack_index, sizeof(int) * MAX_CALLSTACK_DEPTH);
   memcpy(reader->callstack_loop_iteration, savestate->callstack_loop_iteration, sizeof(int) * MAX_CALLSTACK_DEPTH);

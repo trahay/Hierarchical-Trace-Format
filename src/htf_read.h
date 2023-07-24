@@ -12,6 +12,7 @@
 enum thread_reader_option {
   OPTION_NONE = 0,
   OPTION_SHOW_STRUCTURE = 1,
+  OPTION_NO_TIMESTAMPS = 2,
 };
 
 struct htf_thread_reader {
