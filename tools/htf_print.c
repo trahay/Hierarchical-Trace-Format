@@ -257,9 +257,9 @@ static void display_sequence(struct htf_thread_reader* reader,
 static void print_thread(struct htf_archive* trace, struct htf_thread* thread) {
   printf("Reading events for thread %u (%s):\n", thread->id, htf_get_thread_name(thread));
   if (store_timestamps) {
-    printf("Timestamp\t");
+    printf("Timestamp\tDuration\t");
   }
-  printf("Duration\tTag\tEvent\n");
+  printf("Tag\tEvent\n");
 
   struct htf_thread_reader reader;
   int reader_options = OPTION_NONE;
