@@ -119,7 +119,6 @@ static FILE* _htf_file_open(char* filename, char* mode) {
 /** Writes a vector to the given file.*/
 inline static void _htf_vector_fwrite(htf_vector_t* vector, FILE* file) {
   _htf_fwrite(&vector->size, sizeof(vector->size), 1, file);
-  _htf_fwrite(&vector->element_size, sizeof(vector->element_size), 1, file);
   htf_vector_t* vec = vector;
   while (vec != NULL) {
     _htf_fwrite(vec->array, vector->element_size, vec->_local_size, file);
@@ -128,9 +127,8 @@ inline static void _htf_vector_fwrite(htf_vector_t* vector, FILE* file) {
 }
 
 /** Reads a vector from the given file.*/
-inline static void _htf_vector_fread(htf_vector_t* vector, FILE* file) {
+inline static void _htf_vector_fread(htf_vector_t* vector, size_t element_size, FILE* file) {
   _htf_fread(&vector->size, sizeof(vector->size), 1, file);
-  _htf_fread(&vector->element_size, sizeof(vector->element_size), 1, file);
   vector->array = malloc(vector->element_size * vector->size);
   vector->allocated = vector->size;
   vector->next = NULL;
@@ -377,7 +375,7 @@ static void _htf_read_sequence(const char* base_dirname,
     htf_assert(stored_hash == s->hash);
   }
   if (STORE_TIMESTAMPS) {
-    _htf_vector_fread(&s->timestamps, file);
+    _htf_vector_fread(&s->timestamps, sizeof(htf_timestamp_t), file);
     s->durations = calloc(s->timestamps.size, sizeof(htf_timestamp_t));
   } else {
     s->durations = NULL;
@@ -418,7 +416,7 @@ static void _htf_read_loop(const char* base_dirname, struct htf_thread* th, stru
   FILE* file = _htf_get_loop_file(base_dirname, th, loop_id, "r");
   l->id = HTF_TOKENIZE(HTF_TYPE_LOOP, loop_id.id);
   _htf_fread(&l->token, sizeof(l->token), 1, file);
-  _htf_vector_fread(&l->nb_iterations, file);
+  _htf_vector_fread(&l->nb_iterations, sizeof(int), file);
   fclose(file);
   if (htf_debug_level >= htf_dbg_lvl_debug) {
     htf_log(htf_dbg_lvl_debug, "\tLoad loops %x {.nb_loops=%d, .token=%x.%x, .nb_iterations: ", HTF_ID(loop_id),
