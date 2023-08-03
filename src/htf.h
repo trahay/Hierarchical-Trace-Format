@@ -250,9 +250,8 @@ enum htf_record {
  *  - uint8_t event_data[256]: data related to the events (parameters of functions etc)
  */
 struct htf_event {
-  uint8_t event_size;
   enum htf_record record;
-
+  uint8_t event_size;
   uint8_t event_data[256];  // todo: align on 256
 } __attribute__((packed));
 
