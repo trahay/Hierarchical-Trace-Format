@@ -2,22 +2,16 @@
  * Copyright (C) Telecom SudParis
  * See LICENSE in top-level directory.
  */
-#include <assert.h>
-#include <fcntl.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/mman.h>
-#include <sys/stat.h>
-#include <unistd.h>
 
 #include "htf.h"
-#include "htf_archive.h"
 #include "htf_read.h"
-#include "htf_storage.h"
 
 static int show_structure = 0;
 static int per_thread = 0;
 static long max_depth = MAX_CALLSTACK_DEPTH;
+static char* structure_indent[MAX_CALLSTACK_DEPTH];
 static short store_timestamps = 1;
 /* Print one event */
 static void print_event(struct htf_thread* thread, htf_token_t token, struct htf_event_occurence* e) {
@@ -105,7 +99,6 @@ static void print_loop(struct htf_thread* thread, htf_token_t token, struct htf_
   }
   printf("\n");
 }
-static int seq_loop_to_close[MAX_CALLSTACK_DEPTH] = {0};
 static void print_token(struct htf_thread* thread,
                         struct htf_token* t,
                         htf_occurence* e,
@@ -116,43 +109,20 @@ static void print_token(struct htf_thread* thread,
 
   // Prints the structure of the sequences and the loops
   if (show_structure) {
-    if (last_one) {
-      if (t->type == HTF_TYPE_LOOP || (t->type == HTF_TYPE_SEQUENCE && containing_loop == NULL)) {
-        seq_loop_to_close[depth] = 1;
-        DOFOR(i, depth - 1) printf("│");
-        if (depth) {
-          if (containing_loop == NULL) {
-            printf("├┬");
-          } else
-            printf("├─");
-        }
+    structure_indent[depth - 1] = last_one ? "╰" : "├";
+    DOFOR(i, depth) {
+      printf("%s", structure_indent[i]);
+    }
+    if (depth) {
+      if (t->type != HTF_TYPE_EVENT) {
+        printf((containing_loop == NULL) ? "┬" : "─");
       } else {
-        int nb_last_sequences = 1;
-        for (int i = depth - 1; i > 0; i--) {
-          if (!seq_loop_to_close[i])
-            break;
-          seq_loop_to_close[i] = 0;
-          nb_last_sequences++;
-        }
-        DOFOR(i, depth - nb_last_sequences) printf("│");
-        DOFOR(i, nb_last_sequences) printf("╰");
         printf("─");
       }
-    } else {
-      if (t->type == HTF_TYPE_SEQUENCE || t->type == HTF_TYPE_LOOP) {
-        DOFOR(i, depth - 1) printf("│");
-        if (depth) {
-          if (containing_loop == NULL) {
-            printf("├┬");
-          } else
-            printf("├─");
-        }
-      } else {
-        DOFOR(i, depth) printf("│");
-        printf(" ");
-      }
     }
+    structure_indent[depth - 1] = last_one ? " " : "│";
   }
+
   // printf("│ ");
   // printf("├─");
   // printf("╰─");
