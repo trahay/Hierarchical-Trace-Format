@@ -278,8 +278,7 @@ struct htf_sequence {
   htf_token_t* token;
   unsigned size;
   unsigned allocated;
-  htf_vector_t timestamps;
-  htf_timestamp_t* durations;
+  htf_vector_t durations;
   uint32_t hash;
 };
 
@@ -317,7 +316,6 @@ struct htf_loop {
  */
 struct htf_event_summary {
   struct htf_event event;
-  htf_timestamp_t* timestamps;
   htf_timestamp_t* durations;
   unsigned nb_allocated_events;
   unsigned nb_events;

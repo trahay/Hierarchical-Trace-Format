@@ -20,7 +20,7 @@ enum htf_debug_level {
 
 extern enum htf_debug_level htf_debug_level;
 
-void htf_debug_level_init();
+void htf_debug_level_init(void);
 void htf_debug_level_set(enum htf_debug_level lvl);
 
 #define htf_abort() abort()

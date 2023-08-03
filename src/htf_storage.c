@@ -129,6 +129,7 @@ inline static void _htf_vector_fwrite(htf_vector_t* vector, FILE* file) {
 /** Reads a vector from the given file.*/
 inline static void _htf_vector_fread(htf_vector_t* vector, size_t element_size, FILE* file) {
   _htf_fread(&vector->size, sizeof(vector->size), 1, file);
+  vector->element_size = element_size;
   vector->array = malloc(vector->element_size * vector->size);
   vector->allocated = vector->size;
   vector->next = NULL;
@@ -303,7 +304,7 @@ static void _htf_store_event(const char* base_dirname,
   _htf_fwrite(&e->event, sizeof(struct htf_event), 1, file);
   _htf_fwrite(&e->nb_events, sizeof(e->nb_events), 1, file);
   if (STORE_TIMESTAMPS) {
-    _htf_compress_write(e->timestamps, e->nb_events * sizeof(htf_timestamp_t), file);
+    _htf_compress_write(e->durations, e->nb_events * sizeof(htf_timestamp_t), file);
   }
   fclose(file);
 }
@@ -340,7 +341,7 @@ static void _htf_store_sequence(const char* base_dirname,
                                 htf_sequence_id_t sequence_id) {
   FILE* file = _htf_get_sequence_file(base_dirname, th, sequence_id, "w");
   htf_log(htf_dbg_lvl_debug, "\tStore sequence %x {.size=%d, .nb_ts=%u}\n", HTF_ID(sequence_id), s->size,
-          s->timestamps.size);
+          s->durations.size);
   if (htf_debug_level >= htf_dbg_lvl_debug) {
     htf_print_sequence(th, sequence_id);
   }
@@ -354,7 +355,7 @@ static void _htf_store_sequence(const char* base_dirname,
     _htf_fwrite(&s->hash, sizeof(s->hash), 1, file);
   }
   if (STORE_TIMESTAMPS) {
-    _htf_vector_fwrite(&s->timestamps, file);
+    _htf_vector_fwrite(&s->durations, file);
   }
   fclose(file);
 }
@@ -375,15 +376,12 @@ static void _htf_read_sequence(const char* base_dirname,
     htf_assert(stored_hash == s->hash);
   }
   if (STORE_TIMESTAMPS) {
-    _htf_vector_fread(&s->timestamps, sizeof(htf_timestamp_t), file);
-    s->durations = calloc(s->timestamps.size, sizeof(htf_timestamp_t));
-  } else {
-    s->durations = NULL;
+    _htf_vector_fread(&s->durations, sizeof(htf_timestamp_t), file);
   }
   fclose(file);
 
   htf_log(htf_dbg_lvl_debug, "\tLoad sequence %x {.size=%u, .nb_ts=%u}\n", HTF_ID(sequence_id), s->size,
-          s->timestamps.size);
+          s->durations.size);
 
   if (htf_debug_level >= htf_dbg_lvl_debug) {
     htf_print_sequence(th, sequence_id);

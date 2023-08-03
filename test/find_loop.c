@@ -10,7 +10,6 @@
 #include "htf_write.h"
 
 static inline void _init_event_summary(struct htf_event_summary* e) {
-  e->timestamps = malloc(sizeof(htf_timestamp_t) * NB_TIMESTAMP_DEFAULT);
   e->durations = malloc(sizeof(htf_timestamp_t) * NB_TIMESTAMP_DEFAULT);
   e->nb_allocated_events = NB_TIMESTAMP_DEFAULT;
   e->nb_events = 0;
