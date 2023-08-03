@@ -255,8 +255,7 @@ static void _htf_create_loop(struct htf_thread_writer* thread_writer,
   htf_timestamp_t duration_first_sequence = duration_two_sequences - duration_first_sequence;
   htf_vector_add(&loop_seq->durations, &duration_first_sequence);
   htf_vector_add(&loop_seq->durations, &duration_last_sequence);
-  printf("Creating S%x, duration = %lu\n", loop->token.id, duration_first_sequence);
-  printf("Creating S%x, duration = %lu\n", loop->token.id, duration_last_sequence);
+  htf_add_timestamp_to_delta(htf_vector_get(&loop_seq->durations, loop_seq->durations.size - 1));
 
   cur_seq->size = index_first_iteration;
   cur_seq->token[cur_seq->size] = loop->id;
@@ -298,7 +297,7 @@ static void _htf_find_loop(struct htf_thread_writer* thread_writer) {
           htf_timestamp_t ts =
             _htf_get_sequence_duration(&thread_writer->thread_trace, &cur_seq->token[s1_start], loop_len);
           htf_vector_add(&seq->durations, &ts);
-          printf("Creating S%x, duration = %lu\n", loop->token.id, ts);
+          htf_add_timestamp_to_delta(htf_vector_get(&seq->durations, seq->durations.size - 1));
           cur_seq->size = s1_start;
           return;
         }
@@ -403,7 +402,7 @@ void _htf_record_exit_function(struct htf_thread_writer* thread_writer) {
   struct htf_sequence* seq = thread_writer->thread_trace.sequences[seq_id.id];
   htf_timestamp_t ts = _htf_get_sequence_duration(&thread_writer->thread_trace, seq->token, seq->size);
   htf_vector_add(&seq->durations, &ts);
-  printf("Creating S%x, duration = %lu\n", seq_id.id, ts);
+  htf_add_timestamp_to_delta(htf_vector_get(&seq->durations, seq->durations.size - 1));
   htf_log(htf_dbg_lvl_debug, "Exiting a function, closing sequence %d (%p)\n", seq_id.id, cur_seq);
 
   thread_writer->cur_depth--;
