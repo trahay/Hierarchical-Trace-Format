@@ -120,10 +120,13 @@ static FILE* _htf_file_open(char* filename, char* mode) {
 inline static void _htf_vector_fwrite(htf_vector_t* vector, FILE* file) {
   _htf_fwrite(&vector->size, sizeof(vector->size), 1, file);
   htf_vector_t* vec = vector;
+  size_t size = vector->size;
   while (vec != NULL) {
     _htf_fwrite(vec->array, vector->element_size, vec->_local_size, file);
+    size -= vec->_local_size;
     vec = vec->next;
   }
+  htf_assert(size == 0);
 }
 
 /** Reads a vector from the given file.*/

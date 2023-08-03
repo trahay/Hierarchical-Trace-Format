@@ -35,6 +35,7 @@ void htf_vector_new(htf_vector_t* vector, size_t element_size) {
 void htf_vector_new_with_size(htf_vector_t* vector, size_t element_size, uint size) {
   vector->element_size = element_size;
   vector->size = 0;
+  vector->_local_size = 0;
   vector->allocated = size;
   vector->array = malloc(element_size * size);
   vector->next = NULL;
