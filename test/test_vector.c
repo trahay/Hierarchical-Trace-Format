@@ -29,27 +29,6 @@ int main(int argc, char** argv) {
   htf_assert(vector.size == TEST_SIZE);
   htf_vector_print_as_int(&vector);
   printf("\n");
-  DOFOR(i, TEST_SIZE / 2) {
-    htf_vector_remove_at(&vector, i);
-    // Should remove all the even numbers
-  }
-  htf_vector_print_as_int(&vector);
-  printf("\n");
-  htf_assert(vector.size == TEST_SIZE - TEST_SIZE / 2);
-  DOFOR(i, (TEST_SIZE - TEST_SIZE / 2) / 2) {
-    htf_vector_remove_at(&vector, i);
-    // Should remove all the even numbers
-  }
-  htf_assert(vector.size == (TEST_SIZE - TEST_SIZE / 2) / 2);
-  htf_vector_print_as_int(&vector);
-  printf("\n");
-
-  DOFOR(i, TEST_SIZE / 2) {
-    adding = 2 * i;
-    htf_vector_add(&vector, &adding);
-  }
-  htf_vector_print_as_int(&vector);
-  printf("\n");
   return EXIT_SUCCESS;
 }
 

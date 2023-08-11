@@ -119,12 +119,12 @@ static FILE* _htf_file_open(char* filename, char* mode) {
 /** Writes a vector to the given file.*/
 inline static void _htf_vector_fwrite(htf_vector_t* vector, FILE* file) {
   _htf_fwrite(&vector->size, sizeof(vector->size), 1, file);
-  htf_vector_t* vec = vector;
+  htf_subvector_t* sub_vec = vector->first_subvector;
   size_t size = vector->size;
-  while (vec != NULL) {
-    _htf_fwrite(vec->array, vector->element_size, vec->_local_size, file);
-    size -= vec->_local_size;
-    vec = vec->next;
+  while (sub_vec != NULL) {
+    _htf_fwrite(sub_vec->array, vector->element_size, sub_vec->size, file);
+    size -= sub_vec->size;
+    sub_vec = sub_vec->next;
   }
   htf_assert(size == 0);
 }
@@ -133,11 +133,15 @@ inline static void _htf_vector_fwrite(htf_vector_t* vector, FILE* file) {
 inline static void _htf_vector_fread(htf_vector_t* vector, size_t element_size, FILE* file) {
   _htf_fread(&vector->size, sizeof(vector->size), 1, file);
   vector->element_size = element_size;
-  vector->array = malloc(vector->element_size * vector->size);
-  vector->allocated = vector->size;
-  vector->next = NULL;
-  vector->_local_size = vector->size;
-  _htf_fread(vector->array, vector->element_size, vector->size, file);
+  vector->last_subvector = malloc(sizeof(htf_subvector_t));
+  vector->first_subvector = vector->last_subvector;
+  vector->first_subvector->array = malloc(vector->element_size * vector->size);
+  vector->first_subvector->size = vector->size;
+  vector->first_subvector->allocated = vector->size;
+  vector->first_subvector->starting_index = 0;
+  vector->first_subvector->next = NULL;
+  vector->first_subvector->previous = NULL;
+  _htf_fread(vector->first_subvector->array, vector->element_size, vector->size, file);
 }
 
 /** Compresses the content in src using ZSTD and writes it to dest. Returns the size of the compressed array.

@@ -9,21 +9,37 @@
 #include <sys/types.h>
 /**
  * Dynamic arrays, basically a hybrid between a linked list and an array.
- *  - void* array: The array containing the data.
+ * This struct is kind of a wrapper for easier usage.
  *  - size_t element_size: sizeof the elements stored.
  *  - uint size: Size of this array (not of the array).
  *  - uint _local_size: Number of items stored in the array.
  *  - uint allocated: Number of items allocated in the array.
- *  - htf_vector_t * next: Next vector in the Linked List structure.
+ *  - htf_vector_t * previous: Next vector in the Linked List structure.
  */
 typedef struct htf_vector {
-  void* array;
   size_t element_size;
   uint size;
-  uint _local_size;
-  uint allocated;
-  struct htf_vector* next;
+  struct htf_subvector* last_subvector;
+  struct htf_subvector* first_subvector;
 } htf_vector_t;
+
+/**
+ * Dynamic arrays, basically a hybrid between a linked list and an array.
+ *  - void* array: The array containing the data.
+ *  - uint size: size of that particular array.
+ *  - uint starting_index: the starting index of that array.
+ *  - uint allocated: Number of items allocated in the array.
+ *  - htf_subvector_t previous: The previous subvector in the Linked List structure.
+ */
+
+typedef struct htf_subvector {
+  void* array;
+  uint size;
+  uint starting_index;
+  uint allocated;
+  struct htf_subvector* previous;
+  struct htf_subvector* next;
+} htf_subvector_t;
 
 /** Creates a new vector */
 void htf_vector_new(htf_vector_t* vector, size_t element_size);
@@ -36,12 +52,6 @@ void htf_vector_add(htf_vector_t* vector, void* element);
 
 /** Gets the element at the given index. Returns a pointer to that element, NULL if the index is incorrect. */
 void* htf_vector_get(htf_vector_t* vector, int index);
-
-/** Removes the element at the given index. */
-void htf_vector_remove_at(htf_vector_t* vector, int index);
-
-/** Removes the first element whose memory is equal to the given element */
-void htf_vector_remove_first(htf_vector_t* vector, void* element);
 
 /* Prints the vector as a vector of ints.*/
 void htf_vector_print_as_int(htf_vector_t* vector);
