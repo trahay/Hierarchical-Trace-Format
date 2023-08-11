@@ -152,7 +152,6 @@ inline static void _htf_vector_fread(htf_vector_t* vector, size_t element_size, 
 inline static size_t _htf_zstd_compress(void* src, void* dest, size_t size) {
   return ZSTD_compress(dest, size, src, size, ZSTD_COMPRESSION_LEVEL);
 }
-enum uint64_size { bit8 = 0, bit16 = 1, bit32 = 2, bit64 = 3 };
 /** Compresses the content in src using a Masking technique and writes it to dest.
  * Returns the size of the compressed array.
  *  - void* src: what's going to be compressed.
@@ -160,26 +159,21 @@ enum uint64_size { bit8 = 0, bit16 = 1, bit32 = 2, bit64 = 3 };
  *  - size_t size: size of src (and of the allocated memory in dest).
  */
 inline static size_t _htf_masking_compress(void* src, void* dest, size_t size) {
-  size_t n = size / sizeof(uint64_t);
+  size_t n = size / sizeof(htf_timestamp_t);
   uint64_t* new_src = src;
   uint64_t mask = 0;
   for (int i = 0; i < n; i++) {
     mask |= new_src[i];
   }
-  enum uint64_size mask_size = bit64;
-  if (mask < UINT8_MAX) {
-    mask_size = bit8;
-  } else if (mask < UINT16_MAX) {
-    mask_size = bit16;
-  } else if (mask < UINT32_MAX) {
-    mask_size = bit32;
+  short mask_size = 0;
+  while (mask >> (mask_size * 8) != 0) {
+    mask_size += 1;
   }
-  if (mask_size != bit64) {
-    size_t width = 1 << mask_size;
+  if (mask_size != sizeof(htf_timestamp_t)) {
     for (int i = 0; i < n; i++) {
-      memcpy(&dest[size * i], &new_src[i], size);
+      memcpy(&dest[sizeof(htf_timestamp_t) * i], &new_src[i], mask_size);
     }
-    return width * n;
+    return mask_size * n;
   } else {
     memcpy(dest, src, size);
     return size;
@@ -217,6 +211,7 @@ inline static void _htf_compress_write(void* array, size_t size, FILE* file) {
   htf_log(htf_dbg_lvl_debug, "Writing %lu bytes as %lu bytes\n", size, compSize);
   _htf_fwrite(&compSize, sizeof(compSize), 1, file);
   _htf_fwrite(compArray, compSize, 1, file);
+  //  free(compArray);
 }
 /** Decompresses an array that has been compressed by ZSTD. Returns the size of the uncompressed data.
  * - void * array : the array in which the uncompressed data will be written.
