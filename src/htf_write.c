@@ -142,8 +142,8 @@ void htf_store_timestamp(struct htf_thread_writer* thread_writer, htf_event_id_t
   struct htf_event_summary* es = &thread_writer->thread_trace.events[HTF_ID(e_id)];
   htf_assert(es);
 
-  htf_vector_add(&es->durations, &ts);
-  htf_delta_timestamp(htf_vector_get(&es->durations, es->durations.size - 1));
+  htf_timestamp_t* ts_address = htf_vector_add(&es->durations, &ts);
+  htf_delta_timestamp(ts_address);
 }
 
 static void _htf_store_token(struct htf_thread_writer* thread_writer, struct htf_sequence* seq, htf_token_t t) {

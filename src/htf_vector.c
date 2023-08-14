@@ -40,15 +40,16 @@ void htf_vector_new_with_size(htf_vector_t* vector, size_t element_size, uint si
   vector->first_subvector = vector->last_subvector;
 }
 
-void htf_vector_add(htf_vector_t* vector, void* element) {
+void* htf_vector_add(htf_vector_t* vector, void* element) {
   if (vector->last_subvector->size >= vector->last_subvector->allocated) {
     htf_log(htf_dbg_lvl_debug, "Adding a new tail to an array: %p\n", vector);
     vector->last_subvector = htf_subvector_next(vector->element_size, vector->last_subvector);
   }
-  memcpy(vector->last_subvector->array + vector->last_subvector->size * vector->element_size, element,
-         vector->element_size);
+  void* addr = (void*)((size_t)vector->last_subvector->array + vector->last_subvector->size * vector->element_size);
+  memcpy(addr, element, vector->element_size);
   vector->size++;
   vector->last_subvector->size++;
+  return addr;
 }
 
 void* htf_vector_get(htf_vector_t* vector, int index) {
@@ -58,7 +59,7 @@ void* htf_vector_get(htf_vector_t* vector, int index) {
   while (index < correct_sub->starting_index || correct_sub->starting_index + correct_sub->size <= index) {
     correct_sub = (index < correct_sub->starting_index) ? correct_sub->previous : correct_sub->next;
   }
-  return correct_sub->array + (index * vector->element_size);
+  return (void*)((size_t)correct_sub->array + ((index - correct_sub->starting_index) * vector->element_size));
 }
 
 void htf_vector_print_as_int(htf_vector_t* vector) {

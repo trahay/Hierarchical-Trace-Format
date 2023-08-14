@@ -48,7 +48,7 @@ void htf_vector_new(htf_vector_t* vector, size_t element_size);
 void htf_vector_new_with_size(htf_vector_t* vector, size_t element_size, uint size);
 
 /** Adds an element to the vector. Copies the value of the element. */
-void htf_vector_add(htf_vector_t* vector, void* element);
+void* htf_vector_add(htf_vector_t* vector, void* element);
 
 /** Gets the element at the given index. Returns a pointer to that element, NULL if the index is incorrect. */
 void* htf_vector_get(htf_vector_t* vector, int index);
