@@ -19,6 +19,7 @@ static htf_subvector_t* htf_subvector_new(size_t element_size, uint size) {
   new_subvector->previous = NULL;
   new_subvector->next = NULL;
   new_subvector->starting_index = 0;
+  return new_subvector;
 }
 
 static htf_subvector_t* htf_subvector_next(size_t element_size, htf_subvector_t* previous) {
