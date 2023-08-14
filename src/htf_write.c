@@ -185,6 +185,7 @@ static inline htf_timestamp_t _htf_get_sequence_duration(struct htf_thread* thre
   int* sequence_index = calloc(thread->nb_sequences, sizeof(int));
   int* loop_index = calloc(thread->nb_loops, sizeof(int));
   htf_timestamp_t duration = 0;
+  // FIXME This doesn't go into the sequences so it's not accurate
   for (int i = size - 1; i >= 0; i--) {
     htf_token_t t = array[i];
     switch (t.type) {
@@ -206,10 +207,10 @@ static inline htf_timestamp_t _htf_get_sequence_duration(struct htf_thread* thre
       loop_index[t.id] += 1;
       struct htf_loop l = thread->loops[t.id];
       int n_repetitions = *(int*)htf_vector_get(&l.nb_iterations, l.nb_iterations.size - loop_index[t.id]);
+      struct htf_sequence* s = thread->sequences[l.token.id];
       DOFOR(j, n_repetitions) {
-        sequence_index[t.id] += 1;
-        struct htf_sequence* s = thread->sequences[l.token.id];
-        duration += *(htf_timestamp_t*)htf_vector_get(&s->durations, s->durations.size - sequence_index[t.id]);
+        sequence_index[l.token.id] += 1;
+        duration += *(htf_timestamp_t*)htf_vector_get(&s->durations, s->durations.size - sequence_index[l.token.id]);
       }
       break;
     }
