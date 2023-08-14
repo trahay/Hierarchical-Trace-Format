@@ -24,7 +24,7 @@ static inline htf_sequence_id_t _htf_get_sequence_id_from_array(struct htf_threa
                                                                 int array_len);
 
 static inline void _init_sequence(struct htf_sequence* s) {
-  s->token = calloc(sizeof(htf_token_t), SEQUENCE_SIZE_DEFAULT);
+  s->token = calloc(SEQUENCE_SIZE_DEFAULT, sizeof(htf_token_t));
   s->size = 0;
   s->allocated = SEQUENCE_SIZE_DEFAULT;
   htf_vector_new(&s->durations, sizeof(htf_timestamp_t));
@@ -786,7 +786,6 @@ static inline htf_event_id_t _htf_get_event_id(struct htf_thread* thread_trace, 
   }
 
   if (thread_trace->nb_events >= thread_trace->nb_allocated_events) {
-    //		htf_error( "too many event data!\n");
     htf_warn("Doubling mem space of events for thread trace %p\n", thread_trace);
     DOUBLE_MEMORY_SPACE(thread_trace->events, thread_trace->nb_allocated_events, struct htf_event_summary);
   }
