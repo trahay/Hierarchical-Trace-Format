@@ -261,10 +261,10 @@ inline static void _htf_compress_read(void* array, size_t size, FILE* file) {
 
 /** Writes a vector to the given file.*/
 inline static void _htf_vector_fwrite(htf_vector_t* vector, FILE* file) {
+  _htf_fwrite(&vector->size, sizeof(vector->size), 1, file);
   if (vector->size == 0) {
     return;
   }
-  _htf_fwrite(&vector->size, sizeof(vector->size), 1, file);
   void* buffer = malloc(vector->element_size * vector->size);
   uint cur_index = 0;
   htf_subvector_t* sub_vec = vector->first_subvector;
@@ -282,15 +282,20 @@ inline static void _htf_vector_fwrite(htf_vector_t* vector, FILE* file) {
 inline static void _htf_vector_fread(htf_vector_t* vector, size_t element_size, FILE* file) {
   _htf_fread(&vector->size, sizeof(vector->size), 1, file);
   vector->element_size = element_size;
-  vector->last_subvector = malloc(sizeof(htf_subvector_t));
-  vector->first_subvector = vector->last_subvector;
-  vector->first_subvector->array = malloc(vector->element_size * vector->size);
-  vector->first_subvector->size = vector->size;
-  vector->first_subvector->allocated = vector->size;
-  vector->first_subvector->starting_index = 0;
-  vector->first_subvector->next = NULL;
-  vector->first_subvector->previous = NULL;
-  _htf_compress_read(vector->first_subvector->array, vector->element_size * vector->size, file);
+  if (vector->size != 0) {
+    vector->last_subvector = malloc(sizeof(htf_subvector_t));
+    vector->first_subvector = vector->last_subvector;
+    vector->first_subvector->array = malloc(vector->element_size * vector->size);
+    vector->first_subvector->size = vector->size;
+    vector->first_subvector->allocated = vector->size;
+    vector->first_subvector->starting_index = 0;
+    vector->first_subvector->next = NULL;
+    vector->first_subvector->previous = NULL;
+    _htf_compress_read(vector->first_subvector->array, vector->element_size * vector->size, file);
+  } else {
+    vector->first_subvector = NULL;
+    vector->last_subvector = NULL;
+  }
 }
 
 /**************** Storage Functions ****************/
