@@ -315,9 +315,7 @@ struct htf_loop {
  */
 struct htf_event_summary {
   struct htf_event event;
-  htf_timestamp_t* durations;
-  unsigned nb_allocated_events;
-  unsigned nb_events;
+  htf_vector_t durations;
 };
 
 #define HTF_UNDEFINED_UINT8 ((uint8_t)(~((uint8_t)0u)))

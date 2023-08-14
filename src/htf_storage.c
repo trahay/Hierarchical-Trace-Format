@@ -301,12 +301,11 @@ static void _htf_store_event(const char* base_dirname,
                              struct htf_event_summary* e,
                              htf_event_id_t event_id) {
   FILE* file = _htf_get_event_file(base_dirname, th, event_id, "w");
-  htf_log(htf_dbg_lvl_debug, "\tStore event %x {.nb_events=%d}\n", HTF_ID(event_id), e->nb_events);
+  htf_log(htf_dbg_lvl_debug, "\tStore event %x {.nb_events=%d}\n", HTF_ID(event_id), e->durations.size);
 
   _htf_fwrite(&e->event, sizeof(struct htf_event), 1, file);
-  _htf_fwrite(&e->nb_events, sizeof(e->nb_events), 1, file);
   if (STORE_TIMESTAMPS) {
-    _htf_compress_write(e->durations, e->nb_events * sizeof(htf_timestamp_t), file);
+    _htf_vector_fwrite(&e->durations, file);
   }
   fclose(file);
 }
@@ -318,13 +317,11 @@ static void _htf_read_event(const char* base_dirname,
   FILE* file = _htf_get_event_file(base_dirname, th, event_id, "r");
 
   _htf_fread(&e->event, sizeof(struct htf_event), 1, file);
-  _htf_fread(&e->nb_events, sizeof(e->nb_events), 1, file);
-  htf_log(htf_dbg_lvl_debug, "\tLoad event %x {.nb_events=%d}\n", HTF_ID(event_id), e->nb_events);
+  htf_log(htf_dbg_lvl_debug, "\tLoad event %x\n", HTF_ID(event_id));
   if (STORE_TIMESTAMPS) {
-    e->durations = calloc(e->nb_events, sizeof(htf_timestamp_t));
-    _htf_compress_read(e->durations, sizeof(htf_timestamp_t) * e->nb_events, file);
+    _htf_vector_fread(&e->durations, sizeof(htf_timestamp_t), file);
   } else {
-    e->durations = NULL;
+    e->durations.size = 0;
   }
 }
 

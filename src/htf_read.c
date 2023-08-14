@@ -244,7 +244,7 @@ int htf_move_to_next_token(struct htf_thread_reader* reader) {
     // Don't forget to update the timestamp
     struct htf_event_summary* es = &reader->thread_trace->events[t.id];
     if ((reader->options & OPTION_NO_TIMESTAMPS) == 0)
-      reader->referential_timestamp += es->durations[reader->event_index[t.id]];
+      reader->referential_timestamp += *(htf_timestamp_t*)htf_vector_get(&es->durations, reader->event_index[t.id]);
     reader->event_index[t.id]++;  // "consume" the event occurence
     _get_next_token(reader);
   }
@@ -310,7 +310,7 @@ int htf_read_thread_cur_level(struct htf_thread_reader* reader,
       memcpy(&occurence->event, &es->event, sizeof(occurence->event));
       if ((reader->options & OPTION_NO_TIMESTAMPS) == 0) {
         occurence->timestamp = reader->referential_timestamp;
-        occurence->duration = es->durations[reader->event_index[token.id]];
+        occurence->duration = *(htf_timestamp_t*)htf_vector_get(&es->durations, reader->event_index[token.id]);
         // Update the reader
         reader->referential_timestamp += occurence->duration;
       }
@@ -375,7 +375,7 @@ int htf_read_thread_cur_token(struct htf_thread_reader* reader, struct htf_token
       memcpy(&e->event_occurence.event, &es->event, sizeof(e->event_occurence.event));
       if ((reader->options & OPTION_NO_TIMESTAMPS) == 0) {
         e->event_occurence.timestamp = reader->referential_timestamp;
-        e->event_occurence.duration = es->durations[reader->event_index[index]];
+        e->event_occurence.duration = *(htf_timestamp_t*)htf_vector_get(&es->durations, reader->event_index[index]);
       }
     }
     break;
@@ -416,7 +416,7 @@ htf_timestamp_t htf_get_starting_timestamp(struct htf_thread_reader* reader, str
   switch (cur_token.type) {
   case HTF_TYPE_EVENT: {
     int event_index = reader->event_index[HTF_TOKEN_ID(cur_token)];
-    duration = reader->thread_trace->events[cur_token.id].durations[event_index];
+    duration = *(htf_timestamp_t*)htf_vector_get(&reader->thread_trace->events[cur_token.id].durations, event_index);
     break;
   }
   case HTF_TYPE_SEQUENCE: {

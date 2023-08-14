@@ -35,9 +35,7 @@ static inline void _init_loop(struct htf_loop* l) {
 }
 
 static inline void _init_event(struct htf_event_summary* e) {
-  e->durations = malloc(sizeof(htf_timestamp_t) * NB_TIMESTAMP_DEFAULT);
-  e->nb_allocated_events = NB_TIMESTAMP_DEFAULT;
-  e->nb_events = 0;
+  htf_vector_new_with_size(&e->durations, sizeof(htf_timestamp_t), NB_TIMESTAMP_DEFAULT);
 }
 
 static inline struct htf_sequence* _htf_get_cur_sequence(struct htf_thread_writer* thread_writer) {
@@ -144,14 +142,8 @@ void htf_store_timestamp(struct htf_thread_writer* thread_writer, htf_event_id_t
   struct htf_event_summary* es = &thread_writer->thread_trace.events[HTF_ID(e_id)];
   htf_assert(es);
 
-  if (es->nb_events >= es->nb_allocated_events) {
-    htf_warn("Doubling mem space of timestamps for event %u\n", HTF_ID(e_id));
-    DOUBLE_MEMORY_SPACE(es->durations, es->nb_allocated_events, htf_timestamp_t);
-  }
-
-  es->durations[es->nb_events] = ts;
-  htf_delta_timestamp(&es->durations[es->nb_events]);
-  es->nb_events++;
+  htf_vector_add(&es->durations, &ts);
+  htf_delta_timestamp(htf_vector_get(&es->durations, es->durations.size - 1));
 }
 
 static void _htf_store_token(struct htf_thread_writer* thread_writer, struct htf_sequence* seq, htf_token_t t) {
@@ -201,7 +193,7 @@ static inline htf_timestamp_t _htf_get_sequence_duration(struct htf_thread* thre
     case HTF_TYPE_EVENT: {
       event_index[t.id] += 1;
       struct htf_event_summary es = thread->events[t.id];
-      duration += es.durations[es.nb_events - event_index[t.id]];
+      duration += *(htf_timestamp_t*)htf_vector_get(&es.durations, es.durations.size - event_index[t.id]);
       break;
     }
     case HTF_TYPE_SEQUENCE: {
