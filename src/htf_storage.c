@@ -121,8 +121,8 @@ static FILE* _htf_file_open(char* filename, char* mode) {
  *  - void* dest: a free array in which the compressed array will be written.
  *  - size_t size: size of src (and of the allocated memory in dest).
  */
-inline static size_t _htf_zstd_compress(void* src, void* dest, size_t size) {
-  return ZSTD_compress(dest, size, src, size, ZSTD_COMPRESSION_LEVEL);
+inline static size_t _htf_zstd_compress(void* src, size_t src_size, void* dest, size_t dest_size) {
+  return ZSTD_compress(dest, dest_size, src, src_size, ZSTD_COMPRESSION_LEVEL);
 }
 /** Compresses the content in src using a Masking technique and writes it to dest.
  * Returns the size of the compressed array.
@@ -159,23 +159,29 @@ inline static size_t _htf_masking_compress(void* src, void* dest, size_t size) {
  */
 inline static void _htf_compress_write(void* array, size_t size, FILE* file) {
   size_t compSize;
-  void* compArray = malloc(size);
+  void* compArray;
+  int mustFree = 1;
   switch (COMPRESSION_OPTIONS) {
   case NO_COMPRESSION:
+    compArray = array;
     compSize = size;
-    memcpy(compArray, array, size);
+    mustFree = 0;
     break;
-  case ZSTD:
-    compSize = _htf_zstd_compress(array, compArray, size);
-    break;
+  case ZSTD: {
+    compSize = ZSTD_compressBound(size);
+    compArray = malloc(compSize);
+    compSize = _htf_zstd_compress(array, size, compArray, compSize);
+  } break;
   case MASKING:
+    compArray = malloc(size);
     compSize = _htf_masking_compress(array, compArray, size);
     break;
   case MASKING_ZSTD: {
     void* buffer = compArray;
     size_t maskedSize = _htf_masking_compress(array, buffer, size);
-    compArray = malloc(maskedSize);
-    compSize = _htf_zstd_compress(buffer, compArray, maskedSize);
+    compSize = ZSTD_compressBound(maskedSize);
+    compArray = malloc(compSize);
+    compSize = _htf_zstd_compress(buffer, maskedSize, compArray, compSize);
     free(buffer);
     break;
   }
@@ -183,7 +189,9 @@ inline static void _htf_compress_write(void* array, size_t size, FILE* file) {
   htf_log(htf_dbg_lvl_debug, "Writing %lu bytes as %lu bytes\n", size, compSize);
   _htf_fwrite(&compSize, sizeof(compSize), 1, file);
   _htf_fwrite(compArray, compSize, 1, file);
-  free(compArray);
+
+  if (mustFree)
+    free(compArray);
 }
 /** Decompresses an array that has been compressed by ZSTD. Returns the size of the uncompressed data.
  * - void * array : the array in which the uncompressed data will be written.
