@@ -10,9 +10,7 @@
 #include "htf_write.h"
 
 static inline void _init_event_summary(struct htf_event_summary* e) {
-  e->durations = malloc(sizeof(htf_timestamp_t) * NB_TIMESTAMP_DEFAULT);
-  e->nb_allocated_events = NB_TIMESTAMP_DEFAULT;
-  e->nb_events = 0;
+  htf_vector_new_with_size(&e->durations, sizeof(htf_timestamp_t), NB_TIMESTAMP_DEFAULT);
 }
 
 static inline htf_event_id_t _htf_get_event_id(struct htf_thread* thread_trace, struct htf_event* e) {
