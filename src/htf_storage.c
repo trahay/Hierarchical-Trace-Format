@@ -33,6 +33,8 @@ void htf_storage_option_init() {
       COMPRESSION_OPTIONS = MASKING_ZSTD;
     else if (strcmp(compression_str, "NONE") == 0)
       COMPRESSION_OPTIONS = NO_COMPRESSION;
+    else if (strcmp(compression_str, "DYNAMIC_ZSTD") == 0)
+      COMPRESSION_OPTIONS = DYNAMIC_ZSTD;
   }
 
   // Timestamp storage
@@ -131,6 +133,12 @@ inline static size_t _htf_zstd_compress(void* src, size_t src_size, void* dest, 
  *  - size_t size: size of src (and of the allocated memory in dest).
  */
 inline static size_t _htf_masking_compress(void* src, void* dest, size_t size) {
+  // We must be careful of size isn't a multiple of 8
+  if (size % sizeof(htf_timestamp_t) != 0) {
+    memcpy(dest, src, size);
+    return size;
+  }
+
   size_t n = size / sizeof(htf_timestamp_t);
   uint64_t* new_src = src;
   uint64_t mask = 0;
@@ -138,10 +146,11 @@ inline static size_t _htf_masking_compress(void* src, void* dest, size_t size) {
     mask |= new_src[i];
   }
   short mask_size = 0;
-  while (mask >> (mask_size * 8) != 0) {
+  while (mask != 0) {
+    mask >>= 8;
     mask_size += 1;
   }
-  if (mask_size != sizeof(htf_timestamp_t)) {
+  if (mask_size && mask_size != sizeof(htf_timestamp_t)) {
     for (int i = 0; i < n; i++) {
       memcpy(&dest[sizeof(htf_timestamp_t) * i], &new_src[i], mask_size);
     }
@@ -177,7 +186,7 @@ inline static void _htf_compress_write(void* array, size_t size, FILE* file) {
     compSize = _htf_masking_compress(array, compArray, size);
     break;
   case MASKING_ZSTD: {
-    void* buffer = compArray;
+    void* buffer = malloc(size);
     size_t maskedSize = _htf_masking_compress(array, buffer, size);
     compSize = ZSTD_compressBound(maskedSize);
     compArray = malloc(compSize);
@@ -185,8 +194,20 @@ inline static void _htf_compress_write(void* array, size_t size, FILE* file) {
     free(buffer);
     break;
   }
+  case DYNAMIC_ZSTD: {
+    compSize = ZSTD_compressBound(size);
+    compArray = malloc(compSize);
+    compSize = _htf_zstd_compress(array, size, compArray, compSize);
+    if (compSize >= size) {
+      // Then it's not worth it
+      free(compArray);
+      compArray = array;
+      compSize = size;
+      mustFree = 0;
+    }
   }
-  htf_log(htf_dbg_lvl_debug, "Writing %lu bytes as %lu bytes\n", size, compSize);
+  }
+  htf_log(htf_dbg_lvl_normal, "Writing %lu bytes as %lu bytes\n", size, compSize);
   _htf_fwrite(&compSize, sizeof(compSize), 1, file);
   _htf_fwrite(compArray, compSize, 1, file);
 
@@ -215,7 +236,6 @@ inline static size_t _htf_masking_read(void* array, size_t size, void* compArray
     memcpy(array, compArray, size);
     return compSize;
   }
-  // Then we used ZSTD
   size_t width = 1 << (size / compSize);
   memset(array, 0, size);
   for (int i = 0; i < size / sizeof(uint64_t); i++) {
@@ -255,6 +275,15 @@ inline static void _htf_compress_read(void* array, size_t size, FILE* file) {
     free(buffer);
     break;
   }
+  case DYNAMIC_ZSTD: {
+    if (compSize == size) {
+      // Then it's not actually compressed
+      memcpy(array, compArray, size);
+    } else {
+      size_t realSize = _htf_zstd_read(array, compArray, compSize);
+      htf_assert(realSize == size);
+    }
+  }
   }
   free(compArray);
 }
@@ -269,7 +298,8 @@ inline static void _htf_vector_fwrite(htf_vector_t* vector, FILE* file) {
   uint cur_index = 0;
   htf_subvector_t* sub_vec = vector->first_subvector;
   while (sub_vec != NULL) {
-    memcpy(buffer + cur_index, sub_vec->array, sub_vec->size * vector->element_size);
+    memcpy((void*)((size_t)buffer + cur_index * vector->element_size), sub_vec->array,
+           sub_vec->size * vector->element_size);
     cur_index += sub_vec->size;
     sub_vec = sub_vec->next;
   }
@@ -751,9 +781,6 @@ static void _htf_read_archive(struct htf_archive* global_archive,
   if (archive->archive_list == NULL) {
     htf_error("Failed to allocate memory\n");
   }
-  archive->nb_threads = 0;
-  archive->nb_allocated_threads = 1;
-  archive->threads = malloc(sizeof(struct htf_thread*));
 
   htf_log(htf_dbg_lvl_debug, "Reading archive {.dir_name='%s', .trace='%s'}\n", archive->dir_name, archive->trace_name);
 
@@ -765,6 +792,10 @@ static void _htf_read_archive(struct htf_archive* global_archive,
   _htf_fread(&archive->nb_location_groups, sizeof(int), 1, f);
   _htf_fread(&archive->nb_locations, sizeof(int), 1, f);
   _htf_fread(&archive->nb_threads, sizeof(int), 1, f);
+
+  archive->threads = calloc(archive->nb_threads, sizeof(struct htf_thread*));
+  archive->nb_allocated_threads = archive->nb_threads;
+
   _htf_fread(&COMPRESSION_OPTIONS, sizeof(COMPRESSION_OPTIONS), 1, f);
   _htf_fread(&STORE_HASHING, sizeof(STORE_HASHING), 1, f);
   _htf_fread(&STORE_TIMESTAMPS, sizeof(STORE_TIMESTAMPS), 1, f);
@@ -817,7 +848,7 @@ static struct htf_archive* _htf_get_archive(struct htf_archive* global_archive, 
   }
 
   /* not found. we need to read the archive */
-  struct htf_archive* arch = malloc(sizeof(struct htf_archive));
+  struct htf_archive* arch = calloc(1, sizeof(struct htf_archive));
   char* filename = _archive_filename(global_archive, archive_id);
   char* fullpath = htf_archive_fullpath(global_archive->dir_name, filename);
   if (access(fullpath, R_OK) < 0) {
@@ -828,11 +859,11 @@ static struct htf_archive* _htf_get_archive(struct htf_archive* global_archive, 
   printf("Reading archive %s\n", fullpath);
   free(fullpath);
 
-  _htf_read_archive(global_archive, arch, global_archive->dir_name, filename);
-
   while (global_archive->nb_archives >= global_archive->nb_allocated_archives) {
     INCREMENT_MEMORY_SPACE(global_archive->archive_list, global_archive->nb_allocated_archives, struct htf_archive*);
   }
+
+  _htf_read_archive(global_archive, arch, global_archive->dir_name, filename);
 
   int index = global_archive->nb_archives++;
   global_archive->archive_list[index] = arch;
@@ -849,7 +880,7 @@ void htf_read_thread(struct htf_archive* archive, htf_thread_id_t thread_id) {
   }
 
   while (archive->nb_threads >= archive->nb_allocated_threads) {
-    DOUBLE_MEMORY_SPACE(archive->threads, archive->nb_allocated_threads, struct htf_thread*);
+    INCREMENT_MEMORY_SPACE(archive->threads, archive->nb_allocated_threads, struct htf_thread*);
   }
 
   int index = archive->nb_threads++;
