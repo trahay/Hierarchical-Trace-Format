@@ -809,6 +809,12 @@ static inline htf_event_id_t _htf_get_event_id(struct htf_thread* thread_trace, 
   return HTF_EVENT_ID(index);
 }
 
+void htf_store_attribute_list(struct htf_thread_writer* thread_writer,
+			      htf_event_id_t event_id,
+			      htf_attribute_list_t* attributeList) {
+  
+}
+
 void htf_record_enter(struct htf_thread_writer* thread_writer,
                       htf_attribute_list_t* attributeList __attribute__((unused)),
                       htf_timestamp_t time,
@@ -824,6 +830,9 @@ void htf_record_enter(struct htf_thread_writer* thread_writer,
 
   htf_event_id_t e_id = _htf_get_event_id(&thread_writer->thread_trace, &e);
   htf_store_timestamp(thread_writer, e_id, htf_timestamp(time));
+  if(attributeList) {
+    htf_store_attribute_list(thread_writer, e_id, attributeList);
+  }
   htf_store_event(thread_writer, htf_block_start, e_id);
 
   htf_recursion_shield--;
