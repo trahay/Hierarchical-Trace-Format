@@ -372,6 +372,7 @@ static void _htf_read_event(const char* base_dirname,
   } else {
     e->durations.size = 0;
   }
+  fclose(file);
 }
 
 static FILE* _htf_get_sequence_file(const char* base_dirname,
