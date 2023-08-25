@@ -33,8 +33,6 @@ void htf_storage_option_init() {
       COMPRESSION_OPTIONS = MASKING_ZSTD;
     else if (strcmp(compression_str, "NONE") == 0)
       COMPRESSION_OPTIONS = NO_COMPRESSION;
-    else if (strcmp(compression_str, "DYNAMIC_ZSTD") == 0)
-      COMPRESSION_OPTIONS = DYNAMIC_ZSTD;
   }
 
   // Timestamp storage
@@ -194,18 +192,6 @@ inline static void _htf_compress_write(void* array, size_t size, FILE* file) {
     free(buffer);
     break;
   }
-  case DYNAMIC_ZSTD: {
-    compSize = ZSTD_compressBound(size);
-    compArray = malloc(compSize);
-    compSize = _htf_zstd_compress(array, size, compArray, compSize);
-    if (compSize >= size) {
-      // Then it's not worth it
-      free(compArray);
-      compArray = array;
-      compSize = size;
-      mustFree = 0;
-    }
-  }
   }
   htf_log(htf_dbg_lvl_normal, "Writing %lu bytes as %lu bytes\n", size, compSize);
   _htf_fwrite(&compSize, sizeof(compSize), 1, file);
@@ -274,15 +260,6 @@ inline static void _htf_compress_read(void* array, size_t size, FILE* file) {
     _htf_masking_read(buffer, size, compArray, maskedSize);
     free(buffer);
     break;
-  }
-  case DYNAMIC_ZSTD: {
-    if (compSize == size) {
-      // Then it's not actually compressed
-      memcpy(array, compArray, size);
-    } else {
-      size_t realSize = _htf_zstd_read(array, compArray, compSize);
-      htf_assert(realSize == size);
-    }
   }
   }
   free(compArray);
