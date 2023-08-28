@@ -7,6 +7,7 @@
 
 #include "htf.h"
 #include "htf_archive.h"
+#include "htf_write.h"
 #include "htf_dbg.h"
 
 /** Returns the first htf_string corresponding to the given string_ref in the definition group.
@@ -117,6 +118,77 @@ void htf_archive_register_region(struct htf_archive* archive,
                                  htf_string_ref_t string_ref) {
   pthread_mutex_lock(&archive->lock);
   htf_archive_register_region_generic(&archive->definitions, region_ref, string_ref);
+  pthread_mutex_unlock(&archive->lock);
+}
+
+/** Returns the first htf_attribute corresponding to the given attribute_ref in the definition group.
+ * Returns NULL if the ref does not have a match.
+ */
+static struct htf_attribute* _htf_archive_get_attribute_generic(struct htf_definition* d, htf_attribute_ref_t attribute_ref) {
+  /* TODO: race condition here ? when adding a attribute, there may be a realloc so we may have to hold the mutex */
+  for (int i = 0; i < d->nb_attributes; i++) {
+    struct htf_attribute* s = &d->attributes[i];
+    if (s->attribute_ref == attribute_ref) {
+      return s;
+    }
+  }
+  return NULL;
+}
+
+/** Returns the first htf_attribute corresponding to the given attribute_ref in the archive.
+ * If the ref does not match, checks the global archive.
+ * Returns NULL if the ref does not have a match.
+ */
+struct htf_attribute* htf_archive_get_attribute(struct htf_archive* archive, htf_attribute_ref_t attribute_ref) {
+  struct htf_attribute* res = _htf_archive_get_attribute_generic(&archive->definitions, attribute_ref);
+  if (!res && archive->global_archive)
+    res = htf_archive_get_attribute(archive->global_archive, attribute_ref);
+  return res;
+}
+
+/** Adds the given attribute to the given definition and sets its ref.
+ * Error is raised if htf_attribute_ref is already in the definition or malloc fails.
+ */
+void htf_archive_register_attribute_generic(struct htf_definition* d,
+					    htf_attribute_ref_t attribute_ref,
+					    htf_string_ref_t name_ref,
+					    htf_string_ref_t description_ref,
+					    htf_type_t type) {
+  if (_htf_archive_get_attribute_generic(d, attribute_ref) != NULL) {
+    htf_error("Given attribute_ref was already in use.\n");
+  }
+
+  if (d->nb_attributes >= d->nb_allocated_attributes) {
+    if(d->nb_allocated_attributes == 0) {
+      d->attributes = malloc(sizeof(struct htf_attribute) * NB_ATTRIBUTE_DEFAULT);
+      if (d->attributes == NULL) {
+	htf_error("Failed to allocate memory\n");
+      }
+      d->nb_allocated_attributes = NB_ATTRIBUTE_DEFAULT;
+    } else {
+      DOUBLE_MEMORY_SPACE(d->attributes, d->nb_allocated_attributes, struct htf_attribute);
+    }
+  }
+
+  int index = d->nb_attributes++;
+  struct htf_attribute* a = &d->attributes[index];
+  a->attribute_ref = attribute_ref;
+  a->name = name_ref;
+  a->description = description_ref;
+  a->type = type;
+
+  htf_log(htf_dbg_lvl_verbose, "Register attribute #%d{.ref=%x, .name=%d, .description=%d, .type=%d}\n", index, a->attribute_ref, a->name, a->description, a->type);
+}
+
+
+/** Adds the given attribute to the given archive and sets its ref. */
+void htf_archive_register_attribute(struct htf_archive* archive,
+				    htf_attribute_ref_t attribute_ref,
+				    htf_string_ref_t name_ref,
+				    htf_string_ref_t description_ref,
+				    htf_type_t type) {
+  pthread_mutex_lock(&archive->lock);
+  htf_archive_register_attribute_generic(&archive->definitions, attribute_ref, name_ref, description_ref, type);
   pthread_mutex_unlock(&archive->lock);
 }
 

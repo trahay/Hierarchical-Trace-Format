@@ -27,6 +27,9 @@
 #include <stdbool.h>
 #endif
 
+#include "htf.h"
+#include "htf_attribute.h"
+
 #include <otf2/OTF2_ErrorCodes.h>
 
 #include <otf2/OTF2_Definitions.h>
@@ -154,6 +157,74 @@ typedef union OTF2_AttributeValue_union {
    */
   OTF2_LocationGroupRef locationGroupRef;
 } OTF2_AttributeValue;
+
+
+  static htf_type_t OTF2_HTF_TYPE(OTF2_Type type) __attribute__((unused));
+  static htf_type_t OTF2_HTF_TYPE(OTF2_Type type) {
+  switch (type) {
+  case HTF_TYPE_NONE: return OTF2_TYPE_NONE;
+  case HTF_TYPE_UINT8: return OTF2_TYPE_UINT8;
+  case HTF_TYPE_UINT16: return OTF2_TYPE_UINT16;
+  case HTF_TYPE_UINT32: return OTF2_TYPE_UINT32;
+  case HTF_TYPE_UINT64: return OTF2_TYPE_UINT64;
+  case HTF_TYPE_INT8: return OTF2_TYPE_INT8;
+  case HTF_TYPE_INT16: return OTF2_TYPE_INT16;
+  case HTF_TYPE_INT32: return OTF2_TYPE_INT32;
+  case HTF_TYPE_INT64: return OTF2_TYPE_INT64;
+  case HTF_TYPE_FLOAT: return OTF2_TYPE_FLOAT;
+  case HTF_TYPE_DOUBLE: return OTF2_TYPE_DOUBLE;
+  case HTF_TYPE_STRING: return OTF2_TYPE_STRING;
+  case HTF_TYPE_ATTRIBUTE: return OTF2_TYPE_ATTRIBUTE;
+  case HTF_TYPE_LOCATION: return OTF2_TYPE_LOCATION;
+  case HTF_TYPE_REGION: return OTF2_TYPE_REGION;
+  case HTF_TYPE_GROUP: return OTF2_TYPE_GROUP;
+  case HTF_TYPE_METRIC: return OTF2_TYPE_METRIC;
+  case HTF_TYPE_COMM: return OTF2_TYPE_COMM;
+  case HTF_TYPE_PARAMETER: return OTF2_TYPE_PARAMETER;
+  case HTF_TYPE_RMA_WIN: return OTF2_TYPE_RMA_WIN;
+  case HTF_TYPE_SOURCE_CODE_LOCATION: return OTF2_TYPE_SOURCE_CODE_LOCATION;
+  case HTF_TYPE_CALLING_CONTEXT: return OTF2_TYPE_CALLING_CONTEXT;
+  case HTF_TYPE_INTERRUPT_GENERATOR: return OTF2_TYPE_INTERRUPT_GENERATOR;
+  case HTF_TYPE_IO_FILE: return OTF2_TYPE_IO_FILE;
+  case HTF_TYPE_IO_HANDLE: return OTF2_TYPE_IO_HANDLE;
+  case HTF_TYPE_LOCATION_GROUP: return OTF2_TYPE_LOCATION_GROUP;
+  }
+  return OTF2_TYPE_NONE;
+}
+
+  static htf_attribute_value OTF2_HTF_ATTRIBUTE_VALUE(OTF2_AttributeValue u, htf_type_t t)  __attribute__((unused));
+static htf_attribute_value OTF2_HTF_ATTRIBUTE_VALUE(OTF2_AttributeValue u, htf_type_t t) {
+  htf_attribute_value v;
+  switch(t) {
+  case HTF_TYPE_NONE: v.uint8 = 0; break;
+  case HTF_TYPE_UINT8: v.uint8 = u.uint8; break;
+  case HTF_TYPE_UINT16: v.uint16 = u.uint16; break;
+  case HTF_TYPE_UINT32: v.uint32 = u.uint32; break;
+  case HTF_TYPE_UINT64: v.uint64 = u.uint64; break;
+  case HTF_TYPE_INT8: v.int8 = u.int8; break;
+  case HTF_TYPE_INT16: v.int16 = u.int16; break;
+  case HTF_TYPE_INT32: v.int32 = u.int32; break;
+  case HTF_TYPE_INT64: v.int64 = u.int64; break;
+  case HTF_TYPE_FLOAT: v.float32 = u.float32; break;
+  case HTF_TYPE_DOUBLE: v.float64 = u.float64; break;
+  case HTF_TYPE_STRING: v.string_ref = u.stringRef; break;
+  case HTF_TYPE_ATTRIBUTE: v.attribute_ref = u.attributeRef; break;
+  case HTF_TYPE_LOCATION: v.location_ref = u.locationRef; break;
+  case HTF_TYPE_REGION: v.region_ref = u.regionRef; break;
+  case HTF_TYPE_GROUP: v.group_ref = u.groupRef; break;
+  case HTF_TYPE_METRIC: v.metric_ref = u.metricRef; break;
+  case HTF_TYPE_COMM: v.comm_ref = u.commRef; break;
+  case HTF_TYPE_PARAMETER: v.parameter_ref = u.parameterRef; break;
+  case HTF_TYPE_RMA_WIN: v.rma_win_ref = u.rmaWinRef; break;
+  case HTF_TYPE_SOURCE_CODE_LOCATION: v.source_code_location_ref = u.sourceCodeLocationRef; break;
+  case HTF_TYPE_CALLING_CONTEXT: v.calling_context_ref = u.callingContextRef; break;
+  case HTF_TYPE_INTERRUPT_GENERATOR: v.interrupt_generator_ref = u.interruptGeneratorRef; break;
+  case HTF_TYPE_IO_FILE: v.io_file_ref = u.ioFileRef; break;
+  case HTF_TYPE_IO_HANDLE: v.io_handle_ref = u.ioHandleRef; break;
+  case HTF_TYPE_LOCATION_GROUP: v.location_group_ref = u.locationGroupRef; break;
+  }
+  return v;
+}
 
 /** @brief Set @eref{OTF2_Type} and @eref{OTF2_AttributeValue} to the appropriate
  *  values for the given enum entry.  No value range checking done.

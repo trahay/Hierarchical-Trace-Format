@@ -18,9 +18,13 @@ void htf_archive_register_string(struct htf_archive* archive, htf_string_ref_t s
 
 void htf_archive_register_region(struct htf_archive* archive, htf_region_ref_t region_ref, htf_string_ref_t string_ref);
 
+void htf_archive_register_attribute(struct htf_archive* archive, htf_attribute_ref_t attribute_ref, htf_string_ref_t name_ref, htf_string_ref_t description_ref, htf_type_t type);
+
 struct htf_string* htf_archive_get_string(struct htf_archive* archive, htf_string_ref_t string_ref);
 
 struct htf_region* htf_archive_get_region(struct htf_archive* archive, htf_region_ref_t region_ref);
+
+struct htf_attribute* htf_archive_get_attribute(struct htf_archive* archive, htf_attribute_ref_t attribute_ref);
 
 #endif
 

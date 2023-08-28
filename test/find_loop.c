@@ -12,7 +12,7 @@
 static inline void _init_event_summary(struct htf_event_summary* e) {
   e->durations = malloc(sizeof(htf_timestamp_t) * NB_TIMESTAMP_DEFAULT);
   e->nb_allocated_events = NB_TIMESTAMP_DEFAULT;
-  e->nb_events = 0;
+  e->nb_occurrences = 0;
 }
 
 static inline htf_event_id_t _htf_get_event_id(struct htf_thread* thread_trace, struct htf_event* e) {
@@ -48,8 +48,7 @@ static void init_dummy_event(struct htf_thread_writer* thread_writer, enum htf_r
   e.event_size = offsetof(struct htf_event, event_data);
   e.record = record;
   htf_event_id_t e_id = _htf_get_event_id(&thread_writer->thread_trace, &e);
-  htf_store_timestamp(thread_writer, e_id, htf_get_timestamp());
-  htf_store_event(thread_writer, htf_singleton, e_id);
+  htf_store_event(thread_writer, htf_singleton, e_id, htf_get_timestamp(), NULL);
 }
 
 int main(int argc, char** argv __attribute__((unused))) {

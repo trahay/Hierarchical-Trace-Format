@@ -65,9 +65,7 @@ OTF2_ErrorCode OTF2_GlobalDefWriter_WriteAttribute(OTF2_GlobalDefWriter* writerH
                                                    OTF2_StringRef name,
                                                    OTF2_StringRef description,
                                                    OTF2_Type type) {
-  //  NOT_IMPLEMENTED;
-  TO_BE_IMPLEMENTED;
-  /* TODO: implement me ! */
+  htf_archive_register_attribute(&writerHandle->archive, self, name, description, OTF2_HTF_TYPE(type));
   return OTF2_SUCCESS;
 }
 

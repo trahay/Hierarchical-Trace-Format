@@ -111,7 +111,7 @@ static FILE* _htf_file_open(char* filename, char* mode) {
   do {                                             \
     size_t ret = fwrite(ptr, size, nmemb, stream); \
     if (ret != nmemb)                              \
-      htf_error("fwrite failed\n");                \
+      htf_error("fwrite failed\n"); \
   } while (0)
 
 /******************* Read/Write/Compression function for vectors and arrays *******************/
@@ -145,8 +145,8 @@ inline static void _htf_vector_fread(htf_vector_t* vector, size_t element_size, 
  *  - void* dest: a free array in which the compressed array will be written.
  *  - size_t size: size of src (and of the allocated memory in dest).
  */
-inline static size_t _htf_zstd_compress(void* src, void* dest, size_t size) {
-  return ZSTD_compress(dest, size, src, size, ZSTD_COMPRESSION_LEVEL);
+inline static size_t _htf_zstd_compress(void* src, size_t size, void* dest, size_t dest_size) {
+  return ZSTD_compress(dest, dest_size, src, size, ZSTD_COMPRESSION_LEVEL);
 }
 enum uint64_size { bit8 = 0, bit16 = 1, bit32 = 2, bit64 = 3 };
 /** Compresses the content in src using a Masking technique and writes it to dest.
@@ -173,7 +173,7 @@ inline static size_t _htf_masking_compress(void* src, void* dest, size_t size) {
   if (mask_size != bit64) {
     size_t width = 1 << mask_size;
     for (int i = 0; i < n; i++) {
-      memcpy(&dest[size * i], &new_src[i], size);
+      memcpy(&((uint8_t*)dest)[size * i], &new_src[i], size);
     }
     return width * n;
   } else {
@@ -189,14 +189,20 @@ inline static size_t _htf_masking_compress(void* src, void* dest, size_t size) {
  */
 inline static void _htf_compress_write(void* array, size_t size, FILE* file) {
   size_t compSize;
-  void* compArray = malloc(size);
+  size_t dest_size = size >= 4096 ? size: 4096;
+  
+  void* compArray = malloc(dest_size);
   switch (COMPRESSION_OPTIONS) {
   case NO_COMPRESSION:
     compSize = size;
     memcpy(compArray, array, size);
     break;
   case ZSTD:
-    compSize = _htf_zstd_compress(array, compArray, size);
+    compSize = _htf_zstd_compress(array, size, compArray, dest_size);
+    if( ZSTD_isError(compSize) ) {
+      printf("Error ZSTD_compress: %s\n", ZSTD_getErrorName(compSize));
+      abort();
+    }
     break;
   case MASKING:
     compSize = _htf_masking_compress(array, compArray, size);
@@ -205,7 +211,7 @@ inline static void _htf_compress_write(void* array, size_t size, FILE* file) {
     void* buffer = compArray;
     size_t maskedSize = _htf_masking_compress(array, buffer, size);
     compArray = malloc(maskedSize);
-    compSize = _htf_zstd_compress(buffer, compArray, maskedSize);
+    compSize = _htf_zstd_compress(buffer, maskedSize, compArray, dest_size);
     free(buffer);
     break;
   }
@@ -240,7 +246,7 @@ inline static size_t _htf_masking_read(void* array, size_t size, void* compArray
   size_t width = 1 << (size / compSize);
   memset(array, 0, size);
   for (int i = 0; i < size / sizeof(uint64_t); i++) {
-    memcpy(&array[i], &compArray[size * i], width);
+    memcpy(&((uint8_t*)array)[i], &((uint8_t*)compArray)[size * i], width);
   }
   return width * (size / sizeof(uint64_t));
 }
@@ -297,19 +303,45 @@ static FILE* _htf_get_event_file(const char* base_dirname, struct htf_thread* th
   return _htf_file_open(filename, mode);
 }
 
+static void _htf_store_attributes(struct htf_event_summary* e,
+				  FILE* file) {
+
+  _htf_fwrite(&e->attribute_pos, sizeof(e->attribute_pos), 1, file);
+  if(e->attribute_pos > 0)
+    _htf_fwrite(e->attribute_buffer, e->attribute_pos, 1, file);
+}
+
 static void _htf_store_event(const char* base_dirname,
                              struct htf_thread* th,
                              struct htf_event_summary* e,
                              htf_event_id_t event_id) {
   FILE* file = _htf_get_event_file(base_dirname, th, event_id, "w");
-  htf_log(htf_dbg_lvl_debug, "\tStore event %x {.nb_events=%d}\n", HTF_ID(event_id), e->nb_events);
+  htf_log(htf_dbg_lvl_debug, "\tStore event %x {.nb_events=%d}\n", HTF_ID(event_id), e->nb_occurrences);
 
   _htf_fwrite(&e->event, sizeof(struct htf_event), 1, file);
-  _htf_fwrite(&e->nb_events, sizeof(e->nb_events), 1, file);
+  _htf_fwrite(&e->nb_occurrences, sizeof(e->nb_occurrences), 1, file);
+  _htf_store_attributes(e, file);
   if (STORE_TIMESTAMPS) {
-    _htf_compress_write(e->durations, e->nb_events * sizeof(htf_timestamp_t), file);
+    _htf_compress_write(e->durations, e->nb_occurrences * sizeof(htf_timestamp_t), file);
   }
   fclose(file);
+}
+
+static void _htf_read_attributes(struct htf_event_summary* e,
+				 FILE* file) {
+
+  _htf_fread(&e->attribute_pos, sizeof(e->attribute_pos), 1, file);
+  e->attribute_buffer_size = e->attribute_pos;
+  e->attribute_pos = 0;
+  e->attribute_buffer = NULL;
+
+  if(e->attribute_buffer_size > 0) {
+    e->attribute_buffer = malloc(e->attribute_buffer_size);
+    if(e->attribute_buffer == 0) {
+      htf_error("Cannot allocate memory\n");
+    }
+    _htf_fread(e->attribute_buffer, e->attribute_buffer_size, 1, file);
+  }
 }
 
 static void _htf_read_event(const char* base_dirname,
@@ -319,11 +351,12 @@ static void _htf_read_event(const char* base_dirname,
   FILE* file = _htf_get_event_file(base_dirname, th, event_id, "r");
 
   _htf_fread(&e->event, sizeof(struct htf_event), 1, file);
-  _htf_fread(&e->nb_events, sizeof(e->nb_events), 1, file);
-  htf_log(htf_dbg_lvl_debug, "\tLoad event %x {.nb_events=%d}\n", HTF_ID(event_id), e->nb_events);
+  _htf_fread(&e->nb_occurrences, sizeof(e->nb_occurrences), 1, file);
+  htf_log(htf_dbg_lvl_debug, "\tLoad event %x {.nb_events=%d}\n", HTF_ID(event_id), e->nb_occurrences);
+  _htf_read_attributes(e, file);
   if (STORE_TIMESTAMPS) {
-    e->durations = calloc(e->nb_events, sizeof(htf_timestamp_t));
-    _htf_compress_read(e->durations, sizeof(htf_timestamp_t) * e->nb_events, file);
+    e->durations = calloc(e->nb_occurrences, sizeof(htf_timestamp_t));
+    _htf_compress_read(e->durations, sizeof(htf_timestamp_t) * e->nb_occurrences, file);
   } else {
     e->durations = NULL;
   }

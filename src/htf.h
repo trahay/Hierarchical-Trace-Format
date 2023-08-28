@@ -18,7 +18,6 @@
 #endif
 
 
-
 /*************************** Tokens **********************/
 
 
@@ -314,11 +313,18 @@ struct htf_loop {
  * Summary for an event. The nth time the event appears, it is at timestamp timestamps[n].
  */
 struct htf_event_summary {
+  htf_token_id_t id;
   struct htf_event event;
   htf_timestamp_t* durations;
   unsigned nb_allocated_events;
-  unsigned nb_events;
+  unsigned nb_occurrences;
+
+  uint8_t *attribute_buffer;
+  size_t attribute_buffer_size;
+  size_t attribute_pos;
 };
+
+typedef uint32_t htf_ref_t;
 
 #define HTF_UNDEFINED_UINT8 ((uint8_t)(~((uint8_t)0u)))
 #define HTF_UNDEFINED_INT8 ((int8_t)(~(HTF_UNDEFINED_UINT8 >> 1)))
@@ -335,7 +341,7 @@ struct htf_event_summary {
  * Define a string reference structure used by HTF format
  * It has an ID and an associated char* with its length
  */
-typedef uint32_t htf_string_ref_t;
+typedef htf_ref_t htf_string_ref_t;
 #define HTF_STRING_REF_INVALID ((htf_string_ref_t)HTF_UNDEFINED_UINT32)
 
 struct htf_string {
@@ -348,7 +354,7 @@ struct htf_string {
  * Define a region that has an ID and a htf_string_ref_t description
  */
 
-typedef uint32_t htf_region_ref_t;
+typedef htf_ref_t htf_region_ref_t;
 #define HTF_REGIONREF_INVALID ((htf_region_ref_t)HTF_UNDEFINED_UINT32)
 
 struct htf_region {
@@ -357,18 +363,17 @@ struct htf_region {
   /* TODO: add other information (eg. file, line number, etc.)  */
 };
 
+typedef htf_ref_t htf_attribute_ref_t;
 
-typedef uint32_t htf_type_t;
-typedef uint32_t htf_attribute_ref_t;
-typedef uint32_t htf_attribute_value_t;
+/** @brief Wrapper for enum @eref{htf_type_enum}. */
+typedef uint8_t htf_type_t;
 
-typedef struct htf_attribute_list {
-  htf_type_t type_id;
+struct htf_attribute {
   htf_attribute_ref_t attribute_ref;
-  htf_attribute_value_t value;
-  struct htf_attribute_list* next;
-} htf_attribute_list_t;
-
+  htf_string_ref_t name;
+  htf_string_ref_t description;
+  htf_type_t type;
+};
 
 /**
  * Define a thread structure for HTF format
@@ -432,6 +437,10 @@ struct htf_definition {
   struct htf_region* regions;
   int nb_regions;
   int nb_allocated_regions;
+
+  struct htf_attribute* attributes;
+  int nb_attributes;
+  int nb_allocated_attributes;
 };
 
 /**

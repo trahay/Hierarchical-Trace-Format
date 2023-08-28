@@ -22,6 +22,7 @@ static void print_event(struct htf_thread* thread, htf_token_t token, struct htf
   htf_print_token(thread, token);
   printf("\t");
   htf_print_event(thread, &e->event);
+  htf_print_event_attributes(thread, e);
   printf("\n");
 }
 
