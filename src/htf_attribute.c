@@ -187,6 +187,7 @@ void htf_print_attribute_list(struct htf_thread* thread,
     htf_attribute_list_pop_data(l, &attr, &pos);
     htf_assert(ATTRIBUTE_LIST_HEADER_SIZE + pos <= l->struct_size);
 
+    if(i>0) printf(", ");
     _htf_print_attribute(thread,&attr);
   }
   printf("}");
