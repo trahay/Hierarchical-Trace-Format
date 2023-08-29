@@ -61,7 +61,6 @@ typedef union htf_attribute_value_union {
   htf_ref_t location_group_ref;
 } htf_attribute_value;
 
-
 /** @brief HTF basic data types. */
 enum htf_type_enum {
   /** @brief Undefined type.
@@ -235,10 +234,10 @@ enum htf_type_enum {
   HTF_TYPE_LOCATION_GROUP = 25
 };
 
-
 #define NB_ATTRIBUTE_MAX 128
 #define ATTRIBUTE_MAX_BUFFER_SIZE (sizeof(struct htf_attribute_list))
 #define ATTRIBUTE_HEADER_SIZE (sizeof(uint16_t)+sizeof(htf_attribute_ref_t))
+
 struct htf_attribute_data {
   uint16_t struct_size;
   htf_attribute_ref_t ref;
@@ -287,6 +286,7 @@ static inline size_t get_value_size(htf_type_t t) {
   return 0;
 }
 
+
 static inline void htf_attribute_list_push_data(struct htf_attribute_list *l,
 						struct htf_attribute_data* data) {
   uintptr_t offset = l->struct_size;
@@ -295,12 +295,13 @@ static inline void htf_attribute_list_push_data(struct htf_attribute_list *l,
   memcpy((void*)addr, data, data->struct_size);
   l->struct_size += data->struct_size;
   l->nb_values++;
+
 }
 
 static inline void htf_attribute_list_pop_data(struct htf_attribute_list *l,
 					       struct htf_attribute_data* data,
 					       uint16_t *current_offset) {
-  uintptr_t addr = ((uintptr_t)l) + (*current_offset);
+  uintptr_t addr = ((uintptr_t)&l->attributes[0]) + (*current_offset);
   struct htf_attribute_data* attr_data = (struct htf_attribute_data*)addr;
   uint16_t struct_size = attr_data->struct_size;
   
@@ -308,6 +309,7 @@ static inline void htf_attribute_list_pop_data(struct htf_attribute_list *l,
   htf_assert(struct_size + (*current_offset) <= l->struct_size);
 
   memcpy(data, attr_data, struct_size);
+  data->struct_size = struct_size;  
   *current_offset += struct_size;
 }
 
@@ -319,6 +321,10 @@ static inline void htf_attribute_list_init(struct htf_attribute_list* l) {
 
 static inline void htf_attribute_list_finalize(struct htf_attribute_list* l __attribute__((unused))) {
 }
+
+void _htf_print_attribute_value(struct htf_thread* thread,
+				struct htf_attribute_data *attr,
+				htf_type_t type);
 
 static inline int htf_attribute_list_add_attribute(struct htf_attribute_list* list,
 						   htf_attribute_ref_t attribute,
@@ -332,7 +338,7 @@ static inline int htf_attribute_list_add_attribute(struct htf_attribute_list* li
   d.ref = attribute;
   d.value = value;
   d.struct_size = ATTRIBUTE_HEADER_SIZE + data_size;
-  
+
   htf_attribute_list_push_data(list, &d);
   return 0;
 }
@@ -343,4 +349,7 @@ void htf_print_attribute_value(struct htf_thread* thread,
 
 void htf_print_event_attributes(struct htf_thread* thread,
 				struct htf_event_occurence* e);
+
+void htf_print_attribute_list(struct htf_thread* thread,
+			      struct htf_attribute_list* l);
 #endif /* HTF_ATTRIBUTE_H */

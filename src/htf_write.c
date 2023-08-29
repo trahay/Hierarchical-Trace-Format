@@ -178,6 +178,9 @@ void htf_store_attribute_list(struct htf_thread_writer* thread_writer,
 
   memcpy(&es->attribute_buffer[es->attribute_pos], attribute_list, attribute_list->struct_size);
   es->attribute_pos += attribute_list->struct_size;
+
+  htf_log(htf_dbg_lvl_debug, "store_attribute: {index: %d, struct_size: %d, nb_values: %d}\n",
+	  attribute_list->index, attribute_list->struct_size, attribute_list->nb_values);
 }
 
 static void _htf_store_token(struct htf_thread_writer* thread_writer, struct htf_sequence* seq, htf_token_t t) {

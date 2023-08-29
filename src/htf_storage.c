@@ -57,6 +57,7 @@ static void _htf_store_loop(const char* base_dirname, struct htf_thread* th, str
 
 static void _htf_store_string(struct htf_archive* c, struct htf_string* l, int string_index);
 static void _htf_store_regions(struct htf_archive* c);
+static void _htf_store_attributes(struct htf_archive* c);
 
 static void _htf_store_location_groups(struct htf_archive* a);
 static void _htf_store_locations(struct htf_archive* a);
@@ -73,6 +74,7 @@ static void _htf_read_loop(const char* base_dirname, struct htf_thread* th, stru
 
 static void _htf_read_string(struct htf_archive* c, struct htf_string* l, int string_index);
 static void _htf_read_regions(struct htf_archive* c);
+static void _htf_read_attributes(struct htf_archive* c);
 static void _htf_read_location_groups(struct htf_archive* a);
 static void _htf_read_locations(struct htf_archive* a);
 
@@ -104,7 +106,7 @@ static FILE* _htf_file_open(char* filename, char* mode) {
   do {                                            \
     size_t ret = fread(ptr, size, nmemb, stream); \
     if (ret != nmemb)                             \
-      htf_error("fread failed\n");                \
+      htf_error("fread failed: %s\n", strerror(errno)); \
   } while (0)
 
 #define _htf_fwrite(ptr, size, nmemb, stream)      \
@@ -303,12 +305,14 @@ static FILE* _htf_get_event_file(const char* base_dirname, struct htf_thread* th
   return _htf_file_open(filename, mode);
 }
 
-static void _htf_store_attributes(struct htf_event_summary* e,
-				  FILE* file) {
 
+static void _htf_store_attribute_values(struct htf_event_summary* e,
+					FILE* file) {  
   _htf_fwrite(&e->attribute_pos, sizeof(e->attribute_pos), 1, file);
-  if(e->attribute_pos > 0)
+  if(e->attribute_pos > 0) {
+    htf_log(htf_dbg_lvl_debug, "\t\tStore %lu attributes\n", e->attribute_pos);
     _htf_fwrite(e->attribute_buffer, e->attribute_pos, 1, file);
+  }
 }
 
 static void _htf_store_event(const char* base_dirname,
@@ -320,14 +324,14 @@ static void _htf_store_event(const char* base_dirname,
 
   _htf_fwrite(&e->event, sizeof(struct htf_event), 1, file);
   _htf_fwrite(&e->nb_occurrences, sizeof(e->nb_occurrences), 1, file);
-  _htf_store_attributes(e, file);
+  _htf_store_attribute_values(e, file);
   if (STORE_TIMESTAMPS) {
     _htf_compress_write(e->durations, e->nb_occurrences * sizeof(htf_timestamp_t), file);
   }
   fclose(file);
 }
 
-static void _htf_read_attributes(struct htf_event_summary* e,
+static void _htf_read_attribute_values(struct htf_event_summary* e,
 				 FILE* file) {
 
   _htf_fread(&e->attribute_pos, sizeof(e->attribute_pos), 1, file);
@@ -353,7 +357,7 @@ static void _htf_read_event(const char* base_dirname,
   _htf_fread(&e->event, sizeof(struct htf_event), 1, file);
   _htf_fread(&e->nb_occurrences, sizeof(e->nb_occurrences), 1, file);
   htf_log(htf_dbg_lvl_debug, "\tLoad event %x {.nb_events=%d}\n", HTF_ID(event_id), e->nb_occurrences);
-  _htf_read_attributes(e, file);
+  _htf_read_attribute_values(e, file);
   if (STORE_TIMESTAMPS) {
     e->durations = calloc(e->nb_occurrences, sizeof(htf_timestamp_t));
     _htf_compress_read(e->durations, sizeof(htf_timestamp_t) * e->nb_occurrences, file);
@@ -521,11 +525,10 @@ static void _htf_store_regions(struct htf_archive* a) {
   fclose(file);
 }
 
+
 static void _htf_read_regions_generic(FILE* file, struct htf_definition* d) {
   if (d->nb_regions == 0)
     return;
-
-  printf("\tLoad %d regions\n", d->nb_regions);
 
   d->nb_allocated_regions = d->nb_regions;
   d->regions = malloc(sizeof(struct htf_region) * d->nb_allocated_regions);
@@ -540,6 +543,55 @@ static void _htf_read_regions(struct htf_archive* a) {
 
   FILE* file = _htf_get_regions_file(a, "r");
   _htf_read_regions_generic(file, &a->definitions);
+  fclose(file);
+}
+
+
+static FILE* _htf_get_attributes_file(struct htf_archive* a, char* mode) {
+  char filename[1024];
+  snprintf(filename, 1024, "%s/archive_%u/attributes.dat", base_dirname(a), a->id);
+  return _htf_file_open(filename, mode);
+}
+
+static void _htf_store_attributes_generic(FILE* file, struct htf_definition* d) {
+  if (d->nb_attributes == 0)
+    return;
+
+  htf_log(htf_dbg_lvl_debug, "\tStore %d Attributes\n", d->nb_attributes);
+  for(int i=0; i< d->nb_attributes; i++) {
+    htf_log(htf_dbg_lvl_debug, "\t\t[%d] {ref=%x, name=%x, type=%x}\n", i,
+	    d->attributes[i].attribute_ref, d->attributes[i].name, d->attributes[i].type);
+  }
+
+  _htf_fwrite(d->attributes, sizeof(struct htf_attribute), d->nb_attributes, file);
+}
+
+static void _htf_store_attributes(struct htf_archive* a) {
+  if (a->definitions.nb_attributes == 0)
+    return;
+
+  FILE* file = _htf_get_attributes_file(a, "w");
+  _htf_store_attributes_generic(file, &a->definitions);
+  fclose(file);
+}
+
+static void _htf_read_attributes_generic(FILE* file, struct htf_definition* d) {
+  if (d->nb_attributes == 0)
+    return;
+
+  d->nb_allocated_attributes = d->nb_attributes;
+  d->attributes = malloc(sizeof(struct htf_attribute) * d->nb_allocated_attributes);
+  _htf_fread(d->attributes, sizeof(struct htf_attribute), d->nb_allocated_attributes, file);
+
+  htf_log(htf_dbg_lvl_debug, "\tLoad %d attributes\n", d->nb_attributes);
+}
+
+static void _htf_read_attributes(struct htf_archive* a) {
+  if (a->definitions.nb_attributes == 0)
+    return;
+
+  FILE* file = _htf_get_attributes_file(a, "r");
+  _htf_read_attributes_generic(file, &a->definitions);
   fclose(file);
 }
 
@@ -565,8 +617,6 @@ static void _htf_read_location_groups(struct htf_archive* a) {
     return;
 
   FILE* file = _htf_get_location_groups_file(a, "r");
-
-  printf("\tLoad %d location_groups\n", a->nb_location_groups);
 
   a->location_groups = malloc(sizeof(struct htf_location_group) * a->nb_location_groups);
   _htf_fread(a->location_groups, sizeof(struct htf_location_group), a->nb_location_groups, file);
@@ -601,8 +651,6 @@ static void _htf_read_locations(struct htf_archive* a) {
     return;
 
   FILE* file = _htf_get_locations_file(a, "r");
-
-  printf("\tLoad %d locations\n", a->nb_locations);
 
   a->locations = malloc(sizeof(struct htf_location) * a->nb_locations);
   _htf_fread(a->locations, sizeof(struct htf_location), a->nb_locations, file);
@@ -711,6 +759,7 @@ void htf_storage_finalize(struct htf_archive* archive) {
   _htf_fwrite(&archive->id, sizeof(htf_location_group_id_t), 1, f);
   _htf_fwrite(&archive->definitions.nb_strings, sizeof(int), 1, f);
   _htf_fwrite(&archive->definitions.nb_regions, sizeof(int), 1, f);
+  _htf_fwrite(&archive->definitions.nb_attributes, sizeof(int), 1, f);
   _htf_fwrite(&archive->nb_location_groups, sizeof(int), 1, f);
   _htf_fwrite(&archive->nb_locations, sizeof(int), 1, f);
   _htf_fwrite(&archive->nb_threads, sizeof(int), 1, f);
@@ -723,6 +772,7 @@ void htf_storage_finalize(struct htf_archive* archive) {
   }
 
   _htf_store_regions(archive);
+  _htf_store_attributes(archive);
 
   _htf_store_location_groups(archive);
   _htf_store_locations(archive);
@@ -780,6 +830,7 @@ static void _htf_read_archive(struct htf_archive* global_archive,
   _htf_fread(&archive->id, sizeof(htf_location_group_id_t), 1, f);
   _htf_fread(&archive->definitions.nb_strings, sizeof(int), 1, f);
   _htf_fread(&archive->definitions.nb_regions, sizeof(int), 1, f);
+  _htf_fread(&archive->definitions.nb_attributes, sizeof(int), 1, f);
   _htf_fread(&archive->nb_location_groups, sizeof(int), 1, f);
   _htf_fread(&archive->nb_locations, sizeof(int), 1, f);
   _htf_fread(&archive->nb_threads, sizeof(int), 1, f);
@@ -802,6 +853,7 @@ static void _htf_read_archive(struct htf_archive* global_archive,
   }
 
   _htf_read_regions(archive);
+  _htf_read_attributes(archive);
 
   archive->nb_allocated_location_groups = archive->nb_location_groups;
   if (archive->nb_allocated_location_groups) {
