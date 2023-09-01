@@ -54,6 +54,8 @@ void* htf_vector_add(htf_vector_t* vector, void* element) {
 }
 
 void* htf_vector_get(htf_vector_t* vector, int index) {
+  htf_assert(index >= 0);
+  
   if (index >= vector->size)
     return NULL;
   htf_subvector_t* correct_sub = vector->last_subvector;

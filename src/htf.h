@@ -316,8 +316,6 @@ struct htf_event_summary {
   htf_token_id_t id;
   struct htf_event event;
   htf_vector_t durations;
-  //htf_timestamp_t* durations;
-  unsigned nb_allocated_events;
   unsigned nb_occurrences;
 
   uint8_t *attribute_buffer;

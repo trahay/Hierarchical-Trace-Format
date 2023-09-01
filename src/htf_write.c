@@ -36,7 +36,6 @@ static inline void _init_loop(struct htf_loop* l) {
 
 static inline void _init_event(struct htf_event_summary* e) {
   htf_vector_new_with_size(&e->durations, sizeof(htf_timestamp_t), NB_TIMESTAMP_DEFAULT);
-  e->nb_allocated_events = NB_TIMESTAMP_DEFAULT;
   e->nb_occurrences = 0;
   e->id = -1;
 
@@ -220,13 +219,14 @@ static inline htf_timestamp_t _htf_get_sequence_duration(struct htf_thread* thre
     switch (t.type) {
     case HTF_TYPE_INVALID:
       htf_error("This shouldn't happen");
+
     case HTF_TYPE_EVENT: {
       event_index[t.id] += 1;
       struct htf_event_summary es = thread->events[t.id];
-
       duration += *(htf_timestamp_t*)htf_vector_get(&es.durations, es.durations.size - event_index[t.id]);
       break;
     }
+
     case HTF_TYPE_SEQUENCE: {
       sequence_index[t.id] += 1;
       struct htf_sequence* s = thread->sequences[t.id];
@@ -271,11 +271,11 @@ static void _htf_create_loop(struct htf_thread_writer* thread_writer,
   // We need to go back in the current sequence in order to correctly get our durations
   struct htf_sequence* loop_seq = htf_get_sequence(&thread_writer->thread_trace, HTF_TOKEN_TO_SEQUENCE_ID(loop->token));
 
-  htf_timestamp_t duration_two_sequences =
-    _htf_get_sequence_duration(&thread_writer->thread_trace, &cur_seq->token[index_first_iteration], 2 * loop_len);
+  htf_timestamp_t duration_first_sequence = 
+    _htf_get_sequence_duration(&thread_writer->thread_trace, &cur_seq->token[index_first_iteration], loop_len);
   htf_timestamp_t duration_last_sequence =
     _htf_get_sequence_duration(&thread_writer->thread_trace, &cur_seq->token[index_second_iteration], loop_len);
-  htf_timestamp_t duration_first_sequence = duration_two_sequences - duration_first_sequence;
+
   htf_vector_add(&loop_seq->durations, &duration_first_sequence);
   htf_vector_add(&loop_seq->durations, &duration_last_sequence);
   htf_add_timestamp_to_delta(htf_vector_get(&loop_seq->durations, loop_seq->durations.size - 1));
@@ -455,7 +455,7 @@ int htf_store_event(struct htf_thread_writer* thread_writer,
   struct htf_event_summary* es = &thread_writer->thread_trace.events[HTF_ID(id)];
   int occurrence_index = es->nb_occurrences++;
 
-  htf_store_timestamp(thread_writer, es, ts);
+  htf_store_timestamp(thread_writer, es, htf_timestamp(ts));
   if(attribute_list)
     htf_store_attribute_list(thread_writer, es, attribute_list, occurrence_index);
 
