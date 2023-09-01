@@ -22,6 +22,7 @@ static void print_event(struct htf_thread* thread, htf_token_t token, struct htf
   htf_print_token(thread, token);
   printf("\t");
   htf_print_event(thread, &e->event);
+  htf_print_event_attributes(thread, e);
   printf("\n");
 }
 
@@ -106,7 +107,7 @@ static void print_token(struct htf_thread* thread,
                         int last_one,
                         struct htf_loop_occurence* containing_loop) {
   htf_log(htf_dbg_lvl_verbose, "Reading token(%x.%x) for thread %s\n", t->type, t->id, htf_get_thread_name(thread));
-
+  if(depth < 1) depth = 1;
   // Prints the structure of the sequences and the loops
   if (show_structure) {
     structure_indent[depth - 1] = last_one ? "╰" : "├";

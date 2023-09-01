@@ -38,7 +38,7 @@ static htf_string_ref_t _register_string(char* str) {
   static htf_string_ref_t next_ref = 0;
   htf_string_ref_t ref = next_ref++;
 
-  htf_archive_register_string(&trace, ref, str);
+  htf_archive_register_string(&global_archive, ref, str);
   return ref;
 }
 

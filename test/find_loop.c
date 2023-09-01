@@ -46,8 +46,7 @@ static void init_dummy_event(struct htf_thread_writer* thread_writer, enum htf_r
   e.event_size = offsetof(struct htf_event, event_data);
   e.record = record;
   htf_event_id_t e_id = _htf_get_event_id(&thread_writer->thread_trace, &e);
-  htf_store_timestamp(thread_writer, e_id, htf_get_timestamp());
-  htf_store_event(thread_writer, htf_singleton, e_id);
+  htf_store_event(thread_writer, htf_singleton, e_id, htf_get_timestamp(), NULL);
 }
 
 int main(int argc, char** argv __attribute__((unused))) {

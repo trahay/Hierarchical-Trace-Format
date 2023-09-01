@@ -7,6 +7,7 @@
 #define HTF_WRITE_H
 
 #include "htf.h"
+#include "htf_attribute.h"
 
 struct htf_thread_writer {
   struct htf_thread thread_trace;
@@ -52,37 +53,43 @@ void htf_write_archive_open(struct htf_archive* archive,
 
 void htf_write_archive_close(struct htf_archive* archive);
 
-void htf_store_timestamp(struct htf_thread_writer* thread_writer, htf_event_id_t e_id, htf_timestamp_t ts);
-void htf_store_event(struct htf_thread_writer* thread_writer, enum htf_event_type event_type, htf_event_id_t id);
+//void htf_store_timestamp(struct htf_thread_writer* thread_writer, htf_event_id_t e_id, htf_timestamp_t ts);
+//int htf_store_event(struct htf_thread_writer* thread_writer, enum htf_event_type event_type, htf_event_id_t id);
+int htf_store_event(struct htf_thread_writer* thread_writer,
+		    enum htf_event_type event_type,
+		    htf_event_id_t id,
+		    htf_timestamp_t ts,
+		    struct htf_attribute_list* attributeList);
+
 
 void htf_record_enter(struct htf_thread_writer* thread_writer,
-                      htf_attribute_list_t* attributeList,
+                      struct htf_attribute_list* attributeList,
                       htf_timestamp_t time,
                       htf_region_ref_t region_ref);
 
 void htf_record_leave(struct htf_thread_writer* thread_writer,
-                      htf_attribute_list_t* attributeList,
+                      struct htf_attribute_list* attributeList,
                       htf_timestamp_t time,
                       htf_region_ref_t region_ref);
 
 void htf_record_thread_begin(struct htf_thread_writer* thread_writer,
-                             htf_attribute_list_t* attributeList,
+                             struct htf_attribute_list* attributeList,
                              htf_timestamp_t time);
 
 void htf_record_thread_end(struct htf_thread_writer* thread_writer,
-                           htf_attribute_list_t* attributeList,
+                           struct htf_attribute_list* attributeList,
                            htf_timestamp_t time);
 
 void htf_record_thread_team_begin(struct htf_thread_writer* thread_writer,
-                                  htf_attribute_list_t* attributeList,
+                                  struct htf_attribute_list* attributeList,
                                   htf_timestamp_t time);
 
 void htf_record_thread_team_end(struct htf_thread_writer* thread_writer,
-                                htf_attribute_list_t* attributeList,
+                                struct htf_attribute_list* attributeList,
                                 htf_timestamp_t time);
 
 void htf_record_mpi_send(struct htf_thread_writer* thread_writer,
-                         htf_attribute_list_t* attributeList,
+                         struct htf_attribute_list* attributeList,
                          htf_timestamp_t time,
                          uint32_t receiver,
                          uint32_t communicator,
@@ -90,7 +97,7 @@ void htf_record_mpi_send(struct htf_thread_writer* thread_writer,
                          uint64_t msgLength);
 
 void htf_record_mpi_isend(struct htf_thread_writer* thread_writer,
-                          htf_attribute_list_t* attribute_list,
+                          struct htf_attribute_list* attribute_list,
                           htf_timestamp_t time,
                           uint32_t receiver,
                           uint32_t communicator,
@@ -99,17 +106,17 @@ void htf_record_mpi_isend(struct htf_thread_writer* thread_writer,
                           uint64_t requestID);
 
 void htf_record_mpi_isend_complete(struct htf_thread_writer* thread_writer,
-                                   htf_attribute_list_t* attribute_list,
+                                   struct htf_attribute_list* attribute_list,
                                    htf_timestamp_t time,
                                    uint64_t requestID);
 
 void htf_record_mpi_irecv_request(struct htf_thread_writer* thread_writer,
-                                  htf_attribute_list_t* attribute_list,
+                                  struct htf_attribute_list* attribute_list,
                                   htf_timestamp_t time,
                                   uint64_t requestID);
 
 void htf_record_mpi_recv(struct htf_thread_writer* thread_writer,
-                         htf_attribute_list_t* attributeList,
+                         struct htf_attribute_list* attributeList,
                          htf_timestamp_t time,
                          uint32_t sender,
                          uint32_t communicator,
@@ -117,7 +124,7 @@ void htf_record_mpi_recv(struct htf_thread_writer* thread_writer,
                          uint64_t msgLength);
 
 void htf_record_mpi_irecv(struct htf_thread_writer* thread_writer,
-                          htf_attribute_list_t* attribute_list,
+                          struct htf_attribute_list* attribute_list,
                           htf_timestamp_t time,
                           uint32_t sender,
                           uint32_t communicator,
@@ -126,11 +133,11 @@ void htf_record_mpi_irecv(struct htf_thread_writer* thread_writer,
                           uint64_t requestID);
 
 void htf_record_mpi_collective_begin(struct htf_thread_writer* thread_writer,
-                                     htf_attribute_list_t* attribute_list,
+                                     struct htf_attribute_list* attribute_list,
                                      htf_timestamp_t time);
 
 void htf_record_mpi_collective_end(struct htf_thread_writer* thread_writer,
-                                   htf_attribute_list_t* attribute_list,
+                                   struct htf_attribute_list* attribute_list,
                                    htf_timestamp_t time,
                                    uint32_t collectiveOp,
                                    uint32_t communicator,
@@ -144,6 +151,7 @@ void htf_record_mpi_collective_end(struct htf_thread_writer* thread_writer,
 #define NB_STRING_DEFAULT 100
 #define NB_REGION_DEFAULT 100
 #define NB_TIMESTAMP_DEFAULT 1000
+#define NB_ATTRIBUTE_DEFAULT 1000
 #define SEQUENCE_SIZE_DEFAULT 1024
 #define LOOP_SIZE_DEFAULT 16
 #define CALLSTACK_DEPTH_DEFAULT 128
