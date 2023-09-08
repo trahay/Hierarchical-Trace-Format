@@ -57,6 +57,7 @@ static void _htf_store_loop(const char* base_dirname, struct htf_thread* th, str
 
 static void _htf_store_string(struct htf_archive* c, struct htf_string* l, int string_index);
 static void _htf_store_regions(struct htf_archive* c);
+static void _htf_store_attributes(struct htf_archive* c);
 
 static void _htf_store_location_groups(struct htf_archive* a);
 static void _htf_store_locations(struct htf_archive* a);
@@ -73,6 +74,7 @@ static void _htf_read_loop(const char* base_dirname, struct htf_thread* th, stru
 
 static void _htf_read_string(struct htf_archive* c, struct htf_string* l, int string_index);
 static void _htf_read_regions(struct htf_archive* c);
+static void _htf_read_attributes(struct htf_archive* c);
 static void _htf_read_location_groups(struct htf_archive* a);
 static void _htf_read_locations(struct htf_archive* a);
 
@@ -104,14 +106,14 @@ static FILE* _htf_file_open(char* filename, char* mode) {
   do {                                            \
     size_t ret = fread(ptr, size, nmemb, stream); \
     if (ret != nmemb)                             \
-      htf_error("fread failed\n");                \
+      htf_error("fread failed: %s\n", strerror(errno)); \
   } while (0)
 
 #define _htf_fwrite(ptr, size, nmemb, stream)      \
   do {                                             \
     size_t ret = fwrite(ptr, size, nmemb, stream); \
     if (ret != nmemb)                              \
-      htf_error("fwrite failed\n");                \
+      htf_error("fwrite failed\n"); \
   } while (0)
 
 /******************* Read/Write/Compression function for vectors and arrays *******************/
@@ -121,8 +123,8 @@ static FILE* _htf_file_open(char* filename, char* mode) {
  *  - void* dest: a free array in which the compressed array will be written.
  *  - size_t size: size of src (and of the allocated memory in dest).
  */
-inline static size_t _htf_zstd_compress(void* src, size_t src_size, void* dest, size_t dest_size) {
-  return ZSTD_compress(dest, dest_size, src, src_size, ZSTD_COMPRESSION_LEVEL);
+inline static size_t _htf_zstd_compress(void* src, size_t size, void* dest, size_t dest_size) {
+  return ZSTD_compress(dest, dest_size, src, size, ZSTD_COMPRESSION_LEVEL);
 }
 /** Compresses the content in src using a Masking technique and writes it to dest.
  * Returns the size of the compressed array.
@@ -150,7 +152,7 @@ inline static size_t _htf_masking_compress(void* src, void* dest, size_t size) {
   }
   if (mask_size && mask_size != sizeof(htf_timestamp_t)) {
     for (int i = 0; i < n; i++) {
-      memcpy(&dest[sizeof(htf_timestamp_t) * i], &new_src[i], mask_size);
+      memcpy(&((uint8_t*)dest)[sizeof(htf_timestamp_t) * i], &new_src[i], mask_size);
     }
     return mask_size * n;
   } else {
@@ -166,13 +168,15 @@ inline static size_t _htf_masking_compress(void* src, void* dest, size_t size) {
  */
 inline static void _htf_compress_write(void* array, size_t size, FILE* file) {
   size_t compSize;
-  void* compArray;
+  void* compArray = malloc(size);
   int mustFree = 1;
+
   switch (COMPRESSION_OPTIONS) {
   case NO_COMPRESSION:
     compArray = array;
     compSize = size;
     mustFree = 0;
+    memcpy(compArray, array, size);
     break;
   case ZSTD: {
     compSize = ZSTD_compressBound(size);
@@ -225,7 +229,7 @@ inline static size_t _htf_masking_read(void* array, size_t size, void* compArray
   size_t width = 1 << (size / compSize);
   memset(array, 0, size);
   for (int i = 0; i < size / sizeof(uint64_t); i++) {
-    memcpy(&array[i], &compArray[size * i], width);
+    memcpy(&((uint8_t*)array)[i], &((uint8_t*)compArray)[size * i], width);
   }
   return width * (size / sizeof(uint64_t));
 }
@@ -322,18 +326,47 @@ static FILE* _htf_get_event_file(const char* base_dirname, struct htf_thread* th
   return _htf_file_open(filename, mode);
 }
 
+
+static void _htf_store_attribute_values(struct htf_event_summary* e,
+					FILE* file) {  
+  _htf_fwrite(&e->attribute_pos, sizeof(e->attribute_pos), 1, file);
+  if(e->attribute_pos > 0) {
+    htf_log(htf_dbg_lvl_debug, "\t\tStore %lu attributes\n", e->attribute_pos);
+    _htf_fwrite(e->attribute_buffer, e->attribute_pos, 1, file);
+  }
+}
+
 static void _htf_store_event(const char* base_dirname,
                              struct htf_thread* th,
                              struct htf_event_summary* e,
                              htf_event_id_t event_id) {
   FILE* file = _htf_get_event_file(base_dirname, th, event_id, "w");
-  htf_log(htf_dbg_lvl_debug, "\tStore event %x {.nb_events=%d}\n", HTF_ID(event_id), e->durations.size);
+  htf_log(htf_dbg_lvl_debug, "\tStore event %x {.nb_events=%d}\n", HTF_ID(event_id), e->nb_occurrences);
 
   _htf_fwrite(&e->event, sizeof(struct htf_event), 1, file);
+  _htf_fwrite(&e->nb_occurrences, sizeof(e->nb_occurrences), 1, file);
+  _htf_store_attribute_values(e, file);
   if (STORE_TIMESTAMPS) {
     _htf_vector_fwrite(&e->durations, file);
   }
   fclose(file);
+}
+
+static void _htf_read_attribute_values(struct htf_event_summary* e,
+				 FILE* file) {
+
+  _htf_fread(&e->attribute_pos, sizeof(e->attribute_pos), 1, file);
+  e->attribute_buffer_size = e->attribute_pos;
+  e->attribute_pos = 0;
+  e->attribute_buffer = NULL;
+
+  if(e->attribute_buffer_size > 0) {
+    e->attribute_buffer = malloc(e->attribute_buffer_size);
+    if(e->attribute_buffer == 0) {
+      htf_error("Cannot allocate memory\n");
+    }
+    _htf_fread(e->attribute_buffer, e->attribute_buffer_size, 1, file);
+  }
 }
 
 static void _htf_read_event(const char* base_dirname,
@@ -343,7 +376,9 @@ static void _htf_read_event(const char* base_dirname,
   FILE* file = _htf_get_event_file(base_dirname, th, event_id, "r");
 
   _htf_fread(&e->event, sizeof(struct htf_event), 1, file);
-  htf_log(htf_dbg_lvl_debug, "\tLoad event %x\n", HTF_ID(event_id));
+  _htf_fread(&e->nb_occurrences, sizeof(e->nb_occurrences), 1, file);
+  htf_log(htf_dbg_lvl_debug, "\tLoad event %x {.nb_events=%d}\n", HTF_ID(event_id), e->nb_occurrences);
+  _htf_read_attribute_values(e, file);
   if (STORE_TIMESTAMPS) {
     _htf_vector_fread(&e->durations, sizeof(htf_timestamp_t), file);
   } else {
@@ -511,11 +546,10 @@ static void _htf_store_regions(struct htf_archive* a) {
   fclose(file);
 }
 
+
 static void _htf_read_regions_generic(FILE* file, struct htf_definition* d) {
   if (d->nb_regions == 0)
     return;
-
-  printf("\tLoad %d regions\n", d->nb_regions);
 
   d->nb_allocated_regions = d->nb_regions;
   d->regions = malloc(sizeof(struct htf_region) * d->nb_allocated_regions);
@@ -530,6 +564,55 @@ static void _htf_read_regions(struct htf_archive* a) {
 
   FILE* file = _htf_get_regions_file(a, "r");
   _htf_read_regions_generic(file, &a->definitions);
+  fclose(file);
+}
+
+
+static FILE* _htf_get_attributes_file(struct htf_archive* a, char* mode) {
+  char filename[1024];
+  snprintf(filename, 1024, "%s/archive_%u/attributes.dat", base_dirname(a), a->id);
+  return _htf_file_open(filename, mode);
+}
+
+static void _htf_store_attributes_generic(FILE* file, struct htf_definition* d) {
+  if (d->nb_attributes == 0)
+    return;
+
+  htf_log(htf_dbg_lvl_debug, "\tStore %d Attributes\n", d->nb_attributes);
+  for(int i=0; i< d->nb_attributes; i++) {
+    htf_log(htf_dbg_lvl_debug, "\t\t[%d] {ref=%x, name=%x, type=%x}\n", i,
+	    d->attributes[i].attribute_ref, d->attributes[i].name, d->attributes[i].type);
+  }
+
+  _htf_fwrite(d->attributes, sizeof(struct htf_attribute), d->nb_attributes, file);
+}
+
+static void _htf_store_attributes(struct htf_archive* a) {
+  if (a->definitions.nb_attributes == 0)
+    return;
+
+  FILE* file = _htf_get_attributes_file(a, "w");
+  _htf_store_attributes_generic(file, &a->definitions);
+  fclose(file);
+}
+
+static void _htf_read_attributes_generic(FILE* file, struct htf_definition* d) {
+  if (d->nb_attributes == 0)
+    return;
+
+  d->nb_allocated_attributes = d->nb_attributes;
+  d->attributes = malloc(sizeof(struct htf_attribute) * d->nb_allocated_attributes);
+  _htf_fread(d->attributes, sizeof(struct htf_attribute), d->nb_allocated_attributes, file);
+
+  htf_log(htf_dbg_lvl_debug, "\tLoad %d attributes\n", d->nb_attributes);
+}
+
+static void _htf_read_attributes(struct htf_archive* a) {
+  if (a->definitions.nb_attributes == 0)
+    return;
+
+  FILE* file = _htf_get_attributes_file(a, "r");
+  _htf_read_attributes_generic(file, &a->definitions);
   fclose(file);
 }
 
@@ -555,8 +638,6 @@ static void _htf_read_location_groups(struct htf_archive* a) {
     return;
 
   FILE* file = _htf_get_location_groups_file(a, "r");
-
-  printf("\tLoad %d location_groups\n", a->nb_location_groups);
 
   a->location_groups = malloc(sizeof(struct htf_location_group) * a->nb_location_groups);
   _htf_fread(a->location_groups, sizeof(struct htf_location_group), a->nb_location_groups, file);
@@ -591,8 +672,6 @@ static void _htf_read_locations(struct htf_archive* a) {
     return;
 
   FILE* file = _htf_get_locations_file(a, "r");
-
-  printf("\tLoad %d locations\n", a->nb_locations);
 
   a->locations = malloc(sizeof(struct htf_location) * a->nb_locations);
   _htf_fread(a->locations, sizeof(struct htf_location), a->nb_locations, file);
@@ -701,6 +780,7 @@ void htf_storage_finalize(struct htf_archive* archive) {
   _htf_fwrite(&archive->id, sizeof(htf_location_group_id_t), 1, f);
   _htf_fwrite(&archive->definitions.nb_strings, sizeof(int), 1, f);
   _htf_fwrite(&archive->definitions.nb_regions, sizeof(int), 1, f);
+  _htf_fwrite(&archive->definitions.nb_attributes, sizeof(int), 1, f);
   _htf_fwrite(&archive->nb_location_groups, sizeof(int), 1, f);
   _htf_fwrite(&archive->nb_locations, sizeof(int), 1, f);
   _htf_fwrite(&archive->nb_threads, sizeof(int), 1, f);
@@ -713,6 +793,7 @@ void htf_storage_finalize(struct htf_archive* archive) {
   }
 
   _htf_store_regions(archive);
+  _htf_store_attributes(archive);
 
   _htf_store_location_groups(archive);
   _htf_store_locations(archive);
@@ -767,6 +848,7 @@ static void _htf_read_archive(struct htf_archive* global_archive,
   _htf_fread(&archive->id, sizeof(htf_location_group_id_t), 1, f);
   _htf_fread(&archive->definitions.nb_strings, sizeof(int), 1, f);
   _htf_fread(&archive->definitions.nb_regions, sizeof(int), 1, f);
+  _htf_fread(&archive->definitions.nb_attributes, sizeof(int), 1, f);
   _htf_fread(&archive->nb_location_groups, sizeof(int), 1, f);
   _htf_fread(&archive->nb_locations, sizeof(int), 1, f);
   _htf_fread(&archive->nb_threads, sizeof(int), 1, f);
@@ -793,6 +875,7 @@ static void _htf_read_archive(struct htf_archive* global_archive,
   }
 
   _htf_read_regions(archive);
+  _htf_read_attributes(archive);
 
   archive->nb_allocated_location_groups = archive->nb_location_groups;
   if (archive->nb_allocated_location_groups) {

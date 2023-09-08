@@ -36,6 +36,12 @@ static inline void _init_loop(struct htf_loop* l) {
 
 static inline void _init_event(struct htf_event_summary* e) {
   htf_vector_new_with_size(&e->durations, sizeof(htf_timestamp_t), NB_TIMESTAMP_DEFAULT);
+  e->nb_occurrences = 0;
+  e->id = -1;
+
+  e->attribute_buffer = NULL; 	/* most event probably don't use attribute so we allocate lazily */
+  e->attribute_buffer_size = 0;
+  e->attribute_pos = 0;
 }
 
 static inline struct htf_sequence* _htf_get_cur_sequence(struct htf_thread_writer* thread_writer) {
@@ -59,9 +65,10 @@ static inline htf_sequence_id_t _htf_get_sequence_id(struct htf_thread* thread_t
 static inline htf_sequence_id_t _htf_get_sequence_id_from_array(struct htf_thread* thread_trace,
                                                                 htf_token_t* token_array,
                                                                 int array_len) {
-  htf_log(htf_dbg_lvl_debug, "Searching for sequence {.size=%d}\n", array_len);
   uint32_t hash;
   htf_hash_32(token_array, array_len, SEED, &hash);
+  htf_log(htf_dbg_lvl_debug, "Searching for sequence {.size=%d, .hash=%x}\n", array_len, hash);
+
   for (unsigned i = 1; i < thread_trace->nb_sequences; i++) {
     if (thread_trace->sequences[i]->hash == hash) {
       if (_htf_arrays_equal(token_array, array_len, thread_trace->sequences[i]->token,
@@ -136,19 +143,40 @@ static inline struct htf_loop* _htf_create_loop_id(struct htf_thread_writer* thr
   return l;
 }
 
-void htf_store_timestamp(struct htf_thread_writer* thread_writer, htf_event_id_t e_id, htf_timestamp_t ts) {
-  htf_assert(HTF_ID(e_id) < thread_writer->thread_trace.nb_allocated_events);
-
-  struct htf_event_summary* es = &thread_writer->thread_trace.events[HTF_ID(e_id)];
-  htf_assert(es);
-
+void htf_store_timestamp(struct htf_thread_writer* thread_writer,
+			 struct htf_event_summary* es,
+			 htf_timestamp_t ts) {
   htf_timestamp_t* ts_address = htf_vector_add(&es->durations, &ts);
   htf_delta_timestamp(ts_address);
 }
 
+void htf_store_attribute_list(struct htf_thread_writer* thread_writer,
+			      struct htf_event_summary* es,
+			      struct htf_attribute_list* attribute_list,
+			      int occurrence_index) {
+  attribute_list->index = occurrence_index;
+  if(es->attribute_pos + attribute_list->struct_size >= es->attribute_buffer_size) {
+    if(es->attribute_buffer_size == 0) {
+      htf_warn("Allocating attribute memory for event %u\n", es->id);
+      es->attribute_buffer_size = NB_ATTRIBUTE_DEFAULT * sizeof(struct htf_attribute_list);
+      es->attribute_buffer = malloc(es->attribute_buffer_size);
+      htf_assert(es->attribute_buffer != NULL);
+    } else {
+      htf_warn("Doubling mem space of attributes for event %u\n", es->id);
+      DOUBLE_MEMORY_SPACE(es->attribute_buffer, es->attribute_buffer_size, uint8_t);
+    }
+    htf_assert(es->attribute_pos + attribute_list->struct_size < es->attribute_buffer_size);
+  }
+
+  memcpy(&es->attribute_buffer[es->attribute_pos], attribute_list, attribute_list->struct_size);
+  es->attribute_pos += attribute_list->struct_size;
+
+  htf_log(htf_dbg_lvl_debug, "store_attribute: {index: %d, struct_size: %d, nb_values: %d}\n",
+	  attribute_list->index, attribute_list->struct_size, attribute_list->nb_values);
+}
+
 static void _htf_store_token(struct htf_thread_writer* thread_writer, struct htf_sequence* seq, htf_token_t t) {
   while (seq->size >= seq->allocated) {
-    //    htf_error( "too many tokens\n");
     htf_warn("Doubling mem space of tokens for sequence %p, cur=%u, size=%u\n", seq, seq->allocated, seq->size);
     DOUBLE_MEMORY_SPACE(seq->token, seq->allocated, htf_token_t);
   }
@@ -191,12 +219,14 @@ static inline htf_timestamp_t _htf_get_sequence_duration(struct htf_thread* thre
     switch (t.type) {
     case HTF_TYPE_INVALID:
       htf_error("This shouldn't happen");
+
     case HTF_TYPE_EVENT: {
       event_index[t.id] += 1;
       struct htf_event_summary es = thread->events[t.id];
       duration += *(htf_timestamp_t*)htf_vector_get(&es.durations, es.durations.size - event_index[t.id]);
       break;
     }
+
     case HTF_TYPE_SEQUENCE: {
       sequence_index[t.id] += 1;
       struct htf_sequence* s = thread->sequences[t.id];
@@ -241,11 +271,11 @@ static void _htf_create_loop(struct htf_thread_writer* thread_writer,
   // We need to go back in the current sequence in order to correctly get our durations
   struct htf_sequence* loop_seq = htf_get_sequence(&thread_writer->thread_trace, HTF_TOKEN_TO_SEQUENCE_ID(loop->token));
 
-  htf_timestamp_t duration_two_sequences =
-    _htf_get_sequence_duration(&thread_writer->thread_trace, &cur_seq->token[index_first_iteration], 2 * loop_len);
+  htf_timestamp_t duration_first_sequence = 
+    _htf_get_sequence_duration(&thread_writer->thread_trace, &cur_seq->token[index_first_iteration], loop_len);
   htf_timestamp_t duration_last_sequence =
     _htf_get_sequence_duration(&thread_writer->thread_trace, &cur_seq->token[index_second_iteration], loop_len);
-  htf_timestamp_t duration_first_sequence = duration_two_sequences - duration_first_sequence;
+
   htf_vector_add(&loop_seq->durations, &duration_first_sequence);
   htf_vector_add(&loop_seq->durations, &duration_last_sequence);
   htf_add_timestamp_to_delta(htf_vector_get(&loop_seq->durations, loop_seq->durations.size - 1));
@@ -409,7 +439,11 @@ void _htf_record_exit_function(struct htf_thread_writer* thread_writer) {
   cur_seq->size = 0;
 }
 
-void htf_store_event(struct htf_thread_writer* thread_writer, enum htf_event_type event_type, htf_event_id_t id) {
+int htf_store_event(struct htf_thread_writer* thread_writer,
+		    enum htf_event_type event_type,
+		    htf_event_id_t id,
+		    htf_timestamp_t ts,
+		    struct htf_attribute_list* attribute_list) {
   if (event_type == htf_block_start) {
     _htf_record_enter_function(thread_writer);
   }
@@ -418,9 +452,17 @@ void htf_store_event(struct htf_thread_writer* thread_writer, enum htf_event_typ
   struct htf_sequence* seq = _htf_get_cur_sequence(thread_writer);
   _htf_store_token(thread_writer, seq, t);
 
+  struct htf_event_summary* es = &thread_writer->thread_trace.events[HTF_ID(id)];
+  int occurrence_index = es->nb_occurrences++;
+
+  htf_store_timestamp(thread_writer, es, htf_timestamp(ts));
+  if(attribute_list)
+    htf_store_attribute_list(thread_writer, es, attribute_list, occurrence_index);
+
   if (event_type == htf_block_end) {
     _htf_record_exit_function(thread_writer);
   }
+  return occurrence_index;
 }
 
 void htf_write_thread_close(struct htf_thread_writer* thread_writer) {
@@ -793,16 +835,17 @@ static inline htf_event_id_t _htf_get_event_id(struct htf_thread* thread_trace, 
 
   int index = thread_trace->nb_events++;
   htf_log(htf_dbg_lvl_max, "\tNot found. Adding it with id=%x\n", index);
-  struct htf_event_summary* es = &thread_trace->events[index];
+  struct htf_event_summary* new_event = &thread_trace->events[index];
 
-  memcpy(&es->event, e, e->event_size);
-  _init_event(es);
+  _init_event(new_event);
+  new_event->id = index;
+  memcpy(&new_event->event, e, e->event_size);
 
   return HTF_EVENT_ID(index);
 }
 
 void htf_record_enter(struct htf_thread_writer* thread_writer,
-                      htf_attribute_list_t* attributeList __attribute__((unused)),
+                      struct htf_attribute_list* attribute_list __attribute__((unused)),
                       htf_timestamp_t time,
                       htf_region_ref_t region_ref) {
   if (htf_recursion_shield)
@@ -815,14 +858,14 @@ void htf_record_enter(struct htf_thread_writer* thread_writer,
   push_data(&e, &region_ref, sizeof(region_ref));
 
   htf_event_id_t e_id = _htf_get_event_id(&thread_writer->thread_trace, &e);
-  htf_store_timestamp(thread_writer, e_id, htf_timestamp(time));
-  htf_store_event(thread_writer, htf_block_start, e_id);
+
+  htf_store_event(thread_writer, htf_block_start, e_id, time, attribute_list);
 
   htf_recursion_shield--;
 }
 
 void htf_record_leave(struct htf_thread_writer* thread_writer,
-                      htf_attribute_list_t* attributeList __attribute__((unused)),
+                      struct htf_attribute_list* attribute_list __attribute__((unused)),
                       htf_timestamp_t time,
                       htf_region_ref_t region_ref) {
   if (htf_recursion_shield)
@@ -835,14 +878,13 @@ void htf_record_leave(struct htf_thread_writer* thread_writer,
   push_data(&e, &region_ref, sizeof(region_ref));
 
   htf_event_id_t e_id = _htf_get_event_id(&thread_writer->thread_trace, &e);
-  htf_store_timestamp(thread_writer, e_id, htf_timestamp(time));
-  htf_store_event(thread_writer, htf_block_end, e_id);
+  htf_store_event(thread_writer, htf_block_end, e_id, time, attribute_list);
 
   htf_recursion_shield--;
 }
 
 void htf_record_thread_begin(struct htf_thread_writer* thread_writer,
-                             htf_attribute_list_t* attributeList __attribute__((unused)),
+                             struct htf_attribute_list* attribute_list __attribute__((unused)),
                              htf_timestamp_t time) {
   if (htf_recursion_shield)
     return;
@@ -852,14 +894,13 @@ void htf_record_thread_begin(struct htf_thread_writer* thread_writer,
   init_event(&e, HTF_EVENT_THREAD_BEGIN);
 
   htf_event_id_t e_id = _htf_get_event_id(&thread_writer->thread_trace, &e);
-  htf_store_timestamp(thread_writer, e_id, htf_timestamp(time));
-  htf_store_event(thread_writer, htf_block_start, e_id);
+  htf_store_event(thread_writer, htf_block_start, e_id, time, attribute_list);
 
   htf_recursion_shield--;
 }
 
 void htf_record_thread_end(struct htf_thread_writer* thread_writer,
-                           htf_attribute_list_t* attributeList __attribute__((unused)),
+                           struct htf_attribute_list* attribute_list __attribute__((unused)),
                            htf_timestamp_t time) {
   if (htf_recursion_shield)
     return;
@@ -868,14 +909,13 @@ void htf_record_thread_end(struct htf_thread_writer* thread_writer,
   struct htf_event e;
   init_event(&e, HTF_EVENT_THREAD_END);
   htf_event_id_t e_id = _htf_get_event_id(&thread_writer->thread_trace, &e);
-  htf_store_timestamp(thread_writer, e_id, htf_timestamp(time));
-  htf_store_event(thread_writer, htf_block_end, e_id);
+  htf_store_event(thread_writer, htf_block_end, e_id, time, attribute_list);
 
   htf_recursion_shield--;
 }
 
 void htf_record_thread_team_begin(struct htf_thread_writer* thread_writer,
-                                  htf_attribute_list_t* attributeList __attribute__((unused)),
+                                  struct htf_attribute_list* attribute_list __attribute__((unused)),
                                   htf_timestamp_t time) {
   if (htf_recursion_shield)
     return;
@@ -884,14 +924,13 @@ void htf_record_thread_team_begin(struct htf_thread_writer* thread_writer,
   struct htf_event e;
   init_event(&e, HTF_EVENT_THREAD_TEAM_BEGIN);
   htf_event_id_t e_id = _htf_get_event_id(&thread_writer->thread_trace, &e);
-  htf_store_timestamp(thread_writer, e_id, htf_timestamp(time));
-  htf_store_event(thread_writer, htf_block_start, e_id);
+  htf_store_event(thread_writer, htf_block_start, e_id, time, attribute_list);
 
   htf_recursion_shield--;
 }
 
 void htf_record_thread_team_end(struct htf_thread_writer* thread_writer,
-                                htf_attribute_list_t* attributeList __attribute__((unused)),
+                                struct htf_attribute_list* attribute_list __attribute__((unused)),
                                 htf_timestamp_t time) {
   if (htf_recursion_shield)
     return;
@@ -900,14 +939,13 @@ void htf_record_thread_team_end(struct htf_thread_writer* thread_writer,
   struct htf_event e;
   init_event(&e, HTF_EVENT_THREAD_TEAM_END);
   htf_event_id_t e_id = _htf_get_event_id(&thread_writer->thread_trace, &e);
-  htf_store_timestamp(thread_writer, e_id, htf_timestamp(time));
-  htf_store_event(thread_writer, htf_block_end, e_id);
+  htf_store_event(thread_writer, htf_block_end, e_id, time, attribute_list);
 
   htf_recursion_shield--;
 }
 
 void htf_record_mpi_send(struct htf_thread_writer* thread_writer,
-                         htf_attribute_list_t* attributeList __attribute__((unused)),
+                         struct htf_attribute_list* attribute_list __attribute__((unused)),
                          htf_timestamp_t time,
                          uint32_t receiver,
                          uint32_t communicator,
@@ -926,15 +964,14 @@ void htf_record_mpi_send(struct htf_thread_writer* thread_writer,
   push_data(&e, &msgLength, sizeof(msgLength));
 
   htf_event_id_t e_id = _htf_get_event_id(&thread_writer->thread_trace, &e);
-  htf_store_timestamp(thread_writer, e_id, htf_timestamp(time));
-  htf_store_event(thread_writer, htf_singleton, e_id);
+  htf_store_event(thread_writer, htf_singleton, e_id, time, attribute_list);
 
   htf_recursion_shield--;
   return;
 }
 
 void htf_record_mpi_isend(struct htf_thread_writer* thread_writer,
-                          htf_attribute_list_t* attribute_list __attribute__((unused)),
+                          struct htf_attribute_list* attribute_list __attribute__((unused)),
                           htf_timestamp_t time,
                           uint32_t receiver,
                           uint32_t communicator,
@@ -955,15 +992,14 @@ void htf_record_mpi_isend(struct htf_thread_writer* thread_writer,
   push_data(&e, &requestID, sizeof(requestID));
 
   htf_event_id_t e_id = _htf_get_event_id(&thread_writer->thread_trace, &e);
-  htf_store_timestamp(thread_writer, e_id, htf_timestamp(time));
-  htf_store_event(thread_writer, htf_singleton, e_id);
+  htf_store_event(thread_writer, htf_singleton, e_id, time, attribute_list);
 
   htf_recursion_shield--;
   return;
 }
 
 void htf_record_mpi_isend_complete(struct htf_thread_writer* thread_writer,
-                                   htf_attribute_list_t* attribute_list __attribute__((unused)),
+                                   struct htf_attribute_list* attribute_list __attribute__((unused)),
                                    htf_timestamp_t time,
                                    uint64_t requestID) {
   if (htf_recursion_shield)
@@ -976,15 +1012,14 @@ void htf_record_mpi_isend_complete(struct htf_thread_writer* thread_writer,
   push_data(&e, &requestID, sizeof(requestID));
 
   htf_event_id_t e_id = _htf_get_event_id(&thread_writer->thread_trace, &e);
-  htf_store_timestamp(thread_writer, e_id, htf_timestamp(time));
-  htf_store_event(thread_writer, htf_singleton, e_id);
+  htf_store_event(thread_writer, htf_singleton, e_id, time, attribute_list);
 
   htf_recursion_shield--;
   return;
 }
 
 void htf_record_mpi_irecv_request(struct htf_thread_writer* thread_writer,
-                                  htf_attribute_list_t* attribute_list __attribute__((unused)),
+                                  struct htf_attribute_list* attribute_list __attribute__((unused)),
                                   htf_timestamp_t time,
                                   uint64_t requestID) {
   if (htf_recursion_shield)
@@ -997,15 +1032,14 @@ void htf_record_mpi_irecv_request(struct htf_thread_writer* thread_writer,
   push_data(&e, &requestID, sizeof(requestID));
 
   htf_event_id_t e_id = _htf_get_event_id(&thread_writer->thread_trace, &e);
-  htf_store_timestamp(thread_writer, e_id, htf_timestamp(time));
-  htf_store_event(thread_writer, htf_singleton, e_id);
+  htf_store_event(thread_writer, htf_singleton, e_id, time, attribute_list);
 
   htf_recursion_shield--;
   return;
 }
 
 void htf_record_mpi_recv(struct htf_thread_writer* thread_writer,
-                         htf_attribute_list_t* attributeList __attribute__((unused)),
+                         struct htf_attribute_list* attribute_list __attribute__((unused)),
                          htf_timestamp_t time,
                          uint32_t sender,
                          uint32_t communicator,
@@ -1024,15 +1058,14 @@ void htf_record_mpi_recv(struct htf_thread_writer* thread_writer,
   push_data(&e, &msgLength, sizeof(msgLength));
 
   htf_event_id_t e_id = _htf_get_event_id(&thread_writer->thread_trace, &e);
-  htf_store_timestamp(thread_writer, e_id, htf_timestamp(time));
-  htf_store_event(thread_writer, htf_singleton, e_id);
+  htf_store_event(thread_writer, htf_singleton, e_id, time, attribute_list);
 
   htf_recursion_shield--;
   return;
 }
 
 void htf_record_mpi_irecv(struct htf_thread_writer* thread_writer,
-                          htf_attribute_list_t* attribute_list __attribute__((unused)),
+                          struct htf_attribute_list* attribute_list __attribute__((unused)),
                           htf_timestamp_t time,
                           uint32_t sender,
                           uint32_t communicator,
@@ -1053,15 +1086,14 @@ void htf_record_mpi_irecv(struct htf_thread_writer* thread_writer,
   push_data(&e, &requestID, sizeof(requestID));
 
   htf_event_id_t e_id = _htf_get_event_id(&thread_writer->thread_trace, &e);
-  htf_store_timestamp(thread_writer, e_id, htf_timestamp(time));
-  htf_store_event(thread_writer, htf_singleton, e_id);
+  htf_store_event(thread_writer, htf_singleton, e_id, time, attribute_list);
 
   htf_recursion_shield--;
   return;
 }
 
 void htf_record_mpi_collective_begin(struct htf_thread_writer* thread_writer,
-                                     htf_attribute_list_t* attribute_list __attribute__((unused)),
+                                     struct htf_attribute_list* attribute_list __attribute__((unused)),
                                      htf_timestamp_t time) {
   if (htf_recursion_shield)
     return;
@@ -1071,15 +1103,14 @@ void htf_record_mpi_collective_begin(struct htf_thread_writer* thread_writer,
   init_event(&e, HTF_EVENT_MPI_COLLECTIVE_BEGIN);
 
   htf_event_id_t e_id = _htf_get_event_id(&thread_writer->thread_trace, &e);
-  htf_store_timestamp(thread_writer, e_id, htf_timestamp(time));
-  htf_store_event(thread_writer, htf_singleton, e_id);
+  htf_store_event(thread_writer, htf_singleton, e_id, time, attribute_list);
 
   htf_recursion_shield--;
   return;
 }
 
 void htf_record_mpi_collective_end(struct htf_thread_writer* thread_writer,
-                                   htf_attribute_list_t* attribute_list __attribute__((unused)),
+                                   struct htf_attribute_list* attribute_list __attribute__((unused)),
                                    htf_timestamp_t time,
                                    uint32_t collectiveOp,
                                    uint32_t communicator,
@@ -1100,8 +1131,7 @@ void htf_record_mpi_collective_end(struct htf_thread_writer* thread_writer,
   push_data(&e, &sizeReceived, sizeof(sizeReceived));
 
   htf_event_id_t e_id = _htf_get_event_id(&thread_writer->thread_trace, &e);
-  htf_store_timestamp(thread_writer, e_id, htf_timestamp(time));
-  htf_store_event(thread_writer, htf_singleton, e_id);
+  htf_store_event(thread_writer, htf_singleton, e_id, time, attribute_list);
 
   htf_recursion_shield--;
 }

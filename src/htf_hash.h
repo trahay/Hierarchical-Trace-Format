@@ -6,7 +6,7 @@
 #include "htf.h"
 #ifndef HTF_HASH_H
 #define HTF_HASH_H
-#define SEED 0
+#define SEED 17
 void htf_hash_32(const void* key, const int len, const uint32_t seed, uint32_t* out);
 void htf_hash_64(const void* key, const int len, const uint32_t seed, uint64_t* out);
 #endif  // HTF_HASH_H

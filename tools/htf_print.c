@@ -62,6 +62,7 @@ static void print_event(const char* current_indent,
     printf("\t");
   }
   htf_print_event(thread, &e->event);
+  htf_print_event_attributes(thread, e);
   printf("\n");
 }
 
@@ -140,7 +141,7 @@ static void print_token(struct htf_thread* thread,
                         int last_one,
                         struct htf_loop_occurence* containing_loop) {
   htf_log(htf_dbg_lvl_verbose, "Reading token(%x.%x) for thread %s\n", t->type, t->id, htf_get_thread_name(thread));
-
+  if(depth < 1) depth = 1;
   // Prints the structure of the sequences and the loops
   char current_indent[MAX_CALLSTACK_DEPTH];
   current_indent[0]='\0';

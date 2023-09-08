@@ -113,6 +113,62 @@ static void print_callstack(struct htf_thread_reader* reader) {
   }
 }
 
+static struct htf_event_summary* _htf_get_event_summary(struct htf_thread_reader* reader, int event_id) {
+  if(event_id < reader->thread_trace->nb_events)
+    return &reader->thread_trace->events[event_id];
+  return NULL;
+}
+
+static htf_timestamp_t _htf_get_event_timestamp(struct htf_thread_reader* reader, int event_id, int occurrence_id) {
+  struct htf_event_summary* es = _htf_get_event_summary(reader, event_id);
+  if(es)
+    return *(htf_timestamp_t*) htf_vector_get(&es->durations, occurrence_id);
+  return HTF_TIMESTAMP_INVALID;
+}
+
+/* return 1 if an attribute was copied, or 0 otherwise */
+static struct htf_attribute_list * _htf_get_event_attribute_list(struct htf_thread_reader* reader,
+								 int event_id,
+								 int occurrence_id) {
+  struct htf_event_summary* es = _htf_get_event_summary(reader, event_id);
+  if(es == NULL) return 0;
+  if(es->attribute_buffer == NULL) return 0;
+
+  htf_assert(occurrence_id < es->nb_occurrences);
+
+  if(es->attribute_pos < es->attribute_buffer_size) {
+    struct htf_attribute_list* l = (struct htf_attribute_list*) &es->attribute_buffer[es->attribute_pos];
+
+    while( l->index < occurrence_id) {	/* move to the next attribute until we reach the needed index */
+      es->attribute_pos += l->struct_size;
+      l = (struct htf_attribute_list*) &es->attribute_buffer[es->attribute_pos];
+    }
+    /* TODO: what if l->index > occurrence_id ? */
+    if(l->index == occurrence_id) {
+      return l;
+    }
+    if(l->index > occurrence_id) {
+      htf_error("Erro fetching attribute %d. We went too far (cur position: %d) !\n", occurrence_id, l->index);
+    }
+    
+  }
+  return NULL;
+}
+
+int _htf_copy_event_occurence(struct htf_thread_reader* reader, int event_id, int occurrence_id, struct htf_event_occurence* eo) {
+
+  struct htf_event_summary* es = _htf_get_event_summary(reader, event_id);
+  if(es == NULL) return 0;
+  
+  memcpy(&eo->event, &es->event, sizeof(es->event));
+  if ((reader->options & OPTION_NO_TIMESTAMPS) == 0) {
+    eo->duration = *(htf_timestamp_t*) htf_vector_get(&es->durations, occurrence_id);
+  }
+  eo->attributes = _htf_get_event_attribute_list(reader, event_id, occurrence_id);
+
+  return 1;
+}
+
 /* enter a block (push a new frame in the callstack) */
 void enter_block(struct htf_thread_reader* reader, htf_token_t new_block) {
   htf_assert(HTF_TOKEN_TYPE(new_block) == HTF_TYPE_SEQUENCE || HTF_TOKEN_TYPE(new_block) == HTF_TYPE_LOOP);
@@ -304,6 +360,15 @@ int htf_read_thread_cur_level(struct htf_thread_reader* reader,
     case HTF_TYPE_EVENT: {
       // Get the info
       struct htf_event_occurence* occurence = &(*occurence_array)[i].event_occurence;
+
+#if 1
+      _htf_copy_event_occurence(reader, token.id, reader->event_index[token.id], occurence);
+      if ((reader->options & OPTION_NO_TIMESTAMPS) == 0) {
+        occurence->timestamp = reader->referential_timestamp;
+        // Update the reader
+        reader->referential_timestamp += occurence->duration;
+      }
+#else
       struct htf_event_summary* es = &reader->thread_trace->events[token.id];
 
       // Write it to the occurence
@@ -314,7 +379,7 @@ int htf_read_thread_cur_level(struct htf_thread_reader* reader,
         // Update the reader
         reader->referential_timestamp += occurence->duration;
       }
-
+#endif
       reader->event_index[token.id]++;
       break;
     }
@@ -359,6 +424,7 @@ int htf_read_thread_cur_level(struct htf_thread_reader* reader,
   return 0;
 }
 
+
 int htf_read_thread_cur_token(struct htf_thread_reader* reader, struct htf_token* token, htf_occurence* e) {
   if (reader->current_frame < 0) {
     return -1; /* TODO: return EOF */
@@ -370,14 +436,21 @@ int htf_read_thread_cur_token(struct htf_thread_reader* reader, struct htf_token
   int index = t.id;
   switch (t.type) {
   case HTF_TYPE_EVENT: {
+#if 1
+    if(e) {
+      _htf_copy_event_occurence(reader, index, reader->event_index[index], &e->event_occurence);
+    }
+#else
     struct htf_event_summary* es = &reader->thread_trace->events[index];
     if (e) {
       memcpy(&e->event_occurence.event, &es->event, sizeof(e->event_occurence.event));
+      
       if ((reader->options & OPTION_NO_TIMESTAMPS) == 0) {
         e->event_occurence.timestamp = reader->referential_timestamp;
         e->event_occurence.duration = *(htf_timestamp_t*)htf_vector_get(&es->durations, reader->event_index[index]);
       }
     }
+#endif
     break;
   }
   case HTF_TYPE_SEQUENCE: {

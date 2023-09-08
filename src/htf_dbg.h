@@ -8,6 +8,8 @@
 
 #include <pthread.h>
 #include <stdio.h>
+#include <stdlib.h>
+
 enum htf_debug_level {
   htf_dbg_lvl_error,    // only print errors
   htf_dbg_lvl_quiet,    // only print important messages

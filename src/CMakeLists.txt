@@ -10,6 +10,7 @@ add_library(htf SHARED)
 
 set(HTF_HEADERS
         htf.h
+        htf_attribute.h
         htf_read.h
         htf_write.h
         htf_archive.h
@@ -23,6 +24,7 @@ set(HTF_HEADERS
 target_sources(
         htf
         PRIVATE
+        htf_attribute.c
         htf_read.c
         htf_write.c
         htf_archive.c

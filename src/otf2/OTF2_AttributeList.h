@@ -94,7 +94,8 @@ extern "C" {
 #endif /* __cplusplus */
 
 /** @brief Attribute list handle. */
-typedef struct OTF2_AttributeList_struct OTF2_AttributeList;
+//typedef struct OTF2_AttributeList_struct OTF2_AttributeList;
+  typedef struct htf_attribute_list OTF2_AttributeList;
 
 /** @brief Create a new attribute list handle.
  *

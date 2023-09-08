@@ -8,6 +8,7 @@
 
 #include "htf.h"
 #include "htf_timestamp.h"
+#include "htf_attribute.h"
 
 enum thread_reader_option {
   OPTION_NONE = 0,
@@ -79,11 +80,13 @@ struct htf_savestate {
    * Use this to grab the timestamps and other information on the sequence. */
   int* loop_index;
 };
+
 /** Only used when reading a trace, links an event with a timestamp. */
 struct htf_event_occurence {
   struct htf_event event;
   htf_timestamp_t timestamp;
   htf_timestamp_t duration;
+  struct htf_attribute_list *attributes;
 };
 
 struct htf_sequence_occurence {

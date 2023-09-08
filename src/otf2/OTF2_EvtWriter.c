@@ -46,7 +46,7 @@ OTF2_ErrorCode OTF2_EvtWriter_Enter(OTF2_EvtWriter* writer,
   htf_log(htf_dbg_lvl_debug, "enter(%p {.locationRef=%lu, .writer=%p}, %d)\n", writer, writer->locationRef,
           writer->thread_writer, region);
   htf_record_enter(writer->thread_writer,
-                   NULL,  // TO_BE_IMPLEMENTED
+                   attributeList,
                    time, region);
 
   return OTF2_SUCCESS;
@@ -59,7 +59,7 @@ OTF2_ErrorCode OTF2_EvtWriter_Leave(OTF2_EvtWriter* writer,
   htf_log(htf_dbg_lvl_debug, "leave(%p {.locationRef=%lu, .writer=%p}, %d)\n", writer, writer->locationRef,
           writer->thread_writer, region);
   htf_record_leave(writer->thread_writer,
-                   NULL,  // TO_BE_IMPLEMENTED
+                   attributeList,
                    time, region);
   return OTF2_SUCCESS;
 }
@@ -71,7 +71,7 @@ OTF2_ErrorCode OTF2_EvtWriter_MpiSend(OTF2_EvtWriter* writer,
                                       OTF2_CommRef communicator,
                                       uint32_t msgTag,
                                       uint64_t msgLength) {
-  htf_record_mpi_send(writer->thread_writer, NULL, time, receiver, communicator, msgTag, msgLength);
+  htf_record_mpi_send(writer->thread_writer, attributeList, time, receiver, communicator, msgTag, msgLength);
 
   return OTF2_SUCCESS;
 }
@@ -84,7 +84,7 @@ OTF2_ErrorCode OTF2_EvtWriter_MpiIsend(OTF2_EvtWriter* writer,
                                        uint32_t msgTag,
                                        uint64_t msgLength,
                                        uint64_t requestID) {
-  htf_record_mpi_isend(writer->thread_writer, NULL, time, receiver, communicator, msgTag, msgLength, requestID);
+  htf_record_mpi_isend(writer->thread_writer, attributeList, time, receiver, communicator, msgTag, msgLength, requestID);
   return OTF2_SUCCESS;
 }
 
@@ -92,7 +92,7 @@ OTF2_ErrorCode OTF2_EvtWriter_MpiIsendComplete(OTF2_EvtWriter* writer,
                                                OTF2_AttributeList* attributeList,
                                                OTF2_TimeStamp time,
                                                uint64_t requestID) {
-  htf_record_mpi_isend_complete(writer->thread_writer, NULL, time, requestID);
+  htf_record_mpi_isend_complete(writer->thread_writer, attributeList, time, requestID);
 
   return OTF2_SUCCESS;
 }
@@ -101,7 +101,7 @@ OTF2_ErrorCode OTF2_EvtWriter_MpiIrecvRequest(OTF2_EvtWriter* writer,
                                               OTF2_AttributeList* attributeList,
                                               OTF2_TimeStamp time,
                                               uint64_t requestID) {
-  htf_record_mpi_irecv_request(writer->thread_writer, NULL, time, requestID);
+  htf_record_mpi_irecv_request(writer->thread_writer, attributeList, time, requestID);
   return OTF2_SUCCESS;
 }
 
@@ -113,7 +113,7 @@ OTF2_ErrorCode OTF2_EvtWriter_MpiRecv(OTF2_EvtWriter* writer,
                                       uint32_t msgTag,
                                       uint64_t msgLength) {
   htf_record_mpi_recv(writer->thread_writer,
-                      NULL,  // TO_BE_IMPLEMENTED
+                      attributeList,
                       time, sender, communicator, msgTag, msgLength);
 
   return OTF2_SUCCESS;
@@ -126,7 +126,7 @@ OTF2_ErrorCode OTF2_EvtWriter_MpiIrecv(OTF2_EvtWriter* writer,
                                        uint32_t msgTag,
                                        uint64_t msgLength,
                                        uint64_t requestID) {
-  htf_record_mpi_irecv(writer->thread_writer, NULL, time, sender, communicator, msgTag, msgLength, requestID);
+  htf_record_mpi_irecv(writer->thread_writer, attributeList, time, sender, communicator, msgTag, msgLength, requestID);
 
   return OTF2_SUCCESS;
 }
@@ -148,7 +148,7 @@ OTF2_ErrorCode OTF2_EvtWriter_MpiRequestCancelled(OTF2_EvtWriter* writer,
 OTF2_ErrorCode OTF2_EvtWriter_MpiCollectiveBegin(OTF2_EvtWriter* writer,
                                                  OTF2_AttributeList* attributeList,
                                                  OTF2_TimeStamp time) {
-  htf_record_mpi_collective_begin(writer->thread_writer, NULL, time);
+  htf_record_mpi_collective_begin(writer->thread_writer, attributeList, time);
   return OTF2_SUCCESS;
 }
 
@@ -160,7 +160,7 @@ OTF2_ErrorCode OTF2_EvtWriter_MpiCollectiveEnd(OTF2_EvtWriter* writer,
                                                uint32_t root,
                                                uint64_t sizeSent,
                                                uint64_t sizeReceived) {
-  htf_record_mpi_collective_end(writer->thread_writer, NULL, time, collectiveOp, communicator, root, sizeSent,
+  htf_record_mpi_collective_end(writer->thread_writer, attributeList, time, collectiveOp, communicator, root, sizeSent,
                                 sizeReceived);
 
   return OTF2_SUCCESS;
@@ -427,7 +427,7 @@ OTF2_ErrorCode OTF2_EvtWriter_ThreadTeamBegin(OTF2_EvtWriter* writer,
                                               OTF2_AttributeList* attributeList,
                                               OTF2_TimeStamp time,
                                               OTF2_CommRef threadTeam) {
-  htf_record_thread_team_begin(writer->thread_writer, NULL, time);
+  htf_record_thread_team_begin(writer->thread_writer, attributeList, time);
   return OTF2_SUCCESS;
 }
 
@@ -435,7 +435,7 @@ OTF2_ErrorCode OTF2_EvtWriter_ThreadTeamEnd(OTF2_EvtWriter* writer,
                                             OTF2_AttributeList* attributeList,
                                             OTF2_TimeStamp time,
                                             OTF2_CommRef threadTeam) {
-  htf_record_thread_team_end(writer->thread_writer, NULL, time);
+  htf_record_thread_team_end(writer->thread_writer, attributeList, time);
   return OTF2_SUCCESS;
 }
 
@@ -497,7 +497,7 @@ OTF2_ErrorCode OTF2_EvtWriter_ThreadBegin(OTF2_EvtWriter* writer,
                                           OTF2_TimeStamp time,
                                           OTF2_CommRef threadContingent,
                                           uint64_t sequenceCount) {
-  htf_record_thread_begin(writer->thread_writer, NULL, time);
+  htf_record_thread_begin(writer->thread_writer, attributeList, time);
 
   return OTF2_SUCCESS;
 }
@@ -515,7 +515,7 @@ OTF2_ErrorCode OTF2_EvtWriter_ThreadEnd(OTF2_EvtWriter* writer,
                                         OTF2_TimeStamp time,
                                         OTF2_CommRef threadContingent,
                                         uint64_t sequenceCount) {
-  htf_record_thread_end(writer->thread_writer, NULL, time);
+  htf_record_thread_end(writer->thread_writer, attributeList, time);
   return OTF2_SUCCESS;
 }
 

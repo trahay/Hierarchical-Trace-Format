@@ -86,20 +86,20 @@ void info_archive(struct htf_archive* archive) {
   for (int i = 0; i < archive->definitions.nb_regions; i++) {
     printf("\t\t%x: %x ('%s')\n", archive->definitions.regions[i].region_ref,
            archive->definitions.regions[i].string_ref,
-           htf_archive_get_string(archive, archive->definitions.regions[i].string_ref)->str);
+           htf_archive_get_string_str(archive, archive->definitions.regions[i].string_ref));
   }
 
   printf("\tLocation_groups {.nb_lg: %d, .nb_allocated_lg: %d}:\n", archive->nb_location_groups,
          archive->nb_allocated_location_groups);
   for (int i = 0; i < archive->nb_location_groups; i++) {
     printf("\t\t%x: %x ('%s'), parent: %x\n", archive->location_groups[i].id, archive->location_groups[i].name,
-           htf_archive_get_string(archive, archive->location_groups[i].name)->str, archive->location_groups[i].parent);
+	   htf_archive_get_string_str(archive, archive->location_groups[i].name), archive->location_groups[i].parent);
   }
 
   printf("\tLocations {.nb_loc: %d, .nb_allocated_loc: %d}:\n", archive->nb_locations, archive->nb_allocated_locations);
   for (int i = 0; i < archive->nb_locations; i++) {
     printf("\t\t%x: %x ('%s'), parent: %x\n", archive->locations[i].id, archive->locations[i].name,
-           htf_archive_get_string(archive, archive->locations[i].name)->str, archive->locations[i].parent);
+           htf_archive_get_string_str(archive, archive->locations[i].name), archive->locations[i].parent);
   }
 
   printf("\tThreads {.nb_threads: %d, .nb_allocated_threads: %d}:\n", archive->nb_threads,
