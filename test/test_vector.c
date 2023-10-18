@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include "htf.h"
 #include "htf_dbg.h"
-#include "htf_vector.h"
+#include "htf_vector.hpp"
 
 int main(int argc, char** argv) {
   if (argc < 2) {

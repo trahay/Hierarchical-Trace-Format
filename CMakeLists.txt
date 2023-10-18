@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.13.0)
 
 project(HTF
   VERSION 0.1.0
-  LANGUAGES C
+        LANGUAGES CXX C
 )
 
 # include CMake modules
@@ -58,12 +58,12 @@ set(INSTALL_LIBDIR "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
 set(INSTALL_PKGCONFIG_DIR "${INSTALL_LIBDIR}/pkgconfig")
 
 # Subdirectory
-add_subdirectory (src)
+add_subdirectory(libraries/htf)
 if(ENABLE_OTF2)
-add_subdirectory (src/otf2)
+    add_subdirectory(libraries/otf2)
 endif()
-add_subdirectory (tracer)
-add_subdirectory (tools)
+#add_subdirectory (tracer)
+add_subdirectory(apps)
 add_subdirectory (test)
 # if (ENABLE_MPI)
   # add_subdirectory (test/mpi)

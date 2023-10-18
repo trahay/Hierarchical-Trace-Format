@@ -6,13 +6,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "htf.h"
-#include "htf_archive.h"
-#include "htf_write.h"
+#include "htf/htf.h"
+#include "htf/htf_archive.h"
+#include "htf/htf_write.h"
 
-static struct htf_archive global_archive;
-static struct htf_archive trace;
-static htf_location_group_id_t process_id;
+static struct htf_archive* global_archive;
+static struct htf_archive* trace;
+static htf_location_group_id process_id;
 static htf_string_ref_t process_name;
 
 static int nb_iter_default = 100000;
@@ -38,19 +38,19 @@ static htf_string_ref_t _register_string(char* str) {
   static htf_string_ref_t next_ref = 0;
   htf_string_ref_t ref = next_ref++;
 
-  htf_archive_register_string(&global_archive, ref, str);
+  htf_archive_register_string(global_archive, ref, str);
   return ref;
 }
 
-static htf_location_group_id_t _new_location_group() {
-  static _Atomic htf_location_group_id_t next_id = 0;
-  htf_location_group_id_t id = next_id++;
+static htf_location_group_id _new_location_group() {
+  static _Atomic htf_location_group_id next_id = 0;
+  htf_location_group_id id = next_id++;
   return id;
 }
 
-static htf_thread_id_t _new_thread() {
-  static _Atomic htf_thread_id_t next_id = 0;
-  htf_thread_id_t id = next_id++;
+static htf_thread_id _new_thread() {
+  static _Atomic htf_thread_id next_id = 0;
+  htf_thread_id id = next_id++;
   return id;
 }
 
@@ -64,10 +64,10 @@ void* worker(void* arg __attribute__((unused))) {
   snprintf(thread_name, 20, "thread_%d", my_rank);
   htf_string_ref_t thread_name_id = _register_string(thread_name);
 
-  htf_thread_id_t thread_id = _new_thread();
-  htf_write_define_location(&global_archive, thread_id, thread_name_id, process_id);
+  htf_thread_id thread_id = _new_thread();
+  htf_write_define_location(global_archive, thread_id, thread_name_id, process_id);
 
-  htf_write_thread_open(&trace, thread_writer, thread_id);
+  htf_write_thread_open(trace, thread_writer, thread_id);
 
   struct timespec t1, t2;
   pthread_barrier_wait(&bench_start);
@@ -169,14 +169,15 @@ int main(int argc, char** argv) {
   printf("pattern = %d\n", pattern);
   printf("---------------------\n");
 
-  htf_write_global_archive_open(&global_archive, "write_benchmark_trace", "main");
-
-  htf_write_archive_open(&trace, "write_benchmark_trace", "main", 0);
+  global_archive = htf_archive_new();
+  trace = htf_archive_new();
+  htf_write_global_archive_open(global_archive, "write_benchmark_trace", "main");
+  htf_write_archive_open(trace, "write_benchmark_trace", "main", 0);
 
   process_id = _new_location_group();
   process_name = _register_string("Process"),
 
-  htf_write_define_location_group(&global_archive, process_id, process_name, HTF_LOCATION_GROUP_ID_INVALID);
+  htf_write_define_location_group(global_archive, process_id, process_name, HTF_LOCATION_GROUP_ID_INVALID);
 
   regions = malloc(sizeof(htf_region_ref_t) * nb_functions);
   strings = malloc(sizeof(htf_string_ref_t) * nb_functions);
@@ -185,7 +186,7 @@ int main(int argc, char** argv) {
     snprintf(str, 50, "function_%d", i);
     strings[i] = _register_string(str);
     regions[i] = strings[i];
-    htf_archive_register_region(&trace, regions[i], strings[i]);
+    htf_archive_register_region(trace, regions[i], strings[i]);
   }
 
   for (int i = 0; i < nb_threads; i++)
@@ -208,8 +209,8 @@ int main(int argc, char** argv) {
 
   printf("TOTAL: %d events in %lf s -> %lf Me/s \n", nb_events, duration, events_per_second / 1e6);
 
-  htf_write_archive_close(&trace);
-  htf_write_global_archive_close(&global_archive);
+  htf_write_archive_close(trace);
+  htf_write_global_archive_close(global_archive);
   return EXIT_SUCCESS;
 }
 

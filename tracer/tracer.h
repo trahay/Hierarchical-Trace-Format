@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "htf.h"
+#include "htf/htf.h"
 
 #ifdef DEBUG
 #define DEBUG_PRINTF(...) printf(__VA_ARGS__)

@@ -7,9 +7,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "htf.h"
-#include "htf_archive.h"
-#include "htf_write.h"
+#include "htf/htf.h"
+#include "htf/htf_archive.h"
+#include "htf/htf_write.h"
 #include "tracer.h"
 
 static struct htf_archive trace;
