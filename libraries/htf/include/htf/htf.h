@@ -11,6 +11,7 @@
 
 #ifdef __cplusplus
 #include <cstring>
+#include <map>
 #else
 #include <string.h>
 #endif
@@ -88,7 +89,8 @@ typedef struct TokenName {
   }
 
  public:
-  bool operator==(const Token other) const { return (other.type == type && other.id == id); }
+  bool operator==(const Token& other) const { return (other.type == type && other.id == id); }
+  bool operator<(const Token& other) const { return (type < other.type || id < other.id); }
   /* Returns if the Token is a Sequence or a Loop*/
   inline bool isIterable() const { return type == HTF_TYPE_SEQUENCE || type == HTF_TYPE_LOOP; }
 #endif
@@ -192,7 +194,26 @@ typedef struct EventName {
 } __attribute__((packed)) EventName;
 
 /*************************** Sequences **********************/
-
+#ifdef __cplusplus
+struct TokenCountMap : public std::map<Token, size_t> {
+  void operator+=(const TokenCountMap& other) {
+    for (auto keyValue : other) {
+      if (this->count(keyValue.first) == 0) {
+        this->insert(keyValue);
+      } else {
+        this->at(keyValue.first) += keyValue.second;
+      }
+    }
+  }
+  TokenCountMap operator*(size_t multiplier) const {
+    auto otherMap = TokenCountMap();
+    for (auto keyValue : otherMap) {
+      otherMap[keyValue.first] = keyValue.second * multiplier;
+    }
+    return otherMap;
+  }
+};
+#endif
 /**
  * Structure to store a sequence in HTF format
  *  - LinkedVector* durations: array of durations for these types of sequences. (see htf_timestamp.h)
@@ -205,8 +226,11 @@ typedef struct SequenceName {
   uint32_t hash CXX({0});
 #ifdef __cplusplus
   std::vector<Token> tokens;
+  TokenCountMap tokenCount;
   [[nodiscard]] size_t size() const { return tokens.size(); }
+  const TokenCountMap& getTokenCount(const struct Thread* thread);
 
+ private:
 #endif
 } SequenceName;
 
@@ -337,6 +361,7 @@ typedef struct ThreadName {
 #ifdef __cplusplus
   TokenId getEventId(Event* e);
   [[nodiscard]] Event* getEvent(Token) const;
+  [[nodiscard]] EventSummary* getEventSummary(Token) const;
   [[nodiscard]] Sequence* getSequence(Token) const;
   [[nodiscard]] Loop* getLoop(Token) const;
   /* Returns the n-th token in the given Sequence/Loop. */
@@ -367,9 +392,8 @@ typedef struct ThreadName {
    * TODO Speed this up using hashmap
    */
   Token getSequenceIdFromArray(Token* token_array, size_t array_len);
-  /* Returns the duration for the given array.
-   * TODO Implement this. */
-  htf_timestamp_t getSequenceDuration(Token* array, size_t size) { return 0; };
+  /* Returns the duration for the given array. */
+  htf_timestamp_t getSequenceDuration(Token* array, size_t size);
   void finalizeThread();
   /* Create a new Thread from an archive and an id. This is used when writing the trace. */
   Thread(Archive* a, ThreadId id);

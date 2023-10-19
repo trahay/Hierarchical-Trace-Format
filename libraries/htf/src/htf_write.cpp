@@ -621,6 +621,43 @@ TokenId Thread::getEventId(htf::Event* e) {
 
   return index;
 }
+htf_timestamp_t Thread::getSequenceDuration(Token* array, size_t size) {
+  htf_timestamp_t sum = 0;
+  auto tokenCount = TokenCountMap();
+  for (size_t i = 0; i < size; i++) {
+    auto& token = array[i];
+    tokenCount[token]++;
+    switch (token.type) {
+    case HTF_TYPE_INVALID: {
+      htf_error("Error parsing the given array, a Token was invalid\n");
+      break;
+    }
+    case HTF_TYPE_EVENT: {
+      auto summary = getEventSummary(token);
+      sum += summary->durations->at(summary->durations->size - tokenCount[token]);
+      break;
+    }
+    case HTF_TYPE_SEQUENCE: {
+      auto sequence = getSequence(token);
+      sum += sequence->durations->at(sequence->durations->size - tokenCount[token]);
+      tokenCount += sequence->getTokenCount(this);
+      break;
+    }
+    case HTF_TYPE_LOOP: {
+      auto loop = getLoop(token);
+      auto nb_iterations = loop->nb_iterations[loop->nb_iterations.size() - tokenCount[token]];
+      auto sequence = getSequence(loop->repeated_token);
+      for (size_t j = 0; j < nb_iterations; j++) {
+        tokenCount[loop->repeated_token]++;
+        sum += sequence->durations->at(sequence->durations->size - tokenCount[loop->repeated_token]);
+      }
+      tokenCount += sequence->getTokenCount(this) * (size_t)nb_iterations;
+      break;
+    }
+    }
+  }
+  return sum;
+}
 }  // namespace htf
 
 /* C Callbacks */

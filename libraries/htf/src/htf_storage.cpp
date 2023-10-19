@@ -269,8 +269,8 @@ void htf::LinkedVector::writeToFile(FILE* file, bool writeSize = true) const {
   auto* buffer = new uint64_t[size];
   uint cur_index = 0;
   SubVector* sub_vec = first;
-  while (sub_vec != nullptr) {
-    sub_vec->copyToArray(&buffer[cur_index]);
+  while (sub_vec) {
+    sub_vec->copyToArray(&buffer[sub_vec->starting_index]);
     cur_index += sub_vec->size;
     sub_vec = sub_vec->next;
   }

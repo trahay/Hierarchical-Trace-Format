@@ -12,10 +12,15 @@ namespace htf {
  * Aborts if the token is incorrect.
  */
 Event* Thread::getEvent(Token token) const {
+  return &getEventSummary(token)->event;
+}
+
+EventSummary* Thread::getEventSummary(Token token) const {
   htf_assert(token.type == TokenType::HTF_TYPE_EVENT);
   htf_assert(token.id < this->nb_events);
-  return &this->events[token.id].event;
+  return &this->events[token.id];
 }
+
 /**
  * Returns the Sequence corresponding to the given Token
  * Aborts if the token is incorrect.
@@ -136,6 +141,30 @@ const char* Thread::getThreadName() const {
   return archive->getString(archive->getLocation(id)->name)->str;
 }
 
+const TokenCountMap& Sequence::getTokenCount(const Thread* thread) {
+  if (tokenCount.empty()) {
+    // We need to count the tokens
+    for (auto t = tokens.rbegin(); t != tokens.rend(); ++t) {
+      tokenCount[*t]++;
+      switch (t->type) {
+      case HTF_TYPE_SEQUENCE: {
+        auto* s = thread->getSequence(*t);
+        tokenCount += s->getTokenCount(thread);
+        break;
+      }
+      case HTF_TYPE_LOOP: {
+        auto* l = thread->getLoop(*t);
+        auto loopTokenCount = thread->getSequence(l->repeated_token)->getTokenCount(thread);
+        tokenCount += loopTokenCount * l->nb_iterations[l->nb_iterations.size() - tokenCount[*t]];
+        break;
+      }
+      default:
+        break;
+      }
+    }
+  }
+  return tokenCount;
+}
 }  // namespace htf
 
 /* C bindings now */
