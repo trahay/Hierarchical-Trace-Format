@@ -25,8 +25,8 @@ struct LinkedVector {
     size_t size{0};
     size_t allocated;
     uint64_t* array;
-    SubVector* next;
-    SubVector* previous;
+    SubVector* next{nullptr};
+    SubVector* previous{nullptr};
     size_t starting_index;
 
     uint64_t& add(uint64_t element) {
@@ -44,11 +44,13 @@ struct LinkedVector {
 
     SubVector(size_t new_array_size, SubVector* previous_subvector) {
       previous = previous_subvector;
-      if (previous)
+      starting_index = 0;
+      if (previous) {
         previous->next = this;
+        starting_index = previous->starting_index + previous->size;
+      }
       allocated = new_array_size;
       array = new uint64_t[new_array_size];
-      starting_index = (previous_subvector == nullptr) ? 0 : previous_subvector->starting_index + size;
     }
 
     void copyToArray(uint64_t* given_array) const { memcpy(given_array, array, size * sizeof(uint64_t)); }
