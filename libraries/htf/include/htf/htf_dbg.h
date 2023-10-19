@@ -8,15 +8,20 @@
 #endif
 
 #ifdef __cplusplus
+/* Only exists in C++. */
 #define CXX(cxx_name) cxx_name
+/* Only exists in C. */
 #define C(c_name)
 #else
+/* Only exists in C++. */
 #define CXX(cxx_name)
+/* Only exists in C. */
 #define C(c_name) c_name
 #endif
 
 /** A macro to help naming conventions in C/C++. First argument is only kept in C, second is only kept in C++. */
 #define C_CXX(c_name, cxx_name) C(c_name) CXX(cxx_name)
+/* Adds htf:: in front of the variables in C++. */
 #define HTF(something) CXX(htf::) something
 
 #ifdef __cplusplus
