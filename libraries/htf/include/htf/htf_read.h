@@ -20,8 +20,49 @@ enum ThreadReaderOptionsName {
   C_CXX(htf_thread_reader_option_no_timestamps, NoTimestamps) = 2,
 };
 
+#define EventOccurenceName C_CXX(htf_event_occurence, EventOccurence)
+/** Only used when reading a trace, links an event with a timestamp. */
+typedef struct EventOccurenceName {
+  struct EventName* event;
+  htf_timestamp_t timestamp;
+  htf_timestamp_t duration;
+  AttributeListName* attributes;
+} EventOccurenceName;
+
+#define SequenceOccurenceName C_CXX(htf_sequence_occurence, SequenceOccurence)
+typedef struct SequenceOccurenceName {
+  struct SequenceName* sequence;
+  struct C_CXX(htf_savestate, Savestate) * savestate;
+  htf_timestamp_t timestamp;
+  htf_timestamp_t duration;
+  /**Occurences of the events in this sequence. */
+  struct TokenOccurence* full_sequence;
+} SequenceOccurenceName;
+
+#define LoopOccurenceName C_CXX(htf_loop_occurence, LoopOccurence)
+typedef struct LoopOccurenceName {
+  struct LoopName* loop;
+  unsigned int nb_iterations;
+  htf_timestamp_t timestamp;
+  htf_timestamp_t duration;
+  struct SequenceOccurenceName* full_loop;
+} LoopOccurenceName;
+
+#define OccurenceName C_CXX(htf_occurence, Occurence)
+typedef union OccurenceName {
+  struct LoopOccurenceName loop_occurence;
+  struct SequenceOccurenceName sequence_occurence;
+  struct EventOccurenceName event_occurence;
+} OccurenceName;
+
+typedef struct TokenOccurence {
+  Token* token;
+  Occurence* occurence;
+} TokenOccurence;
+
 #define ThreadReaderName C_CXX(htf_thread_reader, ThreadReader)
 typedef struct ThreadReaderName {
+ public:
   /** Archive being read by this reader. */
   struct ArchiveName* archive;
   /** Thread being read. */
@@ -42,31 +83,22 @@ typedef struct ThreadReaderName {
    * You can view this as the "depth" of the callstack. */
   int current_frame;
 
-  /** At any point, an event e has been seen event_index[e.id] times.
-   * Use this to grab the timestamps and other information on the event. */
-  int* event_index;
-  /** At any point, a sequence s has been seen sequence_index[s.id] times.
-   * Use this to grab the timestamps and other information on the sequence. */
-  int* sequence_index;
-  /** At any point, a loop l has been seen loop_index[l.id] times.
-   * Use this to grab the timestamps and other information on the sequence. */
-  int* loop_index;
+  /** At any point, a token t has been seen tokenCount[t] times. */
+  TokenCountMap tokenCount;
 
-  enum ThreadReaderOptionsName options;
+  int options;
 #ifdef __cplusplus
-  ThreadReader(Archive* archive, ThreadId threadId, ThreadReaderOptions options);
+  ThreadReader(Archive* archive, ThreadId threadId, int options);
 
  private:
   /* Returns the Sequence being run at the given frame. */
-  [[nodiscard]] Token getFrameInCallstack(int frame_number) const;
+  [[nodiscard]] const Token& getFrameInCallstack(int frame_number) const;
   /* Returns the token being run at the given frame. */
-  [[nodiscard]] Token getTokenInCallstack(int frame_number) const;
-  /* Returns the current Token. */
-  [[nodiscard]] Token getCurToken() const;
+  [[nodiscard]] const Token& getTokenInCallstack(int frame_number) const;
   /* Prints the current Token. */
   void printCurToken() const;
   /* Returns the current Sequence*/
-  [[nodiscard]] Token getCurSequence() const;
+  [[nodiscard]] const Token& getCurSequence() const;
   /* Prints the current Sequence. */
   void printCurSequence() const;
   /* Prints the whole current callstack. */
@@ -80,12 +112,18 @@ typedef struct ThreadReaderName {
   /* Returns whether the given loop still has more Tokens after the given current_index. */
   [[nodiscard]] bool isEndOfLoop(int current_index, Token loop_id) const;
   /* Returns the duration of the given Loop. */
-  htf_timestamp_t getLoopDuration(Token loop_id);
+  [[nodiscard]] htf_timestamp_t getLoopDuration(Token loop_id) const;
 
-  // TODO This is shitty.
-  void copyEventOccurence(Token event_id, int occurence_id, struct EventOccurence* event_occurence) const;
-  // TODO This is very shitty.
-  void writeSequenceOccurence(struct SequenceOccurence* sequence_occurence, Token token);
+  /** Returns an EventOccurence for the given Token appearing at the given occurence_id.
+   * Timestamp is set to Reader's referential timestamp.*/
+  [[nodiscard]] struct EventOccurence& getEventOccurence(Token event_id, int occurence_id) const;
+  /** Returns an SequenceOccurence for the given Token appearing at the given occurence_id.
+   * Timestamp is set to Reader's referential timestamp.*/
+  [[nodiscard]] struct SequenceOccurence& getSequenceOccurence(Token sequence_id, int occurence_id) const;
+  /** Returns an LoopOccurence for the given Token appearing at the given occurence_id.
+   * Timestamp is set to Reader's referential timestamp.*/
+  [[nodiscard]] struct LoopOccurence& getLoopOccurence(Token loop_id, int occurence_id) const;
+
   /* TODO Write a description here. Also fix the way it's implemented: it does not fit the standard. */
   [[nodiscard]] AttributeList* getEventAttributeList(Token event_id, int occurence_id) const;
 
@@ -97,13 +135,25 @@ typedef struct ThreadReaderName {
   void enterBlock(Token new_block);
   /* Leaves the current block */
   void leaveBlock();
-  /* Fetches the next Token in the trace. */
+  /** Moves the reader's position to the next token.
+   * Moves to the next token in the current block, or exits it recursively as long as it's at the end of a block.*/
+  void moveToNextToken();
+  /** Updates the reader's callstacks et al. by reading the current token.
+   * If the current Token is an event, its index is updated and the referential timestamp as well.
+   * If it's a Loop or a Sequence, their indexes are updated, and the reader enters the corresponding block. */
+  void updateReadCurToken();
+  /** Fetches the next Token in the trace. Changes the state of the reader to match. */
   [[nodiscard]] Token getNextToken();
-  /* Loads the given savestate. */
+  /** Returns the current Token. */
+  [[nodiscard]] const Token& getCurToken() const;
+  /** Returns an Occurence for the given Token appearing at the given occurence_id.
+   * Timestamp is set to Reader's referential timestamp.*/
+  [[nodiscard]] union Occurence& getOccurence(Token id, int occurence_id) const;
+  /** Loads the given savestate. */
   void loadSavestate(struct Savestate* savestate);
-  /* Reads the current level of the thread. */
-  [[nodiscard]] std::pair<Token, union Occurence>* readCurrentLevel();
-  /* Skips the given Sequence and updates the reader. */
+  /** Reads the current level of the thread, and returns it as an array of TokenOccurences. */
+  [[nodiscard]] std::vector<TokenOccurence> readCurrentLevel();
+  /** Skips the given Sequence and updates the reader. */
   void skipSequence(Token token) { htf_error("Not implemented yet\n"); };
 #endif
 } ThreadReaderName;
@@ -129,56 +179,13 @@ typedef struct SavestateName {
    * You can view this as the "depth" of the callstack. */
   int current_frame;
 
-  /** At any point, an event e has been seen event_index[e.id] times.
-   * Use this to grab the timestamps and other information on the event. */
-  int* event_index;
-  /** At any point, a sequence s has been seen sequence_index[s.id] times.
-   * Use this to grab the timestamps and other information on the sequence. */
-  int* sequence_index;
-  /** At any point, a loop l has been seen loop_index[l.id] times.
-   * Use this to grab the timestamps and other information on the sequence. */
-  int* loop_index;
+  TokenCountMap tokenCount;
 #ifdef __cplusplus
  public:
   /* Creates a Savestate (ie a screenshot) of the reader at the moment. */
-  Savestate(ThreadReader* reader);
+  Savestate(const ThreadReader* reader);
 #endif
 } SavestateName;
-
-#define EventOccurenceName C_CXX(htf_event_occurence, EventOccurence)
-/** Only used when reading a trace, links an event with a timestamp. */
-typedef struct EventOccurenceName {
-  struct EventName event;
-  htf_timestamp_t timestamp;
-  htf_timestamp_t duration;
-  AttributeListName* attributes;
-} EventOccurenceName;
-
-#define SequenceOccurenceName C_CXX(htf_sequence_occurence, SequenceOccurence)
-typedef struct SequenceOccurenceName {
-  struct SequenceName* sequence;
-  struct SavestateName* savestate;
-  htf_timestamp_t timestamp;
-  htf_timestamp_t duration;
-  /**Occurences of the events in this sequence. */
-  union OccurenceName* full_sequence;
-} SequenceOccurenceName;
-
-#define LoopOccurenceName C_CXX(htf_loop_occurence, LoopOccurence)
-typedef struct LoopOccurenceName {
-  struct LoopName* loop;
-  unsigned int nb_iterations;
-  htf_timestamp_t timestamp;
-  htf_timestamp_t duration;
-  struct SequenceOccurenceName* full_loop;
-} LoopOccurenceName;
-
-#define OccurenceName C_CXX(htf_occurence, Occurence)
-typedef union OccurenceName {
-  struct LoopOccurenceName loop_occurence;
-  struct SequenceOccurenceName sequence_occurence;
-  struct EventOccurenceName event_occurence;
-} OccurenceName;
 
 #ifdef __cplusplus
 }; /* namespace htf */

@@ -11,18 +11,13 @@
 #include "htf/htf_read.h"
 
 namespace htf {
-ThreadReader::ThreadReader(Archive* archive, ThreadId threadId, ThreadReaderOptions options) {
+ThreadReader::ThreadReader(Archive* archive, ThreadId threadId, int options) {
   // Setup the basic
   this->archive = archive;
   this->options = options;
   htf_assert(threadId != HTF_THREAD_ID_INVALID);
   thread_trace = archive->getThread(threadId);
   htf_assert(thread_trace != nullptr);
-
-  // Allocate what's needed
-  event_index = new int[thread_trace->nb_events];
-  sequence_index = new int[thread_trace->nb_sequences];
-  loop_index = new int[thread_trace->nb_loops];
 
   if (debugLevel >= Verbose) {
     htf_log(Verbose, "init callstack for thread %d\n", threadId);
@@ -40,30 +35,28 @@ ThreadReader::ThreadReader(Archive* archive, ThreadId threadId, ThreadReaderOpti
   callstack_sequence[0].id = 0;
 }
 
-Token ThreadReader::getFrameInCallstack(int frame_number) const {
+const Token& ThreadReader::getFrameInCallstack(int frame_number) const {
   if (frame_number < 0 || frame_number >= MAX_CALLSTACK_DEPTH) {
-    htf_warn("Frame number is too high or negative: %d\n", frame_number);
-    return Token();
+    htf_error("Frame number is too high or negative: %d\n", frame_number);
   }
   return callstack_sequence[frame_number];
 }
 
-Token ThreadReader::getTokenInCallstack(int frame_number) const {
+const Token& ThreadReader::getTokenInCallstack(int frame_number) const {
   if (frame_number < 0 || frame_number >= MAX_CALLSTACK_DEPTH) {
-    htf_warn("Frame number is too high or negative: %d\n", frame_number);
-    return Token();
+    htf_error("Frame number is too high or negative: %d\n", frame_number);
   }
   auto sequence = getFrameInCallstack(frame_number);
   htf_assert(sequence.isIterable());
   return thread_trace->getToken(sequence, callstack_index[frame_number]);
 }
-Token ThreadReader::getCurToken() const {
+const Token& ThreadReader::getCurToken() const {
   return getTokenInCallstack(current_frame);
 }
 void ThreadReader::printCurToken() const {
   thread_trace->printToken(getCurToken());
 }
-Token ThreadReader::getCurSequence() const {
+const Token& ThreadReader::getCurSequence() const {
   return getFrameInCallstack(current_frame);
 }
 void ThreadReader::printCurSequence() const {
@@ -81,7 +74,8 @@ void ThreadReader::printCallstack() const {
 
     if (current_sequence_id.type == HTF_TYPE_LOOP) {
       auto* loop = thread_trace->getLoop(current_sequence_id);
-      printf(" iter %d/%d", callstack_loop_iteration[i], loop->nb_iterations[loop_index[current_sequence_id.id]]);
+      printf(" iter %d/%d", callstack_loop_iteration[i],
+             loop->nb_iterations[tokenCount.find(current_sequence_id)->second]);
       htf_assert(callstack_loop_iteration[i] < MAX_CALLSTACK_DEPTH);
     } else if (current_sequence_id.type == HTF_TYPE_SEQUENCE) {
       auto* sequence = thread_trace->getSequence(current_sequence_id);
@@ -126,47 +120,74 @@ bool ThreadReader::isEndOfLoop(int current_index, Token loop_id) const {
   htf_error("The given loop_id was the wrong type: %d\n", loop_id.type);
 }
 
-htf_timestamp_t ThreadReader::getLoopDuration(Token loop_id) {
+htf_timestamp_t ThreadReader::getLoopDuration(Token loop_id) const {
   htf_assert(loop_id.type == HTF_TYPE_LOOP);
   htf_timestamp_t sum = 0;
   auto* loop = thread_trace->getLoop(loop_id);
   auto* sequence = thread_trace->getSequence(loop->repeated_token);
-  int offset = sequence_index[loop->repeated_token.id];
-  DOFOR(i, i < loop->nb_iterations.at(loop_index[loop_id.id])) {
+  size_t loopIndex = tokenCount.find(loop_id)->second;
+  size_t offset = tokenCount.find(loop->repeated_token)->second;
+  DOFOR(i, i < loop->nb_iterations.at(loopIndex)) {
     sum += sequence->durations->at(offset + i);
   }
   return sum;
 }
 
-void ThreadReader::copyEventOccurence(Token event_id, int occurence_id, EventOccurence* event_occurence) const {
+EventOccurence& ThreadReader::getEventOccurence(Token event_id, int occurence_id) const {
+  auto* eventOccurence = new EventOccurence();
   auto* es = getEventSummary(event_id);
-  memcpy(&event_occurence->event, &es->event, sizeof(es->event));
+  eventOccurence->event = thread_trace->getEvent(event_id);
 
   if ((options & ThreadReaderOptions::NoTimestamps) == 0) {
-    event_occurence->duration = es->durations->at(occurence_id);
+    eventOccurence->timestamp = referential_timestamp;
+    eventOccurence->duration = es->durations->at(occurence_id);
   }
-  event_occurence->attributes = getEventAttributeList(event_id, occurence_id);
+  eventOccurence->attributes = getEventAttributeList(event_id, occurence_id);
+  return *eventOccurence;
 }
 
-void ThreadReader::writeSequenceOccurence(struct SequenceOccurence* sequence_occurence, Token token) {
-  auto* sequence = thread_trace->getSequence(token);
+SequenceOccurence& ThreadReader::getSequenceOccurence(Token sequence_id, int occurence_id) const {
+  auto* sequenceOccurence = new SequenceOccurence();
+  sequenceOccurence->sequence = thread_trace->getSequence(sequence_id);
 
-  // Write it to the occurence
   if ((options & ThreadReaderOptions::NoTimestamps) == 0) {
-    sequence_occurence->timestamp = referential_timestamp;
+    sequenceOccurence->timestamp = referential_timestamp;
+    sequenceOccurence->duration = sequenceOccurence->sequence->durations->at(occurence_id);
   }
-  sequence_occurence->sequence = sequence;
-  sequence_occurence->full_sequence = nullptr;
-  sequence_occurence->savestate = new Savestate(this);
+  sequenceOccurence->full_sequence = nullptr;
+  sequenceOccurence->savestate = new Savestate(this);
 
-  // Update the reader
-  if ((options & ThreadReaderOptions::NoTimestamps) == 0) {
-    sequence_occurence->duration = sequence->durations->at(sequence_index[token.id]);
-    referential_timestamp += sequence_occurence->duration;
-  }
-
-  skipSequence(token);
+  auto tokenCount = sequenceOccurence->sequence->getTokenCount(thread_trace);
+  return *sequenceOccurence;
 };
+
+LoopOccurence& ThreadReader::getLoopOccurence(Token loop_id, int occurence_id) const {
+  auto* loopOccurence = new LoopOccurence();
+  loopOccurence->loop = thread_trace->getLoop(loop_id);
+  loopOccurence->nb_iterations = loopOccurence->loop->nb_iterations[occurence_id];
+  loopOccurence->full_loop = nullptr;
+  if ((options & ThreadReaderOptions::NoTimestamps) == 0) {
+    loopOccurence->timestamp = referential_timestamp;
+    loopOccurence->duration = getLoopDuration(loop_id);
+  }
+  return *loopOccurence;
+}
+
+Occurence& ThreadReader::getOccurence(htf::Token id, int occurence_id) const {
+  auto occurence = new Occurence();
+  switch (id.type) {
+  case HTF_TYPE_INVALID: {
+    htf_error("Wrong token was given");
+  }
+  case HTF_TYPE_EVENT:
+    occurence->event_occurence = getEventOccurence(id, occurence_id);
+  case HTF_TYPE_SEQUENCE:
+    occurence->sequence_occurence = getSequenceOccurence(id, occurence_id);
+  case HTF_TYPE_LOOP:
+    occurence->loop_occurence = getLoopOccurence(id, occurence_id);
+  }
+  return *occurence;
+}
 
 AttributeList* ThreadReader::getEventAttributeList(Token event_id, int occurence_id) const {
   auto* summary = getEventSummary(event_id);
@@ -206,11 +227,8 @@ void ThreadReader::enterBlock(Token new_block) {
   callstack_index[current_frame] = 0;
   callstack_loop_iteration[current_frame] = 0;
   callstack_sequence[current_frame] = new_block;
-  if (new_block.type == HTF_TYPE_SEQUENCE) {
-    auto current_sequence = getCurSequence();
-    // TODO Make a savestate
-  }
 }
+
 void ThreadReader::leaveBlock() {
   if (debugLevel >= Debug) {
     htf_log(Debug, "[%d] Leave ", current_frame);
@@ -228,11 +246,12 @@ void ThreadReader::leaveBlock() {
     htf_assert(current_sequence.type == HTF_TYPE_LOOP || current_sequence.type == HTF_TYPE_SEQUENCE);
   }
 }
-Token ThreadReader::getNextToken() {
+
+void ThreadReader::moveToNextToken() {
   // Check if we've reached the end of the trace
   if (current_frame < 0) {
     htf_log(Debug, "End of trace %d!\n", __LINE__);
-    return {};
+    return;
   }
 
   int current_index = callstack_index[current_frame];
@@ -245,7 +264,7 @@ Token ThreadReader::getNextToken() {
     if (isEndOfSequence(current_index + 1, current_sequence_id)) {
       /* We've reached the end of a sequence. Leave the block and give the next event. */
       leaveBlock();
-      return getNextToken();
+      moveToNextToken();
     }
     /* Move to the next event in the Sequence */
     callstack_index[current_frame]++;
@@ -253,22 +272,23 @@ Token ThreadReader::getNextToken() {
     if (isEndOfLoop(current_loop_iteration + 1, current_sequence_id)) {
       /* We've reached the end of the loop. Leave the block and give the next event. */
       leaveBlock();
-      return getNextToken();
+      moveToNextToken();
     }
     /* just move to the next iteration in the loop */
     callstack_loop_iteration[current_frame]++;
   }
+}
 
+void ThreadReader::updateReadCurToken() {
   auto current_token = getCurToken();
-  // We need to update the reader: enter the blocks if need be, or update the timestamps if it's an Event.
   switch (current_token.type) {
   case HTF_TYPE_SEQUENCE: {
-    sequence_index[current_token.id]++;
+    tokenCount[current_token]++;
     enterBlock(current_token);
     break;
   }
   case HTF_TYPE_LOOP: {
-    loop_index[current_token.id]++;
+    tokenCount[current_token]++;
     enterBlock(current_token);
     break;
   }
@@ -276,15 +296,20 @@ Token ThreadReader::getNextToken() {
     // Update the timestamps
     auto summary = getEventSummary(current_token);
     if ((options & ThreadReaderOptions::NoTimestamps) == 0) {
-      referential_timestamp += summary->durations->at(event_index[current_token.id]);
+      referential_timestamp += summary->durations->at(tokenCount[current_token]);
     }
-    event_index[current_token.id]++;
+    tokenCount[current_token]++;
     break;
   }
   default:
     break;
   }
-  return current_token;
+}
+
+Token ThreadReader::getNextToken() {
+  moveToNextToken();
+  updateReadCurToken();
+  return getCurToken();
 }
 void ThreadReader::loadSavestate(Savestate* savestate) {
   if ((options & ThreadReaderOptions::NoTimestamps) == 0)
@@ -293,41 +318,40 @@ void ThreadReader::loadSavestate(Savestate* savestate) {
   memcpy(callstack_index, savestate->callstack_index, sizeof(int) * MAX_CALLSTACK_DEPTH);
   memcpy(callstack_loop_iteration, savestate->callstack_loop_iteration, sizeof(int) * MAX_CALLSTACK_DEPTH);
   current_frame = savestate->current_frame;
-  memcpy(event_index, savestate->event_index, sizeof(int) * thread_trace->nb_events);
-  memcpy(sequence_index, savestate->sequence_index, sizeof(int) * thread_trace->nb_sequences);
-  memcpy(loop_index, savestate->loop_index, sizeof(int) * thread_trace->nb_loops);
+  tokenCount = savestate->tokenCount;
 }
 
-std::pair<Token, union Occurence>* ThreadReader::readCurrentLevel() {
+std::vector<TokenOccurence> ThreadReader::readCurrentLevel() {
   Token current_sequence_id = getCurSequence();
   auto* current_sequence = thread_trace->getSequence(current_sequence_id);
   htf_assert(current_sequence->size() > 0);
-  auto outputVector = new std::pair<Token, union Occurence>[current_sequence->size()];
+  auto outputVector = std::vector<TokenOccurence>();
+  outputVector.resize(current_sequence->size());
 
   DOFOR(i, current_sequence->size()) {
     Token token = current_sequence->tokens[i];
+    outputVector[i].occurence = new Occurence;
+    outputVector[i].token = &current_sequence->tokens[i];
     switch (token.type) {
     case HTF_TYPE_EVENT: {
       // Get the info
-      auto occurence = outputVector[i].second.event_occurence;
+      auto& occurence = outputVector[i].occurence->event_occurence;
 
-      copyEventOccurence(token, event_index[token.id], &occurence);
+      occurence = getEventOccurence(token, tokenCount[token]);
       if ((options & ThreadReaderOptions::NoTimestamps) == 0) {
-        occurence.timestamp = referential_timestamp;
-        // Update the reader for the next ones
         referential_timestamp += occurence.duration;
       }
-      event_index[token.id]++;
+      tokenCount[token]++;
       break;
     }
     case HTF_TYPE_LOOP: {
       // Get the info
-      auto occurence = outputVector[i].second.loop_occurence;
+      auto& occurence = outputVector[i].occurence->loop_occurence;
       auto* loop = &thread_trace->loops[token.id];
 
       // Write it to the occurence
       occurence.loop = loop;
-      occurence.nb_iterations = loop->nb_iterations.at(loop_index[token.id]);
+      occurence.nb_iterations = loop->nb_iterations.at(tokenCount[token]);
       if ((options & ThreadReaderOptions::NoTimestamps) == 0)
         occurence.timestamp = referential_timestamp;
 
@@ -337,28 +361,29 @@ std::pair<Token, union Occurence>* ThreadReader::readCurrentLevel() {
       occurence.full_loop = new SequenceOccurence[occurence.nb_iterations];
       occurence.duration = 0;
       DOFOR(j, occurence.nb_iterations) {
-        writeSequenceOccurence(&occurence.full_loop[j], loop->repeated_token);
+        occurence.full_loop[j] = getSequenceOccurence(loop->repeated_token, tokenCount[loop->repeated_token]);
         if ((options & ThreadReaderOptions::NoTimestamps) == 0) {
           occurence.duration += occurence.full_loop[j].duration;
         }
       }
       leaveBlock();
 
-      loop_index[token.id]++;
+      tokenCount[token]++;
       break;
     }
     case HTF_TYPE_SEQUENCE: {
       // Get the info
-      writeSequenceOccurence(&outputVector[i].second.sequence_occurence, token);
+      outputVector[i].occurence->sequence_occurence = getSequenceOccurence(token, tokenCount[token]);
       break;
     }
     default:
       htf_error("Invalid token type\n;");
     }
   }
+  return outputVector;
 }
 
-Savestate::Savestate(ThreadReader* reader) {
+Savestate::Savestate(const ThreadReader* reader) {
   if ((reader->options & ThreadReaderOptions::NoTimestamps) == 0) {
     referential_timestamp = reader->referential_timestamp;
   }
@@ -374,22 +399,12 @@ Savestate::Savestate(ThreadReader* reader) {
 
   current_frame = reader->current_frame;
 
-  event_index = new int[reader->thread_trace->nb_events];
-  memcpy(event_index, reader->event_index, sizeof(int) * reader->thread_trace->nb_events);
-
-  sequence_index = new int[reader->thread_trace->nb_sequences];
-  memcpy(sequence_index, reader->sequence_index, sizeof(int) * reader->thread_trace->nb_sequences);
-
-  loop_index = new int[reader->thread_trace->nb_loops];
-  memcpy(loop_index, reader->loop_index, sizeof(int) * reader->thread_trace->nb_loops);
-
+  tokenCount = reader->tokenCount;
 #ifdef DEBUG
   savestate_memory += sizeof(Savestate);
   savestate_memory += reader->current_frame * sizeof(Token);
   savestate_memory += reader->current_frame * sizeof(int) * 2;
-  savestate_memory += reader->thread_trace->nb_events * sizeof(int);
-  savestate_memory += reader->thread_trace->nb_sequences * sizeof(int);
-  savestate_memory += reader->thread_trace->nb_loops * sizeof(int);
+  savestate_memory += sizeof(tokenCount) + (tokenCount.size() * (sizeof(Token) + sizeof(size_t)));
 #endif
 }
 } /* namespace htf */
@@ -400,13 +415,13 @@ htf::ThreadReader* htf_new_thread_reader(htf::Archive* archive,
   return new htf::ThreadReader(archive, thread_id, options);
 }
 
-void htf_thread_reader_enter_block(htf::ThreadReader* reader, htf::Token new_block) {
-  reader->enterBlock(new_block);
-}
-
-void htf_thread_reader_leave_block(htf::ThreadReader* reader) {
-  reader->leaveBlock();
-}
+// void htf_thread_reader_enter_block(htf::ThreadReader* reader, htf::Token new_block) {
+//   reader->enterBlock(new_block);
+// }
+//
+// void htf_thread_reader_leave_block(htf::ThreadReader* reader) {
+//   reader->leaveBlock();
+// }
 
 C_CXX(_Thread_local, thread_local) size_t savestate_memory = 0;
 

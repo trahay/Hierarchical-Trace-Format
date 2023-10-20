@@ -4,7 +4,7 @@ add_compile_options(-Wall -Wextra -Wpedantic)
 include_directories(${CMAKE_SOURCE_DIR}/src/)
 link_libraries(htf zstd)
 
-add_executable(htf_print htf_print.c )
+add_executable(htf_print htf_print.cpp)
 add_executable(htf_info htf_info.cpp)
 
 install(

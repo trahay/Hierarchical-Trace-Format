@@ -91,7 +91,7 @@ typedef struct TokenName {
  public:
   bool operator==(const Token& other) const { return (other.type == type && other.id == id); }
   bool operator<(const Token& other) const { return (type < other.type || id < other.id); }
-  /* Returns if the Token is a Sequence or a Loop*/
+  /* Returns true if the Token is a Sequence or a Loop. */
   inline bool isIterable() const { return type == HTF_TYPE_SEQUENCE || type == HTF_TYPE_LOOP; }
 #endif
 } TokenName;
@@ -226,11 +226,10 @@ typedef struct SequenceName {
   uint32_t hash CXX({0});
 #ifdef __cplusplus
   std::vector<Token> tokens;
-  TokenCountMap tokenCount;
   [[nodiscard]] size_t size() const { return tokens.size(); }
   const TokenCountMap& getTokenCount(const struct Thread* thread);
-
  private:
+  TokenCountMap tokenCount;
 #endif
 } SequenceName;
 
@@ -365,7 +364,7 @@ typedef struct ThreadName {
   [[nodiscard]] Sequence* getSequence(Token) const;
   [[nodiscard]] Loop* getLoop(Token) const;
   /* Returns the n-th token in the given Sequence/Loop. */
-  [[nodiscard]] Token getToken(Token, int) const;
+  [[nodiscard]] Token& getToken(Token, int) const;
 
   void printToken(Token) const;
   void printTokenArray(Token* array, size_t start_index, size_t len) const;
@@ -381,7 +380,7 @@ typedef struct ThreadName {
   void printAttribute(struct AttributeData* attr) const;
   void printAttributeList(struct AttributeList* attribute_list);
   void printEventAttribute(struct EventOccurence* es);
-  [[nodiscard]] const char* getThreadName() const;
+  [[nodiscard]] const char* getName() const;
   /* Search for a sequence_id that matches the given sequence.
    * If none of the registered sequence match, register a new Sequence.
    * TODO Speed this up using hash map and/or storing the sequence's id in the structure.
@@ -413,7 +412,7 @@ extern "C" {
   /**
    * Return the thread name of thread thread
    */
-  extern const char* htf_get_thread_name(HTF(ThreadName) * thread);
+  extern const char* htf_thread_get_name(HTF(ThreadName) * thread);
 
   /**
    * Print the content of sequence seq_id

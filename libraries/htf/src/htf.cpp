@@ -40,7 +40,7 @@ Loop* Thread::getLoop(Token token) const {
   return &this->loops[token.id];
 }
 
-Token Thread::getToken(Token sequenceToken, int index) const {
+Token& Thread::getToken(Token sequenceToken, int index) const {
   if (sequenceToken.type == HTF_TYPE_SEQUENCE) {
     auto sequence = getSequence(sequenceToken);
     if (!sequence) {
@@ -137,7 +137,7 @@ Thread::Thread(Archive* a, ThreadId thread_id) {
 /**
  * Returns a Thread's name.
  */
-const char* Thread::getThreadName() const {
+const char* Thread::getName() const {
   return archive->getString(archive->getLocation(id)->name)->str;
 }
 
@@ -173,8 +173,8 @@ htf::Thread* htf_thread_new() {
   return new htf::Thread();
 };
 
-const char* htf_get_thread_name(htf::Thread* thread) {
-  return thread->getThreadName();
+const char* htf_thread_get_name(htf::Thread* thread) {
+  return thread->getName();
 }
 
 void htf_print_sequence(htf::Thread* thread, htf::Token seq_id) {
