@@ -9,15 +9,16 @@
 #include "htf/htf_read.h"
 #include "htf/htf_storage.h"
 
-static int show_structure = 0;
-static int per_thread = 0;
+static bool show_structure = false;
+static bool per_thread = false;
 static std::string structure_indent[MAX_CALLSTACK_DEPTH];
 static short store_timestamps = 1;
 
-static int print_timestamp = 1;
-static int print_duration = 0;
-static int unroll_loops = 0;
-static int verbose = 0;
+static bool print_timestamp = true;
+static bool print_duration = false;
+static bool unroll_loops = false;
+static bool explore_loop_sequences = false;
+static bool verbose = false;
 
 static void _print_timestamp(htf_timestamp_t ts) {
   if (print_timestamp) {
@@ -42,12 +43,15 @@ static void _print_duration_header() {
   }
 }
 
-static void _print_indent(std::string current_indent) {
+static void _print_indent(const std::string& current_indent) {
   std::cout << current_indent;
 }
 
 /* Print one event */
-static void print_event(std::string current_indent, htf::Thread* thread, htf::Token token, htf::EventOccurence* e) {
+static void print_event(const std::string& current_indent,
+                        htf::Thread* thread,
+                        htf::Token token,
+                        htf::EventOccurence* e) {
   _print_timestamp(e->timestamp);
   _print_duration(e->duration);
   _print_indent(current_indent);
@@ -60,10 +64,10 @@ static void print_event(std::string current_indent, htf::Thread* thread, htf::To
   }
   thread->printEvent(e->event);
   thread->printEventAttribute(e);
-  std::cout << "\t";
+  std::cout << std::endl;
 }
 
-static void print_sequence(std::string current_indent,
+static void print_sequence(const std::string& current_indent,
                            htf::Thread* thread,
                            htf::Token token,
                            htf::SequenceOccurence* sequenceOccurence,
@@ -93,17 +97,17 @@ static void print_sequence(std::string current_indent,
     }
   }
 
-  if (containingLoopOccurence) {
-    htf_timestamp_t mean = containingLoopOccurence->duration / containingLoopOccurence->nb_iterations;
-    std::cout << ((mean < duration) ? "-" : "+");
-    uint64_t diff = (mean < duration) ? duration - mean : mean - duration;
-    float percentile = (float)diff / (float)mean * 100;
-    printf("%5.2f%%", percentile);
+  if (containingLoopOccurence && (unroll_loops || explore_loop_sequences)) {
+    //    htf_timestamp_t mean = containingLoopOccurence->duration / containingLoopOccurence->nb_iterations;
+    //    std::cout << ((mean < duration) ? "-" : "+");
+    //    uint64_t diff = (mean < duration) ? duration - mean : mean - duration;
+    //    float percentile = (float)diff / (float)mean * 100;
+    //    printf("%5.2f%%", percentile);
   }
   std::cout << std::endl;
 }
 
-static void print_loop(std::string current_indent,
+static void print_loop(std::string& current_indent,
                        htf::Thread* thread,
                        htf::Token token,
                        htf::LoopOccurence* loopOccurence) {
@@ -133,21 +137,17 @@ static void print_token(htf::Thread* thread,
                         int last_one,
                         htf::LoopOccurence* containing_loop = nullptr) {
   htf_log(htf::Verbose, "Reading repeated_token(%x.%x) for thread %s\n", t->type, t->id, thread->getName());
-  if (depth < 1)
-    depth = 1;
   // Prints the structure of the sequences and the loops
   std::string current_indent;
-  if (show_structure) {
+  if (show_structure && depth >= 1) {
     structure_indent[depth - 1] = (last_one ? "╰" : "├");
     DOFOR(i, depth) {
       current_indent += structure_indent[i];
     }
-    if (depth) {
-      if (t->type != htf::HTF_TYPE_EVENT) {
-        current_indent += (containing_loop) ? "─" : "┬";
-      } else {
-        current_indent += "─";
-      }
+    if (t->type != htf::HTF_TYPE_EVENT) {
+      current_indent += (containing_loop && !explore_loop_sequences) ? "─" : "┬";
+    } else {
+      current_indent += "─";
     }
     structure_indent[depth - 1] = last_one ? " " : "│";
   }
@@ -189,17 +189,51 @@ static void display_sequence(htf::ThreadReader* reader,
     }
     if (tokenOccurence.token->type == htf::HTF_TYPE_LOOP) {
       htf::LoopOccurence loop = tokenOccurence.occurence->loop_occurence;
-
-      if (unroll_loops) {
-        DOFOR(j, (int)loop.nb_iterations) {
-          /* at the jth iteration of the loop */
-          htf::SequenceOccurence* seq = &loop.full_loop[j];
-          display_sequence(reader, loop.loop->repeated_token, seq, depth + 1);
+      // The printing of loops is a bit convoluted, because there's no right way to do it
+      // Here, we offer four ways to print loops:
+      //    - Print only the Sequence inside once, with its mean/median duration
+      //    - Print only the Sequence inside once, and also print what's inside of it, with their mean/median duration
+      //    - Print the Sequence inside as much time as needed, but don't unroll it
+      //    - Print the Sequence inside as much time as needed, and unroll it.
+      // So we basically need two booleans: unroll_loops, which we use to determine if we need to print each Sequence
+      // inside the loop, and explore_loop_sequences, which we use to determine if we need to print the inside of
+      // each Sequence.
+      // We'll do each option one after another
+      if (!unroll_loops && !explore_loop_sequences) {
+        loop.loop_summary = htf::SequenceOccurence();
+        loop.loop_summary.sequence = loop.full_loop[0].sequence;
+        for (uint j = 0; j < loop.nb_iterations; j++) {
+          loop.loop_summary.duration += loop.full_loop[j].duration / loop.nb_iterations;
         }
-      } else {
-        htf::SequenceOccurence* seq = &loop.full_loop[0];
-        display_sequence(reader, loop.loop->repeated_token, seq, depth + 1);
+        // Don't do this at home kids
+        print_token(reader->thread_trace, &loop.loop->repeated_token, (htf::Occurence*)&loop.loop_summary, depth + 1,
+                    true, &loop);
       }
+      if (!unroll_loops && explore_loop_sequences) {
+        htf_error("Not implemented yet ! Sorry\n");
+      }
+      if (unroll_loops) {
+        for (uint j = 0; j < loop.nb_iterations; j++) {
+          htf::SequenceOccurence* seq = &loop.full_loop[j];
+          print_token(reader->thread_trace, &loop.loop->repeated_token, (htf::Occurence*)seq, depth + 1,
+                      j == loop.nb_iterations - 1, &loop);
+          if (explore_loop_sequences) {
+            display_sequence(reader, loop.loop->repeated_token, seq, depth + 2);
+          }
+        }
+      }
+
+      //      if (unroll_loops) {
+      //        // We print each iteration of the loop
+      //        DOFOR(j, (int)loop.nb_iterations) {
+      //          /* at the jth iteration of the loop */
+      //          htf::SequenceOccurence* seq = &loop.full_loop[j];
+      //          display_sequence(reader, loop.loop->repeated_token, seq, depth + 1);
+      //        }
+      //      } else {
+      //        htf::SequenceOccurence* seq = &loop.full_loop[0];
+      //        display_sequence(reader, loop.loop->repeated_token, seq, depth + 1);
+      //      }
     }
   }
   if (occurence) {
@@ -237,19 +271,19 @@ static void print_thread(htf::Archive* trace, htf::Thread* thread) {
 //   int min_index = -1;
 //
 //  for (int i = 0; i < nb_threads; i++) {
-  //    if (htf_read_thread_cur_token(&readers[i], &cur_t, NULL) == 0) {
-  //      htf_timestamp_t ts = htf_get_starting_timestamp(&readers[i], cur_t);
-  //      if (min_ts == HTF_TIMESTAMP_INVALID || ts < min_ts) {
-  //        min_index = i;
-  //        min_ts = ts;
-  //      }
-  //    }
-  //  }
+//    if (htf_read_thread_cur_token(&readers[i], &cur_t, NULL) == 0) {
+//      htf_timestamp_t ts = htf_get_starting_timestamp(&readers[i], cur_t);
+//      if (min_ts == HTF_TIMESTAMP_INVALID || ts < min_ts) {
+//        min_index = i;
+//        min_ts = ts;
+//      }
+//    }
+//  }
 
-  //  if (min_index >= 0) {
-  //    htf_read_thread_cur_token(&readers[min_index], t, e);
-  //    htf_move_to_next_token(&readers[min_index]);
-  //  }
+//  if (min_index >= 0) {
+//    htf_read_thread_cur_token(&readers[min_index], t, e);
+//    htf_move_to_next_token(&readers[min_index]);
+//  }
 //
 //  return min_index;
 //}
@@ -268,11 +302,11 @@ static void print_thread(htf::Archive* trace, htf::Thread* thread) {
 //   printf("Timestamp\tDuration\tThread Name\tEvent\n");
 //
 //	htf_occurence e;
-  //	struct Token t;
-  //	int thread_index = -1;
-  //	while ((thread_index = get_next_token(readers, trace->nb_threads, &t, &e)) >= 0) {
-  //		print_token(&readers[thread_index], &t, &e);
-  //	}
+//	struct Token t;
+//	int thread_index = -1;
+//	while ((thread_index = get_next_token(readers, trace->nb_threads, &t, &e)) >= 0) {
+//		print_token(&readers[thread_index], &t, &e);
+//	}
 //}
 
 void usage(const char* prog_name) {
@@ -283,6 +317,7 @@ void usage(const char* prog_name) {
   printf("\t-d          Print duration of events\n");
   printf("\t-t          Don't print timestamps\n");
   printf("\t-u          Unroll loops\n");
+  printf("\t-e          Explore sequences inside of loops\n");
   printf("\t-?  -h      Display this help and exit\n");
 }
 
@@ -295,23 +330,26 @@ int main(int argc, char** argv) {
       htf_debug_level_set(htf::DebugLevel::Debug);
       nb_opts++;
     } else if (!strcmp(argv[i], "-T")) {
-      per_thread = 1;
+      per_thread = true;
       nb_opts++;
     } else if (!strcmp(argv[i], "-S")) {
-      show_structure = 1;
+      show_structure = true;
       nb_opts++;
     } else if (!strcmp(argv[i], "-d")) {
-      print_duration = 1;
+      print_duration = true;
       nb_opts++;
     } else if (!strcmp(argv[i], "-t")) {
-      print_timestamp = 0;
+      print_timestamp = false;
       nb_opts++;
     } else if (!strcmp(argv[i], "-u")) {
-      unroll_loops = 1;
+      unroll_loops = true;
+      nb_opts++;
+    } else if (!strcmp(argv[i], "-e")) {
+      explore_loop_sequences = true;
       nb_opts++;
     } else if (!strcmp(argv[i], "--no-timestamps")) {
       setenv("STORE_TIMESTAMPS", "FALSE", 0);
-      print_timestamp = 0;
+      print_timestamp = true;
       store_timestamps = 0;
       nb_opts++;
     } else if (!strcmp(argv[i], "-h") || !strcmp(argv[i], "-?")) {
@@ -326,7 +364,7 @@ int main(int argc, char** argv) {
   }
 
   if (!show_structure) {
-    unroll_loops = 1;
+    unroll_loops = true;
   }
 
   trace_name = argv[nb_opts + 1];

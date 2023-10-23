@@ -46,6 +46,7 @@ typedef struct LoopOccurenceName {
   htf_timestamp_t timestamp;
   htf_timestamp_t duration;
   struct SequenceOccurenceName* full_loop;
+  struct SequenceOccurenceName loop_summary;
 } LoopOccurenceName;
 
 #define OccurenceName C_CXX(htf_occurence, Occurence)

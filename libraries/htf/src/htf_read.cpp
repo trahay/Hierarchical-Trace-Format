@@ -364,7 +364,9 @@ std::vector<TokenOccurence> ThreadReader::readCurrentLevel() {
         occurence.full_loop[j] = getSequenceOccurence(loop->repeated_token, tokenCount[loop->repeated_token]);
         if ((options & ThreadReaderOptions::NoTimestamps) == 0) {
           occurence.duration += occurence.full_loop[j].duration;
+          referential_timestamp += occurence.full_loop[j].duration;
         }
+        tokenCount[loop->repeated_token]++;
       }
       leaveBlock();
 
@@ -374,6 +376,9 @@ std::vector<TokenOccurence> ThreadReader::readCurrentLevel() {
     case HTF_TYPE_SEQUENCE: {
       // Get the info
       outputVector[i].occurence->sequence_occurence = getSequenceOccurence(token, tokenCount[token]);
+      if ((options & ThreadReaderOptions::NoTimestamps) == 0) {
+        referential_timestamp += outputVector[i].occurence->sequence_occurence.duration;
+      }
       break;
     }
     default:
