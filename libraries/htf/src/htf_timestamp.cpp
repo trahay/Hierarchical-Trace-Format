@@ -4,18 +4,14 @@
  */
 
 #include "htf/htf_timestamp.h"
-#include <stdlib.h>
-#include <time.h>
+#include <cstdlib>
+#include <ctime>
+#include <vector>
 
 #define TIME_DIFF(t1, t2) ((t2.tv_sec - t1.tv_sec) * 1000000000 + (t2.tv_nsec - t1.tv_nsec))
 
 static struct timespec first_timestamp = {0, 0};
-
-struct linked_list {
-  htf_timestamp_t* timestamp;
-  struct linked_list* next;
-};
-_Thread_local static struct linked_list last_timestamp = {NULL, NULL};
+thread_local static std::vector<htf_timestamp_t*> timestampsToDelta = std::vector<htf_timestamp_t*>();
 
 htf_timestamp_t htf_get_timestamp() {
   struct timespec timestamp;
@@ -34,34 +30,19 @@ htf_timestamp_t htf_timestamp(htf_timestamp_t t) {
 }
 
 void htf_delta_timestamp(htf_timestamp_t* t) {
-  if (last_timestamp.timestamp != NULL) {
-    struct linked_list* node = &last_timestamp;
-    do {
-      if (*t >= *node->timestamp) {
-        *node->timestamp = *t - *node->timestamp;
-      }
-      node->timestamp = NULL;
-      node = node->next;
-    } while (node != NULL && node->timestamp != NULL);
+  for (auto timestamp : timestampsToDelta) {
+    *timestamp = *t - *timestamp;
   }
-  last_timestamp.timestamp = t;
+  timestampsToDelta.clear();
+  timestampsToDelta.push_back(t);
 }
 
 void htf_add_timestamp_to_delta(htf_timestamp_t* t) {
-  struct linked_list* node = &last_timestamp;
-  while (node->timestamp != NULL) {
-    if (node->next == NULL) {
-      node->next = malloc(sizeof(struct linked_list));
-      node->next->next = NULL;
-      node->next->timestamp = NULL;
-    }
-    node = node->next;
-  }
-  node->timestamp = t;
+  timestampsToDelta.push_back(t);
 }
 
 void htf_finish_timestamp() {
-  *last_timestamp.timestamp = 0;
+  *timestampsToDelta.front() = 0;
 }
 
 /* -*-

@@ -17,7 +17,7 @@ target_sources(htf
         src/htf_hash.cpp
         src/htf_read.cpp
         src/htf_storage.cpp
-        src/htf_timestamp.c
+        src/htf_timestamp.cpp
         src/htf_write.cpp
         src/LinkedVector.cpp
 )
