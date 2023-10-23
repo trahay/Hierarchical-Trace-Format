@@ -90,7 +90,7 @@ typedef struct TokenName {
 
  public:
   bool operator==(const Token& other) const { return (other.type == type && other.id == id); }
-  bool operator<(const Token& other) const { return (type < other.type || id < other.id); }
+  bool operator<(const Token& other) const { return (type < other.type || (type == other.type && id < other.id)); }
   /* Returns true if the Token is a Sequence or a Loop. */
   inline bool isIterable() const { return type == HTF_TYPE_SEQUENCE || type == HTF_TYPE_LOOP; }
 #endif
