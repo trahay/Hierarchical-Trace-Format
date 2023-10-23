@@ -30,10 +30,20 @@ htf_timestamp_t htf_timestamp(htf_timestamp_t t) {
 }
 
 void htf_delta_timestamp(htf_timestamp_t* t) {
-  for (auto timestamp : timestampsToDelta) {
-    *timestamp = *t - *timestamp;
+  if (!timestampsToDelta.empty()) {
+    htf_timestamp_t startingTimestamp = *timestampsToDelta.front();
+    htf_timestamp_t startingDuration = 0;
+    for (auto& timestamp : timestampsToDelta) {
+      if (!startingDuration) {
+        *timestamp = *t - *timestamp;
+        startingDuration = *timestamp;
+      } else {
+        *timestamp += startingDuration;
+        *timestamp -= startingTimestamp;
+      }
+    }
+    timestampsToDelta.clear();
   }
-  timestampsToDelta.clear();
   timestampsToDelta.push_back(t);
 }
 
