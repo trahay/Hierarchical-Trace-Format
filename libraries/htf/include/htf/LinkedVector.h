@@ -16,7 +16,7 @@
 #define DEFAULT_VECTOR_SIZE 1000
 namespace htf {
 #endif
-struct LinkedVector {
+typedef struct LinkedVector {
   size_t size CXX({0});
 
 #ifdef __cplusplus
@@ -125,7 +125,7 @@ struct LinkedVector {
   Iterator begin() const { return {first}; };
   Iterator end() const { return {nullptr}; };
 #endif
-};
+} LinkedVector;
 
 CXX(
 })  // namespace htf
