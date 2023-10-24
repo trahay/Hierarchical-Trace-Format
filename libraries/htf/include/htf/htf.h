@@ -108,66 +108,122 @@ enum EventType {
  * Enumeration of the different events that are recorded by HTF
  */
 enum Record {
-  HTF_EVENT_BUFFER_FLUSH = 0,            /** Event record identifier for the BufferFlush event. */
-  HTF_EVENT_MEASUREMENT_ON_OFF = 1,      /** Event record identifier for the MeasurementOnOff event. */
-  HTF_EVENT_ENTER = 2,                   /** Event record identifier for the Enter event. */
-  HTF_EVENT_LEAVE = 3,                   /** Event record identifier for the Leave event. */
-  HTF_EVENT_MPI_SEND = 4,                /** Event record identifier for the MpiSend event. */
-  HTF_EVENT_MPI_ISEND = 5,               /** Event record identifier for the MpiIsend event. */
-  HTF_EVENT_MPI_ISEND_COMPLETE = 6,      /** Event record identifier for the MpiIsendComplete event. */
-  HTF_EVENT_MPI_IRECV_REQUEST = 7,       /** Event record identifier for the MpiIrecvRequest event. */
-  HTF_EVENT_MPI_RECV = 8,                /** Event record identifier for the MpiRecv event. */
-  HTF_EVENT_MPI_IRECV = 9,               /** Event record identifier for the MpiIrecv event. */
-  HTF_EVENT_MPI_REQUEST_TEST = 10,       /** Event record identifier for the MpiRequestTest event. */
-  HTF_EVENT_MPI_REQUEST_CANCELLED = 11,  /** Event record identifier for the MpiRequestCancelled event. */
-  HTF_EVENT_MPI_COLLECTIVE_BEGIN = 12,   /** Event record identifier for the MpiCollectiveBegin event. */
-  HTF_EVENT_MPI_COLLECTIVE_END = 13,     /** Event record identifier for the MpiCollectiveEnd event. */
-  HTF_EVENT_OMP_FORK = 14,               /** Event record identifier for the OmpFork event. */
-  HTF_EVENT_OMP_JOIN = 15,               /** Event record identifier for the OmpJoin event. */
-  HTF_EVENT_OMP_ACQUIRE_LOCK = 16,       /** Event record identifier for the OmpAcquireLock event. */
-  HTF_EVENT_OMP_RELEASE_LOCK = 17,       /** Event record identifier for the OmpReleaseLock event. */
-  HTF_EVENT_OMP_TASK_CREATE = 18,        /** Event record identifier for the OmpTaskCreate event. */
-  HTF_EVENT_OMP_TASK_SWITCH = 19,        /** Event record identifier for the OmpTaskSwitch event. */
-  HTF_EVENT_OMP_TASK_COMPLETE = 20,      /** Event record identifier for the OmpTaskComplete event. */
-  HTF_EVENT_METRIC = 21,                 /** Event record identifier for the Metric event. */
-  HTF_EVENT_PARAMETER_STRING = 22,       /** Event record identifier for the ParameterString event. */
-  HTF_EVENT_PARAMETER_INT = 23,          /** Event record identifier for the ParameterInt event. */
-  HTF_EVENT_PARAMETER_UNSIGNED_INT = 24, /** Event record identifier for the ParameterUnsignedInt event. */
-  HTF_EVENT_THREAD_FORK = 25,            /** Event record identifier for the ThreadFork event. */
-  HTF_EVENT_THREAD_JOIN = 26,            /** Event record identifier for the ThreadJoin event. */
-  HTF_EVENT_THREAD_TEAM_BEGIN = 27,      /** Event record identifier for the ThreadTeamBegin event. */
-  HTF_EVENT_THREAD_TEAM_END = 28,        /** Event record identifier for the ThreadTeamEnd event. */
-  HTF_EVENT_THREAD_ACQUIRE_LOCK = 29,    /** Event record identifier for the ThreadAcquireLock event. */
-  HTF_EVENT_THREAD_RELEASE_LOCK = 30,    /** Event record identifier for the ThreadReleaseLock event. */
-  HTF_EVENT_THREAD_TASK_CREATE = 31,     /** Event record identifier for the ThreadTaskCreate event. */
-  HTF_EVENT_THREAD_TASK_SWITCH = 32,     /** Event record identifier for the ThreadTaskSwitch event. */
-  HTF_EVENT_THREAD_TASK_COMPLETE = 33,   /** Event record identifier for the ThreadTaskComplete event. */
-  HTF_EVENT_THREAD_CREATE = 34,          /** Event record identifier for the ThreadCreate event. */
-  HTF_EVENT_THREAD_BEGIN = 35,           /** Event record identifier for the ThreadBegin event. */
-  HTF_EVENT_THREAD_WAIT = 36,            /** Event record identifier for the ThreadWait event. */
-  HTF_EVENT_THREAD_END = 37,             /** Event record identifier for the ThreadEnd event. */
-  HTF_EVENT_IO_CREATE_HANDLE = 38,       /** Event record identifier for the IoCreateHandle event. */
-  HTF_EVENT_IO_DESTROY_HANDLE = 39,      /** Event record identifier for the IoDestroyHandle event. */
-  HTF_EVENT_IO_DUPLICATE_HANDLE = 40,    /** Event record identifier for the IoDuplicateHandle event. */
-  HTF_EVENT_IO_SEEK = 41,                /** Event record identifier for the IoSeek event. */
-  HTF_EVENT_IO_CHANGE_STATUS_FLAGS = 42, /** Event record identifier for the IoChangeStatusFlags event. */
-  HTF_EVENT_IO_DELETE_FILE = 43,         /** Event record identifier for the IoDeleteFile event. */
-  HTF_EVENT_IO_OPERATION_BEGIN = 44,     /** Event record identifier for the IoOperationBegin event. */
-  HTF_EVENT_IO_OPERATION_TEST = 45,      /** Event record identifier for the IoOperationTest event. */
-  HTF_EVENT_IO_OPERATION_ISSUED = 46,    /** Event record identifier for the IoOperationIssued event. */
-  HTF_EVENT_IO_OPERATION_COMPLETE = 47,  /** Event record identifier for the IoOperationComplete event. */
-  HTF_EVENT_IO_OPERATION_CANCELLED = 48, /** Event record identifier for the IoOperationCancelled event. */
-  HTF_EVENT_IO_ACQUIRE_LOCK = 49,        /** Event record identifier for the IoAcquireLock event. */
-  HTF_EVENT_IO_RELEASE_LOCK = 50,        /** Event record identifier for the IoReleaseLock event. */
-  HTF_EVENT_IO_TRY_LOCK = 51,            /** Event record identifier for the IoTryLock event. */
-  HTF_EVENT_PROGRAM_BEGIN = 52,          /** Event record identifier for the ProgramBegin event. */
-  HTF_EVENT_PROGRAM_END = 53,            /** Event record identifier for the ProgramEnd event. */
-  HTF_EVENT_NON_BLOCKING_COLLECTIVE_REQUEST =
-    54, /** Event record identifier for the NonBlockingCollectiveRequest event. */
-  HTF_EVENT_NON_BLOCKING_COLLECTIVE_COMPLETE =
-    55,                        /** Event record identifier for the NonBlockingCollectiveComplete event. */
-  HTF_EVENT_COMM_CREATE = 56,  /** Event record identifier for the CommCreate event. */
-  HTF_EVENT_COMM_DESTROY = 57, /** Event record identifier for the CommDestroy event. */
+  /** Event record identifier for the BufferFlush event. */
+  HTF_EVENT_BUFFER_FLUSH = 0,
+  /** Event record identifier for the MeasurementOnOff event. */
+  HTF_EVENT_MEASUREMENT_ON_OFF = 1,
+  /** Event record identifier for the Enter event. */
+  HTF_EVENT_ENTER = 2,
+  /** Event record identifier for the Leave event. */
+  HTF_EVENT_LEAVE = 3,
+  /** Event record identifier for the MpiSend event. */
+  HTF_EVENT_MPI_SEND = 4,
+  /** Event record identifier for the MpiIsend event. */
+  HTF_EVENT_MPI_ISEND = 5,
+  /** Event record identifier for the MpiIsendComplete event. */
+  HTF_EVENT_MPI_ISEND_COMPLETE = 6,
+  /** Event record identifier for the MpiIrecvRequest event. */
+  HTF_EVENT_MPI_IRECV_REQUEST = 7,
+  /** Event record identifier for the MpiRecv event. */
+  HTF_EVENT_MPI_RECV = 8,
+  /** Event record identifier for the MpiIrecv event. */
+  HTF_EVENT_MPI_IRECV = 9,
+  /** Event record identifier for the MpiRequestTest event. */
+  HTF_EVENT_MPI_REQUEST_TEST = 10,
+  /** Event record identifier for the MpiRequestCancelled event. */
+  HTF_EVENT_MPI_REQUEST_CANCELLED = 11,
+  /** Event record identifier for the MpiCollectiveBegin event. */
+  HTF_EVENT_MPI_COLLECTIVE_BEGIN = 12,
+  /** Event record identifier for the MpiCollectiveEnd event. */
+  HTF_EVENT_MPI_COLLECTIVE_END = 13,
+  /** Event record identifier for the OmpFork event. */
+  HTF_EVENT_OMP_FORK = 14,
+  /** Event record identifier for the OmpJoin event. */
+  HTF_EVENT_OMP_JOIN = 15,
+  /** Event record identifier for the OmpAcquireLock event. */
+  HTF_EVENT_OMP_ACQUIRE_LOCK = 16,
+  /** Event record identifier for the OmpReleaseLock event. */
+  HTF_EVENT_OMP_RELEASE_LOCK = 17,
+  /** Event record identifier for the OmpTaskCreate event. */
+  HTF_EVENT_OMP_TASK_CREATE = 18,
+  /** Event record identifier for the OmpTaskSwitch event. */
+  HTF_EVENT_OMP_TASK_SWITCH = 19,
+  /** Event record identifier for the OmpTaskComplete event. */
+  HTF_EVENT_OMP_TASK_COMPLETE = 20,
+  /** Event record identifier for the Metric event. */
+  HTF_EVENT_METRIC = 21,
+  /** Event record identifier for the ParameterString event. */
+  HTF_EVENT_PARAMETER_STRING = 22,
+  /** Event record identifier for the ParameterInt event. */
+  HTF_EVENT_PARAMETER_INT = 23,
+  /** Event record identifier for the ParameterUnsignedInt event. */
+  HTF_EVENT_PARAMETER_UNSIGNED_INT = 24,
+  /** Event record identifier for the ThreadFork event. */
+  HTF_EVENT_THREAD_FORK = 25,
+  /** Event record identifier for the ThreadJoin event. */
+  HTF_EVENT_THREAD_JOIN = 26,
+  /** Event record identifier for the ThreadTeamBegin event. */
+  HTF_EVENT_THREAD_TEAM_BEGIN = 27,
+  /** Event record identifier for the ThreadTeamEnd event. */
+  HTF_EVENT_THREAD_TEAM_END = 28,
+  /** Event record identifier for the ThreadAcquireLock event. */
+  HTF_EVENT_THREAD_ACQUIRE_LOCK = 29,
+  /** Event record identifier for the ThreadReleaseLock event. */
+  HTF_EVENT_THREAD_RELEASE_LOCK = 30,
+  /** Event record identifier for the ThreadTaskCreate event. */
+  HTF_EVENT_THREAD_TASK_CREATE = 31,
+  /** Event record identifier for the ThreadTaskSwitch event. */
+  HTF_EVENT_THREAD_TASK_SWITCH = 32,
+  /** Event record identifier for the ThreadTaskComplete event. */
+  HTF_EVENT_THREAD_TASK_COMPLETE = 33,
+  /** Event record identifier for the ThreadCreate event. */
+  HTF_EVENT_THREAD_CREATE = 34,
+  /** Event record identifier for the ThreadBegin event. */
+  HTF_EVENT_THREAD_BEGIN = 35,
+  /** Event record identifier for the ThreadWait event. */
+  HTF_EVENT_THREAD_WAIT = 36,
+  /** Event record identifier for the ThreadEnd event. */
+  HTF_EVENT_THREAD_END = 37,
+  /** Event record identifier for the IoCreateHandle event. */
+  HTF_EVENT_IO_CREATE_HANDLE = 38,
+  /** Event record identifier for the IoDestroyHandle event. */
+  HTF_EVENT_IO_DESTROY_HANDLE = 39,
+  /** Event record identifier for the IoSeek event. */
+  HTF_EVENT_IO_SEEK = 41,
+  /** Event record identifier for the IoChangeStatusFlags event. */
+  HTF_EVENT_IO_CHANGE_STATUS_FLAGS = 42,
+  /** Event record identifier for the IoDeleteFile event. */
+  HTF_EVENT_IO_DELETE_FILE = 43,
+  /** Event record identifier for the IoOperationBegin event. */
+  HTF_EVENT_IO_OPERATION_BEGIN = 44,
+  /** Event record identifier for the IoDuplicateHandle event. */
+  HTF_EVENT_IO_DUPLICATE_HANDLE = 40,
+  /** Event record identifier for the IoOperationTest event. */
+  HTF_EVENT_IO_OPERATION_TEST = 45,
+  /** Event record identifier for the IoOperationIssued event. */
+  HTF_EVENT_IO_OPERATION_ISSUED = 46,
+  /** Event record identifier for the IoOperationComplete event. */
+  HTF_EVENT_IO_OPERATION_COMPLETE = 47,
+  /** Event record identifier for the IoOperationCancelled event. */
+  HTF_EVENT_IO_OPERATION_CANCELLED = 48,
+  /** Event record identifier for the IoAcquireLock event. */
+  HTF_EVENT_IO_ACQUIRE_LOCK = 49,
+  /** Event record identifier for the IoReleaseLock event. */
+  HTF_EVENT_IO_RELEASE_LOCK = 50,
+  /** Event record identifier for the IoTryLock event. */
+  HTF_EVENT_IO_TRY_LOCK = 51,
+  /** Event record identifier for the ProgramBegin event. */
+  HTF_EVENT_PROGRAM_BEGIN = 52,
+  /** Event record identifier for the ProgramEnd event. */
+  HTF_EVENT_PROGRAM_END = 53,
+  /** Event record identifier for the NonBlockingCollectiveRequest event. */
+  HTF_EVENT_NON_BLOCKING_COLLECTIVE_REQUEST = 54,
+  /** Event record identifier for the NonBlockingCollectiveComplete event. */
+  HTF_EVENT_NON_BLOCKING_COLLECTIVE_COMPLETE = 55,
+  /** Event record identifier for the CommCreate event. */
+  HTF_EVENT_COMM_CREATE = 56,
+  /** Event record identifier for the CommDestroy event. */
+  HTF_EVENT_COMM_DESTROY = 57,
 
   HTF_EVENT_MAX_ID
 };
