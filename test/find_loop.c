@@ -9,14 +9,14 @@
 #include "htf/htf.h"
 #include "htf/htf_write.h"
 
-static inline htf_token_id _htf_get_event_id(struct htf_thread* thread_trace, struct htf_event* e) {
-  htf_log(htf_dbg_lvl_max, "Searching for event {.event_type=%d}\n", e->record);
+static inline TokenId _htf_get_event_id(struct Thread* thread_trace, struct Event* e) {
+  htf_log(Max, "Searching for event {.event_type=%d}\n", e->record);
 
   htf_assert(e->event_size < 256);
 
   for (unsigned i = 0; i < thread_trace->nb_events; i++) {
     if (memcmp(e, &thread_trace->events[i].event, e->event_size) == 0) {
-      htf_log(htf_dbg_lvl_max, "\t found with id=%u\n", i);
+      htf_log(Max, "\t found with id=%u\n", i);
       return i;
     }
   }
@@ -24,23 +24,23 @@ static inline htf_token_id _htf_get_event_id(struct htf_thread* thread_trace, st
   if (thread_trace->nb_events >= thread_trace->nb_allocated_events) {
     //		htf_error( "too many event data!\n");
     htf_warn("Doubling mem space of events for thread trace %p\n", (void*)thread_trace);
-    DOUBLE_MEMORY_SPACE(thread_trace->events, thread_trace->nb_allocated_events, struct htf_event_summary);
+    DOUBLE_MEMORY_SPACE(thread_trace->events, thread_trace->nb_allocated_events, struct EventSummary);
   }
 
   int index = thread_trace->nb_events++;
-  htf_log(htf_dbg_lvl_max, "\tNot found. Adding it with id=%x\n", index);
-  struct htf_event_summary* es = &thread_trace->events[index];
+  htf_log(Max, "\tNot found. Adding it with id=%x\n", index);
+  struct EventSummary* es = &thread_trace->events[index];
 
   memcpy(&es->event, e, e->event_size);
 
   return index;
 }
 
-static void init_dummy_event(struct htf_thread_writer* thread_writer, enum htf_record record) {
-  struct htf_event e;
-  e.event_size = offsetof(struct htf_event, event_data);
+static void init_dummy_event(struct ThreadWriter* thread_writer, enum Record record) {
+  struct Event e;
+  e.event_size = offsetof(struct Event, event_data);
   e.record = record;
-  htf_token_id e_id = _htf_get_event_id(&thread_writer->thread_trace, &e);
+  TokenId e_id = _htf_get_event_id(&thread_writer->thread_trace, &e);
   htf_store_event(thread_writer, HTF_SINGLETON, e_id, htf_get_timestamp(), NULL);
 }
 
@@ -55,9 +55,9 @@ int main(int argc, char** argv __attribute__((unused))) {
   size_t NUM_LOOPS = strtol(argv[2], NULL, 10);
 
   /* Make a dummy archive and a dummy thread writer. */
-  struct htf_archive archive;
+  struct Archive archive;
   htf_write_archive_open(&archive, "dummy_trace", "dummy_trace", 0);
-  struct htf_thread_writer thread_writer;
+  struct ThreadWriter thread_writer;
   htf_write_thread_open(&archive, &thread_writer, 0);
 
   /* Start recording some events.*/
@@ -68,7 +68,7 @@ int main(int argc, char** argv __attribute__((unused))) {
   htf_assert(thread_writer.cur_depth == 0);
   htf_assert(htf_sequence_get_size(thread_writer.og_seq[0]) == (unsigned int)MAX_EVENT);
   for (int eid = 0; eid < MAX_EVENT; eid++) {
-    htf_assert(htf_sequence_get_token(thread_writer.og_seq[0], eid).type == HTF_TYPE_EVENT);
+    htf_assert(htf_sequence_get_token(thread_writer.og_seq[0], eid).type == TypeEvent);
     htf_assert(htf_sequence_get_token(thread_writer.og_seq[0], eid).id == eid);
   }
 
@@ -79,18 +79,18 @@ int main(int argc, char** argv __attribute__((unused))) {
   /* This should have been recognized as a loop, so now there should be some changes. */
   htf_assert(thread_writer.cur_depth == 0);
   htf_assert(htf_sequence_get_size(thread_writer.og_seq[0]) == 1);
-  htf_assert(htf_sequence_get_token(thread_writer.og_seq[0], 0).type == HTF_TYPE_LOOP);
+  htf_assert(htf_sequence_get_token(thread_writer.og_seq[0], 0).type == TypeLoop);
   /* Check that the loop is correct */
-  struct htf_loop* l = htf_get_loop(&thread_writer.thread_trace, htf_sequence_get_token(thread_writer.og_seq[0], 0));
+  struct Loop* l = htf_get_loop(&thread_writer.thread_trace, htf_sequence_get_token(thread_writer.og_seq[0], 0));
   htf_assert(htf_loop_get_count(l, 0) == 2);
 
   /* Check that the sequence inside that loop is correct */
-  struct htf_sequence* s = htf_get_sequence(&thread_writer.thread_trace, l->repeated_token);
+  struct Sequence* s = htf_get_sequence(&thread_writer.thread_trace, l->repeated_token);
 
   htf_assert(htf_sequence_get_size(s) == (unsigned int)MAX_EVENT);
 
   for (int eid = 0; eid < MAX_EVENT; eid++) {
-    htf_assert(htf_sequence_get_token(s, eid).type == HTF_TYPE_EVENT);
+    htf_assert(htf_sequence_get_token(s, eid).type == TypeEvent);
     htf_assert(htf_sequence_get_token(s, eid).id == eid);
   }
 

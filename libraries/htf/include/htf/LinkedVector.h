@@ -126,15 +126,14 @@ struct LinkedVector {
 }  // namespace htf
 
 #endif
-C(typedef struct htf_linked_vector { size_t size; } htf_linked_vector;)
-#define LinkedVectorName C_CXX(htf_linked_vector, LinkedVector)
+C(typedef struct LinkedVector { size_t size; } LinkedVector;)
 
 CXX(extern "C" {)
-  extern HTF(LinkedVectorName)* linked_vector_new(void);
-  extern uint64_t* linked_vector_add(HTF(LinkedVectorName)*, uint64_t);
-  extern uint64_t* linked_vector_get(HTF(LinkedVectorName)*, size_t);
-  extern uint64_t* linked_vector_get_last(HTF(LinkedVectorName)*);
-  extern void print(HTF(LinkedVectorName));
+  extern HTF(LinkedVector)* linked_vector_new(void);
+  extern uint64_t* linked_vector_add(HTF(LinkedVector)*, uint64_t);
+  extern uint64_t* linked_vector_get(HTF(LinkedVector)*, size_t);
+  extern uint64_t* linked_vector_get_last(HTF(LinkedVector)*);
+  extern void print(HTF(LinkedVector));
 CXX(
 };)
 

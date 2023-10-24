@@ -192,9 +192,9 @@ typedef union OTF2_AttributeValue_union {
   return OTF2_TYPE_NONE;
 }
 
-  static htf_attribute_value OTF2_HTF_ATTRIBUTE_VALUE(OTF2_AttributeValue u, htf_type_t t)  __attribute__((unused));
-static htf_attribute_value OTF2_HTF_ATTRIBUTE_VALUE(OTF2_AttributeValue u, htf_type_t t) {
-  htf_attribute_value v;
+  static AttributeValue OTF2_HTF_ATTRIBUTE_VALUE(OTF2_AttributeValue u, htf_type_t t) __attribute__((unused));
+  static AttributeValue OTF2_HTF_ATTRIBUTE_VALUE(OTF2_AttributeValue u, htf_type_t t) {
+  AttributeValue v;
   switch(t) {
   case HTF_TYPE_NONE: v.uint8 = 0; break;
   case HTF_TYPE_UINT8: v.uint8 = u.uint8; break;

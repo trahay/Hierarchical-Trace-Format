@@ -79,32 +79,32 @@ OTF2_ErrorCode OTF2_GlobalDefWriter_WriteSystemTreeNode(OTF2_GlobalDefWriter* wr
 }
 
 struct location_group_map {
-  htf_location_group_id htf_location_group;
+  LocationGroupId htf_location_group;
   OTF2_LocationGroupRef location_group;
 };
 
 struct location_group_map* location_group_map = NULL;
 int nb_location_group = 0;
 
-htf_location_group_id next_location_group_id(int ref) {
+LocationGroupId next_location_group_id(int ref) {
   /* TODO: buggy ?  */
   return ref;
-  static htf_location_group_id next_id = HTF_LOCATION_GROUP_ID_INVALID;  // todo: pb with MPI ?
+  static LocationGroupId next_id = HTF_LOCATION_GROUP_ID_INVALID;  // todo: pb with MPI ?
   if (next_id == HTF_LOCATION_GROUP_ID_INVALID)
     next_id = ref;
   return next_id++;
 }
 
-htf_thread_id next_thread_id(int ref) {
+ThreadId next_thread_id(int ref) {
   /* TODO: buggy ?  */
   return ref;
-  static htf_thread_id next_id = HTF_THREAD_ID_INVALID;  // todo: pb with MPI ?
+  static ThreadId next_id = HTF_THREAD_ID_INVALID;  // todo: pb with MPI ?
   if (next_id == HTF_THREAD_ID_INVALID)
     next_id = ref;
   return next_id++;
 }
 
-htf_location_group_id _otf_get_location_group_id(OTF2_LocationGroupRef ref) {
+LocationGroupId _otf_get_location_group_id(OTF2_LocationGroupRef ref) {
   for (int i = 0; i < nb_location_group; i++) {
     if (location_group_map[i].location_group == ref)
       return location_group_map[i].htf_location_group;
@@ -112,7 +112,7 @@ htf_location_group_id _otf_get_location_group_id(OTF2_LocationGroupRef ref) {
   return HTF_LOCATION_GROUP_ID_INVALID;
 }
 
-htf_location_group_id _otf_register_location_group(OTF2_LocationGroupRef ref) {
+LocationGroupId _otf_register_location_group(OTF2_LocationGroupRef ref) {
   htf_assert(_otf_get_location_group_id(ref) == HTF_LOCATION_GROUP_ID_INVALID);
   int index = nb_location_group++;
   location_group_map = realloc(location_group_map, sizeof(struct location_group_map) * nb_location_group);
@@ -122,14 +122,14 @@ htf_location_group_id _otf_register_location_group(OTF2_LocationGroupRef ref) {
 }
 
 struct location_map {
-  htf_thread_id thread_id;
+  ThreadId thread_id;
   OTF2_LocationRef location;
 };
 
 struct location_map* location_map = NULL;
 int nb_location = 0;
 
-htf_thread_id _otf_get_location_id(OTF2_LocationRef ref) {
+ThreadId _otf_get_location_id(OTF2_LocationRef ref) {
   for (int i = 0; i < nb_location; i++) {
     if (location_map[i].location == ref)
       return location_map[i].thread_id;
@@ -137,7 +137,7 @@ htf_thread_id _otf_get_location_id(OTF2_LocationRef ref) {
   return HTF_THREAD_ID_INVALID;
 }
 
-htf_thread_id _otf_register_location(OTF2_LocationRef ref) {
+ThreadId _otf_register_location(OTF2_LocationRef ref) {
   htf_assert(_otf_get_location_id(ref) == HTF_THREAD_ID_INVALID);
   int index = nb_location++;
   location_map = realloc(location_map, sizeof(struct location_map) * nb_location);
@@ -152,8 +152,8 @@ OTF2_ErrorCode OTF2_GlobalDefWriter_WriteLocationGroup(OTF2_GlobalDefWriter* wri
                                                        OTF2_LocationGroupType locationGroupType,
                                                        OTF2_SystemTreeNodeRef systemTreeParent,
                                                        OTF2_LocationGroupRef creatingLocationGroup) {
-  htf_location_group_id lg_id = _otf_register_location_group(self);
-  htf_location_group_id parent_id = _otf_get_location_group_id(creatingLocationGroup);
+  LocationGroupId lg_id = _otf_register_location_group(self);
+  LocationGroupId parent_id = _otf_get_location_group_id(creatingLocationGroup);
 
   //  htf_write_global_add_subarchive(&writerHandle->archive, self);
   htf_write_define_location_group(&writerHandle->archive, lg_id, name, parent_id);
@@ -167,8 +167,8 @@ OTF2_ErrorCode OTF2_GlobalDefWriter_WriteLocation(OTF2_GlobalDefWriter* writerHa
                                                   OTF2_LocationType locationType,
                                                   uint64_t numberOfEvents,
                                                   OTF2_LocationGroupRef locationGroup) {
-  htf_thread_id thread_id = _otf_register_location(self);
-  htf_location_group_id parent_id = _otf_get_location_group_id(locationGroup);
+  ThreadId thread_id = _otf_register_location(self);
+  LocationGroupId parent_id = _otf_get_location_group_id(locationGroup);
 
   htf_write_define_location(&writerHandle->archive, thread_id, name, parent_id);
 

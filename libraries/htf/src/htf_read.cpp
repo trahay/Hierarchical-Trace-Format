@@ -21,7 +21,7 @@ ThreadReader::ThreadReader(Archive* archive, ThreadId threadId, int options) {
   if (debugLevel >= Verbose) {
     htf_log(Verbose, "init callstack for thread %d\n", threadId);
     htf_log(Verbose, "The trace contains:\n");
-    thread_trace->printSequence(Token(HTF_TYPE_SEQUENCE, 0));
+    thread_trace->printSequence(Token(TypeSequence, 0));
   }
 
   // And initialize the callstack
@@ -30,7 +30,7 @@ ThreadReader::ThreadReader(Archive* archive, ThreadId threadId, int options) {
   current_frame = 0;
   callstack_index[0] = 0;
   callstack_loop_iteration[0] = 0;
-  callstack_sequence[0].type = HTF_TYPE_SEQUENCE;
+  callstack_sequence[0].type = TypeSequence;
   callstack_sequence[0].id = 0;
 }
 
@@ -71,12 +71,12 @@ void ThreadReader::printCallstack() const {
     printf("%.*s[%d] ", i * 2, "                       ", i);
     thread_trace->printToken(current_sequence_id);
 
-    if (current_sequence_id.type == HTF_TYPE_LOOP) {
+    if (current_sequence_id.type == TypeLoop) {
       auto* loop = thread_trace->getLoop(current_sequence_id);
       printf(" iter %d/%d", callstack_loop_iteration[i],
              loop->nb_iterations[tokenCount.find(current_sequence_id)->second]);
       htf_assert(callstack_loop_iteration[i] < MAX_CALLSTACK_DEPTH);
-    } else if (current_sequence_id.type == HTF_TYPE_SEQUENCE) {
+    } else if (current_sequence_id.type == TypeSequence) {
       auto* sequence = thread_trace->getSequence(current_sequence_id);
       printf(" pos %d/%lu", callstack_index[i], sequence->size());
       htf_assert(callstack_index[i] < MAX_CALLSTACK_DEPTH);
@@ -88,14 +88,14 @@ void ThreadReader::printCallstack() const {
   }
 }
 EventSummary* ThreadReader::getEventSummary(Token event) const {
-  htf_assert(event.type == HTF_TYPE_EVENT);
+  htf_assert(event.type == TypeEvent);
   if (event.id < thread_trace->nb_events) {
     return &thread_trace->events[event.id];
   }
   htf_error("Given event (%d) was invalid\n", event.id);
 }
 htf_timestamp_t ThreadReader::getEventTimestamp(Token event, int occurence_id) const {
-  htf_assert(event.type == HTF_TYPE_EVENT);
+  htf_assert(event.type == TypeEvent);
   auto summary = getEventSummary(event);
   if (0 <= occurence_id && occurence_id < summary->nb_occurences) {
     return summary->durations->at(occurence_id);
@@ -103,7 +103,7 @@ htf_timestamp_t ThreadReader::getEventTimestamp(Token event, int occurence_id) c
   htf_error("Given occurence_id (%d) was invalid for event %d\n", occurence_id, event.id);
 }
 bool ThreadReader::isEndOfSequence(int current_index, Token sequence_id) const {
-  if (sequence_id.type == HTF_TYPE_SEQUENCE) {
+  if (sequence_id.type == TypeSequence) {
     auto* sequence = thread_trace->getSequence(sequence_id);
     return current_index >= sequence->size();
     // We are in a sequence and index is beyond the end of the sequence
@@ -111,7 +111,7 @@ bool ThreadReader::isEndOfSequence(int current_index, Token sequence_id) const {
   htf_error("The given sequence_id was the wrong type: %d\n", sequence_id.type);
 }
 bool ThreadReader::isEndOfLoop(int current_index, Token loop_id) const {
-  if (loop_id.type == HTF_TYPE_LOOP) {
+  if (loop_id.type == TypeLoop) {
     auto* loop = thread_trace->getLoop(loop_id);
     return current_index >= loop->nb_iterations.back();
     // We are in a loop and index is beyond the number of iterations
@@ -120,7 +120,7 @@ bool ThreadReader::isEndOfLoop(int current_index, Token loop_id) const {
 }
 
 htf_timestamp_t ThreadReader::getLoopDuration(Token loop_id) const {
-  htf_assert(loop_id.type == HTF_TYPE_LOOP);
+  htf_assert(loop_id.type == TypeLoop);
   htf_timestamp_t sum = 0;
   auto* loop = thread_trace->getLoop(loop_id);
   auto* sequence = thread_trace->getSequence(loop->repeated_token);
@@ -175,16 +175,16 @@ LoopOccurence& ThreadReader::getLoopOccurence(Token loop_id, int occurence_id) c
 Occurence& ThreadReader::getOccurence(htf::Token id, int occurence_id) const {
   auto occurence = new Occurence();
   switch (id.type) {
-  case HTF_TYPE_INVALID: {
+  case TypeInvalid: {
     htf_error("Wrong token was given");
   }
-  case HTF_TYPE_EVENT:
+  case TypeEvent:
     occurence->event_occurence = getEventOccurence(id, occurence_id);
     break;
-  case HTF_TYPE_SEQUENCE:
+  case TypeSequence:
     occurence->sequence_occurence = getSequenceOccurence(id, occurence_id);
     break;
-  case HTF_TYPE_LOOP:
+  case TypeLoop:
     occurence->loop_occurence = getLoopOccurence(id, occurence_id);
     break;
   }
@@ -245,7 +245,7 @@ void ThreadReader::leaveBlock() {
 
   if (debugLevel >= Debug && current_frame >= 0) {
     auto current_sequence = getCurSequence();
-    htf_assert(current_sequence.type == HTF_TYPE_LOOP || current_sequence.type == HTF_TYPE_SEQUENCE);
+    htf_assert(current_sequence.type == TypeLoop || current_sequence.type == TypeSequence);
   }
 }
 
@@ -262,7 +262,7 @@ void ThreadReader::moveToNextToken() {
   htf_assert(current_sequence_id.isIterable());
 
   /* First update the current loop / sequence. */
-  if (current_sequence_id.type == HTF_TYPE_SEQUENCE) {
+  if (current_sequence_id.type == TypeSequence) {
     if (isEndOfSequence(current_index + 1, current_sequence_id)) {
       /* We've reached the end of a sequence. Leave the block and give the next event. */
       leaveBlock();
@@ -284,17 +284,17 @@ void ThreadReader::moveToNextToken() {
 void ThreadReader::updateReadCurToken() {
   auto current_token = getCurToken();
   switch (current_token.type) {
-  case HTF_TYPE_SEQUENCE: {
+  case TypeSequence: {
     tokenCount[current_token]++;
     enterBlock(current_token);
     break;
   }
-  case HTF_TYPE_LOOP: {
+  case TypeLoop: {
     tokenCount[current_token]++;
     enterBlock(current_token);
     break;
   }
-  case HTF_TYPE_EVENT: {
+  case TypeEvent: {
     // Update the timestamps
     auto summary = getEventSummary(current_token);
     if ((options & ThreadReaderOptions::NoTimestamps) == 0) {
@@ -335,7 +335,7 @@ std::vector<TokenOccurence> ThreadReader::readCurrentLevel() {
     outputVector[i].occurence = new Occurence;
     outputVector[i].token = &current_sequence->tokens[i];
     switch (token.type) {
-    case HTF_TYPE_EVENT: {
+    case TypeEvent: {
       // Get the info
       auto& occurence = outputVector[i].occurence->event_occurence;
 
@@ -346,7 +346,7 @@ std::vector<TokenOccurence> ThreadReader::readCurrentLevel() {
       tokenCount[token]++;
       break;
     }
-    case HTF_TYPE_LOOP: {
+    case TypeLoop: {
       // Get the info
       auto& occurence = outputVector[i].occurence->loop_occurence;
       auto* loop = &thread_trace->loops[token.id];
@@ -375,7 +375,7 @@ std::vector<TokenOccurence> ThreadReader::readCurrentLevel() {
       tokenCount[token]++;
       break;
     }
-    case HTF_TYPE_SEQUENCE: {
+    case TypeSequence: {
       // Get the info
       outputVector[i].occurence->sequence_occurence = getSequenceOccurence(token, tokenCount[token]);
       if ((options & ThreadReaderOptions::NoTimestamps) == 0) {
@@ -444,7 +444,7 @@ int htf_read_thread_cur_token(htf::ThreadReader* reader) {
   htf_error("Not implemented yet!\n");
 }
 
-int htf_move_to_next_token(HTF(ThreadReaderName) * reader) {
+int htf_move_to_next_token(HTF(ThreadReader) * reader) {
   htf_error("Not implemented yet!\n");
 }
 

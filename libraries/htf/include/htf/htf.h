@@ -30,29 +30,25 @@ namespace htf {
  *   - a loop (a repetition of sequences)
  */
 
-#define TokenTypeName C_CXX(htf_token_type, TokenType)
 /**
  * Enumeration of token types
  */
-enum TokenTypeName { HTF_TYPE_INVALID = 0,
-  HTF_TYPE_EVENT = 1,
-  HTF_TYPE_SEQUENCE = 2,
-  HTF_TYPE_LOOP = 3 };
+enum TokenType { TypeInvalid = 0, TypeEvent = 1, TypeSequence = 2, TypeLoop = 3 };
 
 /**
  * Match numerical token type with a character
- * HTF_TYPE_INVALID = 'I'
- * HTF_TYPE_EVENT = 'E'
- * HTF_TYPE_SEQUENCE = 'S'
- * HTF_TYPE_LOOP = 'L'
+ * TypeInvalid = 'I'
+ * TypeEvent = 'E'
+ * TypeSequence = 'S'
+ * TypeLoop = 'L'
  * 'U' otherwise
  */
-#define HTF_TOKEN_TYPE_C(t)             \
-  (t.type) == HTF_TYPE_INVALID    ? 'I' \
-  : (t.type) == HTF_TYPE_EVENT    ? 'E' \
-  : (t.type) == HTF_TYPE_SEQUENCE ? 'S' \
-  : (t.type) == HTF_TYPE_LOOP     ? 'L' \
-                                  : 'U'
+#define HTF_TOKEN_TYPE_C(t)        \
+  (t.type) == TypeInvalid    ? 'I' \
+  : (t.type) == TypeEvent    ? 'E' \
+  : (t.type) == TypeSequence ? 'S' \
+  : (t.type) == TypeLoop     ? 'L' \
+                             : 'U'
 
 /**
  * Useful macros
@@ -62,21 +58,19 @@ enum TokenTypeName { HTF_TYPE_INVALID = 0,
 #define HTF_SEQUENCE_ID_INVALID HTF_TOKEN_ID_INVALID
 #define HTF_LOOP_ID_INVALID HTF_TOKEN_ID_INVALID
 
-#define TokenIdName C_CXX(htf_token_id, TokenId)
 /**
  * Definition of the type for a token ID
  */
-typedef uint32_t TokenIdName;
+typedef uint32_t TokenId;
 
 /**
  * A token is defined as a structure composed of
  *  - its type (2bits)
  *  - its id (30bits )
  */
-#define TokenName C_CXX(htf_token, Token)
-typedef struct TokenName {
-  enum TokenTypeName type : 2;
-  TokenIdName id : 30;
+typedef struct Token {
+  enum TokenType type : 2;
+  TokenId id : 30;
 #ifdef __cplusplus
   Token(TokenType type, uint32_t id) {
     this->type = type;
@@ -84,7 +78,7 @@ typedef struct TokenName {
   }
   // Default token is an invalid one
   Token() {
-    type = HTF_TYPE_INVALID;
+    type = TypeInvalid;
     id = HTF_TOKEN_ID_INVALID;
   }
 
@@ -92,20 +86,19 @@ typedef struct TokenName {
   bool operator==(const Token& other) const { return (other.type == type && other.id == id); }
   bool operator<(const Token& other) const { return (type < other.type || (type == other.type && id < other.id)); }
   /* Returns true if the Token is a Sequence or a Loop. */
-  inline bool isIterable() const { return type == HTF_TYPE_SEQUENCE || type == HTF_TYPE_LOOP; }
+  inline bool isIterable() const { return type == TypeSequence || type == TypeLoop; }
 #endif
-} TokenName;
+} Token;
 
-#define HTF_EVENT_ID(i) HTF(TokenName)(HTF(HTF_TYPE_EVENT), i)
-#define HTF_SEQUENCE_ID(i) HTF(TokenName)(HTF(HTF_TYPE_SEQUENCE), i)
-#define HTF_LOOP_ID(i) HTF(TokenName)(HTF(HTF_TYPE_LOOP), i)
+#define HTF_EVENT_ID(i) HTF(Token)(HTF(TypeEvent), i)
+#define HTF_SEQUENCE_ID(i) HTF(Token)(HTF(TypeSequence), i)
+#define HTF_LOOP_ID(i) HTF(Token)(HTF(TypeLoop), i)
 
 /*************************** Events **********************/
-#define EventTypeName C_CXX(htf_event_type, EventType)
 /**
  * Enumeration of event types
  */
-enum EventTypeName {
+enum EventType {
   HTF_BLOCK_START,
   HTF_BLOCK_END,
   HTF_SINGLETON,
@@ -114,8 +107,7 @@ enum EventTypeName {
 /**
  * Enumeration of the different events that are recorded by HTF
  */
-#define RecordName C_CXX(htf_record, Record)
-enum RecordName {
+enum Record {
   HTF_EVENT_BUFFER_FLUSH = 0,            /** Event record identifier for the BufferFlush event. */
   HTF_EVENT_MEASUREMENT_ON_OFF = 1,      /** Event record identifier for the MeasurementOnOff event. */
   HTF_EVENT_ENTER = 2,                   /** Event record identifier for the Enter event. */
@@ -186,12 +178,11 @@ enum RecordName {
  *  - enum Record record: the ID of the event recorded in the above enumeration of events
  *  - uint8_t event_data[256]: data related to the events (parameters of functions etc)
  */
-#define EventName C_CXX(htf_event, Event)
-typedef struct EventName {
-  enum RecordName record;
+typedef struct Event {
+  enum Record record;
   uint8_t event_size;
   uint8_t event_data[256];  // todo: align on 256
-} __attribute__((packed)) EventName;
+} __attribute__((packed)) Event;
 
 /*************************** Sequences **********************/
 #ifdef __cplusplus
@@ -220,18 +211,18 @@ struct TokenCountMap : public std::map<Token, size_t> {
  *  - uint_32_t hash: Hash value according to the hash32 function. (see htf_hash.h)
  *  - std::vector* tokens: Array to store the sequence of tokens
  */
-#define SequenceName C_CXX(htf_sequence, Sequence)
-typedef struct SequenceName {
-  LinkedVectorName* durations CXX({new LinkedVector()});
+typedef struct Sequence {
+  LinkedVector* durations CXX({new LinkedVector()});
   uint32_t hash CXX({0});
 #ifdef __cplusplus
   std::vector<Token> tokens;
   [[nodiscard]] size_t size() const { return tokens.size(); }
   const TokenCountMap& getTokenCount(const struct Thread* thread);
+
  private:
   TokenCountMap tokenCount;
 #endif
-} SequenceName;
+} Sequence;
 
 /*************************** Loop **********************/
 
@@ -244,45 +235,40 @@ typedef struct SequenceName {
  * - htf_token_t repeated_token: Token of the sequence being repeated
  * - struct Token id: Self-id of the loop
  */
-#define LoopName C_CXX(htf_loop, Loop)
-typedef struct LoopName {
-  TokenName repeated_token;
-  TokenName self_id;
+typedef struct Loop {
+  Token repeated_token;
+  Token self_id;
   CXX(std::vector<uint> nb_iterations;)
   CXX(void addIteration();)
-} LoopName;
+} Loop;
 
 /**
  * Summary for an event.
  */
-#define EventSummaryName C_CXX(htf_event_summary, EventSummary)
-typedef struct EventSummaryName {
-  C_CXX(htf_token_id, TokenId) id;
-  EventName event;
-  LinkedVectorName* durations CXX({new LinkedVector()});
+typedef struct EventSummary {
+  TokenId id;
+  Event event;
+  LinkedVector* durations CXX({new LinkedVector()});
   // TODO use NB_TIMESTAMP_DEFAULT as the default size for that
   size_t nb_occurences;
 
   uint8_t* attribute_buffer;
   size_t attribute_buffer_size;
   size_t attribute_pos;
-} EventSummaryName;
+} EventSummary;
 
-#define ThreadIdName C_CXX(htf_thread_id, ThreadId)
 /**
  * Define a thread structure for HTF format
  */
-typedef uint32_t ThreadIdName;
-#define HTF_THREAD_ID_INVALID ((HTF(ThreadIdName))HTF_UNDEFINED_UINT32)
+typedef uint32_t ThreadId;
+#define HTF_THREAD_ID_INVALID ((HTF(ThreadId))HTF_UNDEFINED_UINT32)
 
-#define LocationGroupIdName C_CXX(htf_location_group_id, LocationGroupId)
-typedef uint32_t LocationGroupIdName;
-#define HTF_LOCATION_GROUP_ID_INVALID ((HTF(LocationGroupIdName))HTF_UNDEFINED_UINT32)
-#define HTF_MAIN_LOCATION_GROUP_ID ((HTF(LocationGroupIdName))HTF_LOCATION_GROUP_ID_INVALID - 1)
+typedef uint32_t LocationGroupId;
+#define HTF_LOCATION_GROUP_ID_INVALID ((HTF(LocationGroupId))HTF_UNDEFINED_UINT32)
+#define HTF_MAIN_LOCATION_GROUP_ID ((HTF(LocationGroupId))HTF_LOCATION_GROUP_ID_INVALID - 1)
 
-#define RefName C_CXX(htf_ref_t, Ref)
 /** A reference for everything after that. */
-typedef uint32_t RefName;
+typedef uint32_t Ref;
 
 #define HTF_UNDEFINED_UINT8 ((uint8_t)(~((uint8_t)0u)))
 #define HTF_UNDEFINED_INT8 ((int8_t)(~(HTF_UNDEFINED_UINT8 >> 1)))
@@ -294,67 +280,60 @@ typedef uint32_t RefName;
 #define HTF_UNDEFINED_INT64 ((int64_t)(~(HTF_UNDEFINED_UINT64 >> 1)))
 #define HTF_UNDEFINED_TYPE HTF_UNDEFINED_UINT8
 
-#define StringRefName C_CXX(htf_string_ref_t, StringRef)
 /**
  * Define a string reference structure used by HTF format
  * It has an ID and an associated char* with its length
  */
-typedef RefName StringRefName;
-#define HTF_STRING_REF_INVALID ((StringRefName)HTF_UNDEFINED_UINT32)
+typedef Ref StringRef;
+#define HTF_STRING_REF_INVALID ((StringRef)HTF_UNDEFINED_UINT32)
 
-#define StringName C_CXX(htf_string, String)
-typedef struct StringName {
-  StringRefName string_ref;
+typedef struct String {
+  StringRef string_ref;
   char* str;
   int length;
-} StringName;
+} String;
 
-#define RegionRefName C_CXX(htf_region_ref_t, RegionRef)
 /**
  * Define a region that has an ID and a htf_string_ref_t description
  */
-typedef RefName RegionRefName;
-#define HTF_REGIONREF_INVALID ((RegionRefName)HTF_UNDEFINED_UINT32)
+typedef Ref RegionRef;
+#define HTF_REGIONREF_INVALID ((RegionRef)HTF_UNDEFINED_UINT32)
 
-#define RegionName C_CXX(htf_region, Region)
-typedef struct RegionName {
-  RegionRefName region_ref;
-  StringRefName string_ref;
+typedef struct Region {
+  RegionRef region_ref;
+  StringRef string_ref;
   /* TODO: add other information (eg. file, line number, etc.)  */
-} RegionName;
+} Region;
 
-#define AttributeRefName C_CXX(htf_attribute_ref, AttributeRef)
-typedef RefName AttributeRefName;
+typedef Ref AttributeRef;
 
-/** @brief Wrapper for enum @eref{AttributeTypeName}. */
+/** @brief Wrapper for enum @eref{AttributeType}. */
 typedef uint8_t htf_type_t;
 
-#define AttributeName C_CXX(htf_attribute, Attribute)
-typedef struct AttributeName {
-  AttributeRefName attribute_ref;
-  StringRefName name;
-  StringRefName description;
+typedef struct Attribute {
+  AttributeRef attribute_ref;
+  StringRef name;
+  StringRef description;
   htf_type_t type;
-} AttributeName;
+} Attribute;
 
 /**
  * A thread contains streams of events.
  * It can be a regular thread (eg. a pthread), or a GPU stream
  */
-#define ThreadName C_CXX(htf_thread, Thread)
-typedef struct ThreadName {
-  struct C_CXX(htf_archive, Archive) * archive;
-  C_CXX(htf_thread_id, ThreadId) id;
+typedef struct Thread {
+  struct Archive* archive;
+  ThreadId id;
 
-  EventSummaryName* events;
+  EventSummary* events;
   unsigned nb_allocated_events;
   unsigned nb_events;
 
-  SequenceName** sequences;
+  Sequence** sequences;
   unsigned nb_allocated_sequences;
   unsigned nb_sequences;
 
-  LoopName* loops;
+  Loop* loops;
   unsigned nb_allocated_loops;
   unsigned nb_loops;
 #ifdef __cplusplus
@@ -399,7 +378,7 @@ typedef struct ThreadName {
   /* Create a blank new Thread. This is used when reading the trace. */
   Thread() = default;
 #endif
-} ThreadName;
+} Thread;
 
 CXX(
 };) /* namespace htf */
@@ -408,69 +387,68 @@ extern "C" {
 #endif
   /*************************** C Functions **********************/
   /* Allocates a new thread */
-  extern HTF(ThreadName) * htf_thread_new(void);
+  extern HTF(Thread) * htf_thread_new(void);
   /**
    * Return the thread name of thread thread
    */
-  extern const char* htf_thread_get_name(HTF(ThreadName) * thread);
+  extern const char* htf_thread_get_name(HTF(Thread) * thread);
 
   /**
    * Print the content of sequence seq_id
    */
-  extern void htf_print_sequence(HTF(ThreadName) * thread, HTF(TokenName) seq_id);
+  extern void htf_print_sequence(HTF(Thread) * thread, HTF(Token) seq_id);
 
   /**
    * Print the subset of a repeated_token array
    */
-  extern void htf_print_token_array(HTF(ThreadName) * thread, HTF(TokenName) * token_array, int index_start,
-                                    int index_stop);
+  extern void htf_print_token_array(HTF(Thread) * thread, HTF(Token) * token_array, int index_start, int index_stop);
 
   /**
    * Print a repeated_token
    */
-  extern void htf_print_token(HTF(ThreadName) * thread, HTF(TokenName) token);
+  extern void htf_print_token(HTF(Thread) * thread, HTF(Token) token);
 
   /**
    * Print an event
    */
-  extern void htf_print_event(HTF(ThreadName) * thread, HTF(EventName) * e);
+  extern void htf_print_event(HTF(Thread) * thread, HTF(Event) * e);
 
   /**
    * Return the loop whose id is loop_id
    *  - return NULL if loop_id is unknown
    */
-  extern struct HTF(LoopName) * htf_get_loop(HTF(ThreadName) * thread_trace, HTF(TokenName) loop_id);
+  extern struct HTF(Loop) * htf_get_loop(HTF(Thread) * thread_trace, HTF(Token) loop_id);
 
   /*
    * Return the sequence whose id is sequence_id
    *  - return NULL if sequence_id is unknown
    */
-  extern struct HTF(SequenceName) * htf_get_sequence(HTF(ThreadName) * thread_trace, HTF(TokenName) seq_id);
+  extern struct HTF(Sequence) * htf_get_sequence(HTF(Thread) * thread_trace, HTF(Token) seq_id);
 
   /**
    * Return the event whose id is event_id
    *  - return NULL if event_id is unknown
    */
-  extern struct HTF(EventName) * htf_get_event(HTF(ThreadName) * thread_trace, HTF(TokenName) evt_id);
+  extern struct HTF(Event) * htf_get_event(HTF(Thread) * thread_trace, HTF(Token) evt_id);
 
   /**
    * Get the nth token of a given Sequence.
    */
-  extern HTF(TokenName) htf_get_token(HTF(ThreadName) * trace, HTF(TokenName) sequence, int index);
+  extern HTF(Token) htf_get_token(HTF(Thread) * trace, HTF(Token) sequence, int index);
   // Says here that we shouldn't send a htf::Token, but that's because it doesn't know
   // We made the htf_token type that matches it. This works as long as the C++ and C version
   // of the struct both have the same elements. Don't care about the rest.
 
   /* Returns the size of the given sequence. */
-  extern size_t htf_sequence_get_size(HTF(SequenceName) * sequence);
+  extern size_t htf_sequence_get_size(HTF(Sequence) * sequence);
   /* Returns the nth token of the given sequence. */
-  extern HTF(TokenName) htf_sequence_get_token(HTF(SequenceName) * sequence, int index);
+  extern HTF(Token) htf_sequence_get_token(HTF(Sequence) * sequence, int index);
   /* Returns the number of similar loops. */
-  extern size_t htf_loop_count(HTF(LoopName) * loop);
+  extern size_t htf_loop_count(HTF(Loop) * loop);
   /* Returns the number of loops for the nth loop. */
-  extern size_t htf_loop_get_count(HTF(LoopName) * loop, size_t index);
-  extern HTF(TokenName) * htf_loop_get_data();
-  extern HTF(TokenName) * htf_sequence_get_data();
+  extern size_t htf_loop_get_count(HTF(Loop) * loop, size_t index);
+  extern HTF(Token) * htf_loop_get_data();
+  extern HTF(Token) * htf_sequence_get_data();
 
 #ifdef __cplusplus
 };

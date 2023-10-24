@@ -181,7 +181,7 @@ int new_location(OTF2_Archive* archive, OTF2_LocationRef location) {
   archive->def_writers[index] = malloc(sizeof(OTF2_DefWriter));
   archive->def_writers[index]->locationRef = location;
   archive->def_writers[index]->archive = &archive->archive;
-  archive->def_writers[index]->thread_writer = malloc(sizeof(struct htf_thread_writer));
+  archive->def_writers[index]->thread_writer = malloc(sizeof(struct ThreadWriter));
 
   htf_write_thread_open(&archive->archive, archive->def_writers[index]->thread_writer, location);
 

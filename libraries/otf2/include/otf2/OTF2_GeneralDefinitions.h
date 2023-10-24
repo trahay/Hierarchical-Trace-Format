@@ -105,7 +105,7 @@ typedef uint8_t OTF2_IoParadigmRef;
 #define OTF2_UNDEFINED_IO_PARADIGM ((OTF2_IoParadigmRef)OTF2_UNDEFINED_UINT8)
 
 /** @brief Type used to indicate a reference to a @eref{String} definition */
-typedef htf_string_ref_t OTF2_StringRef;
+typedef StringRef OTF2_StringRef;
 /** @brief The invalid value for a reference to a @eref{String} definition */
 #define OTF2_UNDEFINED_STRING ((OTF2_StringRef)HTF_STRINGREF_INVALID)
 
@@ -130,7 +130,7 @@ typedef uint64_t OTF2_LocationRef;
 #define OTF2_UNDEFINED_LOCATION ((OTF2_LocationRef)OTF2_UNDEFINED_UINT64)
 
 /** @brief Type used to indicate a reference to a @eref{Region} definition */
-typedef htf_region_ref_t OTF2_RegionRef;
+typedef RegionRef OTF2_RegionRef;
 /** @brief The invalid value for a reference to a @eref{Region} definition */
 #define OTF2_UNDEFINED_REGION ((OTF2_RegionRef)HTF_REGIONREF_INVALID)
 

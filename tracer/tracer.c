@@ -13,9 +13,9 @@
 #include "tracer.h"
 
 static struct htf_archive trace;
-static htf_location_group_id_t process_id;
+static LocationGroupId_t process_id;
 static _Thread_local struct htf_thread_writer* thread_writer = NULL;
-static _Thread_local htf_thread_id_t thread_id;
+static _Thread_local ThreadId_t thread_id;
 static _Thread_local int thread_rank;
 static _Atomic int nb_threads = 0;
 static struct htf_thread_writer** thread_writers = NULL;
@@ -32,15 +32,15 @@ static htf_string_ref_t _register_string(char* str) {
   return ref;
 }
 
-static htf_location_group_id_t _new_location_group() {
-  static _Atomic htf_location_group_id_t next_id = 0;
-  htf_location_group_id_t id = next_id++;
+static LocationGroupId_t _new_location_group() {
+  static _Atomic LocationGroupId_t next_id = 0;
+  LocationGroupId_t id = next_id++;
   return id;
 }
 
-static htf_thread_id_t _new_thread() {
-  static _Atomic htf_thread_id_t next_id = 0;
-  htf_thread_id_t id = next_id++;
+static ThreadId_t _new_thread() {
+  static _Atomic ThreadId_t next_id = 0;
+  ThreadId_t id = next_id++;
   return id;
 }
 

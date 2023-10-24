@@ -10,65 +10,61 @@
 namespace htf {
 #endif
 
-#define LocationGroupName C_CXX(htf_location_group, LocationGroup)
 /**
  * A location_group can be a process, a machine, etc.
  */
-struct LocationGroupName {
-  LocationGroupIdName id;
-  StringRefName name;
-  LocationGroupIdName parent;
+struct LocationGroup {
+  LocationGroupId id;
+  StringRef name;
+  LocationGroupId parent;
 };
 
-#define LocationName C_CXX(htf_location, Location)
 /**
  * A location is basically a thread (or GPU stream)
  */
-struct LocationName {
-  ThreadIdName id;
-  StringRefName name;
-  LocationGroupIdName parent;
+struct Location {
+  ThreadId id;
+  StringRef name;
+  LocationGroupId parent;
 };
 
-#define DefinitionName C_CXX(htf_definition, Definition)
 /**
  * A definition describes a function
  */
-typedef struct DefinitionName {
+typedef struct Definition {
 #ifdef __cplusplus
  public:
   std::vector<String> strings;
   std::vector<Region> regions;
   std::vector<Attribute> attributes;
   [[nodiscard]] const String* getString(StringRef) const;
-  void addString(StringRefName, const char*);
+  void addString(StringRef, const char*);
   [[nodiscard]] const Region* getRegion(RegionRef) const;
-  void addRegion(RegionRefName, StringRefName);
+  void addRegion(RegionRef, StringRef);
   [[nodiscard]] const Attribute* getAttribute(AttributeRef) const;
-  void addAttribute(AttributeRefName, StringRefName, StringRefName, htf_type_t);
+  void addAttribute(AttributeRef, StringRef, StringRef, htf_type_t);
 #endif
-} DefinitionName;
+} Definition;
 
-#define ArchiveName C_CXX(htf_archive, Archive)
 /**
  * An archive represents a program
  */
-typedef struct ArchiveName {
+typedef struct Archive {
   char* dir_name;
   char* trace_name;
   char* fullpath;
   pthread_mutex_t lock;
 
-  LocationGroupIdName id;
-  struct ArchiveName* global_archive;
-  struct DefinitionName* definitions CXX({new Definition()});
+  LocationGroupId id;
+  struct Archive* global_archive;
+  struct Definition* definitions CXX({new Definition()});
   /* a list of threads */
-  struct ThreadName** threads;
+  struct Thread** threads;
   int nb_threads;
   int nb_allocated_threads;
 
   /* a list of archive */
-  struct ArchiveName** archive_list;
+  struct Archive** archive_list;
   int nb_archives;
   int nb_allocated_archives;
   /* Indicates whether there are timestamps in there.*/
@@ -77,7 +73,7 @@ typedef struct ArchiveName {
   std::vector<Location> locations{std::vector<Location>()};
   std::vector<LocationGroup> location_groups{std::vector<LocationGroup>()};
 
-  [[nodiscard]] Thread* getThread(ThreadIdName) const;
+  [[nodiscard]] Thread* getThread(ThreadId) const;
   [[nodiscard]] const struct String* getString(StringRef) const;
   [[nodiscard]] const struct Region* getRegion(RegionRef) const;
   [[nodiscard]] const struct Attribute* getAttribute(AttributeRef) const;
@@ -93,49 +89,45 @@ typedef struct ArchiveName {
   void finalize() { htf_error("Not implemented yet !\n"); };
   void close();
 
-  [[nodiscard]] const LocationGroup* getLocationGroup(LocationGroupIdName) const;
-  [[nodiscard]] const Location* getLocation(ThreadIdName) const;
+  [[nodiscard]] const LocationGroup* getLocationGroup(LocationGroupId) const;
+  [[nodiscard]] const Location* getLocation(ThreadId) const;
 #endif
-} ArchiveName;
+} Archive;
 
 #ifdef __cplusplus
 } /* namespace htf */
 extern "C" {
 #endif
 
-extern HTF(ArchiveName) * htf_archive_new(void);
+extern HTF(Archive) * htf_archive_new(void);
 
-extern struct HTF(ThreadName) * htf_archive_get_thread(HTF(ArchiveName) * archive, HTF(ThreadIdName) thread_id);
+extern struct HTF(Thread) * htf_archive_get_thread(HTF(Archive) * archive, HTF(ThreadId) thread_id);
 
-extern const struct HTF(LocationGroupName) *
-  htf_archive_get_location_group(HTF(ArchiveName) * archive, HTF(LocationGroupIdName) location_group);
-extern const struct HTF(LocationName) *
-  htf_archive_get_location(HTF(ArchiveName) * archive, HTF(ThreadIdName) thread_id);
+extern const struct HTF(LocationGroup) *
+  htf_archive_get_location_group(HTF(Archive) * archive, HTF(LocationGroupId) location_group);
+extern const struct HTF(Location) * htf_archive_get_location(HTF(Archive) * archive, HTF(ThreadId) thread_id);
 
-extern void htf_archive_register_string(HTF(ArchiveName) * archive, HTF(StringRefName) string_ref, const char* string);
+extern void htf_archive_register_string(HTF(Archive) * archive, HTF(StringRef) string_ref, const char* string);
 
-extern void htf_archive_register_region(HTF(ArchiveName) * archive,
-                                        HTF(RegionRefName) region_ref,
-                                        HTF(StringRefName) string_ref);
+extern void htf_archive_register_region(HTF(Archive) * archive, HTF(RegionRef) region_ref, HTF(StringRef) string_ref);
 
-extern void htf_archive_register_attribute(HTF(ArchiveName) * archive,
-                                           HTF(AttributeRefName) attribute_ref,
-                                           HTF(StringRefName) name_ref,
-                                           HTF(StringRefName) description_ref,
+extern void htf_archive_register_attribute(HTF(Archive) * archive,
+                                           HTF(AttributeRef) attribute_ref,
+                                           HTF(StringRef) name_ref,
+                                           HTF(StringRef) description_ref,
                                            HTF(htf_type_t) type);
 
-extern const struct HTF(StringName) * htf_archive_get_string(HTF(ArchiveName) * archive, HTF(StringRefName) string_ref);
+extern const struct HTF(String) * htf_archive_get_string(HTF(Archive) * archive, HTF(StringRef) string_ref);
 
-extern const struct HTF(RegionName) * htf_archive_get_region(HTF(ArchiveName) * archive, HTF(RegionRefName) region_ref);
+extern const struct HTF(Region) * htf_archive_get_region(HTF(Archive) * archive, HTF(RegionRef) region_ref);
 
-extern const struct HTF(AttributeName) *
-  htf_archive_get_attribute(HTF(ArchiveName) * archive, HTF(AttributeRefName) attribute_ref);
+extern const struct HTF(Attribute) * htf_archive_get_attribute(HTF(Archive) * archive, HTF(AttributeRef) attribute_ref);
 #ifdef __cplusplus
 };
 #endif /* __cplusplus */
 
 /* -*-
-  mode: c;
+  mode: c++;
   c-file-style: "k&r";
   c-basic-offset 2;
   tab-width 2 ;

@@ -16,7 +16,7 @@ Event* Thread::getEvent(Token token) const {
 }
 
 EventSummary* Thread::getEventSummary(Token token) const {
-  htf_assert(token.type == TokenType::HTF_TYPE_EVENT);
+  htf_assert(token.type == TokenType::TypeEvent);
   htf_assert(token.id < this->nb_events);
   return &this->events[token.id];
 }
@@ -26,7 +26,7 @@ EventSummary* Thread::getEventSummary(Token token) const {
  * Aborts if the token is incorrect.
  */
 Sequence* Thread::getSequence(Token token) const {
-  htf_assert(token.type == TokenType::HTF_TYPE_SEQUENCE);
+  htf_assert(token.type == TokenType::TypeSequence);
   htf_assert(token.id < this->nb_sequences);
   return this->sequences[token.id];
 }
@@ -35,13 +35,13 @@ Sequence* Thread::getSequence(Token token) const {
  * Aborts if the token is incorrect.
  */
 Loop* Thread::getLoop(Token token) const {
-  htf_assert(token.type == TokenType::HTF_TYPE_LOOP);
+  htf_assert(token.type == TokenType::TypeLoop);
   htf_assert(token.id < this->nb_loops);
   return &this->loops[token.id];
 }
 
 Token& Thread::getToken(Token sequenceToken, int index) const {
-  if (sequenceToken.type == HTF_TYPE_SEQUENCE) {
+  if (sequenceToken.type == TypeSequence) {
     auto sequence = getSequence(sequenceToken);
     if (!sequence) {
       htf_error("Invalid sequence ID: %d\n", sequenceToken.id);
@@ -50,7 +50,7 @@ Token& Thread::getToken(Token sequenceToken, int index) const {
       htf_error("Invalid index (%d) in sequence %d\n", index, sequenceToken.id);
     }
     return sequence->tokens[index];
-  } else if (sequenceToken.type == HTF_TYPE_LOOP) {
+  } else if (sequenceToken.type == TypeLoop) {
     auto loop = getLoop(sequenceToken);
     if (!loop) {
       htf_error("Invalid loop ID: %d\n", sequenceToken.id);
@@ -65,16 +65,16 @@ Token& Thread::getToken(Token sequenceToken, int index) const {
  */
 void Thread::printToken(Token token) const {
   switch (token.type) {
-  case HTF_TYPE_EVENT: {
+  case TypeEvent: {
 #define ET2C(et) (((et) == HTF_EVENT_ENTER ? 'E' : (et) == HTF_EVENT_LEAVE ? 'L' : 'S'))
     Event* event = getEvent(token);
     printf("E%x_%c", token.id, ET2C(event->record));
     break;
   }
-  case HTF_TYPE_SEQUENCE:
+  case TypeSequence:
     printf("S%x", token.id);
     break;
-  case HTF_TYPE_LOOP:
+  case TypeLoop:
     printf("L%x", token.id);
     break;
   default:
@@ -147,12 +147,12 @@ const TokenCountMap& Sequence::getTokenCount(const Thread* thread) {
     for (auto t = tokens.rbegin(); t != tokens.rend(); ++t) {
       tokenCount[*t]++;
       switch (t->type) {
-      case HTF_TYPE_SEQUENCE: {
+      case TypeSequence: {
         auto* s = thread->getSequence(*t);
         tokenCount += s->getTokenCount(thread);
         break;
       }
-      case HTF_TYPE_LOOP: {
+      case TypeLoop: {
         auto* l = thread->getLoop(*t);
         auto loopTokenCount = thread->getSequence(l->repeated_token)->getTokenCount(thread);
         tokenCount += loopTokenCount * l->nb_iterations[l->nb_iterations.size() - tokenCount[*t]];
@@ -215,7 +215,7 @@ htf::Token htf_sequence_get_token(htf::Sequence* sequence, int index) {
 size_t htf_loop_count(htf::Loop* loop) {
   return loop->nb_iterations.size();
 };
-size_t htf_loop_get_count(HTF(LoopName) * loop, size_t index) {
+size_t htf_loop_get_count(HTF(Loop) * loop, size_t index) {
   return loop->nb_iterations[index];
 };
 

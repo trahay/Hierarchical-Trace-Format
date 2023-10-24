@@ -13,66 +13,60 @@ namespace htf {
 #endif
 #define MAX_CALLSTACK_DEPTH 100
 
-#define ThreadReaderOptionsName C_CXX(htf_thread_reader_options, ThreadReaderOptions)
-enum ThreadReaderOptionsName {
-  C_CXX(htf_thread_reader_option_none, None) = 0,
-  C_CXX(htf_thread_reader_option_show_structure, ShowStructure) = 1,
-  C_CXX(htf_thread_reader_option_no_timestamps, NoTimestamps) = 2,
+enum ThreadReaderOptions {
+  None = 0,
+  ShowStructure = 1,
+  NoTimestamps = 2,
 };
 
-#define EventOccurenceName C_CXX(htf_event_occurence, EventOccurence)
 /** Only used when reading a trace, links an event with a timestamp. */
-typedef struct EventOccurenceName {
-  struct EventName* event;
+typedef struct EventOccurence {
+  struct Event* event;
   htf_timestamp_t timestamp;
   htf_timestamp_t duration;
-  AttributeListName* attributes;
-} EventOccurenceName;
+  AttributeList* attributes;
+} EventOccurence;
 
-#define SequenceOccurenceName C_CXX(htf_sequence_occurence, SequenceOccurence)
-typedef struct SequenceOccurenceName {
-  struct SequenceName* sequence;
-  struct C_CXX(htf_savestate, Savestate) * savestate;
+typedef struct SequenceOccurence {
+  struct Sequence* sequence;
+  struct Savestate* savestate;
   htf_timestamp_t timestamp;
   htf_timestamp_t duration;
   /**Occurences of the events in this sequence. */
   struct TokenOccurence* full_sequence;
-} SequenceOccurenceName;
+} SequenceOccurence;
 
-#define LoopOccurenceName C_CXX(htf_loop_occurence, LoopOccurence)
-typedef struct LoopOccurenceName {
-  struct LoopName* loop;
+typedef struct LoopOccurence {
+  struct Loop* loop;
   unsigned int nb_iterations;
   htf_timestamp_t timestamp;
   htf_timestamp_t duration;
-  struct SequenceOccurenceName* full_loop;
-  struct SequenceOccurenceName loop_summary;
-} LoopOccurenceName;
+  struct SequenceOccurence* full_loop;
+  struct SequenceOccurence loop_summary;
+} LoopOccurence;
 
-#define OccurenceName C_CXX(htf_occurence, Occurence)
-typedef union OccurenceName {
-  struct LoopOccurenceName loop_occurence;
-  struct SequenceOccurenceName sequence_occurence;
-  struct EventOccurenceName event_occurence;
-} OccurenceName;
+typedef union Occurence {
+  struct LoopOccurence loop_occurence;
+  struct SequenceOccurence sequence_occurence;
+  struct EventOccurence event_occurence;
+} Occurence;
 
 typedef struct TokenOccurence {
   Token* token;
   Occurence* occurence;
 } TokenOccurence;
 
-#define ThreadReaderName C_CXX(htf_thread_reader, ThreadReader)
-typedef struct ThreadReaderName {
+typedef struct ThreadReader {
  public:
   /** Archive being read by this reader. */
-  struct ArchiveName* archive;
+  struct Archive* archive;
   /** Thread being read. */
-  struct ThreadName* thread_trace;
+  struct Thread* thread_trace;
   /** The current referential timestamp. */
   htf_timestamp_t referential_timestamp;
 
   /** Stack containing the sequences/loops being read. */
-  TokenName callstack_sequence[MAX_CALLSTACK_DEPTH];
+  Token callstack_sequence[MAX_CALLSTACK_DEPTH];
 
   /** Stack containing the index in the sequence or the loop iteration. */
   int callstack_index[MAX_CALLSTACK_DEPTH];
@@ -157,18 +151,17 @@ typedef struct ThreadReaderName {
   /** Skips the given Sequence and updates the reader. */
   void skipSequence(Token token) { htf_error("Not implemented yet\n"); };
 #endif
-} ThreadReaderName;
+} ThreadReader;
 
-#define SavestateName C_CXX(htf_savestate, Savestate)
 /**
  * A savestate of a htf_thread_reader.
  */
-typedef struct SavestateName {
+typedef struct Savestate {
   /** The current referential timestamp. */
   htf_timestamp_t referential_timestamp;
 
   /** Stack containing the sequences/loops being read. */
-  TokenName* callstack_sequence;
+  Token* callstack_sequence;
 
   /** Stack containing the index in the sequence or the loop iteration. */
   int* callstack_index;
@@ -186,7 +179,7 @@ typedef struct SavestateName {
   /* Creates a Savestate (ie a screenshot) of the reader at the moment. */
   Savestate(const ThreadReader* reader);
 #endif
-} SavestateName;
+} Savestate;
 
 #ifdef __cplusplus
 }; /* namespace htf */
@@ -197,29 +190,28 @@ extern "C" {
 #endif
 
 /* Creates and initializes a Thread Reader. */
-extern HTF(ThreadReaderName) * htf_new_thread_reader(HTF(ArchiveName) * archive,
-                                                     HTF(ThreadIdName) thread_id,
-                                                     enum HTF(ThreadReaderOptionsName) options);
+extern HTF(ThreadReader) *
+  htf_new_thread_reader(HTF(Archive) * archive, HTF(ThreadId) thread_id, enum HTF(ThreadReaderOptions) options);
 /* Enter a block (push a new frame in the callstack) */
-extern void htf_thread_reader_enter_block(HTF(ThreadReaderName) * reader, HTF(TokenName) new_block);
+extern void htf_thread_reader_enter_block(HTF(ThreadReader) * reader, HTF(Token) new_block);
 /* Leaves the current block */
-extern void htf_thread_reader_leave_block(HTF(ThreadReaderName) * reader);
+extern void htf_thread_reader_leave_block(HTF(ThreadReader) * reader);
 
 /** Creates a savestate from a reader. */
-extern HTF(SavestateName) * create_savestate(HTF(ThreadReaderName) * reader);
+extern HTF(Savestate) * create_savestate(HTF(ThreadReader) * reader);
 /** Loads a savestate to a reader. */
-extern void load_savestate(HTF(ThreadReaderName) * reader, HTF(SavestateName) * savestate);
+extern void load_savestate(HTF(ThreadReader) * reader, HTF(Savestate) * savestate);
 
 /* Reads the current token and writes it somewhere / returns it. TODO: Implement this. */
-extern int htf_read_thread_cur_token(HTF(ThreadReaderName) * reader);
+extern int htf_read_thread_cur_token(HTF(ThreadReader) * reader);
 /** Moves the reader to the next repeated_token in the thread. */
-extern int htf_move_to_next_token(HTF(ThreadReaderName) * reader);
+extern int htf_move_to_next_token(HTF(ThreadReader) * reader);
 
 /** Reads the whole current level, and writes it somewhere / returns it. TODO: Implement this.*/
-extern int htf_read_thread_cur_level(HTF(ThreadReaderName) * reader);
+extern int htf_read_thread_cur_level(HTF(ThreadReader) * reader);
 
 /** Skips the given sequence entirely. TODO: Implement this. */
-extern void skip_sequence(HTF(ThreadReaderName) * reader, HTF(TokenName) token);
+extern void skip_sequence(HTF(ThreadReader) * reader, HTF(Token) token);
 
 #ifdef __cplusplus
 };

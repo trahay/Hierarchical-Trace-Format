@@ -144,7 +144,7 @@ static void print_token(htf::Thread* thread,
     DOFOR(i, depth) {
       current_indent += structure_indent[i];
     }
-    if (t->type != htf::HTF_TYPE_EVENT) {
+    if (t->type != htf::TypeEvent) {
       current_indent += (containing_loop && !explore_loop_sequences) ? "─" : "┬";
     } else {
       current_indent += "─";
@@ -154,18 +154,18 @@ static void print_token(htf::Thread* thread,
 
   // Prints the repeated_token we first started with
   switch (t->type) {
-  case htf::HTF_TYPE_INVALID:
+  case htf::TypeInvalid:
     htf_error("Type is invalid\n");
     break;
-  case htf::HTF_TYPE_EVENT:
+  case htf::TypeEvent:
     print_event(current_indent, thread, *t, &e->event_occurence);
     break;
-  case htf::HTF_TYPE_SEQUENCE: {
+  case htf::TypeSequence: {
     if (show_structure)
       print_sequence(current_indent, thread, *t, &e->sequence_occurence, containing_loop);
     break;
   }
-  case htf::HTF_TYPE_LOOP: {
+  case htf::TypeLoop: {
     print_loop(current_indent, thread, *t, &e->loop_occurence);
     break;
   }
@@ -184,10 +184,10 @@ static void display_sequence(htf::ThreadReader* reader,
   for (const auto& tokenOccurence : current_level) {
     print_token(reader->thread_trace, tokenOccurence.token, tokenOccurence.occurence, depth,
                 &tokenOccurence == &current_level.back());
-    if (tokenOccurence.token->type == htf::HTF_TYPE_SEQUENCE) {
+    if (tokenOccurence.token->type == htf::TypeSequence) {
       display_sequence(reader, *tokenOccurence.token, &tokenOccurence.occurence->sequence_occurence, depth + 1);
     }
-    if (tokenOccurence.token->type == htf::HTF_TYPE_LOOP) {
+    if (tokenOccurence.token->type == htf::TypeLoop) {
       htf::LoopOccurence loop = tokenOccurence.occurence->loop_occurence;
       // The printing of loops is a bit convoluted, because there's no right way to do it
       // Here, we offer four ways to print loops:
@@ -258,7 +258,7 @@ static void print_thread(htf::Archive* trace, htf::Thread* thread) {
 
   auto* reader = new htf::ThreadReader(trace, thread->id, reader_options);
 
-  display_sequence(reader, htf::Token(htf::HTF_TYPE_SEQUENCE, 0), nullptr, 0);
+  display_sequence(reader, htf::Token(htf::TypeSequence, 0), nullptr, 0);
 }
 
 /** Compare the timestamps of the current repeated_token on each thread and select the smallest timestamp.

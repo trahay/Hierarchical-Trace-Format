@@ -12,7 +12,7 @@
 #include "htf_write.h"
 
 static struct htf_archive trace;
-static htf_location_group_id_t process_id;
+static LocationGroupId_t process_id;
 
 static int nb_iter_default = 100000;
 static int nb_functions_default = 2;
@@ -35,7 +35,7 @@ static pthread_barrier_t bench_stop;
 
 static htf_region_ref_t next_region_ref = 0;
 static htf_string_ref_t next_string_ref = 0;
-static _Atomic htf_thread_id_t next_thread_id = 0;
+static _Atomic ThreadId_t next_thread_id = 0;
 
 static htf_string_ref_t _register_string(char* str) {
   htf_string_ref_t ref = next_string_ref++;
@@ -49,8 +49,8 @@ static htf_region_ref_t _register_region(htf_string_ref_t string_ref) {
   return id;
 }
 
-static htf_thread_id_t _new_thread() {
-  htf_thread_id_t id = next_thread_id++;
+static ThreadId_t _new_thread() {
+  ThreadId_t id = next_thread_id++;
   return id;
 }
 
@@ -67,7 +67,7 @@ void* worker(void* arg __attribute__((unused))) {
   snprintf(thread_name, 20, "P#%dT#%d", mpi_rank, my_rank);
   htf_string_ref_t thread_name_id = _register_string(thread_name);
 
-  htf_thread_id_t thread_id = _new_thread();
+  ThreadId_t thread_id = _new_thread();
   htf_write_define_location(&trace, thread_id, thread_name_id, process_id);
 
   htf_write_thread_open(&trace, thread_writer, thread_id);

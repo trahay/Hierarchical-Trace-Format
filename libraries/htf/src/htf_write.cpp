@@ -193,7 +193,7 @@ void ThreadWriter::findLoop() {
     if (s1_start > 0) {
       int loop_start = s1_start - 1;
       /* first, check if there's a loop that start at loop_start*/
-      if (cur_seq->tokens[loop_start].type == HTF_TYPE_LOOP) {
+      if (cur_seq->tokens[loop_start].type == TypeLoop) {
         Token l = cur_seq->tokens[loop_start];
         Loop* loop = thread_trace.getLoop(l);
         htf_assert(loop);
@@ -254,7 +254,7 @@ void ThreadWriter::recordExitFunction() {
              first_token.id, last_token.type, last_token.id);
   }
 
-  if (first_token.type == HTF_TYPE_EVENT) {
+  if (first_token.type == TypeEvent) {
     Event* first_event = thread_trace.getEvent(first_token);
     Event* last_event = thread_trace.getEvent(last_token);
 
@@ -332,7 +332,7 @@ size_t ThreadWriter::storeEvent(enum EventType event_type,
     recordEnterFunction();
   }
 
-  Token token = Token(HTF_TYPE_EVENT, event_id);
+  Token token = Token(TypeEvent, event_id);
   auto* sequence = getCurrentSequence();
   storeToken(sequence, token);
 
@@ -628,22 +628,22 @@ htf_timestamp_t Thread::getSequenceDuration(Token* array, size_t size) {
     auto& token = array[i];
     tokenCount[token]++;
     switch (token.type) {
-    case HTF_TYPE_INVALID: {
+    case TypeInvalid: {
       htf_error("Error parsing the given array, a Token was invalid\n");
       break;
     }
-    case HTF_TYPE_EVENT: {
+    case TypeEvent: {
       auto summary = getEventSummary(token);
       sum += summary->durations->at(summary->durations->size - tokenCount[token]);
       break;
     }
-    case HTF_TYPE_SEQUENCE: {
+    case TypeSequence: {
       auto sequence = getSequence(token);
       sum += sequence->durations->at(sequence->durations->size - tokenCount[token]);
       tokenCount += sequence->getTokenCount(this);
       break;
     }
-    case HTF_TYPE_LOOP: {
+    case TypeLoop: {
       auto loop = getLoop(token);
       auto nb_iterations = loop->nb_iterations[loop->nb_iterations.size() - tokenCount[token]];
       auto sequence = getSequence(loop->repeated_token);
@@ -697,15 +697,15 @@ extern void htf_write_archive_open(htf::Archive* archive,
   archive->open(dir_name, trace_name, location_group);
 };
 
-extern void htf_write_archive_close(HTF(ArchiveName) * archive) {
+extern void htf_write_archive_close(HTF(Archive) * archive) {
   archive->close();
 };
 
-void htf_store_event(HTF(ThreadWriterName) * thread_writer,
-                     enum HTF(EventTypeName) event_type,
-                     HTF(TokenIdName) id,
+void htf_store_event(HTF(ThreadWriter) * thread_writer,
+                     enum HTF(EventType) event_type,
+                     HTF(TokenId) id,
                      htf_timestamp_t ts,
-                     HTF(AttributeListName) * attribute_list) {
+                     HTF(AttributeList) * attribute_list) {
   thread_writer->storeEvent(event_type, id, ts, attribute_list);
 };
 

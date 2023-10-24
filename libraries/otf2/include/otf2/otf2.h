@@ -24,24 +24,24 @@
 #include "htf/htf_write.h"
 
 struct OTF2_GlobalDefWriter_struct {
-  struct htf_archive archive;
+  struct Archive archive;
 };
 
 struct OTF2_DefWriter_struct {
   OTF2_LocationRef locationRef;
-  struct htf_archive* archive;
+  struct Archive* archive;
 
-  struct htf_thread_writer* thread_writer;
+  struct ThreadWriter* thread_writer;
 };
 
 struct OTF2_EvtWriter_struct {
   OTF2_LocationRef locationRef;
-  struct htf_archive* archive;
-  struct htf_thread_writer* thread_writer;
+  struct Archive* archive;
+  struct ThreadWriter* thread_writer;
 };
 
 struct OTF2_Archive_struct {
-  struct htf_archive archive;
+  struct Archive archive;
 
   OTF2_GlobalDefWriter* globalDefWriter;
 

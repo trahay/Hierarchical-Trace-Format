@@ -43,10 +43,10 @@ OTF2_ErrorCode OTF2_DefWriter_WriteSystemTreeNode(OTF2_DefWriter* writer,
   NOT_IMPLEMENTED;
 }
 
-htf_thread_id _otf_register_location(OTF2_LocationRef ref);
-htf_thread_id _otf_get_thread_id(OTF2_LocationRef ref);
-htf_location_group_id _otf_register_location_group(OTF2_LocationGroupRef ref);
-htf_location_group_id _otf_get_location_group_id(OTF2_LocationGroupRef ref);
+ThreadId _otf_register_location(OTF2_LocationRef ref);
+ThreadId _otf_get_thread_id(OTF2_LocationRef ref);
+LocationGroupId _otf_register_location_group(OTF2_LocationGroupRef ref);
+LocationGroupId _otf_get_location_group_id(OTF2_LocationGroupRef ref);
 
 OTF2_ErrorCode OTF2_DefWriter_WriteLocationGroup(OTF2_DefWriter* writer,
                                                  OTF2_LocationGroupRef self,
@@ -55,8 +55,8 @@ OTF2_ErrorCode OTF2_DefWriter_WriteLocationGroup(OTF2_DefWriter* writer,
                                                  OTF2_SystemTreeNodeRef systemTreeParent,
                                                  OTF2_LocationGroupRef creatingLocationGroup) {
   NOT_IMPLEMENTED;
-  htf_location_group_id lg_id = _otf_register_location_group(self);
-  htf_location_group_id parent_id = _otf_get_location_group_id(creatingLocationGroup);
+  LocationGroupId lg_id = _otf_register_location_group(self);
+  LocationGroupId parent_id = _otf_get_location_group_id(creatingLocationGroup);
 
   htf_write_define_location_group(writer->archive, lg_id, name, parent_id);
 
@@ -69,8 +69,8 @@ OTF2_ErrorCode OTF2_DefWriter_WriteLocation(OTF2_DefWriter* writer,
                                             OTF2_LocationType locationType,
                                             uint64_t numberOfEvents,
                                             OTF2_LocationGroupRef locationGroup) {
-  htf_thread_id thread_id = _otf_register_location(self);
-  htf_location_group_id parent_id = _otf_get_location_group_id(locationGroup);
+  ThreadId thread_id = _otf_register_location(self);
+  LocationGroupId parent_id = _otf_get_location_group_id(locationGroup);
 
   static int first_call = 1;
   if (first_call) {

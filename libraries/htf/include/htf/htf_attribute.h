@@ -6,11 +6,10 @@
 #ifdef __cplusplus
 namespace htf {
 #endif
-#define AttributeValueName C_CXX(htf_attribute_value, AttributeValue)
 
 /** @brief Value container for an attributes.
  */
-typedef union AttributeValueName {
+typedef union AttributeValue {
   /** @brief Arbitrary value of type uint8_t */
   uint8_t uint8;
   /** @brief Arbitrary value of type uint16_t */
@@ -32,40 +31,39 @@ typedef union AttributeValueName {
   /** @brief Arbitrary value of type double */
   double float64;
   /** @brief References a @eref{String} definition */
-  StringRefName string_ref;
+  StringRef string_ref;
   /** @brief References a @eref{Attribute} definition */
-  AttributeRefName attribute_ref;
+  AttributeRef attribute_ref;
   /** @brief References a @eref{Location} definition */
-  RefName location_ref;
+  Ref location_ref;
   /** @brief References a @eref{Region} definition */
-  RegionRefName region_ref;
+  RegionRef region_ref;
   /** @brief References a @eref{Group} definition */
-  RefName group_ref;
+  Ref group_ref;
   /** @brief References a @eref{MetricClass}, or a @eref{MetricInstance} definition */
-  RefName metric_ref;
+  Ref metric_ref;
   /** @brief References a @eref{Comm}, or a @eref{InterComm} definition */
-  RefName comm_ref;
+  Ref comm_ref;
   /** @brief References a @eref{Parameter} definition */
-  RefName parameter_ref;
+  Ref parameter_ref;
   /** @brief References a @eref{RmaWin} definition */
-  RefName rma_win_ref;
+  Ref rma_win_ref;
   /** @brief References a @eref{SourceCodeLocation} definition */
-  RefName source_code_location_ref;
+  Ref source_code_location_ref;
   /** @brief References a @eref{CallingContext} definition */
-  RefName calling_context_ref;
+  Ref calling_context_ref;
   /** @brief References a @eref{InterruptGenerator} definition */
-  RefName interrupt_generator_ref;
+  Ref interrupt_generator_ref;
   /** @brief References a @eref{IoRegularFile}, or a @eref{IoDirectory} definition */
-  RefName io_file_ref;
+  Ref io_file_ref;
   /** @brief References a @eref{IoHandle} definition */
-  RefName io_handle_ref;
+  Ref io_handle_ref;
   /** @brief References a @eref{LocationGroup} definition */
-  RefName location_group_ref;
-} AttributeValueName;
+  Ref location_group_ref;
+} AttributeValue;
 
-#define AttributeTypeName C_CXX(htf_attribute_type, AttributeType)
 /** @brief HTF basic data types. */
-enum AttributeTypeName {
+enum AttributeType {
   /** @brief Undefined type.
    *
    *  Type category: None
@@ -238,28 +236,25 @@ enum AttributeTypeName {
 };
 
 #define NB_ATTRIBUTE_MAX 128
-#define ATTRIBUTE_MAX_BUFFER_SIZE (sizeof(HTF(AttributeListName)))
-#define ATTRIBUTE_HEADER_SIZE (sizeof(uint16_t) + sizeof(HTF(AttributeRefName)))
+#define ATTRIBUTE_MAX_BUFFER_SIZE (sizeof(HTF(AttributeList)))
+#define ATTRIBUTE_HEADER_SIZE (sizeof(uint16_t) + sizeof(HTF(AttributeRef)))
 
-#define AttributeDataName C_CXX(htf_attribute_data, AttributeData)
-
-typedef struct AttributeDataName {
+typedef struct AttributeData {
   uint16_t struct_size;
-  AttributeRefName ref;
-  union AttributeValueName value;
-} __attribute__((packed)) AttributeDataName;
+  AttributeRef ref;
+  union AttributeValue value;
+} __attribute__((packed)) AttributeData;
 
 #define ATTRIBUTE_LIST_HEADER_SIZE (sizeof(int) + sizeof(uint16_t) + sizeof(uint8_t))
-#define AttributeListName C_CXX(htf_attribute_list, AttributeList)
-typedef struct AttributeListName {
+typedef struct AttributeList {
   int index;
   uint16_t struct_size;
   uint8_t nb_values;
-  AttributeDataName attributes[NB_ATTRIBUTE_MAX];
-} __attribute__((packed)) AttributeListName;
+  AttributeData attributes[NB_ATTRIBUTE_MAX];
+} __attribute__((packed)) AttributeList;
 
 static inline size_t get_value_size(htf_type_t t) {
-  union AttributeValueName u;
+  union AttributeValue u;
   switch (t) {
   case HTF_TYPE_NONE:
     return 0;
@@ -346,7 +341,7 @@ static inline size_t get_value_size(htf_type_t t) {
 }; /* namespace htf */
 #endif
 
-static inline void htf_attribute_list_push_data(HTF(AttributeListName) * l, HTF(AttributeDataName) * data) {
+static inline void htf_attribute_list_push_data(HTF(AttributeList) * l, HTF(AttributeData) * data) {
   uintptr_t offset = l->struct_size;
   htf_assert(offset + data->struct_size <= ATTRIBUTE_MAX_BUFFER_SIZE);
   uintptr_t addr = ((uintptr_t)l) + offset;
@@ -355,11 +350,11 @@ static inline void htf_attribute_list_push_data(HTF(AttributeListName) * l, HTF(
   l->nb_values++;
 }
 
-static inline void htf_attribute_list_pop_data(HTF(AttributeListName) * l,
-                                               HTF(AttributeDataName) * data,
+static inline void htf_attribute_list_pop_data(HTF(AttributeList) * l,
+                                               HTF(AttributeData) * data,
                                                uint16_t* current_offset) {
   uintptr_t addr = ((uintptr_t)&l->attributes[0]) + (*current_offset);
-  HTF(AttributeDataName)* attr_data = (HTF(AttributeDataName)*)addr;
+  HTF(AttributeData)* attr_data = (HTF(AttributeData)*)addr;
   uint16_t struct_size = attr_data->struct_size;
 
   htf_assert(struct_size + (*current_offset) <= ATTRIBUTE_MAX_BUFFER_SIZE);
@@ -370,23 +365,23 @@ static inline void htf_attribute_list_pop_data(HTF(AttributeListName) * l,
   *current_offset += struct_size;
 }
 
-static inline void htf_attribute_list_init(HTF(AttributeListName) * l) {
+static inline void htf_attribute_list_init(HTF(AttributeList) * l) {
   l->index = -1;
   l->nb_values = 0;
   l->struct_size = ATTRIBUTE_LIST_HEADER_SIZE;
 }
 
-static inline void htf_attribute_list_finalize(HTF(AttributeListName) * l __attribute__((unused))) {}
+static inline void htf_attribute_list_finalize(HTF(AttributeList) * l __attribute__((unused))) {}
 
-static inline int htf_attribute_list_add_attribute(HTF(AttributeListName) * list,
-                                                   HTF(AttributeRefName) attribute,
+static inline int htf_attribute_list_add_attribute(HTF(AttributeList) * list,
+                                                   HTF(AttributeRef) attribute,
                                                    size_t data_size,
-                                                   HTF(AttributeValueName) value) {
+                                                   HTF(AttributeValue) value) {
   if (list->nb_values + 1 >= NB_ATTRIBUTE_MAX) {
     htf_warn("[HTF] too many attributes\n");
     return -1;
   }
-  HTF(AttributeDataName) d;
+  HTF(AttributeData) d;
   d.ref = attribute;
   d.value = value;
   d.struct_size = ATTRIBUTE_HEADER_SIZE + data_size;
@@ -399,12 +394,12 @@ static inline int htf_attribute_list_add_attribute(HTF(AttributeListName) * list
 extern "C" {
 #endif
 
-extern void htf_print_attribute_value(HTF(ThreadName) * thread, HTF(AttributeDataName) * attr, HTF(htf_type_t) type);
+extern void htf_print_attribute_value(HTF(Thread) * thread, HTF(AttributeData) * attr, HTF(htf_type_t) type);
 
-extern void htf_print_event_attributes(HTF(ThreadName) * thread,
+extern void htf_print_event_attributes(HTF(Thread) * thread,
                                        struct C_CXX(htf_event_occurence, htf::EventOccurence) * e);
 
-extern void htf_print_attribute_list(HTF(ThreadName) * thread, HTF(AttributeListName) * l);
+extern void htf_print_attribute_list(HTF(Thread) * thread, HTF(AttributeList) * l);
 
 #ifdef __cplusplus
 };

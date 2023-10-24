@@ -15,7 +15,7 @@ void print_sequence(Thread* t, Sequence* s) {
   printf("{");
   for (unsigned i = 0; i < s->size(); i++) {
     Token token = s->tokens[i];
-    if (token.type == HTF_TYPE_LOOP) {
+    if (token.type == TypeLoop) {
       Loop* l = t->getLoop(token);
       token = l->repeated_token;
     }

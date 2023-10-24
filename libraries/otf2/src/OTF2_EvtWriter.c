@@ -43,8 +43,7 @@ OTF2_ErrorCode OTF2_EvtWriter_Enter(OTF2_EvtWriter* writer,
                                     OTF2_AttributeList* attributeList,
                                     OTF2_TimeStamp time,
                                     OTF2_RegionRef region) {
-  htf_log(htf_dbg_lvl_debug, "enter(%p {.locationRef=%lu, .writer=%p}, %d)\n", writer, writer->locationRef,
-          writer->thread_writer, region);
+  htf_log(Debug, "enter(%p {.locationRef=%lu, .writer=%p}, %d)\n", writer, writer->locationRef, writer->thread_writer, region);
   htf_record_enter(writer->thread_writer,
                    attributeList,
                    time, region);
@@ -56,8 +55,7 @@ OTF2_ErrorCode OTF2_EvtWriter_Leave(OTF2_EvtWriter* writer,
                                     OTF2_AttributeList* attributeList,
                                     OTF2_TimeStamp time,
                                     OTF2_RegionRef region) {
-  htf_log(htf_dbg_lvl_debug, "leave(%p {.locationRef=%lu, .writer=%p}, %d)\n", writer, writer->locationRef,
-          writer->thread_writer, region);
+  htf_log(Debug, "leave(%p {.locationRef=%lu, .writer=%p}, %d)\n", writer, writer->locationRef, writer->thread_writer, region);
   htf_record_leave(writer->thread_writer,
                    attributeList,
                    time, region);

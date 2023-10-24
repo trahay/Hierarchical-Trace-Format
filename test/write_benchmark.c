@@ -10,10 +10,10 @@
 #include "htf/htf_archive.h"
 #include "htf/htf_write.h"
 
-static struct htf_archive* global_archive;
-static struct htf_archive* trace;
-static htf_location_group_id process_id;
-static htf_string_ref_t process_name;
+static struct Archive* global_archive;
+static struct Archive* trace;
+static LocationGroupId process_id;
+static StringRef process_name;
 
 static int nb_iter_default = 100000;
 static int nb_functions_default = 2;
@@ -25,32 +25,32 @@ static int nb_functions;
 static int nb_threads;
 static int pattern;
 
-struct htf_thread_writer** thread_writers;
-static htf_region_ref_t* regions;
-static htf_string_ref_t* strings;
+struct ThreadWriter** thread_writers;
+static RegionRef* regions;
+static StringRef* strings;
 
 static pthread_barrier_t bench_start;
 static pthread_barrier_t bench_stop;
 
 #define TIME_DIFF(t1, t2) (((t2).tv_sec - (t1).tv_sec) + ((t2).tv_nsec - (t1).tv_nsec) / 1e9)
 
-static htf_string_ref_t _register_string(char* str) {
-  static htf_string_ref_t next_ref = 0;
-  htf_string_ref_t ref = next_ref++;
+static StringRef _register_string(char* str) {
+  static StringRef next_ref = 0;
+  StringRef ref = next_ref++;
 
   htf_archive_register_string(global_archive, ref, str);
   return ref;
 }
 
-static htf_location_group_id _new_location_group() {
-  static _Atomic htf_location_group_id next_id = 0;
-  htf_location_group_id id = next_id++;
+static LocationGroupId _new_location_group() {
+  static _Atomic LocationGroupId next_id = 0;
+  LocationGroupId id = next_id++;
   return id;
 }
 
-static htf_thread_id _new_thread() {
-  static _Atomic htf_thread_id next_id = 0;
-  htf_thread_id id = next_id++;
+static ThreadId _new_thread() {
+  static _Atomic ThreadId next_id = 0;
+  ThreadId id = next_id++;
   return id;
 }
 
@@ -58,13 +58,13 @@ void* worker(void* arg __attribute__((unused))) {
   static _Atomic int nb_threads = 0;
   int my_rank = nb_threads++;
 
-  thread_writers[my_rank] = malloc(sizeof(struct htf_thread_writer));
-  struct htf_thread_writer* thread_writer = thread_writers[my_rank];
+  thread_writers[my_rank] = malloc(sizeof(struct ThreadWriter));
+  struct ThreadWriter* thread_writer = thread_writers[my_rank];
   char thread_name[20];
   snprintf(thread_name, 20, "thread_%d", my_rank);
-  htf_string_ref_t thread_name_id = _register_string(thread_name);
+  StringRef thread_name_id = _register_string(thread_name);
 
-  htf_thread_id thread_id = _new_thread();
+  ThreadId thread_id = _new_thread();
   htf_write_define_location(global_archive, thread_id, thread_name_id, process_id);
 
   htf_write_thread_open(trace, thread_writer, thread_id);
@@ -179,8 +179,8 @@ int main(int argc, char** argv) {
 
   htf_write_define_location_group(global_archive, process_id, process_name, HTF_LOCATION_GROUP_ID_INVALID);
 
-  regions = malloc(sizeof(htf_region_ref_t) * nb_functions);
-  strings = malloc(sizeof(htf_string_ref_t) * nb_functions);
+  regions = malloc(sizeof(RegionRef) * nb_functions);
+  strings = malloc(sizeof(StringRef) * nb_functions);
   for (int i = 0; i < nb_functions; i++) {
     char str[50];
     snprintf(str, 50, "function_%d", i);

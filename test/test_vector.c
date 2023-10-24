@@ -4,9 +4,9 @@
  */
 
 #include <stdlib.h>
-#include "htf.h"
-#include "htf_dbg.h"
-#include "htf_vector.hpp"
+#include "htf/LinkedVector.h"
+#include "htf/htf.h"
+#include "htf/htf_dbg.h"
 
 int main(int argc, char** argv) {
   if (argc < 2) {
@@ -16,18 +16,16 @@ int main(int argc, char** argv) {
     htf_error("Too many arguments ! 2 argument required.\n");
   }
   long VECTOR_SIZE = strtol(argv[1], NULL, 10);
-  long TEST_SIZE = strtol(argv[2], NULL, 10);
+  size_t TEST_SIZE = strtol(argv[2], NULL, 10);
 
-  htf_vector_t vector;
-  htf_vector_new_with_size(&vector, sizeof(int), VECTOR_SIZE);
+  LinkedVector* vector = linked_vector_new();
   int adding;
   DOFOR(i, TEST_SIZE) {
-    adding = i;
-    htf_vector_add(&vector, &adding);
+    linked_vector_add(vector, i);
   }
 
-  htf_assert(vector.size == TEST_SIZE);
-  htf_vector_print_as_int(&vector);
+  htf_assert(vector->size == TEST_SIZE);
+  //  htf_vector_print_as_int(&vector);
   printf("\n");
   return EXIT_SUCCESS;
 }

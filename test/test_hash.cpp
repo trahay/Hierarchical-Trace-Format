@@ -29,7 +29,7 @@ int main(int argc __attribute__((unused)), char** argv __attribute__((unused))) 
   struct timespec start_time;
   clock_gettime(CLOCK_MONOTONIC, &start_time);
   for (uint32_t i = 0; i < MAX_EVENT; i++) {
-    Token token = Token(HTF_TYPE_EVENT, i);
+    Token token = Token(TypeEvent, i);
     hash32(&token, 1, SEED, hash);
     uint32_t new_key = hash[0] % SIZE_COLLISION_ARRAY;
     int buffer = collisions[new_key]++;
@@ -42,7 +42,7 @@ int main(int argc __attribute__((unused)), char** argv __attribute__((unused))) 
   }
   printf("Testing all the sequences up to %d\n", MAX_SEQUENCE);
   for (uint32_t i = 0; i < MAX_SEQUENCE; i++) {
-    Token token = Token(HTF_TYPE_SEQUENCE, i);
+    Token token = Token(TypeSequence, i);
     hash32(&token, 1, SEED, hash);
     uint32_t new_key = hash[0] % SIZE_COLLISION_ARRAY;
     int buffer = collisions[new_key]++;
@@ -55,7 +55,7 @@ int main(int argc __attribute__((unused)), char** argv __attribute__((unused))) 
   }
   printf("Testing all the loops up to %d\n", MAX_LOOP);
   for (uint32_t i = 0; i < MAX_LOOP; i++) {
-    Token token = Token(HTF_TYPE_LOOP, i);
+    Token token = Token(TypeLoop, i);
     hash32(&token, 1, SEED, hash);
     uint32_t new_key = hash[0] % SIZE_COLLISION_ARRAY;
     int buffer = collisions[new_key]++;
@@ -75,15 +75,15 @@ int main(int argc __attribute__((unused)), char** argv __attribute__((unused))) 
       // Constructing the sequence
       for (uint32_t j = 0; j < sequence_size; j++) {
         auto type = static_cast<TokenType>(1 + (rand() % 3));
-        if (type == HTF_TYPE_EVENT) {
+        if (type == TypeEvent) {
           Token t = Token(type, rand() % MAX_EVENT);
           token[j] = t;
         }
-        if (type == HTF_TYPE_SEQUENCE) {
+        if (type == TypeSequence) {
           Token t = Token(type, rand() % MAX_SEQUENCE);
           token[j] = t;
         }
-        if (type == HTF_TYPE_LOOP) {
+        if (type == TypeLoop) {
           Token t = Token(type, rand() % MAX_LOOP);
           token[j] = t;
         }
