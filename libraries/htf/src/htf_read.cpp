@@ -180,10 +180,13 @@ Occurence& ThreadReader::getOccurence(htf::Token id, int occurence_id) const {
   }
   case HTF_TYPE_EVENT:
     occurence->event_occurence = getEventOccurence(id, occurence_id);
+    break;
   case HTF_TYPE_SEQUENCE:
     occurence->sequence_occurence = getSequenceOccurence(id, occurence_id);
+    break;
   case HTF_TYPE_LOOP:
     occurence->loop_occurence = getLoopOccurence(id, occurence_id);
+    break;
   }
   return *occurence;
 }
