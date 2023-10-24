@@ -18,7 +18,7 @@ htf_timestamp_t htf_get_timestamp() {
   if (NANOSECONDS(firstTimestamp.time_since_epoch()) == 0) {
     firstTimestamp = start;
   }
-  return NANOSECONDS(firstTimestamp - start);
+  return NANOSECONDS(start - firstTimestamp);
 }
 
 htf_timestamp_t htf_timestamp(htf_timestamp_t t) {
