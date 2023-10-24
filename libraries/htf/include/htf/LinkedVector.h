@@ -15,10 +15,11 @@
 #include <vector>
 #define DEFAULT_VECTOR_SIZE 1000
 namespace htf {
+#endif
 struct LinkedVector {
- public:
-  size_t size{0};
+  size_t size CXX({0});
 
+#ifdef __cplusplus
  private:
   struct SubVector {
    public:
@@ -55,10 +56,11 @@ struct LinkedVector {
 
     void copyToArray(uint64_t* given_array) const { memcpy(given_array, array, size * sizeof(uint64_t)); }
   };
-  size_t default_size{DEFAULT_VECTOR_SIZE};
-  SubVector* first;
-  SubVector* last;
-
+#endif
+  size_t default_size CXX({DEFAULT_VECTOR_SIZE});
+  C_CXX(void, SubVector) * first;
+  C_CXX(void, SubVector) * last;
+#ifdef __cplusplus
  public:
   LinkedVector();
   /* Loads a LinkedVector from a file without reading the size. */
@@ -122,11 +124,12 @@ struct LinkedVector {
   };
   Iterator begin() const { return {first}; };
   Iterator end() const { return {nullptr}; };
-};
-}  // namespace htf
-
 #endif
-C(typedef struct LinkedVector { size_t size; } LinkedVector;)
+};
+
+CXX(
+})  // namespace htf
+
 
 CXX(extern "C" {)
   extern HTF(LinkedVector)* linked_vector_new(void);

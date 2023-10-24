@@ -261,6 +261,11 @@ struct TokenCountMap : public std::map<Token, size_t> {
   }
 };
 #endif
+/** Defines a TokenCountMap. In C, defines a char[] of size sizeof(TokenCountMap). */
+#define DEFINE_TokenCountMap(name) C_CXX(char, TokenCountMap) name C([48])
+/** Defines a C++ vector. In C, defines a char[] of size sizeof(std::vector). */
+#define DEFINE_Vector(type, name) C_CXX(char, std::vector<type>) name C_CXX([24], {  std::vector<type>() })
+
 /**
  * Structure to store a sequence in HTF format
  *  - LinkedVector* durations: array of durations for these types of sequences. (see htf_timestamp.h)
@@ -270,13 +275,13 @@ struct TokenCountMap : public std::map<Token, size_t> {
 typedef struct Sequence {
   LinkedVector* durations CXX({new LinkedVector()});
   uint32_t hash CXX({0});
+  DEFINE_Vector(Token, tokens);
+  CXX(private:)
+  DEFINE_TokenCountMap(tokenCount);
 #ifdef __cplusplus
-  std::vector<Token> tokens;
+ public:
   [[nodiscard]] size_t size() const { return tokens.size(); }
   const TokenCountMap& getTokenCount(const struct Thread* thread);
-
- private:
-  TokenCountMap tokenCount;
 #endif
 } Sequence;
 
@@ -294,7 +299,7 @@ typedef struct Sequence {
 typedef struct Loop {
   Token repeated_token;
   Token self_id;
-  CXX(std::vector<uint> nb_iterations;)
+  DEFINE_Vector(uint16_t, nb_iterations);
   CXX(void addIteration();)
 } Loop;
 

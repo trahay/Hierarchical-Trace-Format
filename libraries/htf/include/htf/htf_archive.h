@@ -32,11 +32,10 @@ struct Location {
  * A definition describes a function
  */
 typedef struct Definition {
+  DEFINE_Vector(String, strings);
+  DEFINE_Vector(Region, regions);
+  DEFINE_Vector(Attribute, attributes);
 #ifdef __cplusplus
- public:
-  std::vector<String> strings;
-  std::vector<Region> regions;
-  std::vector<Attribute> attributes;
   [[nodiscard]] const String* getString(StringRef) const;
   void addString(StringRef, const char*);
   [[nodiscard]] const Region* getRegion(RegionRef) const;
@@ -69,10 +68,9 @@ typedef struct Archive {
   int nb_allocated_archives;
   /* Indicates whether there are timestamps in there.*/
   short store_timestamps;
+  DEFINE_Vector(Location, locations);
+  DEFINE_Vector(LocationGroup, location_groups);
 #ifdef __cplusplus
-  std::vector<Location> locations{std::vector<Location>()};
-  std::vector<LocationGroup> location_groups{std::vector<LocationGroup>()};
-
   [[nodiscard]] Thread* getThread(ThreadId) const;
   [[nodiscard]] const struct String* getString(StringRef) const;
   [[nodiscard]] const struct Region* getRegion(RegionRef) const;

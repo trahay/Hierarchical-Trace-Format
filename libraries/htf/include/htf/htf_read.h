@@ -57,7 +57,6 @@ typedef struct TokenOccurence {
 } TokenOccurence;
 
 typedef struct ThreadReader {
- public:
   /** Archive being read by this reader. */
   struct Archive* archive;
   /** Thread being read. */
@@ -79,7 +78,7 @@ typedef struct ThreadReader {
   int current_frame;
 
   /** At any point, a token t has been seen tokenCount[t] times. */
-  TokenCountMap tokenCount;
+  DEFINE_TokenCountMap(tokenCount);
 
   int options;
 #ifdef __cplusplus
@@ -173,9 +172,8 @@ typedef struct Savestate {
    * You can view this as the "depth" of the callstack. */
   int current_frame;
 
-  TokenCountMap tokenCount;
+  DEFINE_TokenCountMap(tokenCount);
 #ifdef __cplusplus
- public:
   /* Creates a Savestate (ie a screenshot) of the reader at the moment. */
   Savestate(const ThreadReader* reader);
 #endif
