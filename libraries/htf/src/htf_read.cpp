@@ -3,12 +3,11 @@
  * See LICENSE in top-level directory.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include "htf/htf_archive.h"
 #include "htf/htf_read.h"
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include "htf/htf_archive.h"
 
 namespace htf {
 ThreadReader::ThreadReader(Archive* archive, ThreadId threadId, int options) {
@@ -236,9 +235,9 @@ void ThreadReader::leaveBlock() {
     printf("\n");
   }
 
-  callstack_index[current_frame] = INT_MAX;
+  callstack_index[current_frame] = INT16_MAX;
   callstack_sequence[current_frame] = Token();
-  callstack_loop_iteration[current_frame] = INT_MAX;
+  callstack_loop_iteration[current_frame] = INT16_MAX;
   current_frame--;  // pop frame
 
   if (debugLevel >= Debug && current_frame >= 0) {

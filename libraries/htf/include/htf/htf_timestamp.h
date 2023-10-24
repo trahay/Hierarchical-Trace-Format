@@ -2,21 +2,25 @@
  * Copyright (C) Telecom SudParis
  * See LICENSE in top-level directory.
  */
+#pragma once
 
-#ifndef TIMESTAMP_H
-#define TIMESTAMP_H
+#include "htf/htf_dbg.h"
 
+#ifdef __cplusplus
+#include <cstdint>
+#include <limits>
+extern "C" {
+#else
 #include <limits.h>
 #include <stdint.h>
-#include "htf/htf_dbg.h"
+#endif
 typedef uint64_t htf_timestamp_t;
-
 #define HTF_TIMESTAMP_INVALID UINT64_MAX
-CXX(extern "C" {)
+
 /** return the current timestamp */
 htf_timestamp_t htf_get_timestamp();
 
-  /** return t, or the current timestamp if t is invalid*/
+/** return t, or the current timestamp if t is invalid*/
 htf_timestamp_t htf_timestamp(htf_timestamp_t t);
 
 /** Writes the difference between the given timestamp and the last timestamp to the adress of the last timestamp,
@@ -26,10 +30,11 @@ void htf_delta_timestamp(htf_timestamp_t* t);
 void htf_add_timestamp_to_delta(htf_timestamp_t* t);
 
 /** Writes 0 to the last timestamp */
-  void htf_finish_timestamp();
-CXX(
-};)
-#endif /* TIMESTAMP_H */
+void htf_finish_timestamp();
+
+#ifdef __cplusplus
+};
+#endif
 
 /* -*-
    mode: c;

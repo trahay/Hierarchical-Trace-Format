@@ -4,23 +4,21 @@
  */
 
 #include "htf/htf_timestamp.h"
-#include <cstdlib>
-#include <ctime>
+#include <chrono>
 #include <vector>
 
-#define TIME_DIFF(t1, t2) ((t2.tv_sec - t1.tv_sec) * 1000000000 + (t2.tv_nsec - t1.tv_nsec))
+using TimePoint = std::chrono::time_point<std::chrono::high_resolution_clock>;
+#define NANOSECONDS(timestamp) std::chrono::duration_cast<std::chrono::nanoseconds>(timestamp).count()
 
-static struct timespec first_timestamp = {0, 0};
+static TimePoint firstTimestamp = {};
 thread_local static std::vector<htf_timestamp_t*> timestampsToDelta = std::vector<htf_timestamp_t*>();
 
 htf_timestamp_t htf_get_timestamp() {
-  struct timespec timestamp;
-  clock_gettime(CLOCK_MONOTONIC, &timestamp);
-  if (first_timestamp.tv_sec == 0 && first_timestamp.tv_nsec == 0) {
-    first_timestamp.tv_sec = timestamp.tv_sec;
-    first_timestamp.tv_nsec = timestamp.tv_nsec;
+  TimePoint start = std::chrono::high_resolution_clock::now();
+  if (NANOSECONDS(firstTimestamp.time_since_epoch()) == 0) {
+    firstTimestamp = start;
   }
-  return TIME_DIFF(first_timestamp, timestamp);
+  return NANOSECONDS(firstTimestamp - start);
 }
 
 htf_timestamp_t htf_timestamp(htf_timestamp_t t) {
@@ -56,7 +54,7 @@ void htf_finish_timestamp() {
 }
 
 /* -*-
-   mode: c;
+   mode: cpp;
    c-file-style: "k&r";
    c-basic-offset 2;
    tab-width 2 ;
