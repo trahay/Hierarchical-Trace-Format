@@ -154,14 +154,14 @@ inline static void _htf_compress_write(uint64_t* src, size_t n, FILE* file) {
   size_t encodedSize;
   // First we do the encoding
   switch (htf::parameterHandler.getEncodingAlgorithm()) {
-  case htf::EncodingNone:
+  case htf::EncodingAlgorithm::None:
     break;
-  case htf::EncodingMasking: {
+  case htf::EncodingAlgorithm::Masking: {
     encodedArray = new uint64_t[n];
     encodedSize = _htf_masking_encode(src, (uint8_t*)encodedArray, n);
     break;
   }
-  case htf::EncodingLeadingZeroes: {
+  case htf::EncodingAlgorithm::LeadingZeroes: {
     htf_error("Not yet implemented\n");
     break;
   }
@@ -170,9 +170,9 @@ inline static void _htf_compress_write(uint64_t* src, size_t n, FILE* file) {
   byte* compressedArray = nullptr;
   size_t compressedSize;
   switch (htf::parameterHandler.getCompressionAlgorithm()) {
-  case htf::CompressionNone:
+  case htf::CompressionAlgorithm::None:
     break;
-  case htf::CompressionZSTD: {
+  case htf::CompressionAlgorithm::ZSTD: {
     compressedSize = ZSTD_compressBound(encodedArray ? encodedSize : size);
     compressedArray = new uint8_t[compressedSize];
     if (encodedArray) {
@@ -182,17 +182,17 @@ inline static void _htf_compress_write(uint64_t* src, size_t n, FILE* file) {
     }
     break;
   }
-  case htf::CompressionSZ:
-  case htf::CompressionZFP:
+  case htf::CompressionAlgorithm::SZ:
+  case htf::CompressionAlgorithm::ZFP:
     htf_error("Not implemented yet\n");
     break;
   }
 
-  if (htf::parameterHandler.getCompressionAlgorithm() != htf::CompressionNone) {
+  if (htf::parameterHandler.getCompressionAlgorithm() != htf::CompressionAlgorithm::None) {
     htf_log(htf::Normal, "Compressing %lu bytes as %lu bytes\n", size, compressedSize);
     _htf_fwrite(&compressedSize, sizeof(compressedSize), 1, file);
     _htf_fwrite(compressedArray, compressedSize, 1, file);
-  } else if (htf::parameterHandler.getEncodingAlgorithm() != htf::EncodingNone) {
+  } else if (htf::parameterHandler.getEncodingAlgorithm() != htf::EncodingAlgorithm::None) {
     htf_log(htf::Normal, "Encoding %lu bytes as %lu bytes\n", size, encodedSize);
     _htf_fwrite(&encodedSize, sizeof(encodedSize), 1, file);
     _htf_fwrite(encodedArray, encodedSize, 1, file);
@@ -201,9 +201,9 @@ inline static void _htf_compress_write(uint64_t* src, size_t n, FILE* file) {
     _htf_fwrite(&size, sizeof(size), 1, file);
     _htf_fwrite(src, size, 1, file);
   }
-  if (htf::parameterHandler.getCompressionAlgorithm() != htf::CompressionNone)
+  if (htf::parameterHandler.getCompressionAlgorithm() != htf::CompressionAlgorithm::None)
     delete[] compressedArray;
-  if (htf::parameterHandler.getEncodingAlgorithm() != htf::EncodingNone)
+  if (htf::parameterHandler.getEncodingAlgorithm() != htf::EncodingAlgorithm::None)
     delete[] encodedArray;
 }
 /**
@@ -257,13 +257,13 @@ inline static void _htf_compress_read(uint64_t* dest, size_t n, FILE* file) {
   byte* encodedArray = nullptr;
 
   switch (htf::parameterHandler.getCompressionAlgorithm()) {
-  case htf::CompressionNone:
+  case htf::CompressionAlgorithm::None:
     break;
-  case htf::CompressionZSTD: {
+  case htf::CompressionAlgorithm::ZSTD: {
     _htf_fread(&compressedSize, sizeof(compressedSize), 1, file);
     compressedArray = new byte[compressedSize];
     _htf_fread(compressedArray, compressedSize, 1, file);
-    if (htf::parameterHandler.getEncodingAlgorithm() == htf::EncodingNone) {
+    if (htf::parameterHandler.getEncodingAlgorithm() == htf::EncodingAlgorithm::None) {
       size_t realSize = _htf_zstd_read(dest, compressedArray, compressedSize);
       htf_assert(realSize == n * sizeof(uint64_t));
     } else {
@@ -274,17 +274,17 @@ inline static void _htf_compress_read(uint64_t* dest, size_t n, FILE* file) {
     delete[] compressedArray;
     break;
   }
-  case htf::CompressionSZ:
-  case htf::CompressionZFP:
+  case htf::CompressionAlgorithm::SZ:
+  case htf::CompressionAlgorithm::ZFP:
     htf_error("Not implemented yet\n");
     break;
   }
 
   switch (htf::parameterHandler.getEncodingAlgorithm()) {
-  case htf::EncodingNone:
+  case htf::EncodingAlgorithm::None:
     break;
-  case htf::EncodingMasking: {
-    if (htf::parameterHandler.getCompressionAlgorithm() == htf::CompressionNone) {
+  case htf::EncodingAlgorithm::Masking: {
+    if (htf::parameterHandler.getCompressionAlgorithm() == htf::CompressionAlgorithm::None) {
       _htf_fread(&encodedSize, sizeof(encodedSize), 1, file);
       encodedArray = new byte[encodedSize];  // Too big but don't care
       _htf_fread(encodedArray, encodedSize, 1, file);
@@ -293,14 +293,14 @@ inline static void _htf_compress_read(uint64_t* dest, size_t n, FILE* file) {
     delete[] encodedArray;
     break;
   }
-  case htf::EncodingLeadingZeroes: {
+  case htf::EncodingAlgorithm::LeadingZeroes: {
     htf_error("Not yet implemented\n");
     break;
   }
   }
 
-  if (htf::parameterHandler.getCompressionAlgorithm() == htf::CompressionNone &&
-      htf::parameterHandler.getEncodingAlgorithm() == htf::EncodingNone) {
+  if (htf::parameterHandler.getCompressionAlgorithm() == htf::CompressionAlgorithm::None &&
+      htf::parameterHandler.getEncodingAlgorithm() == htf::EncodingAlgorithm::None) {
     size_t realSize;
     _htf_fread(&realSize, sizeof(realSize), 1, file);
     _htf_fread(dest, realSize, 1, file);

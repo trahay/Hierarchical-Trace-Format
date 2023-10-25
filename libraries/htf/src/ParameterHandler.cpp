@@ -10,10 +10,10 @@
 #include "htf/htf_dbg.h"
 
 /** Given a parameter and an enumValue, will assign the parameter's value to enumValue if the config file says so.*/
-#define MATCH_ENUM(parameterName, enumValue)  \
-  if (config[#parameterName] == #enumValue) { \
-    parameterName = enumValue;                \
-    goto parameterName##LoadingIfStatement;   \
+#define MATCH_ENUM(parameterName, enumName, enumValue) \
+  if (config[#parameterName] == #enumValue) {          \
+    parameterName = enumName::enumValue;               \
+    goto parameterName##LoadingIfStatement;            \
   }
 /** Small macro to load a field that is supposed to be an enum, have some code that does the matching,
  * and then throw a warning if nothing has been matched. */
@@ -38,7 +38,7 @@
 /** Small macro that is used when getting parameters from environment variables.*/
 #define GET_ENV_FIELD(parameterName, enumName, enumSpecific) \
   if (parameterName##String == #enumSpecific)                \
-  parameterName##Algorithm = enumName##enumSpecific
+  parameterName##Algorithm = enumName##Algorithm::enumSpecific
 
 namespace htf {
 // TODO Find a way to deal with that because it's sure as hell not a good idea.
@@ -56,22 +56,26 @@ ParameterHandler::ParameterHandler(const std::string& configFileName) {
   configFile >> config;
   configFile.close();
   /* Load from file */
+#define MATCH_COMPRESSION_ENUM(value) MATCH_ENUM(compressionAlgorithm, CompressionAlgorithm, value)
   LOAD_FIELD_ENUM(compressionAlgorithm, {
-    MATCH_ENUM(compressionAlgorithm, CompressionNone);
-    MATCH_ENUM(compressionAlgorithm, CompressionZSTD);
-    MATCH_ENUM(compressionAlgorithm, CompressionZFP);
-    MATCH_ENUM(compressionAlgorithm, CompressionSZ);
+    MATCH_COMPRESSION_ENUM(None);
+    MATCH_COMPRESSION_ENUM(ZSTD);
+    MATCH_COMPRESSION_ENUM(SZ);
+    MATCH_COMPRESSION_ENUM(ZFP);
   });
 
+#define MATCH_ENCODING_ENUM(value) MATCH_ENUM(encodingAlgorithm, EncodingAlgorithm, value)
   LOAD_FIELD_ENUM(encodingAlgorithm, {
-    MATCH_ENUM(encodingAlgorithm, EncodingNone);
-    MATCH_ENUM(encodingAlgorithm, EncodingMasking);
-    MATCH_ENUM(encodingAlgorithm, EncodingLeadingZeroes);
+    MATCH_ENCODING_ENUM(None);
+    MATCH_ENCODING_ENUM(Masking);
+    MATCH_ENCODING_ENUM(LeadingZeroes);
   });
+
+#define MATCH_LOOP_FINDING_ENUM(value) MATCH_ENUM(loopFindingAlgorithm, LoopFindingAlgorithm, value)
   LOAD_FIELD_ENUM(loopFindingAlgorithm, {
-    MATCH_ENUM(loopFindingAlgorithm, LoopFindingNone);
-    MATCH_ENUM(loopFindingAlgorithm, LoopFindingBasic);
-    MATCH_ENUM(loopFindingAlgorithm, LoopFindingBasicTruncated);
+    MATCH_LOOP_FINDING_ENUM(None);
+    MATCH_LOOP_FINDING_ENUM(Basic);
+    MATCH_LOOP_FINDING_ENUM(BasicTruncated);
   });
   LOAD_FIELD_UINT64(maxLoopLength);
   LOAD_FIELD_UINT64(zstdCompressionLevel);
@@ -108,12 +112,12 @@ ParameterHandler::ParameterHandler(const std::string& configFileName) {
 }
 
 size_t ParameterHandler::getMaxLoopLength() const {
-  if (loopFindingAlgorithm == LoopFindingBasicTruncated)
+  if (loopFindingAlgorithm == LoopFindingAlgorithm::BasicTruncated)
     return maxLoopLength;
   htf_error("Asked for the max loop length but wasn't using a LoopFindingBasicTruncated algorithm.\n");
 }
 u_int8_t ParameterHandler::getZstdCompressionLevel() const {
-  if (compressionAlgorithm == CompressionZSTD) {
+  if (compressionAlgorithm == CompressionAlgorithm::ZSTD) {
     return zstdCompressionLevel;
   }
   htf_error("Asked for ZSTD Compression Level but wasn't using a CompressionZSTD algorithm.\n");
@@ -124,7 +128,7 @@ CompressionAlgorithm ParameterHandler::getCompressionAlgorithm() const {
 EncodingAlgorithm ParameterHandler::getEncodingAlgorithm() const {
   if (isLossy(compressionAlgorithm)) {
     htf_warn("Encoding algorithm isn't None even though the compression algorithm is lossy.\n");
-    return EncodingNone;
+    return EncodingAlgorithm::None;
   }
   return encodingAlgorithm;
 }
