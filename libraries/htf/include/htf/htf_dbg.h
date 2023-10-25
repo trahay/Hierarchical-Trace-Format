@@ -7,24 +7,25 @@
  */
 #pragma once
 #ifndef NDEBUG
+/** This macro only exists in Debug mode.*/
 #define DEBUG
 #endif
 
 #ifdef __cplusplus
-/* Only exists in C++. */
+/** Only exists in C++. */
 #define CXX(cxx_name) cxx_name
-/* Only exists in C. */
+/** Only exists in C. */
 #define C(c_name)
 #else
-/* Only exists in C++. */
+/** Only exists in C++. */
 #define CXX(cxx_name)
-/* Only exists in C. */
+/** Only exists in C. */
 #define C(c_name) c_name
 #endif
 
 /** A macro to help naming conventions in C/C++. First argument is only kept in C, second is only kept in C++. */
 #define C_CXX(c_name, cxx_name) C(c_name) CXX(cxx_name)
-/* Adds htf:: in front of the variables in C++. */
+/** Adds htf:: in front of the variables in C++. */
 #define HTF(something) CXX(htf::) something
 
 #ifdef __cplusplus
@@ -40,14 +41,17 @@
 namespace htf {
 #endif
 
+/**
+ * Enum to handle the different level of logging.
+ */
 enum CXX(class) DebugLevel {
-  Error,   /**< only print errors */
-  Quiet,   /**< only print important messages */
-  Normal,  /**< default verbosity level */
-  Verbose, /**< print additional information */
-  Debug,   /**< print much information */
-  Help,    /**< print the different verbosity level and exit */
-  Max,     /**< flood stdout with debug messages */
+  Error,   /**< Only print errors. */
+  Quiet,   /**< Only print important messages. */
+  Normal,  /**< Default verbosity level. */
+  Verbose, /**< Print additional information. */
+  Debug,   /**< Print much information. */
+  Help,    /**< Print the different verbosity level and exit. */
+  Max,     /**< Flood stdout with debug messages. */
 };
 #ifdef __cplusplus
 extern enum DebugLevel debugLevel;
