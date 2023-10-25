@@ -34,6 +34,8 @@ option(ENABLE_OTF2 "Enable OTF2 compatibilit layer" ON)
 # endif()
 
 find_package (zstd REQUIRED)
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(JSONCPP jsoncpp)
 
 ####################################################
 # Some flags for compilation

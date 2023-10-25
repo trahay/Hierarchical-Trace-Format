@@ -1,0 +1,6 @@
+{
+  "compressionAlgorithm": "CompressionZSTD",
+  "encodingAlgorithm": "EncodingMasking",
+  "loopFindingAlgorithm": "LoopFindingBasicTruncated",
+  "maxLoopLength": 100
+}

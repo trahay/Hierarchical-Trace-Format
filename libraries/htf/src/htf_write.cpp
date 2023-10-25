@@ -9,13 +9,13 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "ParameterHandler.h"
 #include "htf/htf.h"
 #include "htf/htf_archive.h"
 #include "htf/htf_hash.h"
 #include "htf/htf_storage.h"
 #include "htf/htf_timestamp.h"
 #include "htf/htf_write.h"
-
 thread_local int htf_recursion_shield = 0;
 
 namespace htf {
@@ -177,15 +177,16 @@ void ThreadWriter::replaceTokensInLoop(int loop_len, size_t index_first_iteratio
 void ThreadWriter::findLoop() {
   Sequence* cur_seq = getCurrentSequence();
   size_t cur_index = cur_seq->size() - 1;
+  size_t maxLoopLength = parameterHandler.getMaxLoopLength();
 
   if (debugLevel >= Debug) {
     printf("find loops in :\n");
-    size_t start_index = (cur_index >= MAX_LOOP_LENGTH) ? cur_index - MAX_LOOP_LENGTH : 0;
-    size_t len = (cur_index <= MAX_LOOP_LENGTH) ? cur_index + 1 : MAX_LOOP_LENGTH;
+    size_t start_index = (cur_index >= maxLoopLength) ? cur_index - maxLoopLength : 0;
+    size_t len = (cur_index <= maxLoopLength) ? cur_index + 1 : maxLoopLength;
     thread_trace.printTokenArray(cur_seq->tokens.data(), start_index, len);
   }
 
-  for (int loop_len = 1; loop_len < MAX_LOOP_LENGTH && loop_len <= cur_index; loop_len++) {
+  for (int loop_len = 1; loop_len < maxLoopLength && loop_len <= cur_index; loop_len++) {
     /* search for a loop of loop_len tokens */
     size_t s1_start = cur_index + 1 - loop_len;
     size_t s2_start = cur_index + 1 - 2 * loop_len;

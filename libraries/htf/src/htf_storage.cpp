@@ -11,30 +11,18 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <memory>
 
+#include "ParameterHandler.h"
 #include "htf/htf.h"
 #include "htf/htf_dbg.h"
 #include "htf/htf_hash.h"
 #include "htf/htf_read.h"
 #include "htf/htf_storage.h"
 
-static enum storage_compression_option COMPRESSION_OPTIONS = ZSTD;
 short STORE_TIMESTAMPS = 1;
 static short STORE_HASHING = 0;
 void htf_storage_option_init() {
-  // Compression options
-  char* compression_str = getenv("COMPRESSION");
-  if (compression_str) {
-    if (strcmp(compression_str, "ZSTD") == 0)
-      COMPRESSION_OPTIONS = ZSTD;
-    else if (strcmp(compression_str, "MASKING") == 0)
-      COMPRESSION_OPTIONS = MASKING;
-    else if (strcmp(compression_str, "MASKING_ZSTD") == 0)
-      COMPRESSION_OPTIONS = MASKING_ZSTD;
-    else if (strcmp(compression_str, "NONE") == 0)
-      COMPRESSION_OPTIONS = NO_COMPRESSION;
-  }
-
   // Timestamp storage
   char* store_timestamps_str = getenv("STORE_TIMESTAMPS");
   if (store_timestamps_str && strcmp(store_timestamps_str, "TRUE") != 0)
@@ -105,158 +93,219 @@ static FILE* _htf_file_open(char* filename, char* mode) {
   } while (0)
 
 /******************* Read/Write/Compression function for vectors and arrays *******************/
+/**
+ * A simple alias to make some code clearer. We use uint8 because they're the size of a byte.
+ */
+typedef uint8_t byte;
 
 /** Compresses the content in src using ZSTD and writes it to dest. Returns the size of the compressed array.
- *  - void* src: what's going to be compressed.
- *  - void* dest: a free array in which the compressed array will be written.
- *  - size_t size: size of src (and of the allocated memory in dest).
+ *  @param src The source array.
+ *  @param size Size of the source array.
+ *  @param dest A free array in which the compressed data will be written.
+ *  @param destSize Size of the destination array
+ *  @returns Number of bytes written in the dest array.
  */
-inline static size_t _htf_zstd_compress(void* src, size_t size, void* dest, size_t dest_size) {
-  return ZSTD_compress(dest, dest_size, src, size, ZSTD_COMPRESSION_LEVEL);
+inline static size_t _htf_zstd_compress(void* src, size_t size, void* dest, size_t destSize) {
+  return ZSTD_compress(dest, destSize, src, size, htf::parameterHandler.getZstdCompressionLevel());
 }
-/** Compresses the content in src using a Masking technique and writes it to dest.
- * This is done only for 64-bits values.
- * Returns the size of the compressed array.
- *  - uint64_t* src: what's going to be compressed.
- *  - void* dest: a free array in which the compressed array will be written.
- *  - size_t size: size of src (and of the allocated memory in dest).
- */
-inline static size_t _htf_masking_compress(uint64_t* src, void* dest, size_t size) {
-  // We must be careful of size isn't a multiple of 8
-  if (size % sizeof(htf_timestamp_t) != 0) {
-    memcpy(dest, src, size);
-    return size;
-  }
 
-  size_t n = size / sizeof(htf_timestamp_t);
-  uint64_t* new_src = src;
+/**
+ * Encodes the content in src using a Masking technique and writes it to dest.
+ * This is done only for 64-bits values.
+ * @param src The source array. Contains n elements of 8 bytes (sizeof uint64_t).
+ * @param dest The destination array. Same size as src, is an uint8 for convenience (byte counting).
+ * @param n Number of elements in source array.
+ * @return Number of interesting bytes contained in dest. (0 <= nBytes <= n * sizeof uint64)
+ */
+inline static size_t _htf_masking_encode(const uint64_t* src, byte* dest, size_t n) {
   uint64_t mask = 0;
   for (int i = 0; i < n; i++) {
-    mask |= new_src[i];
+    mask |= src[i];
   }
-  short mask_size = 0;
+  short maskSize = 0;
   while (mask != 0) {
     mask >>= 8;
-    mask_size += 1;
+    maskSize += 1;
   }
-  if (mask_size && mask_size != sizeof(htf_timestamp_t)) {
+  // maskSize is the number of bytes needed to write the mask
+  // ie the most amount of byte any number in src will need to be written
+  if (maskSize && maskSize != sizeof(uint64_t)) {
     for (int i = 0; i < n; i++) {
-      memcpy(&((uint8_t*)dest)[sizeof(htf_timestamp_t) * i], &new_src[i], mask_size);
+      // FIXME This works because our LSB is in front (Small-endian)
+      memcpy(&dest[maskSize * i], &src[i], maskSize);
     }
-    return mask_size * n;
+    return maskSize * n;
   } else {
-    memcpy(dest, src, size);
-    return size;
+    memcpy(dest, src, n * sizeof(uint64_t));
+    return n * sizeof(uint64_t);
   }
 }
 
-/** Writes the array to the given file, but compresses it before, according to the value of COMPRESSION_OPTIONS.
- * - void* array: the array to be written.
- * - size_t size: size of said array.
- * - FILE*  file: file to write in.
+/**
+ * Writes the array to the given file, but encodes and compresses it before
+ * according to the value of parameterHandler::EncodingAlgorithm and parameterHandler::CompressingAlgorithm.
+ * @param src The source array. Contains n elements of 8 bytes (sizeof uint64_t).
+ * @param n Number of elements in src.
+ * @param file File to write in.
  */
-inline static void _htf_compress_write(void* array, size_t size, FILE* file) {
-  size_t compSize;
-  void* compArray = malloc(size);
-  int mustFree = 1;
-  // TODO Check for uint64
-
-  switch (COMPRESSION_OPTIONS) {
-  case NO_COMPRESSION:
-    compArray = array;
-    compSize = size;
-    mustFree = 0;
-    memcpy(compArray, array, size);
+inline static void _htf_compress_write(uint64_t* src, size_t n, FILE* file) {
+  size_t size = n * sizeof(uint64_t);
+  uint64_t* encodedArray = nullptr;
+  size_t encodedSize;
+  // First we do the encoding
+  switch (htf::parameterHandler.getEncodingAlgorithm()) {
+  case htf::EncodingNone:
     break;
-  case ZSTD: {
-    compSize = ZSTD_compressBound(size);
-    compArray = malloc(compSize);
-    compSize = _htf_zstd_compress(array, size, compArray, compSize);
-  } break;
-  case MASKING:
-    compArray = malloc(size);
-    compSize = _htf_masking_compress((uint64_t*)array, compArray, size);
+  case htf::EncodingMasking: {
+    encodedArray = new uint64_t[n];
+    encodedSize = _htf_masking_encode(src, (uint8_t*)encodedArray, n);
     break;
-  case MASKING_ZSTD: {
-    void* buffer = malloc(size);
-    size_t maskedSize = _htf_masking_compress((uint64_t*)array, buffer, size);
-    compSize = ZSTD_compressBound(maskedSize);
-    compArray = malloc(compSize);
-    compSize = _htf_zstd_compress(buffer, maskedSize, compArray, compSize);
-    free(buffer);
+  }
+  case htf::EncodingLeadingZeroes: {
+    htf_error("Not yet implemented\n");
     break;
   }
   }
-  htf_log(htf::DebugLevel::Normal, "Writing %lu bytes as %lu bytes\n", size, compSize);
-  _htf_fwrite(&compSize, sizeof(compSize), 1, file);
-  _htf_fwrite(compArray, compSize, 1, file);
 
-  if (mustFree)
-    free(compArray);
+  byte* compressedArray = nullptr;
+  size_t compressedSize;
+  switch (htf::parameterHandler.getCompressionAlgorithm()) {
+  case htf::CompressionNone:
+    break;
+  case htf::CompressionZSTD: {
+    compressedSize = ZSTD_compressBound(encodedArray ? encodedSize : size);
+    compressedArray = new uint8_t[compressedSize];
+    if (encodedArray) {
+      compressedSize = _htf_zstd_compress(encodedArray, encodedSize, compressedArray, compressedSize);
+    } else {
+      compressedSize = _htf_zstd_compress(src, size, compressedArray, compressedSize);
+    }
+    break;
+  }
+  case htf::CompressionSZ:
+  case htf::CompressionZFP:
+    htf_error("Not implemented yet\n");
+    break;
+  }
+
+  if (htf::parameterHandler.getCompressionAlgorithm() != htf::CompressionNone) {
+    htf_log(htf::Normal, "Compressing %lu bytes as %lu bytes\n", size, compressedSize);
+    _htf_fwrite(&compressedSize, sizeof(compressedSize), 1, file);
+    _htf_fwrite(compressedArray, compressedSize, 1, file);
+  } else if (htf::parameterHandler.getEncodingAlgorithm() != htf::EncodingNone) {
+    htf_log(htf::Normal, "Encoding %lu bytes as %lu bytes\n", size, encodedSize);
+    _htf_fwrite(&encodedSize, sizeof(encodedSize), 1, file);
+    _htf_fwrite(encodedArray, encodedSize, 1, file);
+  } else {
+    htf_log(htf::Normal, "Writing %lu bytes as is.\n", size);
+    _htf_fwrite(&size, sizeof(size), 1, file);
+    _htf_fwrite(src, size, 1, file);
+  }
+  if (htf::parameterHandler.getCompressionAlgorithm() != htf::CompressionNone)
+    delete[] compressedArray;
+  if (htf::parameterHandler.getEncodingAlgorithm() != htf::EncodingNone)
+    delete[] encodedArray;
 }
-/** Decompresses an array that has been compressed by ZSTD. Returns the size of the uncompressed data.
- * - void * array : the array in which the uncompressed data will be written.
- * - void * compArray : the compressed array.
- * - size_t compSize : size of the compressed array
+/**
+ * Decompresses an array that has been compressed by ZSTD. Returns the size of the uncompressed data.
+ * @param dest The array in which the uncompressed data will be written.
+ * @param compArray The compressed array.
+ * @param compSize Size of the compressed array.
+ * @returns Size of the uncompressed data.
  */
-inline static size_t _htf_zstd_read(void* array, void* compArray, size_t compSize) {
+inline static size_t _htf_zstd_read(void* dest, void* compArray, size_t compSize) {
   size_t realSize = ZSTD_getFrameContentSize(compArray, compSize);
-  ZSTD_decompress(array, realSize, compArray, compSize);
+  ZSTD_decompress(dest, realSize, compArray, compSize);
   return realSize;
 }
 
-/** Decompresses an array that has been compressed by the Masking technique. Returns the size of the uncompressed data.
- * - void * array : the array in which the uncompressed data will be written.
- * - size_t size: size of that array.
- * - void * compArray : the compressed array.
- * - size_t compSize : size of the compressed array
+/** De-encodes an array that has been compressed by the Masking technique. Returns the size of the unencoded data.
+ * @param dest The array in which the uncompressed data will be written.
+ * @param n Number of elements in the dest array.
+ * @param encodedArray The encoded array.
+ * @param encodedSize Size of the encoded array.
+ * @returns Number of bytes in the decoded array.
  */
-inline static size_t _htf_masking_read(void* array, size_t size, void* compArray, size_t compSize) {
-  if (compSize == size) {
-    memcpy(array, compArray, size);
-    return compSize;
+inline static size_t _htf_masking_read(uint64_t* dest, size_t n, byte* encodedArray, size_t encodedSize) {
+  size_t size = n * sizeof(uint64_t);
+  if (encodedSize == size) {
+    memcpy(dest, encodedArray, size);
+    return encodedSize;
   }
-  size_t width = 1 << (size / compSize);
-  memset(array, 0, size);
-  for (int i = 0; i < size / sizeof(uint64_t); i++) {
-    memcpy(&((uint8_t*)array)[i], &((uint8_t*)compArray)[size * i], width);
+  size_t width = encodedSize / n;
+  // width is the number of bytes needed to write an element in the encoded array.
+  memset(dest, 0, size);
+  for (int i = 0; i < n; i++) {
+    // FIXME Still only works with Little-Endian architecture.
+    memcpy(&dest[i], &encodedArray[width * i], width);
   }
-  return width * (size / sizeof(uint64_t));
+  return size;
 }
 
-/** Reads the array from the given file, but decompresses it before, according to the value of COMPRESSION_OPTIONS.
- * - void* array: the array to be read.
- * - size_t size: size of said array.
- * - FILE*  file: file to read from.
+/**
+ * Reads, de-encodes and decompresses an array from the given file,
+ * according to the values of parameterHandler::EncodingAlgorithm and parameterHandler::CompressingAlgorithm.
+ * @param dest The destination array.
+ * @param n Number of elements of 8 bytes dest is supposed to have.
+ * @param file File to read from
  */
-inline static void _htf_compress_read(void* array, size_t size, FILE* file) {
-  size_t compSize;
-  _htf_fread(&compSize, sizeof(compSize), 1, file);
-  // Then we used ZSTD
-  void* compArray = malloc(compSize);
-  _htf_fread(compArray, compSize, 1, file);
-  switch (COMPRESSION_OPTIONS) {
-  case NO_COMPRESSION:
-    memcpy(array, compArray, size);
+inline static void _htf_compress_read(uint64_t* dest, size_t n, FILE* file) {
+  size_t compressedSize;
+  byte* compressedArray = nullptr;
+
+  size_t encodedSize;
+  byte* encodedArray = nullptr;
+
+  switch (htf::parameterHandler.getCompressionAlgorithm()) {
+  case htf::CompressionNone:
     break;
-  case ZSTD: {
-    size_t realSize = _htf_zstd_read(array, compArray, compSize);
-    htf_assert(realSize == size);
+  case htf::CompressionZSTD: {
+    _htf_fread(&compressedSize, sizeof(compressedSize), 1, file);
+    compressedArray = new byte[compressedSize];
+    _htf_fread(compressedArray, compressedSize, 1, file);
+    if (htf::parameterHandler.getEncodingAlgorithm() == htf::EncodingNone) {
+      size_t realSize = _htf_zstd_read(dest, compressedArray, compressedSize);
+      htf_assert(realSize == n * sizeof(uint64_t));
+    } else {
+      encodedArray = new byte[n * sizeof(uint64_t)];
+      encodedSize = _htf_zstd_read(encodedArray, compressedArray, compressedSize);
+      htf_assert(encodedSize <= n * sizeof(uint64_t));
+    }
+    delete[] compressedArray;
     break;
   }
-  case MASKING:
-    _htf_masking_read(array, size, compArray, compSize);
+  case htf::CompressionSZ:
+  case htf::CompressionZFP:
+    htf_error("Not implemented yet\n");
     break;
-  case MASKING_ZSTD: {
-    void* buffer = compArray;
-    size_t maskedSize = _htf_zstd_read(array, buffer, compSize);
-    compArray = malloc(maskedSize);
-    _htf_masking_read(buffer, size, compArray, maskedSize);
-    free(buffer);
+  }
+
+  switch (htf::parameterHandler.getEncodingAlgorithm()) {
+  case htf::EncodingNone:
+    break;
+  case htf::EncodingMasking: {
+    if (htf::parameterHandler.getCompressionAlgorithm() == htf::CompressionNone) {
+      _htf_fread(&encodedSize, sizeof(encodedSize), 1, file);
+      encodedArray = new byte[encodedSize];  // Too big but don't care
+      _htf_fread(encodedArray, encodedSize, 1, file);
+    }
+    _htf_masking_read(dest, n, encodedArray, encodedSize);
+    delete[] encodedArray;
+    break;
+  }
+  case htf::EncodingLeadingZeroes: {
+    htf_error("Not yet implemented\n");
     break;
   }
   }
-  free(compArray);
+
+  if (htf::parameterHandler.getCompressionAlgorithm() == htf::CompressionNone &&
+      htf::parameterHandler.getEncodingAlgorithm() == htf::EncodingNone) {
+    size_t realSize;
+    _htf_fread(&realSize, sizeof(realSize), 1, file);
+    _htf_fread(dest, realSize, 1, file);
+    htf_assert(realSize == n * sizeof(uint64_t));
+  }
 }
 
 void htf::LinkedVector::writeToFile(FILE* file, bool writeSize = true) const {
@@ -275,7 +324,7 @@ void htf::LinkedVector::writeToFile(FILE* file, bool writeSize = true) const {
     sub_vec = sub_vec->next;
   }
   htf_assert(cur_index == size);
-  _htf_compress_write(buffer, size * sizeof(uint64_t), file);
+  _htf_compress_write(buffer, size, file);
   delete[] buffer;
 }
 
@@ -284,7 +333,7 @@ htf::LinkedVector::LinkedVector(FILE* file, size_t givenSize) {
   if (size) {
     last = new SubVector(size, nullptr);
     first = last;
-    _htf_compress_read(last->array, size * sizeof(uint64_t), file);
+    _htf_compress_read(last->array, size, file);
     last->size = size;
   }
 }
@@ -294,7 +343,7 @@ htf::LinkedVector::LinkedVector(FILE* file) {
   if (size) {
     last = new SubVector(size, nullptr);
     first = last;
-    _htf_compress_read(last->array, size * sizeof(uint64_t), file);
+    _htf_compress_read(last->array, size, file);
     last->size = size;
   }
 }
@@ -763,7 +812,7 @@ void htf_storage_finalize(htf::Archive* archive) {
   size = archive->locations.size();
   _htf_fwrite(&size, sizeof(size), 1, f);
   _htf_fwrite(&archive->nb_threads, sizeof(int), 1, f);
-  _htf_fwrite(&COMPRESSION_OPTIONS, sizeof(COMPRESSION_OPTIONS), 1, f);
+  //  _htf_fwrite(&COMPRESSION_OPTIONS, sizeof(COMPRESSION_OPTIONS), 1, f);
   _htf_fwrite(&STORE_HASHING, sizeof(STORE_HASHING), 1, f);
   _htf_fwrite(&STORE_TIMESTAMPS, sizeof(STORE_TIMESTAMPS), 1, f);
 
@@ -842,7 +891,7 @@ static void _htf_read_archive(htf::Archive* global_archive, htf::Archive* archiv
   archive->threads = new htf::Thread*[archive->nb_threads];
   archive->nb_allocated_threads = archive->nb_threads;
 
-  _htf_fread(&COMPRESSION_OPTIONS, sizeof(COMPRESSION_OPTIONS), 1, f);
+  //  _htf_fread(&COMPRESSION_OPTIONS, sizeof(COMPRESSION_OPTIONS), 1, f);
   _htf_fread(&STORE_HASHING, sizeof(STORE_HASHING), 1, f);
   _htf_fread(&STORE_TIMESTAMPS, sizeof(STORE_TIMESTAMPS), 1, f);
 

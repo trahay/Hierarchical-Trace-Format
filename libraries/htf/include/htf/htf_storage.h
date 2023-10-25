@@ -6,7 +6,6 @@
 
 #include "htf.h"
 #include "htf_archive.h"
-enum storage_compression_option { NO_COMPRESSION = 0, ZSTD = 1, MASKING = 2, MASKING_ZSTD = 3 };
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -19,8 +18,6 @@ void htf_read_archive(HTF(Archive) * archive, char* main_filename);
 #ifdef __cplusplus
 };
 #endif
-
-#define ZSTD_COMPRESSION_LEVEL 1
 
 /* -*-
    mode: c;

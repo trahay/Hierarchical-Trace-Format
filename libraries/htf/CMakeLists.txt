@@ -20,6 +20,8 @@ target_sources(htf
         src/htf_timestamp.cpp
         src/htf_write.cpp
         src/LinkedVector.cpp
+        src/ParameterHandler.cpp
+        src/ParameterHandler.h
 )
 
 target_include_directories(htf PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} include)
@@ -43,6 +45,7 @@ target_link_libraries(htf
         m
         zstd
         ${zstd_LIBRARIES}
+        ${JSONCPP_LIBRARIES}
 )
 install(TARGETS htf EXPORT HTFLibTargets
   LIBRARY DESTINATION ${INSTALL_LIBDIR}

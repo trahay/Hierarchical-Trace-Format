@@ -164,7 +164,6 @@ extern void htf_record_mpi_collective_end(HTF(ThreadWriter) * thread_writer,
                                    uint64_t sizeSent,
                                    uint64_t sizeReceived);
 
-#define MAX_LOOP_LENGTH 100
 #ifdef __cplusplus
 };
 #endif
