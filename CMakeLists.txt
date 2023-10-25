@@ -27,6 +27,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake_modules)
 option(ENABLE_PTHREAD "Enable Pthread module" ON)
 # option(ENABLE_MPI "Enable MPI module" ON)
 option(ENABLE_OTF2 "Enable OTF2 compatibilit layer" ON)
+option(BUILD_DOC "Build Doxygen Documentation" ON)
 
 
 # if (ENABLE_MPI)
@@ -36,6 +37,7 @@ option(ENABLE_OTF2 "Enable OTF2 compatibilit layer" ON)
 find_package (zstd REQUIRED)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(JSONCPP jsoncpp)
+find_package(Doxygen)
 
 ####################################################
 # Some flags for compilation
