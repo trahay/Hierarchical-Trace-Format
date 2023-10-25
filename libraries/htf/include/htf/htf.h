@@ -58,9 +58,6 @@ enum TokenType { TypeInvalid = 0, TypeEvent = 1, TypeSequence = 2, TypeLoop = 3 
  * Useful macros
  */
 #define HTF_TOKEN_ID_INVALID 0x3fffffff
-#define HTF_EVENT_ID_INVALID HTF_TOKEN_ID_INVALID
-#define HTF_SEQUENCE_ID_INVALID HTF_TOKEN_ID_INVALID
-#define HTF_LOOP_ID_INVALID HTF_TOKEN_ID_INVALID
 
 /**
  * Definition of the type for a token ID
@@ -112,141 +109,90 @@ enum EventType {
  * Enumeration of the different events that are recorded by HTF
  */
 enum Record {
-  /** Event record identifier for the BufferFlush event. */
-  HTF_EVENT_BUFFER_FLUSH = 0,
-  /** Event record identifier for the MeasurementOnOff event. */
-  HTF_EVENT_MEASUREMENT_ON_OFF = 1,
-  /** Event record identifier for the Enter event. */
-  HTF_EVENT_ENTER = 2,
-  /** Event record identifier for the Leave event. */
-  HTF_EVENT_LEAVE = 3,
-  /** Event record identifier for the MpiSend event. */
-  HTF_EVENT_MPI_SEND = 4,
-  /** Event record identifier for the MpiIsend event. */
-  HTF_EVENT_MPI_ISEND = 5,
-  /** Event record identifier for the MpiIsendComplete event. */
-  HTF_EVENT_MPI_ISEND_COMPLETE = 6,
-  /** Event record identifier for the MpiIrecvRequest event. */
-  HTF_EVENT_MPI_IRECV_REQUEST = 7,
-  /** Event record identifier for the MpiRecv event. */
-  HTF_EVENT_MPI_RECV = 8,
-  /** Event record identifier for the MpiIrecv event. */
-  HTF_EVENT_MPI_IRECV = 9,
-  /** Event record identifier for the MpiRequestTest event. */
-  HTF_EVENT_MPI_REQUEST_TEST = 10,
-  /** Event record identifier for the MpiRequestCancelled event. */
-  HTF_EVENT_MPI_REQUEST_CANCELLED = 11,
-  /** Event record identifier for the MpiCollectiveBegin event. */
-  HTF_EVENT_MPI_COLLECTIVE_BEGIN = 12,
-  /** Event record identifier for the MpiCollectiveEnd event. */
-  HTF_EVENT_MPI_COLLECTIVE_END = 13,
-  /** Event record identifier for the OmpFork event. */
-  HTF_EVENT_OMP_FORK = 14,
-  /** Event record identifier for the OmpJoin event. */
-  HTF_EVENT_OMP_JOIN = 15,
-  /** Event record identifier for the OmpAcquireLock event. */
-  HTF_EVENT_OMP_ACQUIRE_LOCK = 16,
-  /** Event record identifier for the OmpReleaseLock event. */
-  HTF_EVENT_OMP_RELEASE_LOCK = 17,
-  /** Event record identifier for the OmpTaskCreate event. */
-  HTF_EVENT_OMP_TASK_CREATE = 18,
-  /** Event record identifier for the OmpTaskSwitch event. */
-  HTF_EVENT_OMP_TASK_SWITCH = 19,
-  /** Event record identifier for the OmpTaskComplete event. */
-  HTF_EVENT_OMP_TASK_COMPLETE = 20,
-  /** Event record identifier for the Metric event. */
-  HTF_EVENT_METRIC = 21,
-  /** Event record identifier for the ParameterString event. */
-  HTF_EVENT_PARAMETER_STRING = 22,
-  /** Event record identifier for the ParameterInt event. */
-  HTF_EVENT_PARAMETER_INT = 23,
-  /** Event record identifier for the ParameterUnsignedInt event. */
-  HTF_EVENT_PARAMETER_UNSIGNED_INT = 24,
-  /** Event record identifier for the ThreadFork event. */
-  HTF_EVENT_THREAD_FORK = 25,
-  /** Event record identifier for the ThreadJoin event. */
-  HTF_EVENT_THREAD_JOIN = 26,
-  /** Event record identifier for the ThreadTeamBegin event. */
-  HTF_EVENT_THREAD_TEAM_BEGIN = 27,
-  /** Event record identifier for the ThreadTeamEnd event. */
-  HTF_EVENT_THREAD_TEAM_END = 28,
-  /** Event record identifier for the ThreadAcquireLock event. */
-  HTF_EVENT_THREAD_ACQUIRE_LOCK = 29,
-  /** Event record identifier for the ThreadReleaseLock event. */
-  HTF_EVENT_THREAD_RELEASE_LOCK = 30,
-  /** Event record identifier for the ThreadTaskCreate event. */
-  HTF_EVENT_THREAD_TASK_CREATE = 31,
-  /** Event record identifier for the ThreadTaskSwitch event. */
-  HTF_EVENT_THREAD_TASK_SWITCH = 32,
-  /** Event record identifier for the ThreadTaskComplete event. */
-  HTF_EVENT_THREAD_TASK_COMPLETE = 33,
-  /** Event record identifier for the ThreadCreate event. */
-  HTF_EVENT_THREAD_CREATE = 34,
-  /** Event record identifier for the ThreadBegin event. */
-  HTF_EVENT_THREAD_BEGIN = 35,
-  /** Event record identifier for the ThreadWait event. */
-  HTF_EVENT_THREAD_WAIT = 36,
-  /** Event record identifier for the ThreadEnd event. */
-  HTF_EVENT_THREAD_END = 37,
-  /** Event record identifier for the IoCreateHandle event. */
-  HTF_EVENT_IO_CREATE_HANDLE = 38,
-  /** Event record identifier for the IoDestroyHandle event. */
-  HTF_EVENT_IO_DESTROY_HANDLE = 39,
-  /** Event record identifier for the IoSeek event. */
-  HTF_EVENT_IO_SEEK = 41,
-  /** Event record identifier for the IoChangeStatusFlags event. */
-  HTF_EVENT_IO_CHANGE_STATUS_FLAGS = 42,
-  /** Event record identifier for the IoDeleteFile event. */
-  HTF_EVENT_IO_DELETE_FILE = 43,
-  /** Event record identifier for the IoOperationBegin event. */
-  HTF_EVENT_IO_OPERATION_BEGIN = 44,
-  /** Event record identifier for the IoDuplicateHandle event. */
-  HTF_EVENT_IO_DUPLICATE_HANDLE = 40,
-  /** Event record identifier for the IoOperationTest event. */
-  HTF_EVENT_IO_OPERATION_TEST = 45,
-  /** Event record identifier for the IoOperationIssued event. */
-  HTF_EVENT_IO_OPERATION_ISSUED = 46,
-  /** Event record identifier for the IoOperationComplete event. */
-  HTF_EVENT_IO_OPERATION_COMPLETE = 47,
-  /** Event record identifier for the IoOperationCancelled event. */
-  HTF_EVENT_IO_OPERATION_CANCELLED = 48,
-  /** Event record identifier for the IoAcquireLock event. */
-  HTF_EVENT_IO_ACQUIRE_LOCK = 49,
-  /** Event record identifier for the IoReleaseLock event. */
-  HTF_EVENT_IO_RELEASE_LOCK = 50,
-  /** Event record identifier for the IoTryLock event. */
-  HTF_EVENT_IO_TRY_LOCK = 51,
-  /** Event record identifier for the ProgramBegin event. */
-  HTF_EVENT_PROGRAM_BEGIN = 52,
-  /** Event record identifier for the ProgramEnd event. */
-  HTF_EVENT_PROGRAM_END = 53,
-  /** Event record identifier for the NonBlockingCollectiveRequest event. */
-  HTF_EVENT_NON_BLOCKING_COLLECTIVE_REQUEST = 54,
-  /** Event record identifier for the NonBlockingCollectiveComplete event. */
-  HTF_EVENT_NON_BLOCKING_COLLECTIVE_COMPLETE = 55,
-  /** Event record identifier for the CommCreate event. */
-  HTF_EVENT_COMM_CREATE = 56,
-  /** Event record identifier for the CommDestroy event. */
-  HTF_EVENT_COMM_DESTROY = 57,
+  HTF_EVENT_BUFFER_FLUSH = 0,                      /**< Event record identifier for the BufferFlush event. */
+  HTF_EVENT_MEASUREMENT_ON_OFF = 1,                /**< Event record identifier for the MeasurementOnOff event. */
+  HTF_EVENT_ENTER = 2,                             /**< Event record identifier for the Enter event. */
+  HTF_EVENT_LEAVE = 3,                             /**< Event record identifier for the Leave event. */
+  HTF_EVENT_MPI_SEND = 4,                          /**< Event record identifier for the MpiSend event. */
+  HTF_EVENT_MPI_ISEND = 5,                         /**< Event record identifier for the MpiIsend event. */
+  HTF_EVENT_MPI_ISEND_COMPLETE = 6,                /**< Event record identifier for the MpiIsendComplete event. */
+  HTF_EVENT_MPI_IRECV_REQUEST = 7,                 /**< Event record identifier for the MpiIrecvRequest event. */
+  HTF_EVENT_MPI_RECV = 8,                          /**< Event record identifier for the MpiRecv event. */
+  HTF_EVENT_MPI_IRECV = 9,                         /**< Event record identifier for the MpiIrecv event. */
+  HTF_EVENT_MPI_REQUEST_TEST = 10,                 /**< Event record identifier for the MpiRequestTest event. */
+  HTF_EVENT_MPI_REQUEST_CANCELLED = 11,            /**< Event record identifier for the MpiRequestCancelled event. */
+  HTF_EVENT_MPI_COLLECTIVE_BEGIN = 12,             /**< Event record identifier for the MpiCollectiveBegin event. */
+  HTF_EVENT_MPI_COLLECTIVE_END = 13,               /**< Event record identifier for the MpiCollectiveEnd event. */
+  HTF_EVENT_OMP_FORK = 14,                         /**< Event record identifier for the OmpFork event. */
+  HTF_EVENT_OMP_JOIN = 15,                         /**< Event record identifier for the OmpJoin event. */
+  HTF_EVENT_OMP_ACQUIRE_LOCK = 16,                 /**< Event record identifier for the OmpAcquireLock event. */
+  HTF_EVENT_OMP_RELEASE_LOCK = 17,                 /**< Event record identifier for the OmpReleaseLock event. */
+  HTF_EVENT_OMP_TASK_CREATE = 18,                  /**< Event record identifier for the OmpTaskCreate event. */
+  HTF_EVENT_OMP_TASK_SWITCH = 19,                  /**< Event record identifier for the OmpTaskSwitch event. */
+  HTF_EVENT_OMP_TASK_COMPLETE = 20,                /**< Event record identifier for the OmpTaskComplete event. */
+  HTF_EVENT_METRIC = 21,                           /**< Event record identifier for the Metric event. */
+  HTF_EVENT_PARAMETER_STRING = 22,                 /**< Event record identifier for the ParameterString event. */
+  HTF_EVENT_PARAMETER_INT = 23,                    /**< Event record identifier for the ParameterInt event. */
+  HTF_EVENT_PARAMETER_UNSIGNED_INT = 24,           /**< Event record identifier for the ParameterUnsignedInt event. */
+  HTF_EVENT_THREAD_FORK = 25,                      /**< Event record identifier for the ThreadFork event. */
+  HTF_EVENT_THREAD_JOIN = 26,                      /**< Event record identifier for the ThreadJoin event. */
+  HTF_EVENT_THREAD_TEAM_BEGIN = 27,                /**< Event record identifier for the ThreadTeamBegin event. */
+  HTF_EVENT_THREAD_TEAM_END = 28,                  /**< Event record identifier for the ThreadTeamEnd event. */
+  HTF_EVENT_THREAD_ACQUIRE_LOCK = 29,              /**< Event record identifier for the ThreadAcquireLock event. */
+  HTF_EVENT_THREAD_RELEASE_LOCK = 30,              /**< Event record identifier for the ThreadReleaseLock event. */
+  HTF_EVENT_THREAD_TASK_CREATE = 31,               /**< Event record identifier for the ThreadTaskCreate event. */
+  HTF_EVENT_THREAD_TASK_SWITCH = 32,               /**< Event record identifier for the ThreadTaskSwitch event. */
+  HTF_EVENT_THREAD_TASK_COMPLETE = 33,             /**< Event record identifier for the ThreadTaskComplete event. */
+  HTF_EVENT_THREAD_CREATE = 34,                    /**< Event record identifier for the ThreadCreate event. */
+  HTF_EVENT_THREAD_BEGIN = 35,                     /**< Event record identifier for the ThreadBegin event. */
+  HTF_EVENT_THREAD_WAIT = 36,                      /**< Event record identifier for the ThreadWait event. */
+  HTF_EVENT_THREAD_END = 37,                       /**< Event record identifier for the ThreadEnd event. */
+  HTF_EVENT_IO_CREATE_HANDLE = 38,                 /**< Event record identifier for the IoCreateHandle event. */
+  HTF_EVENT_IO_DESTROY_HANDLE = 39,                /**< Event record identifier for the IoDestroyHandle event. */
+  HTF_EVENT_IO_SEEK = 41,                          /**< Event record identifier for the IoSeek event. */
+  HTF_EVENT_IO_CHANGE_STATUS_FLAGS = 42,           /**< Event record identifier for the IoChangeStatusFlags event. */
+  HTF_EVENT_IO_DELETE_FILE = 43,                   /**< Event record identifier for the IoDeleteFile event. */
+  HTF_EVENT_IO_OPERATION_BEGIN = 44,               /**< Event record identifier for the IoOperationBegin event. */
+  HTF_EVENT_IO_DUPLICATE_HANDLE = 40,              /**< Event record identifier for the IoDuplicateHandle event. */
+  HTF_EVENT_IO_OPERATION_TEST = 45,                /**< Event record identifier for the IoOperationTest event. */
+  HTF_EVENT_IO_OPERATION_ISSUED = 46,              /**< Event record identifier for the IoOperationIssued event. */
+  HTF_EVENT_IO_OPERATION_COMPLETE = 47,            /**< Event record identifier for the IoOperationComplete event. */
+  HTF_EVENT_IO_OPERATION_CANCELLED = 48,           /**< Event record identifier for the IoOperationCancelled event. */
+  HTF_EVENT_IO_ACQUIRE_LOCK = 49,                  /**< Event record identifier for the IoAcquireLock event. */
+  HTF_EVENT_IO_RELEASE_LOCK = 50,                  /**< Event record identifier for the IoReleaseLock event. */
+  HTF_EVENT_IO_TRY_LOCK = 51,                      /**< Event record identifier for the IoTryLock event. */
+  HTF_EVENT_PROGRAM_BEGIN = 52,                    /**< Event record identifier for the ProgramBegin event. */
+  HTF_EVENT_PROGRAM_END = 53,                      /**< Event record identifier for the ProgramEnd event. */
+  HTF_EVENT_NON_BLOCKING_COLLECTIVE_REQUEST = 54,  /**< Event record identifier for the NonBlockingCollectiveRequest
+                                                    * event. */
+  HTF_EVENT_NON_BLOCKING_COLLECTIVE_COMPLETE = 55, /**< Event record identifier for the NonBlockingCollectiveComplete
+                                                    * event. */
+  HTF_EVENT_COMM_CREATE = 56,                      /**< Event record identifier for the CommCreate event. */
+  HTF_EVENT_COMM_DESTROY = 57,                     /**< Event record identifier for the CommDestroy event. */
 
-  HTF_EVENT_MAX_ID
+  HTF_EVENT_MAX_ID /**< Max Event Record ID */
 };
 
 /**
- * Structure to store an event in HTF
- *  - uint8_t event_size: the size of the event
- *  - enum Record record: the ID of the event recorded in the above enumeration of events
- *  - uint8_t event_data[256]: data related to the events (parameters of functions etc)
+ * @brief Structure to store an event in HTF.
  */
 typedef struct Event {
-  enum Record record;
-  uint8_t event_size;
-  uint8_t event_data[256];  // todo: align on 256
+  enum Record record;      /**< ID of the event recorded in the above enumeration of events. */
+  uint8_t event_size;      /**< Size of the event. */
+  uint8_t event_data[256]; /**< data related to the events. (parameters of functions etc)*/
+                           // todo: align on 256
 } __attribute__((packed)) Event;
 
 /*************************** Sequences **********************/
 #ifdef __cplusplus
+/**
+ * @brief A Map for counting Tokens.
+ * This class exists to make token counting easier.
+ * Instead of having arrays for each different type of token, we can just use that map.
+ * This class also comes with addition and multiplication, so that we can easily use them.
+ */
 struct TokenCountMap : public std::map<Token, size_t> {
+  /** Adds each (key, value) pair of the other map to this one. */
   void operator+=(const TokenCountMap& other) {
     for (auto keyValue : other) {
       if (this->count(keyValue.first) == 0) {
@@ -256,6 +202,7 @@ struct TokenCountMap : public std::map<Token, size_t> {
       }
     }
   }
+  /** Returns a new map with the same keys, but each value has been multiplied by the given value. */
   TokenCountMap operator*(size_t multiplier) const {
     auto otherMap = TokenCountMap();
     for (auto keyValue : otherMap) {
@@ -271,20 +218,25 @@ struct TokenCountMap : public std::map<Token, size_t> {
 #define DEFINE_Vector(type, name) C_CXX(char, std::vector<type>) name C_CXX([24], { std::vector<type>() })
 
 /**
- * Structure to store a sequence in HTF format
- *  - LinkedVector* durations: array of durations for these types of sequences. (see htf_timestamp.h)
- *  - uint_32_t hash: Hash value according to the hash32 function. (see htf_hash.h)
- *  - std::vector* tokens: Array to store the sequence of tokens
+ * @brief Structure to store a sequence in HTF format.
  */
 typedef struct Sequence {
-  LinkedVector* durations CXX({new LinkedVector()});
-  uint32_t hash CXX({0});
-  DEFINE_Vector(Token, tokens);
+  LinkedVector* durations CXX({new LinkedVector()}); /**< Vector of durations for these type of sequences. */
+  uint32_t hash CXX({0});                            /**< Hash value according to the hash32 function.*/
+  DEFINE_Vector(Token, tokens);                      /**< Vector of Token to store the sequence of tokens */
   CXX(private:)
+  /**
+   * A TokenCountMap counting each token in this Sequence (recursively).
+   * It might not be initialized, which is why ::getTokenCount exists.*/
   DEFINE_TokenCountMap(tokenCount);
 #ifdef __cplusplus
  public:
+  /** Getter for the size of that Sequence.
+   * @returns Number of tokens in that Sequence. */
   [[nodiscard]] size_t size() const { return tokens.size(); }
+  /** Getter for #tokenCountMap.
+   * If need be, counts the number of Token in that Sequence to initialize it.
+   * @returns Reference to #tokenCountMap.*/
   const TokenCountMap& getTokenCount(const struct Thread* thread);
 #endif
 } Sequence;
@@ -292,45 +244,39 @@ typedef struct Sequence {
 /*************************** Loop **********************/
 
 /**
- * Structure to store a loop in HTF format
- * // TODO Update this doc
- * - unsigned* nb_iterations:  Number of iterations for these loops
- * - unsigned nb_loops: Number of registered loops
- * - unsigned nb_allocated: Number of allocated loops
- * - htf_token_t repeated_token: Token of the sequence being repeated
- * - struct Token id: Self-id of the loop
+ * @brief Structure to store a Loop in HTF format.
  */
 typedef struct Loop {
-  Token repeated_token;
-  Token self_id;
-  DEFINE_Vector(uint16_t, nb_iterations);
-  CXX(void addIteration();)
+  Token repeated_token;                   /**< Token of the Sequence being repeated. */
+  Token self_id;                          /**< Token identifying that Loop. */
+  DEFINE_Vector(uint16_t, nb_iterations); /**< Vector of uint counting the number of iterations of that loop. */
+  CXX(void addIteration();)               /**< Adds an iteration to the lastest occurence of that loop. */
 } Loop;
 
 /**
- * Summary for an event.
+ * @brief Summary for an htf::Event.
+ *
+ * Contains the durations for each occurence of that event
+ * as well as the number of occurences for that event,
+ * and its attributes.
  */
 typedef struct EventSummary {
-  TokenId id;
-  Event event;
-  LinkedVector* durations CXX({new LinkedVector()});
-  // TODO use NB_TIMESTAMP_DEFAULT as the default size for that
-  size_t nb_occurences;
+  TokenId id;                                        /**< ID of the Event */
+  Event event;                                       /**< The Event being summarized.*/
+  LinkedVector* durations CXX({new LinkedVector()}); /**< Durations for each occurrence of that Event.*/
+  size_t nb_occurences;                              /**< Number of times that Event has happened. */
 
-  uint8_t* attribute_buffer;
-  size_t attribute_buffer_size;
-  size_t attribute_pos;
+  uint8_t* attribute_buffer;    /**< Storage for Attribute.*/
+  size_t attribute_buffer_size; /**< Size of #attribute_buffer.*/
+  size_t attribute_pos;         /**< Position of #attribute_buffer.*/
 } EventSummary;
 
-/**
- * Define a thread structure for HTF format
- */
-typedef uint32_t ThreadId;
-#define HTF_THREAD_ID_INVALID ((HTF(ThreadId))HTF_UNDEFINED_UINT32)
-
-typedef uint32_t LocationGroupId;
-#define HTF_LOCATION_GROUP_ID_INVALID ((HTF(LocationGroupId))HTF_UNDEFINED_UINT32)
+typedef uint32_t ThreadId;                                          /**< Reference for a htf::Thread. */
+#define HTF_THREAD_ID_INVALID ((HTF(ThreadId))HTF_UNDEFINED_UINT32) /**< Invalid ThreadId. */
+typedef uint32_t LocationGroupId;                                   /**< Reference for a htf::LocationGroup. */
+#define HTF_LOCATION_GROUP_ID_INVALID ((HTF(LocationGroupId))HTF_UNDEFINED_UINT32) /**< Invalid LocationGroupId. */
 #define HTF_MAIN_LOCATION_GROUP_ID ((HTF(LocationGroupId))HTF_LOCATION_GROUP_ID_INVALID - 1)
+/**< Main LocationGroupId */  // TODO WTF is that ?
 
 /** A reference for everything after that. */
 typedef uint32_t Ref;
@@ -345,63 +291,66 @@ typedef uint32_t Ref;
 #define HTF_UNDEFINED_INT64 ((int64_t)(~(HTF_UNDEFINED_UINT64 >> 1)))
 #define HTF_UNDEFINED_TYPE HTF_UNDEFINED_UINT8
 
-/** Reference for a String */
-typedef Ref StringRef;
-#define HTF_STRING_REF_INVALID ((StringRef)HTF_UNDEFINED_UINT32)
+typedef Ref StringRef;                                           /**< Reference for a htf::String */
+#define HTF_STRING_REF_INVALID ((StringRef)HTF_UNDEFINED_UINT32) /**< Invalid StringRef */
 /**
- * Define a string reference structure used by HTF format
+ * @brief Define a String reference structure used by HTF format
+ *
  * It has an ID and an associated char* with its length
  */
 typedef struct String {
-  StringRef string_ref;
-  char* str;
-  int length;
+  StringRef string_ref; /** Id of that String.*/
+  char* str;            /** Actual C String */
+  int length;           /** Length of #str.*/
 } String;
 
-/** Reference for a Region */
-typedef Ref RegionRef;
-#define HTF_REGIONREF_INVALID ((RegionRef)HTF_UNDEFINED_UINT32)
+typedef Ref RegionRef;                                          /**< Reference for a htf::Region */
+#define HTF_REGIONREF_INVALID ((RegionRef)HTF_UNDEFINED_UINT32) /**< Invalid RegionRef */
 /**
- * Define a region that has an ID and a htf_string_ref_t description
+ * @brief Define a Region that has an ID and a description.
  */
 typedef struct Region {
-  RegionRef region_ref;
-  StringRef string_ref;
+  RegionRef region_ref; /**< Id of that Region. */
+  StringRef string_ref; /**< Description of that Region. */
   /* TODO: add other information (eg. file, line number, etc.)  */
 } Region;
 
-/** Reference for an Attribute. */
+/** Reference for an htf::Attribute. */
 typedef Ref AttributeRef;
 
-/** @brief Wrapper for enum @eref{AttributeType}. */
+/** Wrapper for enum htf::AttributeType. */
 typedef uint8_t htf_type_t;
 
+/**
+ * @brief Define an Attribute of a function call.
+ */
 typedef struct Attribute {
-  AttributeRef attribute_ref;
-  StringRef name;
-  StringRef description;
-  htf_type_t type;
+  AttributeRef attribute_ref; /**< Id of that Attribute. */
+  StringRef name;             /**< Name of that Attribute. */
+  StringRef description;      /**< Description of that Attribute. */
+  htf_type_t type;            /**< Type of that Attribute. */
 } Attribute;
 
 /**
- * A thread contains streams of events.
- * It can be a regular thread (eg. a pthread), or a GPU stream
+ * @brief A thread contains streams of events.
+ *
+ * It can be a regular thread (eg. a pthread), or a GPU stream.
  */
 typedef struct Thread {
-  struct Archive* archive;
-  ThreadId id;
+  struct Archive* archive; /**< htf::Archive containing this Thread. */
+  ThreadId id;             /** Id of this Thread. */
 
-  EventSummary* events;
-  unsigned nb_allocated_events;
-  unsigned nb_events;
+  EventSummary* events;         /**< Array of events recorded in this Thread. */
+  unsigned nb_allocated_events; /**< Size of #events. */
+  unsigned nb_events;           /**< Number of htf::EventSummary in #events. */
 
-  Sequence** sequences;
-  unsigned nb_allocated_sequences;
-  unsigned nb_sequences;
+  Sequence** sequences;            /**< Array of htf::Sequences recorded in this Thread. */
+  unsigned nb_allocated_sequences; /**< Size of #sequences. */
+  unsigned nb_sequences;           /**< Number of htf::Sequences in #sequences. */
 
-  Loop* loops;
-  unsigned nb_allocated_loops;
-  unsigned nb_loops;
+  Loop* loops;                 /**< Array of htf::Loop recorded in this Thread. */
+  unsigned nb_allocated_loops; /**< Size of #loops. */
+  unsigned nb_loops;           /**< Number of htf::Loop in #loops. */
 #ifdef __cplusplus
   TokenId getEventId(Event* e);
   [[nodiscard]] Event* getEvent(Token) const;
