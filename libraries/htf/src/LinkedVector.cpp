@@ -13,7 +13,7 @@ LinkedVector::LinkedVector() {
 
 uint64_t& LinkedVector::add(uint64_t element) {
   if (this->last->size >= this->last->allocated) {
-    htf_log(Debug, "Adding a new tail to an array: %p\n", this);
+    htf_log(DebugLevel::Debug, "Adding a new tail to an array: %p\n", this);
     last = new SubVector(default_size, last);
   }
   size++;

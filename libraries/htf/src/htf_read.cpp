@@ -18,9 +18,9 @@ ThreadReader::ThreadReader(Archive* archive, ThreadId threadId, int options) {
   thread_trace = archive->getThread(threadId);
   htf_assert(thread_trace != nullptr);
 
-  if (debugLevel >= Verbose) {
-    htf_log(Verbose, "init callstack for thread %d\n", threadId);
-    htf_log(Verbose, "The trace contains:\n");
+  if (debugLevel >= DebugLevel::Verbose) {
+    htf_log(DebugLevel::Verbose, "init callstack for thread %d\n", threadId);
+    htf_log(DebugLevel::Verbose, "The trace contains:\n");
     thread_trace->printSequence(Token(TypeSequence, 0));
   }
 
@@ -219,8 +219,8 @@ AttributeList* ThreadReader::getEventAttributeList(Token event_id, int occurence
 
 void ThreadReader::enterBlock(Token new_block) {
   htf_assert(new_block.isIterable());
-  if (debugLevel >= Debug) {
-    htf_log(Debug, "[%d] Enter Block ", current_frame);
+  if (debugLevel >= DebugLevel::Debug) {
+    htf_log(DebugLevel::Debug, "[%d] Enter Block ", current_frame);
     printCurToken();
     printf("\n");
   }
@@ -232,8 +232,8 @@ void ThreadReader::enterBlock(Token new_block) {
 }
 
 void ThreadReader::leaveBlock() {
-  if (debugLevel >= Debug) {
-    htf_log(Debug, "[%d] Leave ", current_frame);
+  if (debugLevel >= DebugLevel::Debug) {
+    htf_log(DebugLevel::Debug, "[%d] Leave ", current_frame);
     printCurSequence();
     printf("\n");
   }
@@ -243,7 +243,7 @@ void ThreadReader::leaveBlock() {
   callstack_loop_iteration[current_frame] = INT16_MAX;
   current_frame--;  // pop frame
 
-  if (debugLevel >= Debug && current_frame >= 0) {
+  if (debugLevel >= DebugLevel::Debug && current_frame >= 0) {
     auto current_sequence = getCurSequence();
     htf_assert(current_sequence.type == TypeLoop || current_sequence.type == TypeSequence);
   }
@@ -252,7 +252,7 @@ void ThreadReader::leaveBlock() {
 void ThreadReader::moveToNextToken() {
   // Check if we've reached the end of the trace
   if (current_frame < 0) {
-    htf_log(Debug, "End of trace %d!\n", __LINE__);
+    htf_log(DebugLevel::Debug, "End of trace %d!\n", __LINE__);
     return;
   }
 

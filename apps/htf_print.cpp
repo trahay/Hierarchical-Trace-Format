@@ -136,7 +136,7 @@ static void print_token(htf::Thread* thread,
                         int depth,
                         int last_one,
                         htf::LoopOccurence* containing_loop = nullptr) {
-  htf_log(htf::Verbose, "Reading repeated_token(%x.%x) for thread %s\n", t->type, t->id, thread->getName());
+  htf_log(htf::DebugLevel::Verbose, "Reading repeated_token(%x.%x) for thread %s\n", t->type, t->id, thread->getName());
   // Prints the structure of the sequences and the loops
   std::string current_indent;
   if (show_structure && depth >= 1) {

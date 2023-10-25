@@ -34,12 +34,12 @@ static inline bool _htf_arrays_equal(Token* array1, size_t size1, Token* array2,
 Token Thread::getSequenceIdFromArray(htf::Token* token_array, size_t array_len) {
   uint32_t hash;
   hash32(token_array, array_len, SEED, &hash);
-  htf_log(Debug, "Searching for sequence {.size=%zu, .hash=%x}\n", array_len, hash);
+  htf_log(DebugLevel::Debug, "Searching for sequence {.size=%zu, .hash=%x}\n", array_len, hash);
 
   for (unsigned i = 1; i < nb_sequences; i++) {
     if (sequences[i]->hash == hash) {
       if (_htf_arrays_equal(token_array, array_len, sequences[i]->tokens.data(), sequences[i]->size())) {
-        htf_log(Debug, "\t found with id=%u\n", i);
+        htf_log(DebugLevel::Debug, "\t found with id=%u\n", i);
         return HTF_SEQUENCE_ID(i);
       } else {
         htf_warn("Found two sequences with the same hash\n");
@@ -57,7 +57,7 @@ Token Thread::getSequenceIdFromArray(htf::Token* token_array, size_t array_len) 
 
   size_t index = nb_sequences++;
   Token sid = HTF_SEQUENCE_ID(index);
-  htf_log(Debug, "\tSequence not found. Adding it with id=S%zx\n", index);
+  htf_log(DebugLevel::Debug, "\tSequence not found. Adding it with id=S%zx\n", index);
 
   Sequence* s = getSequence(sid);
   s->tokens.resize(array_len);
@@ -81,13 +81,13 @@ Loop* ThreadWriter::createLoop(int start_index, int loop_len) {
   for (int i = 0; i < thread_trace.nb_loops; i++) {
     if (thread_trace.loops[i].repeated_token.id == sid.id) {
       index = i;
-      htf_log(Debug, "\tLoop already exists: id=L%x containing S%x\n", index, sid.id);
+      htf_log(DebugLevel::Debug, "\tLoop already exists: id=L%x containing S%x\n", index, sid.id);
       break;
     }
   }
   if (index == -1) {
     index = thread_trace.nb_loops++;
-    htf_log(Debug, "\tLoop not found. Adding it with id=L%x containing S%x\n", index, sid.id);
+    htf_log(DebugLevel::Debug, "\tLoop not found. Adding it with id=L%x containing S%x\n", index, sid.id);
   }
 
   Loop* l = &thread_trace.loops[index];
@@ -121,12 +121,13 @@ void ThreadWriter::storeAttributeList(htf::EventSummary* es,
   memcpy(&es->attribute_buffer[es->attribute_pos], attribute_list, attribute_list->struct_size);
   es->attribute_pos += attribute_list->struct_size;
 
-  htf_log(Debug, "store_attribute: {index: %d, struct_size: %d, nb_values: %d}\n", attribute_list->index,
+  htf_log(DebugLevel::Debug, "store_attribute: {index: %d, struct_size: %d, nb_values: %d}\n", attribute_list->index,
           attribute_list->struct_size, attribute_list->nb_values);
 }
 
 void ThreadWriter::storeToken(htf::Sequence* seq, htf::Token t) {
-  htf_log(Debug, "store_token: (%c%x) in %p (size: %zu)\n", HTF_TOKEN_TYPE_C(t), t.id, seq, seq->size() + 1);
+  htf_log(DebugLevel::Debug, "store_token: (%c%x) in %p (size: %zu)\n", HTF_TOKEN_TYPE_C(t), t.id, seq,
+          seq->size() + 1);
   seq->tokens.push_back(t);
   findLoop();
 }
@@ -145,7 +146,7 @@ void Loop::addIteration() {
 					     HTF_TOKEN_TO_SEQUENCE_ID(loop->repeated_token));
   htf_assert(_htf_sequences_equal(s1, s2));
 #endif
-  htf_log(Debug, "Adding an iteration to L%x n°%zu (to %u)\n", self_id.id, nb_iterations.size() - 1,
+  htf_log(DebugLevel::Debug, "Adding an iteration to L%x n°%zu (to %u)\n", self_id.id, nb_iterations.size() - 1,
           nb_iterations.back() + 1);
   nb_iterations.back()++;
 }
@@ -179,7 +180,7 @@ void ThreadWriter::findLoop() {
   size_t cur_index = cur_seq->size() - 1;
   size_t maxLoopLength = parameterHandler.getMaxLoopLength();
 
-  if (debugLevel >= Debug) {
+  if (debugLevel >= DebugLevel::Debug) {
     printf("find loops in :\n");
     size_t start_index = (cur_index >= maxLoopLength) ? cur_index - maxLoopLength : 0;
     size_t len = (cur_index <= maxLoopLength) ? cur_index + 1 : maxLoopLength;
@@ -205,7 +206,8 @@ void ThreadWriter::findLoop() {
         if (_htf_arrays_equal(&cur_seq->tokens[s1_start], loop_len, seq->tokens.data(), seq->size())) {
           // The current sequence is just another iteration of the loop
           // remove the sequence, and increment the iteration count
-          htf_log(Debug, "Last tokens were a sequence from L%x aka S%x\n", loop->self_id.id, loop->repeated_token.id);
+          htf_log(DebugLevel::Debug, "Last tokens were a sequence from L%x aka S%x\n", loop->self_id.id,
+                  loop->repeated_token.id);
           loop->addIteration();
           htf_timestamp_t ts = thread_trace.getSequenceDuration(&cur_seq->tokens[s1_start], loop_len);
           htf_add_timestamp_to_delta(&seq->durations->add(ts));
@@ -222,7 +224,7 @@ void ThreadWriter::findLoop() {
       is_loop = _htf_arrays_equal(&cur_seq->tokens[s1_start], loop_len, &cur_seq->tokens[s2_start], loop_len);
 
       if (is_loop) {
-        if (debugLevel >= Debug) {
+        if (debugLevel >= DebugLevel::Debug) {
           printf("Found a loop of len %d:\n", loop_len);
           thread_trace.printTokenArray(cur_seq->tokens.data(), s1_start, loop_len);
           thread_trace.printTokenArray(cur_seq->tokens.data(), s2_start, loop_len);
@@ -309,7 +311,7 @@ void ThreadWriter::recordExitFunction() {
   auto* seq = thread_trace.sequences[seq_id.id];
   htf_timestamp_t ts = thread_trace.getSequenceDuration(seq->tokens.data(), seq->size());
   htf_add_timestamp_to_delta(&seq->durations->add(ts));
-  htf_log(Debug, "Exiting a function, closing sequence %d (%p)\n", seq_id.id, cur_seq);
+  htf_log(DebugLevel::Debug, "Exiting a function, closing sequence %d (%p)\n", seq_id.id, cur_seq);
 
   cur_depth--;
   /* upper_seq is the sequence that called cur_seq */
@@ -388,7 +390,7 @@ void ThreadWriter::open(Archive* archive, ThreadId thread_id) {
 
   htf_assert(htf_archive_get_thread(archive, thread_id) == nullptr);
 
-  htf_log(Debug, "htf_write_thread_open(%ux)\n", thread_id);
+  htf_log(DebugLevel::Debug, "htf_write_thread_open(%ux)\n", thread_id);
 
   thread_trace = Thread(archive, thread_id);
   max_depth = CALLSTACK_DEPTH_DEFAULT;
@@ -603,13 +605,13 @@ void Thread::printEvent(htf::Event* e) const {
 }
 
 TokenId Thread::getEventId(htf::Event* e) {
-  htf_log(Max, "Searching for event {.event_type=%d}\n", e->record);
+  htf_log(DebugLevel::Max, "Searching for event {.event_type=%d}\n", e->record);
 
   htf_assert(e->event_size < 256);
 
   for (TokenId i = 0; i < nb_events; i++) {
     if (memcmp(e, &events[i].event, e->event_size) == 0) {
-      htf_log(Max, "\t found with id=%u\n", i);
+      htf_log(DebugLevel::Max, "\t found with id=%u\n", i);
       return i;
     }
   }
@@ -620,7 +622,7 @@ TokenId Thread::getEventId(htf::Event* e) {
   }
 
   TokenId index = nb_events++;
-  htf_log(Max, "\tNot found. Adding it with id=%x\n", index);
+  htf_log(DebugLevel::Max, "\tNot found. Adding it with id=%x\n", index);
   auto* new_event = &events[index];
 
   new_event->id = index;

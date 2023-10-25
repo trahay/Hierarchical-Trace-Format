@@ -189,15 +189,15 @@ inline static void _htf_compress_write(uint64_t* src, size_t n, FILE* file) {
   }
 
   if (htf::parameterHandler.getCompressionAlgorithm() != htf::CompressionAlgorithm::None) {
-    htf_log(htf::Normal, "Compressing %lu bytes as %lu bytes\n", size, compressedSize);
+    htf_log(htf::DebugLevel::Normal, "Compressing %lu bytes as %lu bytes\n", size, compressedSize);
     _htf_fwrite(&compressedSize, sizeof(compressedSize), 1, file);
     _htf_fwrite(compressedArray, compressedSize, 1, file);
   } else if (htf::parameterHandler.getEncodingAlgorithm() != htf::EncodingAlgorithm::None) {
-    htf_log(htf::Normal, "Encoding %lu bytes as %lu bytes\n", size, encodedSize);
+    htf_log(htf::DebugLevel::Normal, "Encoding %lu bytes as %lu bytes\n", size, encodedSize);
     _htf_fwrite(&encodedSize, sizeof(encodedSize), 1, file);
     _htf_fwrite(encodedArray, encodedSize, 1, file);
   } else {
-    htf_log(htf::Normal, "Writing %lu bytes as is.\n", size);
+    htf_log(htf::DebugLevel::Normal, "Writing %lu bytes as is.\n", size);
     _htf_fwrite(&size, sizeof(size), 1, file);
     _htf_fwrite(src, size, 1, file);
   }

@@ -40,14 +40,14 @@
 namespace htf {
 #endif
 
-enum DebugLevel {
-  Error,    // only print errors
-  Quiet,    // only print important messages
-  Normal,   // default verbosity level
-  Verbose,  // print additional information
-  Debug,    // print much information
-  Help,     // print the diffent verbosity level and exit
-  Max,      // flood stdout with debug messages
+enum CXX(class) DebugLevel {
+  Error,   /**< only print errors */
+  Quiet,   /**< only print important messages */
+  Normal,  /**< default verbosity level */
+  Verbose, /**< print additional information */
+  Debug,   /**< print much information */
+  Help,    /**< print the different verbosity level and exit */
+  Max,     /**< flood stdout with debug messages */
 };
 #ifdef __cplusplus
 extern enum DebugLevel debugLevel;
@@ -69,15 +69,17 @@ CXX(
 
 #define htf_log(_debug_level_, format, ...) _htf_log(stdout, _debug_level_, format, ##__VA_ARGS__)
 
-#define htf_warn(format, ...)                                                                                  \
+#define htf_warn(format, ...)                                                                                          \
   do {                                                                                                                 \
-    _htf_log(stderr, C_CXX(Normal, htf::DebugLevel::Normal), "HTF warning in %s (%s:%d): " format, __func__, __FILE__, __LINE__, ##__VA_ARGS__);                                                     \
+    _htf_log(stderr, C_CXX(Normal, htf::DebugLevel::Normal), "HTF warning in %s (%s:%d): " format, __func__, __FILE__, \
+             __LINE__, ##__VA_ARGS__);                                                                                 \
   } while (0)
 
-#define htf_error(format, ...)                                                                                       \
+#define htf_error(format, ...)                                                                                     \
   do {                                                                                                             \
-    _htf_log(stderr, C_CXX(Error, htf::DebugLevel::Error), "HTF error in %s (%s:%d): " format, __func__, __FILE__, __LINE__, ##__VA_ARGS__);                                                                     \
-    htf_abort();                                                                                                     \
+    _htf_log(stderr, C_CXX(Error, htf::DebugLevel::Error), "HTF error in %s (%s:%d): " format, __func__, __FILE__, \
+             __LINE__, ##__VA_ARGS__);                                                                             \
+    htf_abort();                                                                                                   \
   } while (0)
 
 #ifdef NDEBUG

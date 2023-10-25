@@ -46,7 +46,7 @@ const std::string defaultPath = "/home/khatharsis/Documents/Stage/Hierarchical-T
 const ParameterHandler parameterHandler = ParameterHandler(defaultPath);
 
 ParameterHandler::ParameterHandler(const std::string& configFileName) {
-  htf_log(Debug, "Loading configuration file from %s\n", configFileName.data());
+  htf_log(DebugLevel::Debug, "Loading configuration file from %s\n", configFileName.data());
   std::ifstream configFile(configFileName, std::ifstream::binary);
   if (!configFile.good()) {
     htf_warn("Given config file didn't exist: %s.\n", configFileName.data());
