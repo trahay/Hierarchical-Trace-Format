@@ -338,7 +338,7 @@ typedef struct Attribute {
  */
 typedef struct Thread {
   struct Archive* archive; /**< htf::Archive containing this Thread. */
-  ThreadId id;             /** Id of this Thread. */
+  ThreadId id;             /**< Id of this Thread. */
 
   EventSummary* events;         /**< Array of events recorded in this Thread. */
   unsigned nb_allocated_events; /**< Size of #events. */
