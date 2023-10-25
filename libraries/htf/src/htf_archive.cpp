@@ -9,9 +9,10 @@
 #include "htf/htf_write.h"
 
 namespace htf {
+
 /**
- * Returns the first String corresponding to the given string_ref in the definition group.
- * Returns nullptr if the ref does not have a match.
+ * Getter for a String from its id.
+ * @returns First String matching the given htf::StringRef, nullptr if it doesn't have a match.
  */
 const String* Definition::getString(StringRef string_ref) const {
   /* TODO: race condition here ? when adding a region, there may be a realloc so we may have to hold the mutex */
@@ -23,6 +24,9 @@ const String* Definition::getString(StringRef string_ref) const {
   return nullptr;
 }
 
+/**
+ * Creates a new String and adds it to that definition. Error if the given htf::StringRef is already in use.
+ */
 void Definition::addString(StringRef string_ref, const char* string) {
   if (getString(string_ref)) {
     htf_error("Given string_ref was already in use.\n");
@@ -40,8 +44,8 @@ void Definition::addString(StringRef string_ref, const char* string) {
 }
 
 /**
- * Returns the first Region corresponding to the given region_ref in the definition group.
- * Returns nullptr if the ref does not have a match.
+ * Getter for a Region from its id.
+ * @returns First Region matching the given htf::RegionRef, nullptr if it doesn't have a match.
  */
 const Region* Definition::getRegion(RegionRef region_ref) const {
   /* TODO: race condition here ? when adding a region, there may be a realloc so we may have to hold the mutex */
@@ -53,6 +57,9 @@ const Region* Definition::getRegion(RegionRef region_ref) const {
   return nullptr;
 }
 
+/**
+ * Creates a new Region and adds it to that definition. Error if the given htf::RegionRef is already in use.
+ */
 void Definition::addRegion(RegionRef region_ref, StringRef string_ref) {
   if (getRegion(region_ref)) {
     htf_error("Given region_ref was already in use.\n");
@@ -67,10 +74,10 @@ void Definition::addRegion(RegionRef region_ref, StringRef string_ref) {
 }
 
 /**
- * Returns the first Attribute corresponding to the given attribute_ref in the definition group.
- * Returns nullptr if the ref does not have a match.
+ * Getter for a Attribute from its id.
+ * @returns First Attribute matching the given htf::AttributeRef, nullptr if it doesn't have a match.
  */
-const Attribute* Definition::getAttribute(htf::AttributeRef attribute_ref) const {
+const Attribute* Definition::getAttribute(AttributeRef attribute_ref) const {
   /* TODO: race condition here ? when adding a region, there may be a realloc so we may have to hold the mutex */
   for (auto& a : attributes) {
     if (a.attribute_ref == attribute_ref) {
@@ -80,10 +87,13 @@ const Attribute* Definition::getAttribute(htf::AttributeRef attribute_ref) const
   return nullptr;
 }
 
-void Definition::addAttribute(htf::AttributeRef attribute_ref,
-                              htf::StringRef name_ref,
-                              htf::StringRef description_ref,
-                              htf::htf_type_t type) {
+/**
+ * Creates a new Attribute and adds it to that definition. Error if the given htf::AttributeRef is already in use.
+ */
+void Definition::addAttribute(AttributeRef attribute_ref,
+                              StringRef name_ref,
+                              StringRef description_ref,
+                              htf_type_t type) {
   if (getAttribute(attribute_ref)) {
     htf_error("Given attribute_ref was already in use.\n");
   }
@@ -98,38 +108,41 @@ void Definition::addAttribute(htf::AttributeRef attribute_ref,
           a.attribute_ref, a.name, a.description, a.type);
 }
 
-/** Returns the first String corresponding to the given string_ref in the archive.
- * If the ref does not match, checks the global archive.
- * Returns nullptr if the ref does not have a match.
+/**
+ * Getter for a String from its id.
+ * @returns First String matching the given htf::StringRef in this archive, or in the global_archive if it doesn't
+ * have a match, or nullptr if it doesn't have a match in the global_archive.
  */
-const String* Archive::getString(htf::StringRef string_ref) const {
+const String* Archive::getString(StringRef string_ref) const {
   auto res = definitions->getString(string_ref);
   return (res) ? res : (global_archive) ? global_archive->getString(string_ref) : nullptr;
 }
 
-/** Returns the first Region corresponding to the given region_ref in the archive.
- * If the ref does not match, checks the global archive.
- * Returns nullptr if the ref does not have a match.
+/**
+ * Getter for a Region from its id.
+ * @returns First Region matching the given htf::RegionRef in this archive, or in the global_archive if it doesn't
+ * have a match, or nullptr if it doesn't have a match in the global_archive.
  */
-const Region* Archive::getRegion(htf::RegionRef region_ref) const {
+const Region* Archive::getRegion(RegionRef region_ref) const {
   auto res = definitions->getRegion(region_ref);
   return (res) ? res : (global_archive) ? global_archive->getRegion(region_ref) : nullptr;
 }
 
-/** Returns the first String corresponding to the given string_ref in the archive.
- * If the ref does not match, checks the global archive.
- * Returns nullptr if the ref does not have a match.
+/**
+ * Getter for a Attribute from its id.
+ * @returns First Attribute matching the given htf::AttributeRef in this archive, or in the global_archive if it
+ * doesn't have a match, or nullptr if it doesn't have a match in the global_archive.
  */
-const Attribute* Archive::getAttribute(htf::AttributeRef attribute_ref) const {
+const Attribute* Archive::getAttribute(AttributeRef attribute_ref) const {
   auto res = definitions->getAttribute(attribute_ref);
   return (res) ? res : (global_archive) ? global_archive->getAttribute(attribute_ref) : nullptr;
 }
 
 /**
- * Returns the first thread whose id matches the given one.
- * Returns nullptr if it does not exists.
+ * Getter for a Thread from its id.
+ * @returns First Thread matching the given htf::ThreadId, or nullptr if it doesn't have a match.
  */
-Thread* Archive::getThread(htf::ThreadId thread_id) const {
+Thread* Archive::getThread(ThreadId thread_id) const {
   for (int i = 0; i < nb_threads; i++) {
     if (threads[i]->id == thread_id)
       return threads[i];
@@ -138,9 +151,9 @@ Thread* Archive::getThread(htf::ThreadId thread_id) const {
 }
 
 /**
- * Returns the first LocationGroup corresponding to the given location group id in the archive.
- * If the id does not have a match, checks the global_archive.
- * Returns nullptr if the id does not have a match in the archive nor the global archive.
+ * Getter for a LocationGroup from its id.
+ * @returns First LocationGroup matching the given htf::LocationGroupId in this archive, or in the global_archive if it
+ * doesn't have a match, or nullptr if it doesn't have a match in the global_archive.
  */
 const LocationGroup* Archive::getLocationGroup(LocationGroupId location_group_id) const {
   for (auto& lc : location_groups) {
@@ -153,9 +166,9 @@ const LocationGroup* Archive::getLocationGroup(LocationGroupId location_group_id
 }
 
 /**
- * Returns the first Location corresponding to the given thread location_id in the archive.
- * If the location_id does not have a match, checks the global_archive.
- * Returns nullptr if the location_id does not have a match in the archive nor the global archive.
+ * Getter for a Location from its id.
+ * @returns First Location matching the given htf::ThreadId in this archive, or in the global_archive if it
+ * doesn't have a match, or nullptr if it doesn't have a match in the global_archive.
  */
 const Location* Archive::getLocation(ThreadId location_id) const {
   for (auto& l : locations) {
@@ -166,16 +179,34 @@ const Location* Archive::getLocation(ThreadId location_id) const {
   return (global_archive) ? global_archive->getLocation(location_id) : nullptr;
   // The global_archive is the only one for which the global_archive field is nullptr
 }
+
+/**
+ * Creates a new String and adds it to that Archive.
+ * Error if the given htf::StringRef is already in use.
+ * Locks and unlocks the mutex for that operation.
+ */
 void Archive::addString(StringRef string_ref, const char* string) {
   pthread_mutex_lock(&lock);
   definitions->addString(string_ref, string);
   pthread_mutex_unlock(&lock);
 }
+
+/**
+ * Creates a new Region and adds it to that Archive.
+ * Error if the given htf::RegionRef is already in use.
+ * Locks and unlocks the mutex for that operation.
+ */
 void Archive::addRegion(RegionRef region_ref, StringRef name_ref) {
   pthread_mutex_lock(&lock);
   definitions->addRegion(region_ref, name_ref);
   pthread_mutex_unlock(&lock);
 }
+
+/**
+ * Creates a new Attribute and adds it to that Archive.
+ * Error if the given htf::AttributeRef is already in use.
+ * Locks and unlocks the mutex for that operation.
+ */
 void Archive::addAttribute(AttributeRef attribute_ref, StringRef name_ref, StringRef description_ref, htf_type_t type) {
   pthread_mutex_lock(&lock);
   definitions->addAttribute(attribute_ref, name_ref, description_ref, type);

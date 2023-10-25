@@ -406,6 +406,9 @@ void ThreadWriter::open(Archive* archive, ThreadId thread_id) {
   htf_recursion_shield--;
 }
 
+/**
+ * Creates a new LocationGroup and adds it to that Archive.
+ */
 void Archive::defineLocationGroup(LocationGroupId id, StringRef name, LocationGroupId parent) {
   LocationGroup l = LocationGroup();
   l.id = id;
@@ -414,6 +417,9 @@ void Archive::defineLocationGroup(LocationGroupId id, StringRef name, LocationGr
   location_groups.push_back(l);
 }
 
+/**
+ * Creates a new Location and adds it to that Archive.
+ */
 void Archive::defineLocation(ThreadId id, StringRef name, LocationGroupId parent) {
   Location l = Location();
   l.id = id;
