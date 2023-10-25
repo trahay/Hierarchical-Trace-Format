@@ -2,7 +2,7 @@
  * Copyright (C) Telecom SudParis
  * See LICENSE in top-level directory.
  */
-/** /file
+/** @file
  * This file contains the definitions for Locations, Definitions and Archives.
  * An Archive is the closest thing to an actual trace file. There's one per process (approx).
  * Locations are threads, which are grouped by LocationGroups (processes, machines, etc.).
@@ -17,7 +17,7 @@ namespace htf {
 #endif
 
 /**
- * A LocationGroup can be a process, a machine, etc.
+ * @brief A LocationGroup can be a process, a machine, etc.
  */
 struct LocationGroup {
   /** Unique id for that group. */
@@ -29,7 +29,7 @@ struct LocationGroup {
 };
 
 /**
- * A location is basically a thread (or GPU stream)
+ * @brief A Location is basically a thread (or GPU stream)
  */
 struct Location {
   /** Unique id for that location. */
@@ -61,7 +61,7 @@ typedef struct Definition {
 } Definition;
 
 /**
- * An archive represents a program
+ * @brief An Archive represents a program.
  */
 typedef struct Archive {
   char* dir_name;       /**< Name of the directory in which the archive is recorded. */
