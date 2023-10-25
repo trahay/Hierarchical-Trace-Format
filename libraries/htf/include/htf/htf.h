@@ -2,6 +2,10 @@
  * Copyright (C) Telecom SudParis
  * See LICENSE in top-level directory.
  */
+/** @file
+ * The main file of HTF. Here are defined the most basic elements of the trace
+ * (Tokens, Events, Sequences and Loops), as well as Threads, representing an execution stream.
+ */
 #pragma once
 
 #include <pthread.h>
@@ -264,7 +268,7 @@ struct TokenCountMap : public std::map<Token, size_t> {
 /** Defines a TokenCountMap. In C, defines a char[] of size sizeof(TokenCountMap). */
 #define DEFINE_TokenCountMap(name) C_CXX(char, TokenCountMap) name C([48])
 /** Defines a C++ vector. In C, defines a char[] of size sizeof(std::vector). */
-#define DEFINE_Vector(type, name) C_CXX(char, std::vector<type>) name C_CXX([24], {  std::vector<type>() })
+#define DEFINE_Vector(type, name) C_CXX(char, std::vector<type>) name C_CXX([24], { std::vector<type>() })
 
 /**
  * Structure to store a sequence in HTF format
@@ -341,31 +345,32 @@ typedef uint32_t Ref;
 #define HTF_UNDEFINED_INT64 ((int64_t)(~(HTF_UNDEFINED_UINT64 >> 1)))
 #define HTF_UNDEFINED_TYPE HTF_UNDEFINED_UINT8
 
+/** Reference for a String */
+typedef Ref StringRef;
+#define HTF_STRING_REF_INVALID ((StringRef)HTF_UNDEFINED_UINT32)
 /**
  * Define a string reference structure used by HTF format
  * It has an ID and an associated char* with its length
  */
-typedef Ref StringRef;
-#define HTF_STRING_REF_INVALID ((StringRef)HTF_UNDEFINED_UINT32)
-
 typedef struct String {
   StringRef string_ref;
   char* str;
   int length;
 } String;
 
+/** Reference for a Region */
+typedef Ref RegionRef;
+#define HTF_REGIONREF_INVALID ((RegionRef)HTF_UNDEFINED_UINT32)
 /**
  * Define a region that has an ID and a htf_string_ref_t description
  */
-typedef Ref RegionRef;
-#define HTF_REGIONREF_INVALID ((RegionRef)HTF_UNDEFINED_UINT32)
-
 typedef struct Region {
   RegionRef region_ref;
   StringRef string_ref;
   /* TODO: add other information (eg. file, line number, etc.)  */
 } Region;
 
+/** Reference for an Attribute. */
 typedef Ref AttributeRef;
 
 /** @brief Wrapper for enum @eref{AttributeType}. */

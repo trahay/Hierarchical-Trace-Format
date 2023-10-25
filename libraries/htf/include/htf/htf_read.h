@@ -2,6 +2,9 @@
  * Copyright (C) Telecom SudParis
  * See LICENSE in top-level directory.
  */
+/** @file
+ * Everything needed to read a trace.
+ */
 #pragma once
 
 #include "htf.h"

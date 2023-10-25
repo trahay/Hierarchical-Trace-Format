@@ -1,8 +1,12 @@
-#pragma once
 /*
  * Copyright (C) Telecom SudParis
  * See LICENSE in top-level directory.
  */
+/** @file
+ * A custom type of Linked-List. This takes into account the fact that we never go remove anything from timestamps
+ * vector.
+ */
+#pragma once
 
 #include "htf_dbg.h"
 #ifndef __cplusplus

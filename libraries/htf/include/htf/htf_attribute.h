@@ -1,3 +1,12 @@
+/*
+ * Copyright (C) Telecom SudParis
+ * See LICENSE in top-level directory.
+ */
+
+/** @file
+ * This file contains the definitions and needed functions for Attributes.
+ */
+
 #pragma once
 
 #include <stdint.h>

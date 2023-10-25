@@ -2,6 +2,9 @@
  * Copyright (C) Telecom SudParis
  * See LICENSE in top-level directory.
  */
+/** @file
+ * Functions to handle timestamps.
+ */
 #pragma once
 
 #include "htf/htf_dbg.h"

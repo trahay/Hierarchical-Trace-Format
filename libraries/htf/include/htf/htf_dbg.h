@@ -2,6 +2,9 @@
  * Copyright (C) Telecom SudParis
  * See LICENSE in top-level directory.
  */
+/** @file
+ * Debug macros, debug levels, all that stuff.
+ */
 #pragma once
 #ifndef NDEBUG
 #define DEBUG

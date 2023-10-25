@@ -2,6 +2,9 @@
  * Copyright (C) Telecom SudParis
  * See LICENSE in top-level directory.
  */
+/** @file
+ * Hashing functions, used for hashing htf::Sequence.
+ */
 #pragma once
 
 #include "htf.h"
