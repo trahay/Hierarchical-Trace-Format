@@ -1,11 +1,12 @@
-//
-// Created by khatharsis on 24/10/23.
-//
-#pragma once
+/*
+ * Copyright (C) Telecom SudParis
+ * See LICENSE in top-level directory.
+ */
 /** \file
  * A header file that defines various enums
  * and a class that stores all the different parameters used during the execution.
  */
+#pragma once
 #include <cstddef>
 #include <string>
 namespace htf {
