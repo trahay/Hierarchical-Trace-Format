@@ -94,7 +94,18 @@ typedef struct Archive {
   void addString(StringRef, const char*);
   void addRegion(RegionRef, StringRef);
   void addAttribute(AttributeRef, StringRef, StringRef, htf_type_t);
+  /**
+   * Open a trace file and loads it it that Archive.
+   * @param dirname Path to the file.
+   * @param given_trace_name Name of the trace.
+   * @param archive_id Id of this Archive.
+   */
   void open(const char* dirname, const char* given_trace_name, LocationGroupId archive_id);
+  /**
+   * Open the Global Archive.
+   * @param dirname Path to the file.
+   * @param given_trace_name Name of the trace.
+   */
   void globalOpen(const char* dirname, const char* given_trace_name) {
     open(dirname, given_trace_name, HTF_MAIN_LOCATION_GROUP_ID);
   };

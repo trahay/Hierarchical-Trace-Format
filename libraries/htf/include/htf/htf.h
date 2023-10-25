@@ -357,7 +357,7 @@ typedef struct Thread {
   [[nodiscard]] EventSummary* getEventSummary(Token) const;
   [[nodiscard]] Sequence* getSequence(Token) const;
   [[nodiscard]] Loop* getLoop(Token) const;
-  /* Returns the n-th token in the given Sequence/Loop. */
+  /** Returns the n-th token in the given Sequence/Loop. */
   [[nodiscard]] Token& getToken(Token, int) const;
 
   void printToken(Token) const;
@@ -375,22 +375,22 @@ typedef struct Thread {
   void printAttributeList(struct AttributeList* attribute_list);
   void printEventAttribute(struct EventOccurence* es);
   [[nodiscard]] const char* getName() const;
-  /* Search for a sequence_id that matches the given sequence.
+  /** Search for a sequence_id that matches the given sequence.
    * If none of the registered sequence match, register a new Sequence.
    * TODO Speed this up using hash map and/or storing the sequence's id in the structure.
    */
   Token getSequenceId(Sequence* sequence);
-  /* Search for a sequence_id that matches the given array as a Sequence.
+  /** Search for a sequence_id that matches the given array as a Sequence.
    * If none of the registered sequence match, register a new Sequence.
    * TODO Speed this up using hashmap
    */
   Token getSequenceIdFromArray(Token* token_array, size_t array_len);
-  /* Returns the duration for the given array. */
+  /** Returns the duration for the given array. */
   htf_timestamp_t getSequenceDuration(Token* array, size_t size);
   void finalizeThread();
-  /* Create a new Thread from an archive and an id. This is used when writing the trace. */
+  /** Create a new Thread from an archive and an id. This is used when writing the trace. */
   Thread(Archive* a, ThreadId id);
-  /* Create a blank new Thread. This is used when reading the trace. */
+  /** Create a blank new Thread. This is used when reading the trace. */
   Thread() = default;
 #endif
 } Thread;
