@@ -140,7 +140,7 @@ int main(int argc, char** argv) {
 
   for (int i = 1; i < argc; i++) {
     if (!strcmp(argv[i], "-v")) {
-      htf_debug_level_set(Debug);
+      htf_debug_level_set(DebugLevel::Debug);
       nb_opts++;
     } else if (!strcmp(argv[i], "-h") || !strcmp(argv[i], "-?")) {
       usage(argv[0]);
