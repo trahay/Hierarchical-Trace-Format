@@ -344,9 +344,9 @@ typedef struct Thread {
   unsigned nb_allocated_events; /**< Size of #events. */
   unsigned nb_events;           /**< Number of htf::EventSummary in #events. */
 
-  Sequence** sequences;            /**< Array of htf::Sequences recorded in this Thread. */
+  Sequence** sequences;            /**< Array of htf::Sequence recorded in this Thread. */
   unsigned nb_allocated_sequences; /**< Size of #sequences. */
-  unsigned nb_sequences;           /**< Number of htf::Sequences in #sequences. */
+  unsigned nb_sequences;           /**< Number of htf::Sequence in #sequences. */
 
   Loop* loops;                 /**< Array of htf::Loop recorded in this Thread. */
   unsigned nb_allocated_loops; /**< Size of #loops. */
