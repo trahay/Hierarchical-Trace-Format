@@ -364,7 +364,7 @@ typedef struct Thread {
   void printTokenArray(const Token* array, size_t start_index, size_t len) const;
   void printTokenVector(const std::vector<Token>&) const;
   void printSequence(Token) const;
-  void printEvent(const Event*) const;
+  void printEvent(Event*) const;
   void printAttribute(AttributeRef) const;
   void printString(StringRef) const;
   void printAttributeRef(AttributeRef) const;
