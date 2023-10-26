@@ -191,8 +191,7 @@ extern "C" {
 #endif
 
 /* Creates and initializes a Thread Reader. */
-extern HTF(ThreadReader) *
-  htf_new_thread_reader(HTF(Archive) * archive, HTF(ThreadId) thread_id, enum HTF(ThreadReaderOptions) options);
+extern HTF(ThreadReader) * htf_new_thread_reader(HTF(Archive) * archive, HTF(ThreadId) thread_id, int options);
 /* Enter a block (push a new frame in the callstack) */
 extern void htf_thread_reader_enter_block(HTF(ThreadReader) * reader, HTF(Token) new_block);
 /* Leaves the current block */
