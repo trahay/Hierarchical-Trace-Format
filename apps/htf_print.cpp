@@ -189,7 +189,7 @@ static void display_sequence(htf::ThreadReader* reader,
       display_sequence(reader, *tokenOccurence.token, &tokenOccurence.occurence->sequence_occurence, depth + 1);
     }
     if (tokenOccurence.token->type == htf::TypeLoop) {
-      htf::LoopOccurence loop = tokenOccurence.occurence->loop_occurence;
+      htf::LoopOccurence& loop = tokenOccurence.occurence->loop_occurence;
       // The printing of loops is a bit convoluted, because there's no right way to do it
       // Here, we offer four ways to print loops:
       //    - Print only the Sequence inside once, with its mean/median duration
@@ -274,7 +274,7 @@ static std::tuple<htf::ThreadId, htf::TokenOccurence> getNextToken(std::vector<h
 
   // Grab the interesting information
   auto& token = earliestReader->getCurToken();
-  auto& occurrence = earliestReader->getOccurence(token, earliestReader->tokenCount[token]);
+  auto* occurrence = earliestReader->getOccurence(token, earliestReader->tokenCount[token]);
   auto threadId = earliestReader->thread_trace->id;
 
   // Update the reader
@@ -282,7 +282,7 @@ static std::tuple<htf::ThreadId, htf::TokenOccurence> getNextToken(std::vector<h
   if (token.type == htf::TypeEvent)
     earliestReader->moveToNextToken();
 
-  return {threadId, {&token, &occurrence}};
+  return {threadId, {&token, occurrence}};
 }
 
 /** Print all the events of all the threads sorted by timestamp*/
@@ -308,6 +308,7 @@ void printTrace(htf::Archive& trace) {
       return reader.thread_trace->id == threadId;
     });
     print_token(currentReader->thread_trace, tokenOccurence.token, tokenOccurence.occurence);
+    // If you read the doc, you'll know that the memory of tokenOccurence is ours to manage
     std::tie(threadId, tokenOccurence) = getNextToken(readers);
   }
 }

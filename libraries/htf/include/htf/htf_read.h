@@ -113,13 +113,13 @@ typedef struct ThreadReader {
 
   /** Returns an EventOccurence for the given Token appearing at the given occurence_id.
    * Timestamp is set to Reader's referential timestamp.*/
-  [[nodiscard]] struct EventOccurence& getEventOccurence(Token event_id, int occurence_id) const;
+  [[nodiscard]] EventOccurence getEventOccurence(Token event_id, int occurence_id) const;
   /** Returns an SequenceOccurence for the given Token appearing at the given occurence_id.
    * Timestamp is set to Reader's referential timestamp.*/
-  [[nodiscard]] struct SequenceOccurence& getSequenceOccurence(Token sequence_id, int occurence_id) const;
+  [[nodiscard]] SequenceOccurence getSequenceOccurence(Token sequence_id, int occurence_id) const;
   /** Returns an LoopOccurence for the given Token appearing at the given occurence_id.
    * Timestamp is set to Reader's referential timestamp.*/
-  [[nodiscard]] struct LoopOccurence& getLoopOccurence(Token loop_id, int occurence_id) const;
+  [[nodiscard]] LoopOccurence getLoopOccurence(Token loop_id, int occurence_id) const;
 
   /* TODO Write a description here. Also fix the way it's implemented: it does not fit the standard. */
   [[nodiscard]] AttributeList* getEventAttributeList(Token event_id, int occurence_id) const;
@@ -145,7 +145,7 @@ typedef struct ThreadReader {
   [[nodiscard]] const Token& getCurToken() const;
   /** Returns an Occurence for the given Token appearing at the given occurence_id.
    * Timestamp is set to Reader's referential timestamp.*/
-  [[nodiscard]] union Occurence& getOccurence(Token id, int occurence_id) const;
+  [[nodiscard]] union Occurence* getOccurence(Token id, int occurence_id) const;
   /** Loads the given savestate. */
   void loadSavestate(struct Savestate* savestate);
   /** Reads the current level of the thread, and returns it as an array of TokenOccurences. */

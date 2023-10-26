@@ -133,47 +133,47 @@ htf_timestamp_t ThreadReader::getLoopDuration(Token loop_id) const {
   return sum;
 }
 
-EventOccurence& ThreadReader::getEventOccurence(Token event_id, int occurence_id) const {
-  auto* eventOccurence = new EventOccurence();
+EventOccurence ThreadReader::getEventOccurence(Token event_id, int occurence_id) const {
+  auto eventOccurence = EventOccurence();
   auto* es = getEventSummary(event_id);
-  eventOccurence->event = thread_trace->getEvent(event_id);
+  eventOccurence.event = thread_trace->getEvent(event_id);
 
   if ((options & ThreadReaderOptions::NoTimestamps) == 0) {
-    eventOccurence->timestamp = referential_timestamp;
-    eventOccurence->duration = es->durations->at(occurence_id);
+    eventOccurence.timestamp = referential_timestamp;
+    eventOccurence.duration = es->durations->at(occurence_id);
   }
-  eventOccurence->attributes = getEventAttributeList(event_id, occurence_id);
-  return *eventOccurence;
+  eventOccurence.attributes = getEventAttributeList(event_id, occurence_id);
+  return eventOccurence;
 }
 
-SequenceOccurence& ThreadReader::getSequenceOccurence(Token sequence_id, int occurence_id) const {
-  auto* sequenceOccurence = new SequenceOccurence();
-  sequenceOccurence->sequence = thread_trace->getSequence(sequence_id);
+SequenceOccurence ThreadReader::getSequenceOccurence(Token sequence_id, int occurence_id) const {
+  auto sequenceOccurence = SequenceOccurence();
+  sequenceOccurence.sequence = thread_trace->getSequence(sequence_id);
 
   if ((options & ThreadReaderOptions::NoTimestamps) == 0) {
-    sequenceOccurence->timestamp = referential_timestamp;
-    sequenceOccurence->duration = sequenceOccurence->sequence->durations->at(occurence_id);
+    sequenceOccurence.timestamp = referential_timestamp;
+    sequenceOccurence.duration = sequenceOccurence.sequence->durations->at(occurence_id);
   }
-  sequenceOccurence->full_sequence = nullptr;
-  sequenceOccurence->savestate = new Savestate(this);
+  sequenceOccurence.full_sequence = nullptr;
+  sequenceOccurence.savestate = new Savestate(this);
 
-  auto tokenCount = sequenceOccurence->sequence->getTokenCount(thread_trace);
-  return *sequenceOccurence;
+  auto tokenCount = sequenceOccurence.sequence->getTokenCount(thread_trace);
+  return sequenceOccurence;
 };
 
-LoopOccurence& ThreadReader::getLoopOccurence(Token loop_id, int occurence_id) const {
-  auto* loopOccurence = new LoopOccurence();
-  loopOccurence->loop = thread_trace->getLoop(loop_id);
-  loopOccurence->nb_iterations = loopOccurence->loop->nb_iterations[occurence_id];
-  loopOccurence->full_loop = nullptr;
+LoopOccurence ThreadReader::getLoopOccurence(Token loop_id, int occurence_id) const {
+  auto loopOccurence = LoopOccurence();
+  loopOccurence.loop = thread_trace->getLoop(loop_id);
+  loopOccurence.nb_iterations = loopOccurence.loop->nb_iterations[occurence_id];
+  loopOccurence.full_loop = nullptr;
   if ((options & ThreadReaderOptions::NoTimestamps) == 0) {
-    loopOccurence->timestamp = referential_timestamp;
-    loopOccurence->duration = getLoopDuration(loop_id);
+    loopOccurence.timestamp = referential_timestamp;
+    loopOccurence.duration = getLoopDuration(loop_id);
   }
-  return *loopOccurence;
+  return loopOccurence;
 }
 
-Occurence& ThreadReader::getOccurence(htf::Token id, int occurence_id) const {
+Occurence* ThreadReader::getOccurence(htf::Token id, int occurence_id) const {
   auto occurence = new Occurence();
   switch (id.type) {
   case TypeInvalid: {
@@ -189,7 +189,7 @@ Occurence& ThreadReader::getOccurence(htf::Token id, int occurence_id) const {
     occurence->loop_occurence = getLoopOccurence(id, occurence_id);
     break;
   }
-  return *occurence;
+  return occurence;
 }
 
 AttributeList* ThreadReader::getEventAttributeList(Token event_id, int occurence_id) const {
