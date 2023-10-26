@@ -361,19 +361,19 @@ typedef struct Thread {
   [[nodiscard]] Token& getToken(Token, int) const;
 
   void printToken(Token) const;
-  void printTokenArray(Token* array, size_t start_index, size_t len) const;
+  void printTokenArray(const Token* array, size_t start_index, size_t len) const;
   void printTokenVector(const std::vector<Token>&) const;
   void printSequence(Token) const;
-  void printEvent(Event*) const;
+  void printEvent(const Event*) const;
   void printAttribute(AttributeRef) const;
   void printString(StringRef) const;
   void printAttributeRef(AttributeRef) const;
   void printLocation(Ref) const;
   void printRegion(RegionRef) const;
-  void printAttributeValue(struct AttributeData* attr, htf_type_t type) const;
-  void printAttribute(struct AttributeData* attr) const;
-  void printAttributeList(struct AttributeList* attribute_list);
-  void printEventAttribute(struct EventOccurence* es);
+  void printAttributeValue(const struct AttributeData* attr, htf_type_t type) const;
+  void printAttribute(const struct AttributeData* attr) const;
+  void printAttributeList(const struct AttributeList* attribute_list) const;
+  void printEventAttribute(const struct EventOccurence* es) const;
   [[nodiscard]] const char* getName() const;
   /** Search for a sequence_id that matches the given sequence.
    * If none of the registered sequence match, register a new Sequence.

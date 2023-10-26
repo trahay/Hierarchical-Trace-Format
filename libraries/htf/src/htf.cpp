@@ -83,7 +83,7 @@ void Thread::printToken(Token token) const {
   }
 }
 
-void Thread::printTokenArray(Token* array, size_t start_index, size_t len) const {
+void Thread::printTokenArray(const Token* array, size_t start_index, size_t len) const {
   printf("[");
   for (int i = 0; i < len; i++) {
     printToken(array[start_index + i]);

@@ -21,7 +21,7 @@ void Thread::printAttribute(AttributeRef ref) const {
   printf("INVALID <%d>", ref);
 }
 
-static enum AttributeType _guess_attribute_size(AttributeData* attr) {
+static enum AttributeType _guess_attribute_size(const AttributeData* attr) {
   uint16_t data_size = attr->struct_size - ATTRIBUTE_HEADER_SIZE;
   switch (data_size) {
   case 1:
@@ -113,7 +113,7 @@ static void _htf_print_location_group(Ref location_group_ref) {
   printf("location_group <%d>", location_group_ref);
 }
 
-void Thread::printAttributeValue(struct AttributeData* attr, htf_type_t type) const {
+void Thread::printAttributeValue(const struct AttributeData* attr, htf_type_t type) const {
   switch (type) {
   case HTF_TYPE_NONE:
     printf("NONE");
@@ -196,7 +196,7 @@ void Thread::printAttributeValue(struct AttributeData* attr, htf_type_t type) co
   }
 }
 
-void Thread::printAttribute(struct AttributeData* attr) const {
+void Thread::printAttribute(const struct AttributeData* attr) const {
   char* invalid_attr_string = "INVALID";
   char* attr_string = invalid_attr_string;
   enum AttributeType type = _guess_attribute_size(attr);
@@ -215,7 +215,7 @@ void Thread::printAttribute(struct AttributeData* attr) const {
   printAttributeValue(attr, type);
 }
 
-void Thread::printAttributeList(AttributeList* attribute_list) {
+void Thread::printAttributeList(const AttributeList* attribute_list) const {
   if (attribute_list == nullptr)
     return;
   printf(" { ");
@@ -232,7 +232,7 @@ void Thread::printAttributeList(AttributeList* attribute_list) {
   printf("}");
 }
 
-void Thread::printEventAttribute(struct EventOccurence* e) {
+void Thread::printEventAttribute(const struct EventOccurence* e) const {
   printAttributeList(e->attributes);
 }
 }  // namespace htf

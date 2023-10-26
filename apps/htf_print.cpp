@@ -49,9 +49,9 @@ static void _print_indent(const std::string& current_indent) {
 
 /* Print one event */
 static void print_event(const std::string& current_indent,
-                        htf::Thread* thread,
-                        htf::Token token,
-                        htf::EventOccurence* e) {
+                        const htf::Thread* thread,
+                        const htf::Token token,
+                        const htf::EventOccurence* e) {
   _print_timestamp(e->timestamp);
   _print_duration(e->duration);
   _print_indent(current_indent);
@@ -68,10 +68,10 @@ static void print_event(const std::string& current_indent,
 }
 
 static void print_sequence(const std::string& current_indent,
-                           htf::Thread* thread,
-                           htf::Token token,
-                           htf::SequenceOccurence* sequenceOccurence,
-                           htf::LoopOccurence* containingLoopOccurence = nullptr) {
+                           const htf::Thread* thread,
+                           const htf::Token token,
+                           const htf::SequenceOccurence* sequenceOccurence,
+                           const htf::LoopOccurence* containingLoopOccurence = nullptr) {
   auto* sequence = sequenceOccurence->sequence;
   htf_timestamp_t ts = sequenceOccurence->timestamp;
   htf_timestamp_t duration = sequenceOccurence->duration;
@@ -107,10 +107,10 @@ static void print_sequence(const std::string& current_indent,
   std::cout << std::endl;
 }
 
-static void print_loop(std::string& current_indent,
-                       htf::Thread* thread,
-                       htf::Token token,
-                       htf::LoopOccurence* loopOccurence) {
+static void print_loop(const std::string& current_indent,
+                       const htf::Thread* thread,
+                       const htf::Token token,
+                       const htf::LoopOccurence* loopOccurence) {
   _print_timestamp(loopOccurence->timestamp);
   _print_duration(loopOccurence->duration);
   _print_indent(current_indent);
@@ -126,16 +126,16 @@ static void print_loop(std::string& current_indent,
 
   thread->printToken(token);
   std::cout << "\t" << loopOccurence->nb_iterations << " * ";
-  htf_print_token(thread, loop->repeated_token);
+  thread->printToken(loop->repeated_token);
   std::cout << std::endl;
 }
 
-static void print_token(htf::Thread* thread,
-                        htf::Token* t,
-                        htf::Occurence* e,
+static void print_token(const htf::Thread* thread,
+                        const htf::Token* t,
+                        const htf::Occurence* e,
                         int depth,
                         int last_one,
-                        htf::LoopOccurence* containing_loop = nullptr) {
+                        const htf::LoopOccurence* containing_loop = nullptr) {
   htf_log(htf::DebugLevel::Verbose, "Reading repeated_token(%x.%x) for thread %s\n", t->type, t->id, thread->getName());
   // Prints the structure of the sequences and the loops
   std::string current_indent;

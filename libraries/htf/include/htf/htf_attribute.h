@@ -359,7 +359,7 @@ static inline void htf_attribute_list_push_data(HTF(AttributeList) * l, HTF(Attr
   l->nb_values++;
 }
 
-static inline void htf_attribute_list_pop_data(HTF(AttributeList) * l,
+static inline void htf_attribute_list_pop_data(const HTF(AttributeList) * l,
                                                HTF(AttributeData) * data,
                                                uint16_t* current_offset) {
   uintptr_t addr = ((uintptr_t)&l->attributes[0]) + (*current_offset);

@@ -55,7 +55,7 @@ typedef union Occurence {
 } Occurence;
 
 typedef struct TokenOccurence {
-  Token* token;
+  const Token* token;
   Occurence* occurence;
 } TokenOccurence;
 
