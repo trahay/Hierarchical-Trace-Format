@@ -2,6 +2,7 @@
  * Copyright (C) Telecom SudParis
  * See LICENSE in top-level directory.
  */
+#include <algorithm>
 #include <iostream>
 #include <string>
 #include "htf/htf.h"
@@ -80,13 +81,12 @@ static void print_sequence(const std::string& current_indent,
   _print_duration(duration);
   _print_indent(current_indent);
 
+  if (!per_thread)
+    std::cout << thread->getName() << "\t";
   if (show_structure) {
-    printf("Sequence ");
+    std::cout << "Sequence ";
     thread->printToken(token);
   }
-
-  if (!per_thread)
-    printf("%sequence\t", thread->getName());
 
   if (verbose) {
     thread->printToken(token);
@@ -115,12 +115,12 @@ static void print_loop(const std::string& current_indent,
   _print_duration(loopOccurence->duration);
   _print_indent(current_indent);
 
+  if (!per_thread)
+    std::cout << thread->getName() << "\t";
+
   if (show_structure) {
     std::cout << "Loop ";
   }
-
-  if (!per_thread)
-    std::cout << thread->getName() << "\t";
 
   auto* loop = loopOccurence->loop;
 
@@ -133,8 +133,8 @@ static void print_loop(const std::string& current_indent,
 static void print_token(const htf::Thread* thread,
                         const htf::Token* t,
                         const htf::Occurence* e,
-                        int depth,
-                        int last_one,
+                        int depth = 0,
+                        int last_one = 0,
                         const htf::LoopOccurence* containing_loop = nullptr) {
   htf_log(htf::DebugLevel::Verbose, "Reading repeated_token(%x.%x) for thread %s\n", t->type, t->id, thread->getName());
   // Prints the structure of the sequences and the loops
@@ -166,7 +166,8 @@ static void print_token(const htf::Thread* thread,
     break;
   }
   case htf::TypeLoop: {
-    print_loop(current_indent, thread, *t, &e->loop_occurence);
+    if (show_structure)
+      print_loop(current_indent, thread, *t, &e->loop_occurence);
     break;
   }
   }
@@ -222,18 +223,6 @@ static void display_sequence(htf::ThreadReader* reader,
           }
         }
       }
-
-      //      if (unroll_loops) {
-      //        // We print each iteration of the loop
-      //        DOFOR(j, (int)loop.nb_iterations) {
-      //          /* at the jth iteration of the loop */
-      //          htf::SequenceOccurence* seq = &loop.full_loop[j];
-      //          display_sequence(reader, loop.loop->repeated_token, seq, depth + 1);
-      //        }
-      //      } else {
-      //        htf::SequenceOccurence* seq = &loop.full_loop[0];
-      //        display_sequence(reader, loop.loop->repeated_token, seq, depth + 1);
-      //      }
     }
   }
   if (occurence) {
@@ -243,7 +232,7 @@ static void display_sequence(htf::ThreadReader* reader,
 }
 
 /* Print all the events of a thread */
-static void print_thread(htf::Archive* trace, htf::Thread* thread) {
+static void print_thread(htf::Archive& trace, htf::Thread* thread) {
   printf("Reading events for thread %u (%s):\n", thread->id, thread->getName());
   _print_timestamp_header();
   _print_duration_header();
@@ -253,61 +242,75 @@ static void print_thread(htf::Archive* trace, htf::Thread* thread) {
   int reader_options = htf::ThreadReaderOptions::None;
   if (show_structure)
     reader_options |= htf::ThreadReaderOptions::ShowStructure;
-  if (!store_timestamps || trace->store_timestamps == 0)
+  if (!store_timestamps || trace.store_timestamps == 0)
     reader_options |= htf::ThreadReaderOptions::NoTimestamps;
 
-  auto* reader = new htf::ThreadReader(trace, thread->id, reader_options);
+  auto* reader = new htf::ThreadReader(&trace, thread->id, reader_options);
 
   display_sequence(reader, htf::Token(htf::TypeSequence, 0), nullptr, 0);
 }
 
-/** Compare the timestamps of the current repeated_token on each thread and select the smallest timestamp.
- * This fills the Token t, and the event_occurence e if it's an event,
- * and returns the index of the selected thread (or -1 at the end of the trace).
+/**
+ * Compare the timestamps of the current token on each thread and select the smallest timestamp.
+ * @returns Tuple containing the ThreadId and a TokenOccurence.
+ *          You are responsible for the memory of the TokenOccurence.
  */
-// static int get_next_token(struct htf_thread_reader* readers, int nb_threads, struct htf_token* t, htf_occurence* e) {
-//   struct htf_token cur_t;
-//   htf_timestamp_t min_ts = HTF_TIMESTAMP_INVALID;
-//   int min_index = -1;
-//
-//  for (int i = 0; i < nb_threads; i++) {
-//    if (htf_read_thread_cur_token(&readers[i], &cur_t, NULL) == 0) {
-//      htf_timestamp_t ts = htf_get_starting_timestamp(&readers[i], cur_t);
-//      if (min_ts == HTF_TIMESTAMP_INVALID || ts < min_ts) {
-//        min_index = i;
-//        min_ts = ts;
-//      }
-//    }
-//  }
+static std::tuple<htf::ThreadId, htf::TokenOccurence> getNextToken(std::vector<htf::ThreadReader>& threadReaders) {
+  // Find the earliest threadReader
+  htf::ThreadReader* earliestReader = nullptr;
+  for (auto& reader : threadReaders) {
+    // Check if reader has finished reading its trace
+    if (reader.current_frame < 0)
+      continue;
+    if (!earliestReader || earliestReader->referential_timestamp > reader.referential_timestamp) {
+      earliestReader = &reader;
+    }
+  }
 
-//  if (min_index >= 0) {
-//    htf_read_thread_cur_token(&readers[min_index], t, e);
-//    htf_move_to_next_token(&readers[min_index]);
-//  }
-//
-//  return min_index;
-//}
+  // If no reader was available
+  if (!earliestReader) {
+    return {HTF_THREAD_ID_INVALID, {nullptr, nullptr}};
+  }
 
-/* Print all the events of all the threads sorted by timestamp */
-// void print_trace(struct htf_archive* trace) {
-//   struct htf_thread_reader** readers = malloc(sizeof(struct htf_thread_reader*) * (trace->nb_threads));
-//   int reader_options = htf_thread_reader_option_none;
-//   if (show_structure)
-//     reader_options |= htf_thread_reader_option_show_structure;
-//
-//   for (int i = 0; i < trace->nb_threads; i++) {
-//     readers[i] = htf_new_thread_reader(trace, trace->threads[i]->id, reader_options);
-//   }
-//
-//   printf("Timestamp\tDuration\tThread Name\tEvent\n");
-//
-//	htf_occurence e;
-//	struct Token t;
-//	int thread_index = -1;
-//	while ((thread_index = get_next_token(readers, trace->nb_threads, &t, &e)) >= 0) {
-//		print_token(&readers[thread_index], &t, &e);
-//	}
-//}
+  // Grab the interesting information
+  auto& token = earliestReader->getCurToken();
+  auto& occurrence = earliestReader->getOccurence(token, earliestReader->tokenCount[token]);
+  auto threadId = earliestReader->thread_trace->id;
+
+  // Update the reader
+  earliestReader->updateReadCurToken();
+  if (token.type == htf::TypeEvent)
+    earliestReader->moveToNextToken();
+
+  return {threadId, {&token, &occurrence}};
+}
+
+/** Print all the events of all the threads sorted by timestamp*/
+void printTrace(htf::Archive& trace) {
+  auto readers = std::vector<htf::ThreadReader>();
+  int reader_options = htf::ThreadReaderOptions::None;
+  //  if (show_structure)
+  //    reader_options |= htf::ThreadReaderOptions::ShowStructure;
+
+  for (int i = 0; i < trace.nb_threads; i++) {
+    readers.emplace_back(&trace, trace.threads[i]->id, reader_options);
+  }
+
+  _print_timestamp_header();
+  _print_duration_header();
+  printf("Event\n");
+
+  htf::ThreadId threadId;
+  htf::TokenOccurence tokenOccurence;
+  std::tie(threadId, tokenOccurence) = getNextToken(readers);
+  while (threadId != HTF_THREAD_ID_INVALID) {
+    auto currentReader = std::find_if(readers.begin(), readers.end(), [&threadId](const htf::ThreadReader& reader) {
+      return reader.thread_trace->id == threadId;
+    });
+    print_token(currentReader->thread_trace, tokenOccurence.token, tokenOccurence.occurence);
+    std::tie(threadId, tokenOccurence) = getNextToken(readers);
+  }
+}
 
 void usage(const char* prog_name) {
   printf("Usage: %s [OPTION] trace_file\n", prog_name);
@@ -373,18 +376,17 @@ int main(int argc, char** argv) {
     return EXIT_SUCCESS;
   }
 
-  auto* trace = new htf::Archive();
-  htf_read_archive(trace, trace_name);
-  store_timestamps = trace->store_timestamps;
+  auto trace = htf::Archive();
+  htf_read_archive(&trace, trace_name);
+  store_timestamps = trace.store_timestamps;
 
   if (per_thread) {
-    for (int i = 0; i < trace->nb_threads; i++) {
+    for (int i = 0; i < trace.nb_threads; i++) {
       printf("\n");
-      print_thread(trace, trace->threads[i]);
+      print_thread(trace, trace.threads[i]);
     }
   } else {
-    htf_error("This is currently buggy so don't do it\n");
-    //    print_trace(trace);
+    printTrace(trace);
   }
 
   return EXIT_SUCCESS;
