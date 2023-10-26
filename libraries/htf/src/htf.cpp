@@ -56,7 +56,9 @@ Token& Thread::getToken(Token sequenceToken, int index) const {
       htf_error("Invalid loop ID: %d\n", sequenceToken.id);
     }
     if (index >= loop->nb_iterations.back()) {
+      htf_error("Invalid index (%d): this loop only has %d iterations\n", index, loop->nb_iterations.back());
     }
+    return loop->repeated_token;
   }
 }
 
