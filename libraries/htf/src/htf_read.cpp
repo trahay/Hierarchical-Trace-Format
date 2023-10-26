@@ -126,7 +126,8 @@ htf_timestamp_t ThreadReader::getLoopDuration(Token loop_id) const {
   auto* sequence = thread_trace->getSequence(loop->repeated_token);
   size_t loopIndex = tokenCount.find(loop_id)->second;
   size_t offset = tokenCount.find(loop->repeated_token)->second;
-  DOFOR(i, i < loop->nb_iterations.at(loopIndex)) {
+  size_t nIterations = loop->nb_iterations.at(loopIndex);
+  DOFOR(i, nIterations) {
     sum += sequence->durations->at(offset + i);
   }
   return sum;
@@ -267,17 +268,19 @@ void ThreadReader::moveToNextToken() {
       /* We've reached the end of a sequence. Leave the block and give the next event. */
       leaveBlock();
       moveToNextToken();
+    } else {
+      /* Move to the next event in the Sequence */
+      callstack_index[current_frame]++;
     }
-    /* Move to the next event in the Sequence */
-    callstack_index[current_frame]++;
   } else {
     if (isEndOfLoop(current_loop_iteration + 1, current_sequence_id)) {
       /* We've reached the end of the loop. Leave the block and give the next event. */
       leaveBlock();
       moveToNextToken();
+    } else {
+      /* just move to the next iteration in the loop */
+      callstack_loop_iteration[current_frame]++;
     }
-    /* just move to the next iteration in the loop */
-    callstack_loop_iteration[current_frame]++;
   }
 }
 
@@ -417,8 +420,7 @@ Savestate::Savestate(const ThreadReader* reader) {
 } /* namespace htf */
 
 htf::ThreadReader* htf_new_thread_reader(htf::Archive* archive,
-                                         htf::ThreadId thread_id,
-                                         htf::ThreadReaderOptions options) {
+                                         htf::ThreadId thread_id, int options) {
   return new htf::ThreadReader(archive, thread_id, options);
 }
 
