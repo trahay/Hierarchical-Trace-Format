@@ -175,65 +175,87 @@ void ThreadWriter::replaceTokensInLoop(int loop_len, size_t index_first_iteratio
   loop->addIteration();
 }
 
-void ThreadWriter::findLoop() {
-  Sequence* cur_seq = getCurrentSequence();
-  size_t cur_index = cur_seq->size() - 1;
-  size_t maxLoopLength = parameterHandler.getMaxLoopLength();
+/**
+ * @brief Finds a loop using a basic quadratic algorithm.
+ *
+ * TODO Describe how it works.
+ * @param maxLoopLength The maximum loop length that we try to find.
+ */
+void ThreadWriter::findLoopBasic(size_t maxLoopLength) {
+  Sequence* currentSequence = getCurrentSequence();
+  size_t currentIndex = currentSequence->size() - 1;
+  for (int loopLength = 1; loopLength < maxLoopLength && loopLength <= currentIndex; loopLength++) {
+    // search for a loop of loopLength tokens
+    size_t s1Start = currentIndex + 1 - loopLength;
+    size_t loopStart = s1Start - 1;
+    // First, check if there's a loop that start at loopStart
+    if (currentSequence->tokens[loopStart].type == TypeLoop) {
+      Token l = currentSequence->tokens[loopStart];
+      Loop* loop = thread_trace.getLoop(l);
+      htf_assert(loop);
 
-  if (debugLevel >= DebugLevel::Debug) {
-    printf("find loops in :\n");
-    size_t start_index = (cur_index >= maxLoopLength) ? cur_index - maxLoopLength : 0;
-    size_t len = (cur_index <= maxLoopLength) ? cur_index + 1 : maxLoopLength;
-    thread_trace.printTokenArray(cur_seq->tokens.data(), start_index, len);
-  }
+      Sequence* seq = thread_trace.getSequence(loop->repeated_token);
+      htf_assert(seq);
 
-  for (int loop_len = 1; loop_len < maxLoopLength && loop_len <= cur_index; loop_len++) {
-    /* search for a loop of loop_len tokens */
-    size_t s1_start = cur_index + 1 - loop_len;
-    size_t s2_start = cur_index + 1 - 2 * loop_len;
-
-    if (s1_start > 0) {
-      int loop_start = s1_start - 1;
-      /* first, check if there's a loop that start at loop_start*/
-      if (cur_seq->tokens[loop_start].type == TypeLoop) {
-        Token l = cur_seq->tokens[loop_start];
-        Loop* loop = thread_trace.getLoop(l);
-        htf_assert(loop);
-
-        Sequence* seq = thread_trace.getSequence(loop->repeated_token);
-        htf_assert(seq);
-
-        if (_htf_arrays_equal(&cur_seq->tokens[s1_start], loop_len, seq->tokens.data(), seq->size())) {
-          // The current sequence is just another iteration of the loop
-          // remove the sequence, and increment the iteration count
-          htf_log(DebugLevel::Debug, "Last tokens were a sequence from L%x aka S%x\n", loop->self_id.id,
-                  loop->repeated_token.id);
-          loop->addIteration();
-          htf_timestamp_t ts = thread_trace.getSequenceDuration(&cur_seq->tokens[s1_start], loop_len);
-          htf_add_timestamp_to_delta(&seq->durations->add(ts));
-          cur_seq->tokens.resize(s1_start);
-          return;
-        }
-      }
-    }
-
-    if (cur_index + 1 >= 2 * loop_len) {
-      /* search for a loop of loop_len tokens */
-      int is_loop = 1;
-      /* search for new loops */
-      is_loop = _htf_arrays_equal(&cur_seq->tokens[s1_start], loop_len, &cur_seq->tokens[s2_start], loop_len);
-
-      if (is_loop) {
-        if (debugLevel >= DebugLevel::Debug) {
-          printf("Found a loop of len %d:\n", loop_len);
-          thread_trace.printTokenArray(cur_seq->tokens.data(), s1_start, loop_len);
-          thread_trace.printTokenArray(cur_seq->tokens.data(), s2_start, loop_len);
-          printf("\n");
-        }
-        replaceTokensInLoop(loop_len, s1_start, s2_start);
+      if (_htf_arrays_equal(&currentSequence->tokens[s1Start], loopLength, seq->tokens.data(), seq->size())) {
+        // The current sequence is just another iteration of the loop
+        // remove the sequence, and increment the iteration count
+        htf_log(DebugLevel::Debug, "Last tokens were a sequence from L%x aka S%x\n", loop->self_id.id,
+                loop->repeated_token.id);
+        loop->addIteration();
+        htf_timestamp_t ts = thread_trace.getSequenceDuration(&currentSequence->tokens[s1Start], loopLength);
+        htf_add_timestamp_to_delta(&seq->durations->add(ts));
+        currentSequence->tokens.resize(s1Start);
         return;
       }
     }
+
+    if (currentIndex + 1 >= 2 * loopLength) {
+      size_t s2Start = currentIndex + 1 - 2 * loopLength;
+      /* search for a loop of loopLength tokens */
+      int is_loop = 1;
+      /* search for new loops */
+      is_loop =
+        _htf_arrays_equal(&currentSequence->tokens[s1Start], loopLength, &currentSequence->tokens[s2Start], loopLength);
+
+      if (is_loop) {
+        if (debugLevel >= DebugLevel::Debug) {
+          printf("Found a loop of len %d:\n", loopLength);
+          thread_trace.printTokenArray(currentSequence->tokens.data(), s1Start, loopLength);
+          thread_trace.printTokenArray(currentSequence->tokens.data(), s2Start, loopLength);
+          printf("\n");
+        }
+        replaceTokensInLoop(loopLength, s1Start, s2Start);
+        return;
+      }
+    }
+  }
+}
+
+void ThreadWriter::findLoop() {
+  if (parameterHandler.getLoopFindingAlgorithm() == LoopFindingAlgorithm::None) {
+    return;
+  }
+
+  Sequence* currentSequence = getCurrentSequence();
+  size_t currentIndex = currentSequence->size() - 1;
+
+  switch (parameterHandler.getLoopFindingAlgorithm()) {
+  case LoopFindingAlgorithm::None:
+    return;
+  case LoopFindingAlgorithm::Basic:
+  case LoopFindingAlgorithm::BasicTruncated: {
+    size_t maxLoopLength = (parameterHandler.getLoopFindingAlgorithm() == LoopFindingAlgorithm::BasicTruncated)
+                             ? parameterHandler.getMaxLoopLength()
+                             : SIZE_MAX;
+    if (debugLevel >= DebugLevel::Debug) {
+      printf("Find loops using Basic Algorithm:\n");
+      size_t start_index = (currentIndex >= maxLoopLength) ? currentIndex - maxLoopLength : 0;
+      size_t len = (currentIndex <= maxLoopLength) ? currentIndex + 1 : maxLoopLength;
+      thread_trace.printTokenArray(currentSequence->tokens.data(), start_index, len);
+    }
+    findLoopBasic(maxLoopLength);
+  } break;
   }
 }
 

@@ -20,6 +20,7 @@ typedef struct ThreadWriter {
   int thread_rank;
 #ifdef __cplusplus
  private:
+  void findLoopBasic(size_t maxLoopLength);
   void findLoop();
   /* Creates a Loop in the trace, and returns it. */
   Loop* createLoop(int start_index, int loop_len);
