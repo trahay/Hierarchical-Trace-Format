@@ -10,7 +10,7 @@
 #include "htf/htf_archive.h"
 
 namespace htf {
-ThreadReader::ThreadReader(Archive* archive, ThreadId threadId, int options) {
+ThreadReader::ThreadReader(const Archive* archive, ThreadId threadId, int options) {
   // Setup the basic
   this->archive = archive;
   this->options = options;
@@ -419,18 +419,37 @@ Savestate::Savestate(const ThreadReader* reader) {
 }
 } /* namespace htf */
 
-htf::ThreadReader* htf_new_thread_reader(htf::Archive* archive,
-                                         htf::ThreadId thread_id, int options) {
+htf::ThreadReader* htf_new_thread_reader(const htf::Archive* archive, htf::ThreadId thread_id, int options) {
   return new htf::ThreadReader(archive, thread_id, options);
 }
 
-// void htf_thread_reader_enter_block(htf::ThreadReader* reader, htf::Token new_block) {
-//   reader->enterBlock(new_block);
-// }
-//
-// void htf_thread_reader_leave_block(htf::ThreadReader* reader) {
-//   reader->leaveBlock();
-// }
+void htf_thread_reader_enter_block(htf::ThreadReader* reader, htf::Token new_block) {
+  reader->enterBlock(new_block);
+}
+
+void htf_thread_reader_leave_block(htf::ThreadReader* reader) {
+  reader->leaveBlock();
+}
+
+void htf_thread_reader_move_to_next_token(htf::ThreadReader* reader) {
+  return reader->moveToNextToken();
+}
+
+void htf_thread_reader_update_reader_cur_token(htf::ThreadReader* reader) {
+  return reader->updateReadCurToken();
+}
+
+htf::Token htf_thread_reader_get_next_token(htf::ThreadReader* reader) {
+  return reader->getNextToken();
+}
+
+htf::Token htf_read_thread_cur_token(const htf::ThreadReader* reader) {
+  return reader->getCurToken();
+}
+
+htf::Occurence* htf_thread_reader_get_occurence(const htf::ThreadReader* reader, htf::Token id, int occurence_id) {
+  return reader->getOccurence(id, occurence_id);
+}
 
 C_CXX(_Thread_local, thread_local) size_t savestate_memory = 0;
 
@@ -440,18 +459,6 @@ struct htf::Savestate* create_savestate(htf::ThreadReader* reader) {
 
 void load_savestate(htf::ThreadReader* reader, htf::Savestate* savestate) {
   reader->loadSavestate(savestate);
-}
-
-int htf_read_thread_cur_token(htf::ThreadReader* reader) {
-  htf_error("Not implemented yet!\n");
-}
-
-int htf_move_to_next_token(HTF(ThreadReader) * reader) {
-  htf_error("Not implemented yet!\n");
-}
-
-int htf_read_thread_cur_level(htf::ThreadReader* reader) {
-  htf_error("Not implemented yet!\n");
 }
 
 void skip_sequence(htf::ThreadReader* reader, htf::Token token) {

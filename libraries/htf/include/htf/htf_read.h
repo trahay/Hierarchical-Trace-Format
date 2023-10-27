@@ -61,7 +61,7 @@ typedef struct TokenOccurence {
 
 typedef struct ThreadReader {
   /** Archive being read by this reader. */
-  struct Archive* archive;
+  const struct Archive* archive;
   /** Thread being read. */
   struct Thread* thread_trace;
   /** The current referential timestamp. */
@@ -85,7 +85,7 @@ typedef struct ThreadReader {
 
   int options;
 #ifdef __cplusplus
-  ThreadReader(Archive* archive, ThreadId threadId, int options);
+  ThreadReader(const Archive* archive, ThreadId threadId, int options);
 
  private:
   /* Returns the Sequence being run at the given frame. */
@@ -128,29 +128,32 @@ typedef struct ThreadReader {
   static void skipToken(Token token) { htf_error("Not implemented yet\n"); };
 
  public:
-  /* Enter a block (push a new frame in the callstack) */
+  /** @brief Enter a block (push a new frame in the callstack) */
   void enterBlock(Token new_block);
-  /* Leaves the current block */
+  /** @brief Leaves the current block */
   void leaveBlock();
-  /** Moves the reader's position to the next token.
+  /** @brief Moves the reader's position to the next token.
+   *
    * Moves to the next token in the current block, or exits it recursively as long as it's at the end of a block.*/
   void moveToNextToken();
-  /** Updates the reader's callstacks et al. by reading the current token.
+  /** @brief Updates the reader's callstacks et al. by reading the current token.
+   *
    * If the current Token is an event, its index is updated and the referential timestamp as well.
    * If it's a Loop or a Sequence, their indexes are updated, and the reader enters the corresponding block. */
   void updateReadCurToken();
-  /** Fetches the next Token in the trace. Changes the state of the reader to match. */
+  /** @brief Fetches the next Token in the trace. Changes the state of the reader to match. */
   [[nodiscard]] Token getNextToken();
-  /** Returns the current Token. */
+  /** @brief Returns the current Token. */
   [[nodiscard]] const Token& getCurToken() const;
-  /** Returns an Occurence for the given Token appearing at the given occurence_id.
+  /** @brief Returns an Occurence for the given Token appearing at the given occurence_id.
+   *
    * Timestamp is set to Reader's referential timestamp.*/
   [[nodiscard]] union Occurence* getOccurence(Token id, int occurence_id) const;
-  /** Loads the given savestate. */
+  /** @brief Loads the given savestate. */
   void loadSavestate(struct Savestate* savestate);
-  /** Reads the current level of the thread, and returns it as an array of TokenOccurences. */
+  /** @brief Reads the current level of the thread, and returns it as an array of TokenOccurences. */
   [[nodiscard]] std::vector<TokenOccurence> readCurrentLevel();
-  /** Skips the given Sequence and updates the reader. */
+  /** @brief Skips the given Sequence and updates the reader. */
   void skipSequence(Token token) { htf_error("Not implemented yet\n"); };
 #endif
 } ThreadReader;
@@ -190,27 +193,46 @@ C_CXX(_Thread_local, thread_local) extern size_t savestate_memory;
 extern "C" {
 #endif
 
-/* Creates and initializes a Thread Reader. */
-extern HTF(ThreadReader) * htf_new_thread_reader(HTF(Archive) * archive, HTF(ThreadId) thread_id, int options);
-/* Enter a block (push a new frame in the callstack) */
+/** Creates and initializes a ThreadReader. */
+extern HTF(ThreadReader) * htf_new_thread_reader(const HTF(Archive) * archive, HTF(ThreadId) thread_id, int options);
+/** Enter a block (push a new frame in the callstack) */
 extern void htf_thread_reader_enter_block(HTF(ThreadReader) * reader, HTF(Token) new_block);
-/* Leaves the current block */
+/** Leaves the current block */
 extern void htf_thread_reader_leave_block(HTF(ThreadReader) * reader);
 
-/** Creates a savestate from a reader. */
-extern HTF(Savestate) * create_savestate(HTF(ThreadReader) * reader);
-/** Loads a savestate to a reader. */
+/** @brief Moves the reader's position to the next token.
+ *
+ * Moves to the next token in the current block, or exits it recursively as long as it's at the end of a block.*/
+extern void htf_thread_reader_move_to_next_token(HTF(ThreadReader) * reader);
+
+/** @brief Updates the reader's callstacks et al. by reading the current token.
+ *
+ * If the current Token is an event, its index is updated and the referential timestamp as well.
+ * If it's a Loop or a Sequence, their indexes are updated, and the reader enters the corresponding block. */
+extern void htf_thread_reader_update_reader_cur_token(HTF(ThreadReader) * reader);
+
+/** @brief Fetches the next Token in the trace. Changes the state of the reader to match. */
+extern HTF(Token) htf_thread_reader_get_next_token(HTF(ThreadReader) * reader);
+
+/** @brief Returns the current Token. */
+extern HTF(Token) htf_read_thread_cur_token(const HTF(ThreadReader) * reader);
+
+/** @brief Returns an Occurence for the given Token appearing at the given occurence_id.
+ *
+ * Timestamp is set to Reader's referential timestamp.*/
+extern union HTF(Occurence) *
+  htf_thread_reader_get_occurence(const HTF(ThreadReader) * reader, HTF(Token) id, int occurence_id);
+
+/** @brief Creates a new savestate from the reader. */
+extern HTF(Savestate) * create_savestate(const HTF(ThreadReader) * reader);
+
+/** @brief Loads the given savestate. */
 extern void load_savestate(HTF(ThreadReader) * reader, HTF(Savestate) * savestate);
 
-/* Reads the current token and writes it somewhere / returns it. TODO: Implement this. */
-extern int htf_read_thread_cur_token(HTF(ThreadReader) * reader);
-/** Moves the reader to the next repeated_token in the thread. */
-extern int htf_move_to_next_token(HTF(ThreadReader) * reader);
+/** @brief Reads the current level of the thread, and returns it as an array of TokenOccurences. */
+extern HTF(TokenOccurence) * htf_thread_reader_read_current_level(HTF(ThreadReader) * reader);
 
-/** Reads the whole current level, and writes it somewhere / returns it. TODO: Implement this.*/
-extern int htf_read_thread_cur_level(HTF(ThreadReader) * reader);
-
-/** Skips the given sequence entirely. TODO: Implement this. */
+/** @brief Skips the given Sequence and updates the reader. */
 extern void skip_sequence(HTF(ThreadReader) * reader, HTF(Token) token);
 
 #ifdef __cplusplus
