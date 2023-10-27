@@ -176,9 +176,14 @@ void ThreadWriter::replaceTokensInLoop(int loop_len, size_t index_first_iteratio
 }
 
 /**
- * @brief Finds a loop using a basic quadratic algorithm.
+ * @brief Finds a Loop in the current Sequence using a basic quadratic algorithm.
  *
- * TODO Describe how it works.
+ * For each correct correct possible loop length, this algorithm tries two things:
+ *  - First, it checks if the array of tokens of that length is in front of a loop token
+ *      whose repeating sequence is the same as ours. If it it, it replaces it.
+ *       - Example: L0 = 2 * S1 = E1 E2 E3. L0 E1 E2 E3 -> L0 (= 3 * S1).
+ *  - Secondly, it checks for any doubly repeating array of token, and replaces it with a Loop.
+ *       - Example: E1 E2 E3 E1 E2 E3 -> L0. L0 = 2 * S1 = E1 E2 E3
  * @param maxLoopLength The maximum loop length that we try to find.
  */
 void ThreadWriter::findLoopBasic(size_t maxLoopLength) {
@@ -232,6 +237,64 @@ void ThreadWriter::findLoopBasic(size_t maxLoopLength) {
   }
 }
 
+/**
+ * @brief Finds a Loop in the current Sequence by first filtering the correct Tokens.
+ *
+ * The idea is that since we always search for a Loop who will end on our last Token,
+ * We only need to start searching arrays who end by that token.
+ * We thus start by filtering the indexes of the correct tokens, and then we start searching for loops, using those
+ * indexes.
+ */
+void ThreadWriter::findLoopFilter() {
+  auto endingIndexes = std::vector<size_t>();
+  auto loopIndexes = std::vector<size_t>();
+  size_t i = 0;
+  Sequence* currentSequence = getCurrentSequence();
+  size_t curIndex = currentSequence->size() - 1;
+  for (auto token : currentSequence->tokens) {
+    if (token == currentSequence->tokens.back()) {
+      endingIndexes.push_back(i);
+    }
+    if (token.type == TypeLoop) {
+      loopIndexes.push_back(i);
+    }
+    i++;
+  }
+  for (auto endingIndex : endingIndexes) {
+    size_t loopLength = curIndex - endingIndex;
+    // If the loop can't exist, we skip it
+    if (!loopLength || loopLength >= endingIndex)
+      continue;
+    if (_htf_arrays_equal(&currentSequence->tokens[endingIndex + 1], loopLength,
+                          &currentSequence->tokens[endingIndex + 1 - loopLength], loopLength)) {
+      if (debugLevel >= DebugLevel::Debug) {
+        printf("Found a loop of len %lu:\n", loopLength);
+        thread_trace.printTokenArray(currentSequence->tokens.data(), endingIndex + 1, loopLength);
+        thread_trace.printTokenArray(currentSequence->tokens.data(), endingIndex + 1 - loopLength, loopLength);
+        printf("\n");
+      }
+      replaceTokensInLoop(loopLength, endingIndex + 1, endingIndex + 1 - loopLength);
+    }
+  }
+
+  for (auto loopIndex : loopIndexes) {
+    Token token = currentSequence->tokens[loopIndex];
+    size_t loopLength = curIndex - loopIndex;
+    auto* loop = thread_trace.getLoop(token);
+    auto* sequence = thread_trace.getSequence(loop->repeated_token);
+    if (_htf_arrays_equal(&currentSequence->tokens[loopIndex + 1], loopLength, sequence->tokens.data(),
+                          sequence->size())) {
+      htf_log(DebugLevel::Debug, "Last tokens were a sequence from L%x aka S%x\n", loop->self_id.id,
+              loop->repeated_token.id);
+      loop->addIteration();
+      htf_timestamp_t ts = thread_trace.getSequenceDuration(&currentSequence->tokens[loopIndex + 1], loopLength);
+      htf_add_timestamp_to_delta(&sequence->durations->add(ts));
+      currentSequence->tokens.resize(loopIndex + 1);
+      return;
+    }
+  }
+}
+
 void ThreadWriter::findLoop() {
   if (parameterHandler.getLoopFindingAlgorithm() == LoopFindingAlgorithm::None) {
     return;
@@ -256,6 +319,10 @@ void ThreadWriter::findLoop() {
     }
     findLoopBasic(maxLoopLength);
   } break;
+  case LoopFindingAlgorithm::Filter: {
+    findLoopFilter();
+    break;
+  }
   }
 }
 
@@ -347,7 +414,7 @@ void ThreadWriter::recordExitFunction() {
   // We need to reset the token vector
   // Calling vector::clear() might be a better way to do that,
   // but depending on the implementation it might force a bunch of realloc, which isn't great.
-}
+}  // namespace htf
 
 size_t ThreadWriter::storeEvent(enum EventType event_type,
                                 TokenId event_id,

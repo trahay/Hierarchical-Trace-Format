@@ -83,6 +83,7 @@ ParameterHandler::ParameterHandler() {
     MATCH_LOOP_FINDING_ENUM(None);
     MATCH_LOOP_FINDING_ENUM(Basic);
     MATCH_LOOP_FINDING_ENUM(BasicTruncated);
+    MATCH_LOOP_FINDING_ENUM(Filter);
   });
   LOAD_FIELD_UINT64(maxLoopLength);
   LOAD_FIELD_UINT64(zstdCompressionLevel);
