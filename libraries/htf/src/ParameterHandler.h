@@ -82,15 +82,9 @@ class ParameterHandler {
    * @returns Value of #loopFindingAlgorithm.
    */
   [[nodiscard]] LoopFindingAlgorithm getLoopFindingAlgorithm() const;
-  /**
-   * Creates a ParameterHandler from a config file.
-   * @param configFileName Path to a valid JSON config file.
+  /** @brief Creates a ParameterHandler from a config file loaded from CONFIG_FILE_PATH or config.json.
    */
-  explicit ParameterHandler(const std::string& configFileName);
-  /**
-   * Default constructor.
-   */
-  ParameterHandler() = default;
+  ParameterHandler();
 };
 
 /** Global ParameterHandler. This is supposed to be the only instance of that class. */

@@ -41,11 +41,10 @@
   parameterName##Algorithm = enumName##Algorithm::enumSpecific
 
 namespace htf {
-// TODO Find a way to deal with that because it's sure as hell not a good idea.
-const std::string defaultPath = "/home/khatharsis/Documents/Stage/Hierarchical-Trace-Format/config.json";
-const ParameterHandler parameterHandler = ParameterHandler(defaultPath);
+const std::string defaultPath = "config.json";
+const ParameterHandler parameterHandler = ParameterHandler();
 
-ParameterHandler::ParameterHandler(const std::string& configFileName) {
+ParameterHandler::ParameterHandler() {
   std::ifstream configFile;
   char* possibleConfigFileName = getenv("CONFIG_FILE_PATH");
   if (possibleConfigFileName) {
@@ -53,9 +52,9 @@ ParameterHandler::ParameterHandler(const std::string& configFileName) {
     configFile.open(possibleConfigFileName);
     if (!configFile.good()) {
       htf_warn("Config file from env didn't exist: %s. Using fallback.\n", possibleConfigFileName);
-      configFile.open(configFileName);
+      configFile.open(defaultPath);
       if (!configFile.good()) {
-        htf_warn("Default config file didn't exist: %s.\n", configFileName.data());
+        htf_warn("Default config file didn't exist: %s.\n", defaultPath.data());
         return;
       }
     }
