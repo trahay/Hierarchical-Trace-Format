@@ -46,11 +46,19 @@ const std::string defaultPath = "/home/khatharsis/Documents/Stage/Hierarchical-T
 const ParameterHandler parameterHandler = ParameterHandler(defaultPath);
 
 ParameterHandler::ParameterHandler(const std::string& configFileName) {
-  htf_log(DebugLevel::Debug, "Loading configuration file from %s\n", configFileName.data());
-  std::ifstream configFile(configFileName, std::ifstream::binary);
-  if (!configFile.good()) {
-    htf_warn("Given config file didn't exist: %s.\n", configFileName.data());
-    return;
+  std::ifstream configFile;
+  char* possibleConfigFileName = getenv("CONFIG_FILE_PATH");
+  if (possibleConfigFileName) {
+    htf_log(DebugLevel::Debug, "Loading configuration file from %s\n", possibleConfigFileName);
+    configFile.open(possibleConfigFileName);
+    if (!configFile.good()) {
+      htf_warn("Config file from env didn't exist: %s. Using fallback.\n", possibleConfigFileName);
+      configFile.open(configFileName);
+      if (!configFile.good()) {
+        htf_warn("Default config file didn't exist: %s.\n", configFileName.data());
+        return;
+      }
+    }
   }
   Json::Value config;
   configFile >> config;
