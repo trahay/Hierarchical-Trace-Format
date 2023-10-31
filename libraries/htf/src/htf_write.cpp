@@ -263,7 +263,7 @@ void ThreadWriter::findLoopFilter() {
   for (auto endingIndex : endingIndexes) {
     size_t loopLength = curIndex - endingIndex;
     // If the loop can't exist, we skip it
-    if (!loopLength || loopLength >= endingIndex)
+    if (!loopLength || (endingIndex + 1) < loopLength)
       continue;
     if (_htf_arrays_equal(&currentSequence->tokens[endingIndex + 1], loopLength,
                           &currentSequence->tokens[endingIndex + 1 - loopLength], loopLength)) {
