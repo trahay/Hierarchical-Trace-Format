@@ -41,23 +41,21 @@
   parameterName##Algorithm = enumName##Algorithm::enumSpecific
 
 namespace htf {
-const std::string defaultPath = "config.json";
+const char* defaultPath = "config.json";
 const ParameterHandler parameterHandler = ParameterHandler();
 
 ParameterHandler::ParameterHandler() {
   std::ifstream configFile;
-  char* possibleConfigFileName = getenv("CONFIG_FILE_PATH");
-  if (possibleConfigFileName) {
-    htf_log(DebugLevel::Debug, "Loading configuration file from %s\n", possibleConfigFileName);
-    configFile.open(possibleConfigFileName);
-    if (!configFile.good()) {
-      htf_warn("Config file from env didn't exist: %s. Using fallback.\n", possibleConfigFileName);
-      configFile.open(defaultPath);
-      if (!configFile.good()) {
-        htf_warn("Default config file didn't exist: %s.\n", defaultPath.data());
-        return;
-      }
-    }
+  const char* possibleConfigFileName = getenv("CONFIG_FILE_PATH");
+  if (!possibleConfigFileName) {
+    htf_warn("No config file provided, using default: %s\n", defaultPath);
+    possibleConfigFileName = defaultPath;
+  }
+  htf_log(DebugLevel::Debug, "Loading configuration file from %s\n", possibleConfigFileName);
+  configFile.open(possibleConfigFileName);
+  if (!configFile.good()) {
+    htf_warn("Config file didn't exist: %s.\n", possibleConfigFileName);
+    return;
   }
   Json::Value config;
   configFile >> config;

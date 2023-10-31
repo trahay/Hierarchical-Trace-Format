@@ -6,6 +6,7 @@ enable_testing()
 add_compile_options(-Wall -Wextra -Wpedantic)
 include_directories(${CMAKE_SOURCE_DIR}/src/)
 link_libraries(htf)
+configure_file(../config.json config.json COPYONLY)
 
 #####################################################
 # write_benchmark
