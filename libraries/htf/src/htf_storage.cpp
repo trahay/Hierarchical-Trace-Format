@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <zstd.h>
 #include <cerrno>
+#include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -98,7 +99,7 @@ static FILE* _htf_file_open(char* filename, char* mode) {
  */
 typedef uint8_t byte;
 
-/** Compresses the content in src using ZSTD and writes it to dest. Returns the size of the compressed array.
+/** @brief Compresses the content in src using ZSTD and writes it to dest. Returns the amount of data written.
  *  @param src The source array.
  *  @param size Size of the source array.
  *  @param dest A free array in which the compressed data will be written.
@@ -107,6 +108,43 @@ typedef uint8_t byte;
  */
 inline static size_t _htf_zstd_compress(void* src, size_t size, void* dest, size_t destSize) {
   return ZSTD_compress(dest, destSize, src, size, htf::parameterHandler.getZstdCompressionLevel());
+}
+#define N_BYTES 1
+#define N_BITS (N_BYTES * 8)
+#define MAX_BIT ((1 << N_BITS) - 1)
+
+/** @brief Compresses the content in src using the Histogram method and writes it to dest.
+ * Returns the amount of data written.
+ *  @param src The source array.
+ *  @param n Number of elements in src.
+ *  @param dest A free array in which the compressed data will be written.
+ *  @param destSize Size of the destination array
+ *  @returns Number of bytes written in the dest array.
+ */
+inline static size_t _htf_histogram_compress(const uint64_t* src, size_t n, byte* dest, size_t destSize) {
+  htf_assert(destSize >= (N_BYTES * n + 2 * sizeof(uint64_t)));
+  // Compute the min and max
+  uint64_t min = UINT64_MAX, max = 0;
+  for (size_t i = 0; i < n; i++) {
+    min = (src[i] < min) ? src[i] : min;
+    max = (src[i] > max) ? src[i] : max;
+  }
+  size_t width = max - min;
+  size_t stepSize = ((double)width) / MAX_BIT;
+  printf("Min: %lu; Max: %lu\n", min, max);
+  // TODO Check size is sufficient
+  memcpy(dest, &min, sizeof(min));
+  dest = &dest[sizeof(min)];
+  memcpy(dest, &max, sizeof(max));
+  dest = &dest[sizeof(max)];
+  for (size_t i = 0; i < n; i++) {
+    auto temp = (size_t)std::round((src[i] - min) / stepSize);
+    temp = (temp > MAX_BIT) ? MAX_BIT : temp;
+    printf("Writing %lu as %lu\n", src[i], temp);
+    memcpy(&dest[i * N_BYTES], &temp, N_BYTES);
+  }
+
+  return N_BYTES * n + 2 * sizeof(uint64_t);
 }
 
 /**
@@ -182,6 +220,12 @@ inline static void _htf_compress_write(uint64_t* src, size_t n, FILE* file) {
     }
     break;
   }
+  case htf::CompressionAlgorithm::Histogram: {
+    compressedSize = (n + 2) * sizeof(uint64_t);  // Take into account that we add the min and the max.
+    compressedArray = new uint8_t[compressedSize];
+    compressedSize = _htf_histogram_compress(src, n, compressedArray, compressedSize);
+    break;
+  }
   case htf::CompressionAlgorithm::SZ:
   case htf::CompressionAlgorithm::ZFP:
     htf_error("Not implemented yet\n");
@@ -217,6 +261,35 @@ inline static size_t _htf_zstd_read(void* dest, void* compArray, size_t compSize
   size_t realSize = ZSTD_getFrameContentSize(compArray, compSize);
   ZSTD_decompress(dest, realSize, compArray, compSize);
   return realSize;
+}
+
+/** @brief Decompresses the content in compArray using the Histogram method and writes it to dest.
+ * Returns the amount of data written.
+ * @param dest The array in which the uncompressed data will be written.
+ * @param n Number of elements in the dest array.
+ * @param compArray The compressed array.
+ * @param compSize Size of the compressed array.
+ * @returns Number of bytes in the decoded array.
+ */
+inline static size_t _htf_histogram_read(uint64_t* dest, size_t n, byte* compArray, size_t compSize) {
+  // Compute the min and max
+  uint64_t min, max;
+  memcpy(&min, compArray, sizeof(min));
+  compArray = &compArray[sizeof(min)];
+  memcpy(&max, compArray, sizeof(max));
+  compArray = &compArray[sizeof(max)];
+  size_t width = max - min;
+  size_t stepSize = width / (1 << N_BITS);
+
+  printf("Min: %lu; Max: %lu\n", min, max);
+
+  for (size_t i = 0; i < n; i++) {
+    size_t factor = 0;
+    memcpy(&factor, &compArray[i * N_BYTES], N_BYTES);
+    dest[i] = min + factor * stepSize;
+    printf("Reading %lu as %lu\n", factor, dest[i]);
+  }
+  return n * sizeof(uint64_t);
 }
 
 /** De-encodes an array that has been compressed by the Masking technique. Returns the size of the unencoded data.
@@ -272,6 +345,14 @@ inline static void _htf_compress_read(uint64_t* dest, size_t n, FILE* file) {
       htf_assert(encodedSize <= n * sizeof(uint64_t));
     }
     delete[] compressedArray;
+    break;
+  }
+  case htf::CompressionAlgorithm::Histogram: {
+    _htf_fread(&compressedSize, sizeof(compressedSize), 1, file);
+    compressedArray = new byte[compressedSize];
+    _htf_fread(compressedArray, compressedSize, 1, file);
+    size_t realSize = _htf_histogram_read(dest, n, compressedArray, compressedSize);
+    htf_assert(realSize == n * sizeof(uint64_t));
     break;
   }
   case htf::CompressionAlgorithm::SZ:

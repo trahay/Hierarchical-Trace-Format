@@ -60,6 +60,7 @@ ParameterHandler::ParameterHandler() {
   Json::Value config;
   configFile >> config;
   configFile.close();
+  std::cout << config;
   /* Load from file */
 #define MATCH_COMPRESSION_ENUM(value) MATCH_ENUM(compressionAlgorithm, CompressionAlgorithm, value)
   LOAD_FIELD_ENUM(compressionAlgorithm, {
@@ -67,6 +68,7 @@ ParameterHandler::ParameterHandler() {
     MATCH_COMPRESSION_ENUM(ZSTD);
     MATCH_COMPRESSION_ENUM(SZ);
     MATCH_COMPRESSION_ENUM(ZFP);
+    MATCH_COMPRESSION_ENUM(Histogram);
   });
 
 #define MATCH_ENCODING_ENUM(value) MATCH_ENUM(encodingAlgorithm, EncodingAlgorithm, value)
@@ -132,7 +134,7 @@ CompressionAlgorithm ParameterHandler::getCompressionAlgorithm() const {
   return compressionAlgorithm;
 }
 EncodingAlgorithm ParameterHandler::getEncodingAlgorithm() const {
-  if (isLossy(compressionAlgorithm)) {
+  if (isLossy(compressionAlgorithm) && encodingAlgorithm != EncodingAlgorithm::None) {
     htf_warn("Encoding algorithm isn't None even though the compression algorithm is lossy.\n");
     return EncodingAlgorithm::None;
   }

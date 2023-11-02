@@ -19,11 +19,13 @@ enum class CompressionAlgorithm {
   /** Compression using SZ (lossy). */
   SZ,
   /**Compression using ZFP (lossy). */
-  ZFP
+  ZFP,
+  /**Compression using Histogram (lossy). */
+  Histogram
 };
 /** Returns whether a compression algorithm is lossy or not. */
 inline bool isLossy(CompressionAlgorithm alg) {
-  return alg == CompressionAlgorithm::SZ || alg == CompressionAlgorithm::ZFP;
+  return alg == CompressionAlgorithm::SZ || alg == CompressionAlgorithm::ZFP || alg == CompressionAlgorithm::Histogram;
 }
 /** A set of various encoding algorithms supported by HTF */
 enum class EncodingAlgorithm {
