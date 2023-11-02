@@ -50,7 +50,7 @@ Token Thread::getSequenceIdFromArray(htf::Token* token_array, size_t array_len) 
   if (nb_sequences >= nb_allocated_sequences) {
     htf_warn("Doubling mem space of sequence for thread trace %p\n", this);
     DOUBLE_MEMORY_SPACE(sequences, nb_allocated_sequences, Sequence*);
-    for (int i = nb_allocated_sequences / 2; i < nb_allocated_sequences; i++) {
+    for (uint i = nb_allocated_sequences / 2; i < nb_allocated_sequences; i++) {
       sequences[i] = new Sequence;
     }
   }
