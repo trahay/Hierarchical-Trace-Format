@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.14.0)
 
 # POLICIES #####################
 if (POLICY CMP0076)
-  cmake_policy(SET CMP0076 NEW)
-endif()
+    cmake_policy(SET CMP0076 NEW)
+endif ()
 
 
 add_library(htf SHARED)
@@ -24,16 +24,21 @@ target_sources(htf
         src/ParameterHandler.h
 )
 
-target_include_directories(htf PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} include)
+target_include_directories(htf
+        PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}
+        include
+        ${zfp_INCLUDE_DIRS}
+        ${sz_INCLUDE_DIRS}
+)
 
 
 target_compile_options(htf
-  PUBLIC
-    -D_GNU_SOURCE
-  PRIVATE
-    -Wall -Wextra -Wno-sign-compare
+        PUBLIC
+        -D_GNU_SOURCE
+        PRIVATE
+        -Wall -Wextra -Wno-sign-compare
 )
-
 
 target_link_libraries(htf
         PUBLIC
@@ -46,6 +51,7 @@ target_link_libraries(htf
         zstd
         ${zstd_LIBRARIES}
         ${JSONCPP_LIBRARIES}
+        ${zfp_LIBRARIES}
 )
 if (DOXYGEN_FOUND)
     # set input and output files
@@ -67,5 +73,5 @@ else (DOXYGEN_FOUND)
 endif (DOXYGEN_FOUND)
 
 install(TARGETS htf EXPORT HTFLibTargets
-  LIBRARY DESTINATION ${INSTALL_LIBDIR}
-  PUBLIC_HEADER DESTINATION ${INSTALL_INCLUDEDIR})
+        LIBRARY DESTINATION ${INSTALL_LIBDIR}
+        PUBLIC_HEADER DESTINATION ${INSTALL_INCLUDEDIR})

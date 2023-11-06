@@ -4,7 +4,6 @@
 # zstd_INCLUDE_DIRS - where to find zstd.h, etc.
 # zstd_LIBRARIES - List of libraries when using zstd.
 # zstd_FOUND - True if zstd found.
-
 find_path(zstd_INCLUDE_DIRS
   NAMES zstd.h
   HINTS ${zstd_ROOT_DIR}/include)

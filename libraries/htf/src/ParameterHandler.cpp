@@ -60,7 +60,7 @@ ParameterHandler::ParameterHandler() {
   Json::Value config;
   configFile >> config;
   configFile.close();
-  std::cout << config;
+  std::cout << config << std::endl;
   /* Load from file */
 #define MATCH_COMPRESSION_ENUM(value) MATCH_ENUM(compressionAlgorithm, CompressionAlgorithm, value)
   LOAD_FIELD_ENUM(compressionAlgorithm, {

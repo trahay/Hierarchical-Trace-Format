@@ -14,6 +14,13 @@
 #include <cstring>
 #include <memory>
 
+#ifdef WITH_ZFP
+#include <zfp.h>
+#endif
+#ifdef WITH_SZ
+#include <sz.h>
+#endif
+
 #include "ParameterHandler.h"
 #include "htf/htf.h"
 #include "htf/htf_dbg.h"
@@ -109,6 +116,73 @@ typedef uint8_t byte;
 inline static size_t _htf_zstd_compress(void* src, size_t size, void* dest, size_t destSize) {
   return ZSTD_compress(dest, destSize, src, size, htf::parameterHandler.getZstdCompressionLevel());
 }
+
+#ifdef WITH_ZFP
+/**
+ * @brief Gives a conservative upper bound for the size of the compressed data.
+ * @param src The source array.
+ * @param n Number of items in the array.
+ * @return Upper bound to compressed array size in bytes.
+ */
+inline static size_t _htf_zfp_bound(uint64_t* src, size_t n) {
+  zfp_type type = zfp_type_int64;                 // array scalar type
+  zfp_field* field = zfp_field_1d(src, type, n);  // array metadata
+  zfp_stream* zfp = zfp_stream_open(nullptr);     // compressed stream and parameters
+  zfp_stream_set_accuracy(zfp, .1);               // set tolerance for fixed-accuracy mode, this is absolute error
+  size_t bufsize = zfp_stream_maximum_size(zfp, field);
+  zfp_stream_close(zfp);
+  return bufsize;
+}
+/**
+ * @brief Compresses the content in src using the 1D ZFP Algorithm and writes it to dest.
+ * Returns the amounts of data written.
+ * @param src The source array.
+ * @param n Number of items in the source array.
+ * @param dest A free array in which the compressed data will be written.
+ * @param destSize Size of the destination array.
+ * @return Number of bytes written in the dest array.
+ */
+inline static size_t _htf_zfp_compress(uint64_t* src, size_t n, void* dest, size_t destSize) {
+  zfp_type type = zfp_type_int64;                 // array scalar type
+  zfp_field* field = zfp_field_1d(src, type, n);  // array metadata
+  zfp_stream* zfp = zfp_stream_open(nullptr);     // compressed stream and parameters
+  zfp_stream_set_accuracy(zfp, .1);               // set tolerance for fixed-accuracy mode, this is absolute error
+  size_t bufsize = zfp_stream_maximum_size(zfp, field);  // capacity of compressed buffer (conservative)
+  htf_assert(bufsize <= destSize);
+  bitstream* stream = stream_open(dest, bufsize);  // bit stream to compress to
+  zfp_stream_set_bit_stream(zfp, stream);          // associate with compressed stream
+  zfp_stream_rewind(zfp);                          // rewind stream to beginning
+  size_t outSize = zfp_compress(zfp, field);       // return value is byte size of compressed stream
+  zfp_stream_close(zfp);
+  stream_close(stream);
+  return outSize;
+}
+
+/**
+ * @brief Decompresses the content in src using the 1D ZFP Algorithm and writes it to dest.
+ * Returns the amounts of data written.
+ * @param dest The array in which the uncompressed data will be written.
+ * @param n Number of items in the source array.
+ * @param compressedArray The compressed array.
+ * @param destSize Size of the compressed array.
+ * @return Number of bytes read in the compressed array.
+ */
+inline static size_t _htf_zfp_decompress(uint64_t* dest, size_t n, void* compressedArray, size_t compressedSize) {
+  zfp_type type = zfp_type_int64;                  // array scalar type
+  zfp_field* field = zfp_field_1d(dest, type, n);  // array metadata
+  zfp_stream* zfp = zfp_stream_open(nullptr);      // compressed stream and parameters
+  zfp_stream_set_accuracy(zfp, .1);                // set tolerance for fixed-accuracy mode, this is absolute error
+  bitstream* stream = stream_open(compressedArray, compressedSize);  // bit stream to read from
+  zfp_stream_set_bit_stream(zfp, stream);                            // associate with compressed stream
+  zfp_stream_rewind(zfp);                                            // rewind stream to beginning
+  size_t outSize = zfp_decompress(zfp, field);                       // return value is byte size of compressed stream
+  zfp_stream_close(zfp);
+  stream_close(stream);
+  return outSize;
+}
+
+#endif
+
 #define N_BYTES 1
 #define N_BITS (N_BYTES * 8)
 #define MAX_BIT ((1 << N_BITS) - 1)
@@ -212,7 +286,7 @@ inline static void _htf_compress_write(uint64_t* src, size_t n, FILE* file) {
     break;
   case htf::CompressionAlgorithm::ZSTD: {
     compressedSize = ZSTD_compressBound(encodedArray ? encodedSize : size);
-    compressedArray = new uint8_t[compressedSize];
+    compressedArray = new byte[compressedSize];
     if (encodedArray) {
       compressedSize = _htf_zstd_compress(encodedArray, encodedSize, compressedArray, compressedSize);
     } else {
@@ -226,8 +300,12 @@ inline static void _htf_compress_write(uint64_t* src, size_t n, FILE* file) {
     compressedSize = _htf_histogram_compress(src, n, compressedArray, compressedSize);
     break;
   }
-  case htf::CompressionAlgorithm::SZ:
   case htf::CompressionAlgorithm::ZFP:
+    compressedSize = _htf_zfp_bound(src, n);
+    compressedArray = new byte[compressedSize];
+    compressedSize = _htf_zfp_compress(src, n, compressedArray, compressedSize);
+    break;
+  case htf::CompressionAlgorithm::SZ:
     htf_error("Not implemented yet\n");
     break;
   }
@@ -329,13 +407,17 @@ inline static void _htf_compress_read(uint64_t* dest, size_t n, FILE* file) {
   size_t encodedSize;
   byte* encodedArray = nullptr;
 
-  switch (htf::parameterHandler.getCompressionAlgorithm()) {
-  case htf::CompressionAlgorithm::None:
-    break;
-  case htf::CompressionAlgorithm::ZSTD: {
+  auto compressionAlgorithm = htf::parameterHandler.getCompressionAlgorithm();
+  if (compressionAlgorithm != htf::CompressionAlgorithm::None) {
     _htf_fread(&compressedSize, sizeof(compressedSize), 1, file);
     compressedArray = new byte[compressedSize];
     _htf_fread(compressedArray, compressedSize, 1, file);
+  }
+
+  switch (compressionAlgorithm) {
+  case htf::CompressionAlgorithm::None:
+    break;
+  case htf::CompressionAlgorithm::ZSTD: {
     if (htf::parameterHandler.getEncodingAlgorithm() == htf::EncodingAlgorithm::None) {
       size_t realSize = _htf_zstd_read(dest, compressedArray, compressedSize);
       htf_assert(realSize == n * sizeof(uint64_t));
@@ -348,15 +430,15 @@ inline static void _htf_compress_read(uint64_t* dest, size_t n, FILE* file) {
     break;
   }
   case htf::CompressionAlgorithm::Histogram: {
-    _htf_fread(&compressedSize, sizeof(compressedSize), 1, file);
-    compressedArray = new byte[compressedSize];
-    _htf_fread(compressedArray, compressedSize, 1, file);
     size_t realSize = _htf_histogram_read(dest, n, compressedArray, compressedSize);
     htf_assert(realSize == n * sizeof(uint64_t));
     break;
   }
+  case htf::CompressionAlgorithm::ZFP: {
+    size_t realSize = _htf_zfp_decompress(dest, n, compressedArray, compressedSize);
+    break;
+  }
   case htf::CompressionAlgorithm::SZ:
-  case htf::CompressionAlgorithm::ZFP:
     htf_error("Not implemented yet\n");
     break;
   }
