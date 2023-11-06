@@ -182,6 +182,26 @@ inline static size_t _htf_zfp_decompress(uint64_t* dest, size_t n, void* compres
 }
 
 #endif
+#ifdef WITH_SZ
+/**
+ * @brief Compresses the content in src using the 1D SZ Algorithm.
+ * @param src The source array.
+ * @param n Number of items in the source array.
+ * @param compressedSize Size of the compressed array. Passed by ref and modified.
+ * @return The compressed array.
+ */
+inline static byte* _htf_sz_compress(uint64_t* src, size_t n, size_t& compressedSize) {
+  SZ_Init(nullptr);
+  byte* compressedArray = SZ_compress(SZ_UINT64, src, &compressedSize, 0, 0, 0, 0, n);
+  SZ_Finalize();
+  return compressedArray;
+}
+
+inline static uint64_t* _htf_sz_decompress(size_t n, byte* compressedArray, size_t compressedSize) {
+  return static_cast<uint64_t*>(SZ_decompress(SZ_UINT64, compressedArray, compressedSize, 0, 0, 0, 0, n));
+};
+
+#endif
 
 #define N_BYTES 1
 #define N_BITS (N_BYTES * 8)
@@ -300,14 +320,18 @@ inline static void _htf_compress_write(uint64_t* src, size_t n, FILE* file) {
     compressedSize = _htf_histogram_compress(src, n, compressedArray, compressedSize);
     break;
   }
+#ifdef WITH_ZFP
   case htf::CompressionAlgorithm::ZFP:
     compressedSize = _htf_zfp_bound(src, n);
     compressedArray = new byte[compressedSize];
     compressedSize = _htf_zfp_compress(src, n, compressedArray, compressedSize);
     break;
+#endif
+#ifdef WITH_SZ
   case htf::CompressionAlgorithm::SZ:
-    htf_error("Not implemented yet\n");
+    compressedArray = _htf_sz_compress(src, n, compressedSize);
     break;
+#endif
   }
 
   if (htf::parameterHandler.getCompressionAlgorithm() != htf::CompressionAlgorithm::None) {
@@ -434,13 +458,18 @@ inline static void _htf_compress_read(uint64_t* dest, size_t n, FILE* file) {
     htf_assert(realSize == n * sizeof(uint64_t));
     break;
   }
+#ifdef WITH_ZFP
   case htf::CompressionAlgorithm::ZFP: {
     size_t realSize = _htf_zfp_decompress(dest, n, compressedArray, compressedSize);
     break;
   }
+#endif
+#ifdef WITH_SZ
   case htf::CompressionAlgorithm::SZ:
-    htf_error("Not implemented yet\n");
+    uint64_t* temp = _htf_sz_decompress(n, compressedArray, compressedSize);
+    memcpy(dest, temp, sizeof(uint64_t) * n);
     break;
+#endif
   }
 
   switch (htf::parameterHandler.getEncodingAlgorithm()) {

@@ -52,6 +52,7 @@ target_link_libraries(htf
         ${zstd_LIBRARIES}
         ${JSONCPP_LIBRARIES}
         ${zfp_LIBRARIES}
+        ${sz_LIBRARIES}
 )
 if (DOXYGEN_FOUND)
     # set input and output files
