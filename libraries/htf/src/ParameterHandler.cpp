@@ -66,8 +66,12 @@ ParameterHandler::ParameterHandler() {
   LOAD_FIELD_ENUM(compressionAlgorithm, {
     MATCH_COMPRESSION_ENUM(None);
     MATCH_COMPRESSION_ENUM(ZSTD);
+#ifdef WITH_SZ
     MATCH_COMPRESSION_ENUM(SZ);
+#endif
+#ifdef WITH_ZFP
     MATCH_COMPRESSION_ENUM(ZFP);
+#endif
     MATCH_COMPRESSION_ENUM(Histogram);
   });
 
@@ -96,8 +100,13 @@ ParameterHandler::ParameterHandler() {
     std::string compressionString = compressionChar;
     GET_COMP_FIELD(None);
     GET_COMP_FIELD(ZSTD);
+#ifdef WITH_SZ
     GET_COMP_FIELD(SZ);
+#endif
+#ifdef WITH_ZFP
     GET_COMP_FIELD(ZFP);
+#endif
+    GET_COMP_FIELD(Histogram);
   }
 
 #define GET_ENCO_FIELD(value) GET_ENV_FIELD(encoding, Encoding, value)

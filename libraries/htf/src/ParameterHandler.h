@@ -9,23 +9,32 @@
 #pragma once
 #include <cstddef>
 #include <string>
+
+#ifdef WITH_SZ
+#undef SZ
+#endif
+
 namespace htf {
 /** A set of various compression algorithms supported by HTF.*/
 enum class CompressionAlgorithm {
   /** No Compression.*/
-  None,
+  None = 0,
   /** Compression using ZSTD (lossless). */
-  ZSTD,
-  /** Compression using SZ (lossy). */
-  SZ,
-  /**Compression using ZFP (lossy). */
-  ZFP,
+  ZSTD = 1,
   /**Compression using Histogram (lossy). */
-  Histogram
+  Histogram = 2,
+#ifdef WITH_SZ
+  /** Compression using SZ (lossy). */
+  SZ = 3,
+#endif
+#ifdef WITH_ZFP
+  /**Compression using ZFP (lossy). */
+  ZFP = 4
+#endif
 };
 /** Returns whether a compression algorithm is lossy or not. */
 inline bool isLossy(CompressionAlgorithm alg) {
-  return alg == CompressionAlgorithm::SZ || alg == CompressionAlgorithm::ZFP || alg == CompressionAlgorithm::Histogram;
+  return alg != CompressionAlgorithm::None && alg != CompressionAlgorithm::ZSTD;
 }
 /** A set of various encoding algorithms supported by HTF */
 enum class EncodingAlgorithm {
