@@ -277,7 +277,7 @@ typedef uint32_t ThreadId;                                          /**< Referen
 typedef uint32_t LocationGroupId;                                   /**< Reference for a htf::LocationGroup. */
 #define HTF_LOCATION_GROUP_ID_INVALID ((HTF(LocationGroupId))HTF_UNDEFINED_UINT32) /**< Invalid LocationGroupId. */
 #define HTF_MAIN_LOCATION_GROUP_ID ((HTF(LocationGroupId))HTF_LOCATION_GROUP_ID_INVALID - 1)
-/**< Main LocationGroupId */  // TODO WTF is that ?
+/**< Main LocationGroupId \todo What is that ?*/
 
 /** A reference for everything after that. */
 typedef uint32_t Ref;
@@ -378,12 +378,12 @@ typedef struct Thread {
   [[nodiscard]] const char* getName() const;
   /** Search for a sequence_id that matches the given sequence.
    * If none of the registered sequence match, register a new Sequence.
-   * TODO Speed this up using hash map and/or storing the sequence's id in the structure.
+   * \todo Speed this up using hash map and/or storing the sequence's id in the structure.
    */
   Token getSequenceId(Sequence* sequence);
   /** Search for a sequence_id that matches the given array as a Sequence.
    * If none of the registered sequence match, register a new Sequence.
-   * TODO Speed this up using hashmap
+   * \todo Speed this up using hashmap
    */
   Token getSequenceIdFromArray(Token* token_array, size_t array_len);
   /** Returns the duration for the given array. */

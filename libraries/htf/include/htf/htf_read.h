@@ -121,7 +121,7 @@ typedef struct ThreadReader {
    * Timestamp is set to Reader's referential timestamp.*/
   [[nodiscard]] LoopOccurence getLoopOccurence(Token loop_id, int occurence_id) const;
 
-  /* TODO Write a description here. Also fix the way it's implemented: it does not fit the standard. */
+  /** \todo Write a description here. Also fix the way it's implemented: it does not fit the standard. */
   [[nodiscard]] AttributeList* getEventAttributeList(Token event_id, int occurence_id) const;
 
   /* Skips the given Token and updates the reader. */

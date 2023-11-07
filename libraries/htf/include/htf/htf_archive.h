@@ -66,7 +66,7 @@ typedef struct Definition {
 typedef struct Archive {
   char* dir_name;       /**< Name of the directory in which the archive is recorded. */
   char* trace_name;     /**< Name of the trace. */
-  char* fullpath;       /**< TODO Complete this. */
+  char* fullpath;       /**< \todo Complete this. */
   pthread_mutex_t lock; /**< Archive-wise lock, used for synchronising some threads. */
 
   LocationGroupId id;             /**< ID for the htf::LocationGroup of that Archive. */
