@@ -117,6 +117,19 @@ inline static size_t _htf_zstd_compress(void* src, size_t size, void* dest, size
   return ZSTD_compress(dest, destSize, src, size, htf::parameterHandler.getZstdCompressionLevel());
 }
 
+/**
+ * Decompresses an array that has been compressed by ZSTD. Returns the size of the uncompressed data.
+ * @param dest The array in which the uncompressed data will be written.
+ * @param compArray The compressed array.
+ * @param compSize Size of the compressed array.
+ * @returns Size of the uncompressed data.
+ */
+inline static size_t _htf_zstd_read(void* dest, void* compArray, size_t compSize) {
+  size_t realSize = ZSTD_getFrameContentSize(compArray, compSize);
+  ZSTD_decompress(dest, realSize, compArray, compSize);
+  return realSize;
+}
+
 #ifdef WITH_ZFP
 /**
  * @brief Gives a conservative upper bound for the size of the compressed data.
@@ -180,20 +193,6 @@ inline static size_t _htf_zfp_decompress(uint64_t* dest, size_t n, void* compres
   stream_close(stream);
   return outSize;
 }
-
-/**
- * Decompresses an array that has been compressed by ZSTD. Returns the size of the uncompressed data.
- * @param dest The array in which the uncompressed data will be written.
- * @param compArray The compressed array.
- * @param compSize Size of the compressed array.
- * @returns Size of the uncompressed data.
- */
-inline static size_t _htf_zstd_read(void* dest, void* compArray, size_t compSize) {
-  size_t realSize = ZSTD_getFrameContentSize(compArray, compSize);
-  ZSTD_decompress(dest, realSize, compArray, compSize);
-  return realSize;
-}
-
 #endif
 #ifdef WITH_SZ
 /**
