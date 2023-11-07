@@ -187,6 +187,7 @@ typedef struct Event {
 #ifdef __cplusplus
 /**
  * @brief A Map for counting Tokens.
+ *
  * This class exists to make token counting easier.
  * Instead of having arrays for each different type of token, we can just use that map.
  * This class also comes with addition and multiplication, so that we can easily use them.
