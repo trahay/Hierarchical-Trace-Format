@@ -405,8 +405,7 @@ extern "C" {
 
 extern void htf_print_attribute_value(HTF(Thread) * thread, HTF(AttributeData) * attr, HTF(htf_type_t) type);
 
-extern void htf_print_event_attributes(HTF(Thread) * thread,
-                                       struct C_CXX(htf_event_occurence, htf::EventOccurence) * e);
+extern void htf_print_event_attributes(HTF(Thread) * thread, struct HTF(EventOccurence) * e);
 
 extern void htf_print_attribute_list(HTF(Thread) * thread, HTF(AttributeList) * l);
 
