@@ -561,8 +561,41 @@ static FILE* _htf_get_event_file(const char* base_dirname, htf::Thread* th, htf:
 static void _htf_store_attribute_values(htf::EventSummary* e, FILE* file) {
   _htf_fwrite(&e->attribute_pos, sizeof(e->attribute_pos), 1, file);
   if (e->attribute_pos > 0) {
-    htf_log(htf::DebugLevel::Debug, "\t\tStore %lu attributes\n", e->attribute_pos);
-    _htf_fwrite(e->attribute_buffer, e->attribute_pos, 1, file);
+    htf_log(htf::DebugLevel::Normal, "\t\tStore %lu attributes\n", e->attribute_pos);
+    if (htf::parameterHandler.getCompressionAlgorithm() != htf::CompressionAlgorithm::None) {
+      size_t compressedSize = ZSTD_compressBound(e->attribute_pos);
+      byte* compressedArray = new byte[compressedSize];
+      compressedSize = _htf_zstd_compress(e->attribute_buffer, e->attribute_pos, compressedArray, compressedSize);
+      _htf_fwrite(&compressedSize, sizeof(compressedSize), 1, file);
+      _htf_fwrite(compressedArray, compressedSize, 1, file);
+      delete[] compressedArray;
+    } else {
+      _htf_fwrite(e->attribute_buffer, e->attribute_pos, 1, file);
+    }
+  }
+}
+
+static void _htf_read_attribute_values(htf::EventSummary* e, FILE* file) {
+  _htf_fread(&e->attribute_pos, sizeof(e->attribute_pos), 1, file);
+  e->attribute_buffer_size = e->attribute_pos;
+  e->attribute_pos = 0;
+  e->attribute_buffer = nullptr;
+
+  if (e->attribute_buffer_size > 0) {
+    e->attribute_buffer = new uint8_t[e->attribute_buffer_size];
+    if (e->attribute_buffer == nullptr) {
+      htf_error("Cannot allocate memory\n");
+    }
+    if (htf::parameterHandler.getCompressionAlgorithm() != htf::CompressionAlgorithm::None) {
+      size_t compressedSize;
+      _htf_fread(&compressedSize, sizeof(compressedSize), 1, file);
+      byte* compressedArray = new byte[compressedSize];
+      _htf_fread(e->attribute_buffer, compressedSize, 1, file);
+      _htf_zstd_read(e->attribute_buffer, compressedArray, compressedSize);
+      delete[] compressedArray;
+    } else {
+      _htf_fread(e->attribute_buffer, e->attribute_buffer_size, 1, file);
+    }
   }
 }
 
@@ -577,21 +610,6 @@ static void _htf_store_event(const char* base_dirname, htf::Thread* th, htf::Eve
     e->durations->writeToFile(file, false);
   }
   fclose(file);
-}
-
-static void _htf_read_attribute_values(htf::EventSummary* e, FILE* file) {
-  _htf_fread(&e->attribute_pos, sizeof(e->attribute_pos), 1, file);
-  e->attribute_buffer_size = e->attribute_pos;
-  e->attribute_pos = 0;
-  e->attribute_buffer = nullptr;
-
-  if (e->attribute_buffer_size > 0) {
-    e->attribute_buffer = new uint8_t[e->attribute_buffer_size];
-    if (e->attribute_buffer == nullptr) {
-      htf_error("Cannot allocate memory\n");
-    }
-    _htf_fread(e->attribute_buffer, e->attribute_buffer_size, 1, file);
-  }
 }
 
 static void _htf_read_event(const char* base_dirname, htf::Thread* th, htf::EventSummary* e, htf::Token event) {
