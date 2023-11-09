@@ -56,7 +56,7 @@ OTF2_ErrorCode OTF2_GlobalDefWriter_WriteString(OTF2_GlobalDefWriter* writerHand
                                                 OTF2_StringRef self,
                                                 const char* string) {
   //  NOT_IMPLEMENTED;
-  htf_archive_register_string(&writerHandle->archive, self, string);
+  htf_archive_register_string(writerHandle->archive, self, string);
   return OTF2_SUCCESS;
 }
 
@@ -65,7 +65,7 @@ OTF2_ErrorCode OTF2_GlobalDefWriter_WriteAttribute(OTF2_GlobalDefWriter* writerH
                                                    OTF2_StringRef name,
                                                    OTF2_StringRef description,
                                                    OTF2_Type type) {
-  htf_archive_register_attribute(&writerHandle->archive, self, name, description, OTF2_HTF_TYPE(type));
+  htf_archive_register_attribute(writerHandle->archive, self, name, description, OTF2_HTF_TYPE(type));
   return OTF2_SUCCESS;
 }
 
@@ -156,7 +156,7 @@ OTF2_ErrorCode OTF2_GlobalDefWriter_WriteLocationGroup(OTF2_GlobalDefWriter* wri
   LocationGroupId parent_id = _otf_get_location_group_id(creatingLocationGroup);
 
   //  htf_write_global_add_subarchive(&writerHandle->archive, self);
-  htf_write_define_location_group(&writerHandle->archive, lg_id, name, parent_id);
+  htf_write_define_location_group(writerHandle->archive, lg_id, name, parent_id);
 
   return OTF2_SUCCESS;
 }
@@ -170,7 +170,7 @@ OTF2_ErrorCode OTF2_GlobalDefWriter_WriteLocation(OTF2_GlobalDefWriter* writerHa
   ThreadId thread_id = _otf_register_location(self);
   LocationGroupId parent_id = _otf_get_location_group_id(locationGroup);
 
-  htf_write_define_location(&writerHandle->archive, thread_id, name, parent_id);
+  htf_write_define_location(writerHandle->archive, thread_id, name, parent_id);
 
   return OTF2_SUCCESS;
   //  NOT_IMPLEMENTED;
@@ -192,7 +192,7 @@ OTF2_ErrorCode OTF2_GlobalDefWriter_WriteRegion(OTF2_GlobalDefWriter* writerHand
    * - uppon thread creation, copy the write region to the new thread regions
    * - when creating a global region, add it to the existing threads region
    */
-  htf_archive_register_region(&writerHandle->archive, self, name);
+  htf_archive_register_region(writerHandle->archive, self, name);
   return OTF2_SUCCESS;
 }
 

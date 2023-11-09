@@ -24,7 +24,7 @@
 #include "htf/htf_write.h"
 
 struct OTF2_GlobalDefWriter_struct {
-  struct Archive archive;
+  struct Archive* archive;
 };
 
 struct OTF2_DefWriter_struct {
@@ -41,7 +41,7 @@ struct OTF2_EvtWriter_struct {
 };
 
 struct OTF2_Archive_struct {
-  struct Archive archive;
+  struct Archive* archive;
 
   OTF2_GlobalDefWriter* globalDefWriter;
 

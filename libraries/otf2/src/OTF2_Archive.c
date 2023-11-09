@@ -20,8 +20,9 @@ OTF2_Archive* OTF2_Archive_Open(const char* archivePath,
                                 const OTF2_FileSubstrate fileSubstrate,
                                 const OTF2_Compression compression) {
   OTF2_Archive* archive = malloc(sizeof(OTF2_Archive));
+  archive->archive = htf_archive_new();
 
-  htf_write_archive_open(&archive->archive, archivePath, archiveName, 0); /* TODO: add missing archive_id_t */
+  htf_write_archive_open(archive->archive, archivePath, archiveName, 0); /* TODO: add missing archive_id_t */
 
   archive->globalDefWriter = NULL;
 
@@ -34,7 +35,7 @@ OTF2_Archive* OTF2_Archive_Open(const char* archivePath,
 }
 
 OTF2_ErrorCode OTF2_Archive_Close(OTF2_Archive* archive) {
-  htf_write_archive_close(&archive->archive);
+  htf_write_archive_close(archive->archive);
   return OTF2_SUCCESS;
 }
 
@@ -171,7 +172,7 @@ int new_location(OTF2_Archive* archive, OTF2_LocationRef location) {
 
   if (index == 0) {
     /* TODO: hacky ! we should not have to do that ! */
-    archive->archive.id = location;
+    archive->archive->id = location;
   }
 
   INCREMENT_MEMORY_SPACE(archive->def_writers, archive->nb_locations, OTF2_DefWriter*);
@@ -180,10 +181,10 @@ int new_location(OTF2_Archive* archive, OTF2_LocationRef location) {
 
   archive->def_writers[index] = malloc(sizeof(OTF2_DefWriter));
   archive->def_writers[index]->locationRef = location;
-  archive->def_writers[index]->archive = &archive->archive;
+  archive->def_writers[index]->archive = archive->archive;
   archive->def_writers[index]->thread_writer = malloc(sizeof(struct ThreadWriter));
 
-  htf_write_thread_open(&archive->archive, archive->def_writers[index]->thread_writer, location);
+  htf_write_thread_open(archive->archive, archive->def_writers[index]->thread_writer, location);
 
 #if 0
   htf_write_init_thread(&archive->trace,
@@ -194,7 +195,7 @@ int new_location(OTF2_Archive* archive, OTF2_LocationRef location) {
 
   archive->evt_writers[index] = malloc(sizeof(OTF2_EvtWriter));
   archive->evt_writers[index]->locationRef = location;
-  archive->evt_writers[index]->archive = &archive->archive;
+  archive->evt_writers[index]->archive = archive->archive;
   archive->evt_writers[index]->thread_writer = archive->def_writers[index]->thread_writer;
   return index;
 }
@@ -242,9 +243,10 @@ OTF2_DefWriter* OTF2_Archive_GetDefWriter(OTF2_Archive* archive, OTF2_LocationRe
 OTF2_GlobalDefWriter* OTF2_Archive_GetGlobalDefWriter(OTF2_Archive* archive) {
   if (!archive->globalDefWriter) {
     archive->globalDefWriter = malloc(sizeof(OTF2_GlobalDefWriter));
+    archive->globalDefWriter->archive = htf_archive_new();
 
-    htf_write_global_archive_open(&archive->globalDefWriter->archive, archive->archive.dir_name,
-                                  archive->archive.trace_name);
+    htf_write_global_archive_open(archive->globalDefWriter->archive, archive->archive->dir_name,
+                                  archive->archive->trace_name);
   }
   return archive->globalDefWriter;
 }
@@ -321,7 +323,7 @@ OTF2_ErrorCode OTF2_Archive_CloseSnapWriter(OTF2_Archive* archive, OTF2_SnapWrit
 }
 
 OTF2_ErrorCode OTF2_Archive_CloseGlobalDefWriter(OTF2_Archive* archive, OTF2_GlobalDefWriter* writer) {
-  htf_write_global_archive_close(&writer->archive);
+  htf_write_global_archive_close(writer->archive);
   return OTF2_SUCCESS;
 }
 
