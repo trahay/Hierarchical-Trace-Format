@@ -537,36 +537,34 @@ static inline void push_data(Event* e, void* data, size_t data_size) {
   e->event_size += data_size;
 }
 
-static inline void pop_data(Event* e, void* data, size_t data_size, void** cursor) {
-  if (*cursor == nullptr) {
+static inline void pop_data(Event* e, void* data, size_t data_size, byte*& cursor) {
+  if (cursor == nullptr) {
     /* initialize the cursor to the begining of event data */
-    *cursor = &e->event_data[0];
+    cursor = &e->event_data[0];
   }
 
   uintptr_t last_event_byte = ((uintptr_t)e) + e->event_size;
-  uintptr_t last_read_byte = ((uintptr_t)*cursor) + data_size;
+  uintptr_t last_read_byte = ((uintptr_t)cursor) + data_size;
   htf_assert(last_read_byte <= last_event_byte);
 
-  memcpy(data, *cursor, data_size);
-  *(size_t**)cursor += data_size;
-  // We have to cast because we can't do arithmetic on void* pointer apparently
+  memcpy(data, cursor, data_size);
+  cursor += data_size;
 }
 
 void Thread::printEvent(htf::Event* e) const {
+  byte* cursor = nullptr;
   switch (e->record) {
   case HTF_EVENT_ENTER: {
-    void* cursor = NULL;
     RegionRef region_ref;
-    pop_data(e, &region_ref, sizeof(region_ref), &cursor);
+    pop_data(e, &region_ref, sizeof(region_ref), cursor);
     const Region* region = archive->getRegion(region_ref);
     const char* region_name = region ? archive->getString(region->string_ref)->str : "INVALID";
     printf("Enter %d (%s)", region_ref, region_name);
     break;
   }
   case HTF_EVENT_LEAVE: {
-    void* cursor = NULL;
     RegionRef region_ref;
-    pop_data(e, &region_ref, sizeof(region_ref), &cursor);
+    pop_data(e, &region_ref, sizeof(region_ref), cursor);
     const Region* region = archive->getRegion(region_ref);
     const char* region_name = region ? archive->getString(region->string_ref)->str : "INVALID";
     printf("Leave %d (%s)", region_ref, region_name);
@@ -590,77 +588,71 @@ void Thread::printEvent(htf::Event* e) const {
     break;
 
   case HTF_EVENT_MPI_SEND: {
-    void* cursor = NULL;
     uint32_t receiver;
     uint32_t communicator;
     uint32_t msgTag;
     uint64_t msgLength;
 
-    pop_data(e, &receiver, sizeof(receiver), &cursor);
-    pop_data(e, &communicator, sizeof(communicator), &cursor);
-    pop_data(e, &msgTag, sizeof(msgTag), &cursor);
-    pop_data(e, &msgLength, sizeof(msgLength), &cursor);
+    pop_data(e, &receiver, sizeof(receiver), cursor);
+    pop_data(e, &communicator, sizeof(communicator), cursor);
+    pop_data(e, &msgTag, sizeof(msgTag), cursor);
+    pop_data(e, &msgLength, sizeof(msgLength), cursor);
     printf("MPI_SEND(dest=%d, comm=%x, tag=%x, len=%" PRIu64 ")", receiver, communicator, msgTag, msgLength);
     break;
   }
   case HTF_EVENT_MPI_ISEND: {
-    void* cursor = NULL;
     uint32_t receiver;
     uint32_t communicator;
     uint32_t msgTag;
     uint64_t msgLength;
     uint64_t requestID;
 
-    pop_data(e, &receiver, sizeof(receiver), &cursor);
-    pop_data(e, &communicator, sizeof(communicator), &cursor);
-    pop_data(e, &msgTag, sizeof(msgTag), &cursor);
-    pop_data(e, &msgLength, sizeof(msgLength), &cursor);
-    pop_data(e, &requestID, sizeof(requestID), &cursor);
+    pop_data(e, &receiver, sizeof(receiver), cursor);
+    pop_data(e, &communicator, sizeof(communicator), cursor);
+    pop_data(e, &msgTag, sizeof(msgTag), cursor);
+    pop_data(e, &msgLength, sizeof(msgLength), cursor);
+    pop_data(e, &requestID, sizeof(requestID), cursor);
     printf("MPI_ISEND(dest=%d, comm=%x, tag=%x, len=%" PRIu64 ", req=%" PRIx64 ")", receiver, communicator, msgTag,
            msgLength, requestID);
     break;
   }
   case HTF_EVENT_MPI_ISEND_COMPLETE: {
-    void* cursor = NULL;
     uint64_t requestID;
-    pop_data(e, &requestID, sizeof(requestID), &cursor);
+    pop_data(e, &requestID, sizeof(requestID), cursor);
     printf("MPI_ISEND_COMPLETE(req=%" PRIx64 ")", requestID);
     break;
   }
   case HTF_EVENT_MPI_IRECV_REQUEST: {
-    void* cursor = NULL;
     uint64_t requestID;
-    pop_data(e, &requestID, sizeof(requestID), &cursor);
+    pop_data(e, &requestID, sizeof(requestID), cursor);
     printf("MPI_IRECV_REQUEST(req=%" PRIx64 ")", requestID);
     break;
   }
   case HTF_EVENT_MPI_RECV: {
-    void* cursor = NULL;
     uint32_t sender;
     uint32_t communicator;
     uint32_t msgTag;
     uint64_t msgLength;
 
-    pop_data(e, &sender, sizeof(sender), &cursor);
-    pop_data(e, &communicator, sizeof(communicator), &cursor);
-    pop_data(e, &msgTag, sizeof(msgTag), &cursor);
-    pop_data(e, &msgLength, sizeof(msgLength), &cursor);
+    pop_data(e, &sender, sizeof(sender), cursor);
+    pop_data(e, &communicator, sizeof(communicator), cursor);
+    pop_data(e, &msgTag, sizeof(msgTag), cursor);
+    pop_data(e, &msgLength, sizeof(msgLength), cursor);
 
     printf("MPI_RECV(src=%d, comm=%x, tag=%x, len=%" PRIu64 ")", sender, communicator, msgTag, msgLength);
     break;
   }
   case HTF_EVENT_MPI_IRECV: {
-    void* cursor = NULL;
     uint32_t sender;
     uint32_t communicator;
     uint32_t msgTag;
     uint64_t msgLength;
     uint64_t requestID;
-    pop_data(e, &sender, sizeof(sender), &cursor);
-    pop_data(e, &communicator, sizeof(communicator), &cursor);
-    pop_data(e, &msgTag, sizeof(msgTag), &cursor);
-    pop_data(e, &msgLength, sizeof(msgLength), &cursor);
-    pop_data(e, &requestID, sizeof(requestID), &cursor);
+    pop_data(e, &sender, sizeof(sender), cursor);
+    pop_data(e, &communicator, sizeof(communicator), cursor);
+    pop_data(e, &msgTag, sizeof(msgTag), cursor);
+    pop_data(e, &msgLength, sizeof(msgLength), cursor);
+    pop_data(e, &requestID, sizeof(requestID), cursor);
 
     printf("MPI_IRECV(src=%d, comm=%x, tag=%x, len=%" PRIu64 ", req=%" PRIu64 ")", sender, communicator, msgTag,
            msgLength, requestID);
@@ -671,18 +663,17 @@ void Thread::printEvent(htf::Event* e) const {
     break;
   }
   case HTF_EVENT_MPI_COLLECTIVE_END: {
-    void* cursor = NULL;
     uint32_t collectiveOp;
     uint32_t communicator;
     uint32_t root;
     uint64_t sizeSent;
     uint64_t sizeReceived;
 
-    pop_data(e, &collectiveOp, sizeof(collectiveOp), &cursor);
-    pop_data(e, &communicator, sizeof(communicator), &cursor);
-    pop_data(e, &root, sizeof(root), &cursor);
-    pop_data(e, &sizeSent, sizeof(sizeSent), &cursor);
-    pop_data(e, &sizeReceived, sizeof(sizeReceived), &cursor);
+    pop_data(e, &collectiveOp, sizeof(collectiveOp), cursor);
+    pop_data(e, &communicator, sizeof(communicator), cursor);
+    pop_data(e, &root, sizeof(root), cursor);
+    pop_data(e, &sizeSent, sizeof(sizeSent), cursor);
+    pop_data(e, &sizeReceived, sizeof(sizeReceived), cursor);
 
     printf("MPI_COLLECTIVE_END(op=%x, comm=%x, root=%d, sent=%" PRIu64 ", recved=%" PRIu64 ")", collectiveOp,
            communicator, root, sizeSent, sizeReceived);
