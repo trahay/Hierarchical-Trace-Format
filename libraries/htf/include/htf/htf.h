@@ -20,6 +20,11 @@
 #include <string.h>
 #endif
 
+/**
+ * A simple alias to make some code clearer. We use uint8 because they're the size of a byte.
+ */
+typedef uint8_t byte;
+
 #ifdef __cplusplus
 namespace htf {
 #endif
@@ -214,9 +219,9 @@ struct TokenCountMap : public std::map<Token, size_t> {
 };
 #endif
 /** Defines a TokenCountMap. In C, defines a char[] of size sizeof(TokenCountMap). */
-#define DEFINE_TokenCountMap(name) C_CXX(char, TokenCountMap) name C([48])
+#define DEFINE_TokenCountMap(name) C_CXX(byte, TokenCountMap) name C([48])
 /** Defines a C++ vector. In C, defines a char[] of size sizeof(std::vector). */
-#define DEFINE_Vector(type, name) C_CXX(char, std::vector<type>) name C_CXX([24], { std::vector<type>() })
+#define DEFINE_Vector(type, name) C_CXX(byte, std::vector<type>) name C_CXX([24], { std::vector<type>() })
 
 /**
  * @brief Structure to store a sequence in HTF format.

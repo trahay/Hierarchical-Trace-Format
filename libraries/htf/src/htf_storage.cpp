@@ -101,10 +101,6 @@ static FILE* _htf_file_open(char* filename, char* mode) {
   } while (0)
 
 /******************* Read/Write/Compression function for vectors and arrays *******************/
-/**
- * A simple alias to make some code clearer. We use uint8 because they're the size of a byte.
- */
-typedef uint8_t byte;
 
 /** @brief Compresses the content in src using ZSTD and writes it to dest. Returns the amount of data written.
  *  @param src The source array.
