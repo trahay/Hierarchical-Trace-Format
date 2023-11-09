@@ -8,6 +8,19 @@ endif ()
 
 add_library(htf SHARED)
 
+set(HTF_HEADERS
+        include/htf/htf_archive.h
+        include/htf/htf_attribute.h
+        include/htf/htf_dbg.h
+        include/htf/htf.h
+        include/htf/htf_hash.h
+        include/htf/htf_read.h
+        include/htf/htf_storage.h
+        include/htf/htf_timestamp.h
+        include/htf/htf_write.h
+        include/htf/LinkedVector.h
+)
+
 target_sources(htf
         PRIVATE
         src/htf.cpp
@@ -22,6 +35,8 @@ target_sources(htf
         src/LinkedVector.cpp
         src/ParameterHandler.cpp
         src/ParameterHandler.h
+        PUBLIC
+        ${HTF_HEADERS}
 )
 
 target_include_directories(htf
@@ -31,6 +46,9 @@ target_include_directories(htf
         ${zfp_INCLUDE_DIRS}
         ${sz_INCLUDE_DIRS}
 )
+
+set_property(TARGET htf
+        PROPERTY PUBLIC_HEADER ${HTF_HEADERS})
 
 
 target_compile_options(htf
