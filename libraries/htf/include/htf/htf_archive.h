@@ -73,10 +73,10 @@ typedef struct Archive {
   struct Archive* global_archive; /**< The Global Archive is the archive encompassing the whole execution. NULL if
                                    * this is the global archive. */
 
-  struct Definition* definitions CXX({new Definition()}); /**< Array of Definition.*/
-  struct Thread** threads;                                /**< Array of Thread. */
-  int nb_threads;                                         /**< Number of Thread in #threads. */
-  int nb_allocated_threads;                               /**< Size of #threads. */
+  Definition definitions;   /**< Definitions. */
+  struct Thread** threads;  /**< Array of Thread. */
+  int nb_threads;           /**< Number of Thread in #threads. */
+  int nb_allocated_threads; /**< Size of #threads. */
 
   struct Archive** archive_list; /**< Array of Archive *. */
   int nb_archives;               /**< Number of Archive in #archive_list. */

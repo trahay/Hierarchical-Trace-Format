@@ -115,7 +115,7 @@ void Definition::addAttribute(AttributeRef attribute_ref,
  * have a match, or nullptr if it doesn't have a match in the global_archive.
  */
 const String* Archive::getString(StringRef string_ref) const {
-  auto res = definitions->getString(string_ref);
+  auto res = definitions.getString(string_ref);
   return (res) ? res : (global_archive) ? global_archive->getString(string_ref) : nullptr;
 }
 
@@ -125,7 +125,7 @@ const String* Archive::getString(StringRef string_ref) const {
  * have a match, or nullptr if it doesn't have a match in the global_archive.
  */
 const Region* Archive::getRegion(RegionRef region_ref) const {
-  auto res = definitions->getRegion(region_ref);
+  auto res = definitions.getRegion(region_ref);
   return (res) ? res : (global_archive) ? global_archive->getRegion(region_ref) : nullptr;
 }
 
@@ -135,7 +135,7 @@ const Region* Archive::getRegion(RegionRef region_ref) const {
  * doesn't have a match, or nullptr if it doesn't have a match in the global_archive.
  */
 const Attribute* Archive::getAttribute(AttributeRef attribute_ref) const {
-  auto res = definitions->getAttribute(attribute_ref);
+  auto res = definitions.getAttribute(attribute_ref);
   return (res) ? res : (global_archive) ? global_archive->getAttribute(attribute_ref) : nullptr;
 }
 
@@ -188,7 +188,7 @@ const Location* Archive::getLocation(ThreadId location_id) const {
  */
 void Archive::addString(StringRef string_ref, const char* string) {
   pthread_mutex_lock(&lock);
-  definitions->addString(string_ref, string);
+  definitions.addString(string_ref, string);
   pthread_mutex_unlock(&lock);
 }
 
@@ -199,7 +199,7 @@ void Archive::addString(StringRef string_ref, const char* string) {
  */
 void Archive::addRegion(RegionRef region_ref, StringRef name_ref) {
   pthread_mutex_lock(&lock);
-  definitions->addRegion(region_ref, name_ref);
+  definitions.addRegion(region_ref, name_ref);
   pthread_mutex_unlock(&lock);
 }
 
@@ -210,7 +210,7 @@ void Archive::addRegion(RegionRef region_ref, StringRef name_ref) {
  */
 void Archive::addAttribute(AttributeRef attribute_ref, StringRef name_ref, StringRef description_ref, htf_type_t type) {
   pthread_mutex_lock(&lock);
-  definitions->addAttribute(attribute_ref, name_ref, description_ref, type);
+  definitions.addAttribute(attribute_ref, name_ref, description_ref, type);
   pthread_mutex_unlock(&lock);
 }
 } /* namespace htf*/

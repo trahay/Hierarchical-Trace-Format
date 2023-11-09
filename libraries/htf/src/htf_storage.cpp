@@ -776,11 +776,11 @@ static void _htf_store_regions_generic(FILE* file, htf::Definition* d) {
 }
 
 static void _htf_store_regions(htf::Archive* a) {
-  if (a->definitions->regions.empty())
+  if (a->definitions.regions.empty())
     return;
 
   FILE* file = _htf_get_regions_file(a, "w");
-  _htf_store_regions_generic(file, a->definitions);
+  _htf_store_regions_generic(file, &a->definitions);
   fclose(file);
 }
 
@@ -794,11 +794,11 @@ static void _htf_read_regions_generic(FILE* file, htf::Definition* d) {
 }
 
 static void _htf_read_regions(htf::Archive* a) {
-  if (a->definitions->regions.empty())
+  if (a->definitions.regions.empty())
     return;
 
   FILE* file = _htf_get_regions_file(a, "r");
-  _htf_read_regions_generic(file, a->definitions);
+  _htf_read_regions_generic(file, &a->definitions);
   fclose(file);
 }
 
@@ -822,11 +822,11 @@ static void _htf_store_attributes_generic(FILE* file, htf::Definition* d) {
 }
 
 static void _htf_store_attributes(htf::Archive* a) {
-  if (a->definitions->attributes.empty())
+  if (a->definitions.attributes.empty())
     return;
 
   FILE* file = _htf_get_attributes_file(a, "w");
-  _htf_store_attributes_generic(file, a->definitions);
+  _htf_store_attributes_generic(file, &a->definitions);
   fclose(file);
 }
 
@@ -839,11 +839,11 @@ static void _htf_read_attributes_generic(FILE* file, htf::Definition* d) {
 }
 
 static void _htf_read_attributes(htf::Archive* a) {
-  if (a->definitions->attributes.empty())
+  if (a->definitions.attributes.empty())
     return;
 
   FILE* file = _htf_get_attributes_file(a, "r");
-  _htf_read_attributes_generic(file, a->definitions);
+  _htf_read_attributes_generic(file, &a->definitions);
   fclose(file);
 }
 
@@ -1011,11 +1011,11 @@ void htf_storage_finalize(htf::Archive* archive) {
   FILE* f = _htf_file_open(fullpath, "w");
   delete[] fullpath;
   _htf_fwrite(&archive->id, sizeof(htf::LocationGroupId), 1, f);
-  size_t size = archive->definitions->strings.size();
+  size_t size = archive->definitions.strings.size();
   _htf_fwrite(&size, sizeof(size), 1, f);
-  size = archive->definitions->regions.size();
+  size = archive->definitions.regions.size();
   _htf_fwrite(&size, sizeof(size), 1, f);
-  size = archive->definitions->attributes.size();
+  size = archive->definitions.attributes.size();
   _htf_fwrite(&size, sizeof(size), 1, f);
   size = archive->location_groups.size();
   _htf_fwrite(&size, sizeof(size), 1, f);
@@ -1026,8 +1026,8 @@ void htf_storage_finalize(htf::Archive* archive) {
   _htf_fwrite(&STORE_HASHING, sizeof(STORE_HASHING), 1, f);
   _htf_fwrite(&STORE_TIMESTAMPS, sizeof(STORE_TIMESTAMPS), 1, f);
 
-  for (int i = 0; i < archive->definitions->strings.size(); i++) {
-    _htf_store_string(archive, &archive->definitions->strings[i], i);
+  for (int i = 0; i < archive->definitions.strings.size(); i++) {
+    _htf_store_string(archive, &archive->definitions.strings[i], i);
   }
 
   _htf_store_regions(archive);
@@ -1072,7 +1072,7 @@ static void _htf_read_archive(htf::Archive* global_archive, htf::Archive* archiv
   archive->nb_archives = 0;
   archive->nb_allocated_archives = 1;
   archive->archive_list = new htf::Archive*();
-  archive->definitions = new htf::Definition();
+  archive->definitions = htf::Definition();
   if (archive->archive_list == nullptr) {
     htf_error("Failed to allocate memory\n");
   }
@@ -1086,11 +1086,11 @@ static void _htf_read_archive(htf::Archive* global_archive, htf::Archive* archiv
   size_t size;
 
   _htf_fread(&size, sizeof(size), 1, f);
-  archive->definitions->strings.resize(size);
+  archive->definitions.strings.resize(size);
   _htf_fread(&size, sizeof(size), 1, f);
-  archive->definitions->regions.resize(size);
+  archive->definitions.regions.resize(size);
   _htf_fread(&size, sizeof(size), 1, f);
-  archive->definitions->attributes.resize(size);
+  archive->definitions.attributes.resize(size);
   _htf_fread(&size, sizeof(size), 1, f);
   archive->location_groups.resize(size);
   _htf_fread(&size, sizeof(size), 1, f);
@@ -1111,9 +1111,9 @@ static void _htf_read_archive(htf::Archive* global_archive, htf::Archive* archiv
   }
   archive->store_timestamps = STORE_TIMESTAMPS;
 
-  for (int i = 0; i < archive->definitions->strings.size(); i++) {
+  for (int i = 0; i < archive->definitions.strings.size(); i++) {
     htf_assert(strcmp(archive->dir_name, dir_name) == 0);
-    _htf_read_string(archive, &archive->definitions->strings[i], i);
+    _htf_read_string(archive, &archive->definitions.strings[i], i);
   }
 
   _htf_read_regions(archive);
