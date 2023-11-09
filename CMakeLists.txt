@@ -68,6 +68,7 @@ if (ENABLE_SZ)
     add_compile_definitions(WITH_SZ)
 endif (ENABLE_SZ)
 
+include(FindSize)
 
 set(HTF_LIB_DIR ${CMAKE_INSTALL_FULL_LIBDIR})
 
