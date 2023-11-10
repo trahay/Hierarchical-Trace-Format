@@ -41,6 +41,18 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules(JSONCPP jsoncpp)
 find_package(Doxygen)
 
+
+INCLUDE (CheckTypeSize)
+SET(CMAKE_EXTRA_INCLUDE_FILES "map")
+check_type_size("std::map<int,int>" SIZEOF_MAP LANGUAGE CXX)
+message("Size of std::map<int,int>: ${SIZEOF_MAP}")
+
+SET(CMAKE_EXTRA_INCLUDE_FILES "vector")
+check_type_size("std::vector<int>" SIZEOF_VECTOR LANGUAGE CXX)
+message("Size of std::vector<int>: ${SIZEOF_VECTOR}")
+
+
+
 ####################################################
 # Some flags for compilation
 
@@ -68,7 +80,7 @@ if (ENABLE_SZ)
     add_compile_definitions(WITH_SZ)
 endif (ENABLE_SZ)
 
-include(FindSize)
+#include(FindSize)
 
 set(HTF_LIB_DIR ${CMAKE_INSTALL_FULL_LIBDIR})
 
