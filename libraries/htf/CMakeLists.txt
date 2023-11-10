@@ -43,9 +43,16 @@ target_include_directories(htf
         PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
         include
-        ${zfp_INCLUDE_DIRS}
-        ${sz_INCLUDE_DIRS}
 )
+if (ZFP_FOUND)
+    target_include_directories(htf PUBLIC ${ZFP_INCLUDE_DIR})
+    target_link_libraries(htf PRIVATE ${ZFP_LIBRARIES})
+endif ()
+
+if (SZ_FOUND)
+    target_include_directories(htf PUBLIC ${SZ_INCLUDE_DIR})
+    target_link_libraries(htf PRIVATE ${SZ_LIBRARIES})
+endif ()
 
 set_property(TARGET htf
         PROPERTY PUBLIC_HEADER ${HTF_HEADERS})
@@ -69,8 +76,6 @@ target_link_libraries(htf
         zstd
         ${zstd_LIBRARIES}
         ${JSONCPP_LIBRARIES}
-        ${zfp_LIBRARIES}
-        ${sz_LIBRARIES}
 )
 if (DOXYGEN_FOUND)
     # set input and output files

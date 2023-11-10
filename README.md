@@ -5,9 +5,13 @@ HTF provides an interface to write and read trace data.
 ## Building
 
 ```
-cmake . -DCMAKE_INSTALL_PREFIX=$INSTALLATION_DIR
-make install
+mkdir build && cd dir
+cmake .. -DCMAKE_INSTALL_PREFIX=$INSTALLATION_DIR
+make -j 14 && make install
 ```
+
+If you want to enable SZ and ZFP, you should install them, and then add `-DSZ_ROOT_DIR=<your SZ installation>`
+and `-DZFP_ROOT_DIR=<your ZFP installation>` to the cmake command line.
 
 ## About
 
