@@ -45,12 +45,15 @@ target_include_directories(htf
         include
 )
 if (ZFP_FOUND)
-    target_include_directories(htf PUBLIC ${ZFP_INCLUDE_DIR})
+    target_include_directories(htf PUBLIC ${ZFP_INCLUDE_DIRS})
     target_link_libraries(htf PRIVATE ${ZFP_LIBRARIES})
 endif ()
+message("ZFP include dirs: ${ZFP_INCLUDE_DIRS}")
+message("ZFP include libs: ${ZFP_LIBRARIES}")
+
 
 if (SZ_FOUND)
-    target_include_directories(htf PUBLIC ${SZ_INCLUDE_DIR})
+    target_include_directories(htf PUBLIC ${SZ_INCLUDE_DIRS})
     target_link_libraries(htf PRIVATE ${SZ_LIBRARIES})
 endif ()
 
