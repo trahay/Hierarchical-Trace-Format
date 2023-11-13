@@ -37,7 +37,7 @@ option(ENABLE_ZFP "Enables compression using the ZFP lib" ON)
 
 find_package(zstd REQUIRED)
 find_package(PkgConfig REQUIRED)
-pkg_check_modules(JSONCPP jsoncpp)
+pkg_check_modules(JSONCPP jsoncpp REQUIRED)
 find_package(Doxygen)
 
 
@@ -45,10 +45,12 @@ INCLUDE(CheckTypeSize)
 SET(CMAKE_EXTRA_INCLUDE_FILES "map")
 check_type_size("std::map<uint32_t, size_t>" SIZEOF_MAP LANGUAGE CXX)
 message("Size of std::map<uint32_t, size_t>: ${SIZEOF_MAP}")
+add_compile_definitions(MAP_SIZE=${SIZEOF_MAP})
 
 SET(CMAKE_EXTRA_INCLUDE_FILES "vector")
 check_type_size("std::vector<size_t>" SIZEOF_VECTOR LANGUAGE CXX)
 message("Size of std::vector<size_t>: ${SIZEOF_VECTOR}")
+add_compile_definitions(VECTOR_SIZE=${SIZEOF_VECTOR})
 
 ####################################################
 # Some flags for compilation
