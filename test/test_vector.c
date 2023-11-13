@@ -15,7 +15,7 @@ int main(int argc, char** argv) {
   if (argc > 3) {
     htf_error("Too many arguments ! 2 argument required.\n");
   }
-  long VECTOR_SIZE = strtol(argv[1], NULL, 10);
+  long vector_size = strtol(argv[1], NULL, 10);
   size_t TEST_SIZE = strtol(argv[2], NULL, 10);
 
   LinkedVector* vector = linked_vector_new();
