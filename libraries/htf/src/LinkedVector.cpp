@@ -34,7 +34,7 @@ uint64_t& LinkedVector::front() const {
 }
 
 uint64_t& LinkedVector::back() const {
-  return last->at(last->size - 1);
+  return last->at(size - 1);
 }
 
 void LinkedVector::print() const {
