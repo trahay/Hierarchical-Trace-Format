@@ -260,10 +260,10 @@ typedef struct Sequence {
  * @brief Structure to store a Loop in HTF format.
  */
 typedef struct Loop {
-  Token repeated_token;                   /**< Token of the Sequence being repeated. */
-  Token self_id;                          /**< Token identifying that Loop. */
-  DEFINE_Vector(uint16_t, nb_iterations); /**< Vector of uint counting the number of iterations of that loop. */
-  CXX(void addIteration();)               /**< Adds an iteration to the lastest occurence of that loop. */
+  Token repeated_token;               /**< Token of the Sequence being repeated. */
+  Token self_id;                      /**< Token identifying that Loop. */
+  DEFINE_Vector(uint, nb_iterations); /**< Vector of uint counting the number of iterations of that loop. */
+  CXX(void addIteration();)           /**< Adds an iteration to the lastest occurence of that loop. */
 } Loop;
 
 /**
