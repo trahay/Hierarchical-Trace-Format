@@ -5,6 +5,11 @@ if (POLICY CMP0076)
     cmake_policy(SET CMP0076 NEW)
 endif ()
 
+configure_file(
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/htf/htf.h
+        ${CMAKE_CURRENT_BINARY_DIR}/include/htf/htf.h
+        @ONLY
+)
 
 add_library(htf SHARED)
 
@@ -12,7 +17,7 @@ set(HTF_HEADERS
         include/htf/htf_archive.h
         include/htf/htf_attribute.h
         include/htf/htf_dbg.h
-        include/htf/htf.h
+        ${CMAKE_CURRENT_BINARY_DIR}/include/htf/htf.h
         include/htf/htf_hash.h
         include/htf/htf_read.h
         include/htf/htf_storage.h
