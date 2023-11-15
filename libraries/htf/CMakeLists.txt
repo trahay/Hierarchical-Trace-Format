@@ -48,6 +48,7 @@ target_include_directories(htf
         PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
         include
+        ${JSONCPP_INCLUDE_DIRS}
 )
 if (ZFP_FOUND)
     target_include_directories(htf PUBLIC ${ZFP_INCLUDE_DIRS})
