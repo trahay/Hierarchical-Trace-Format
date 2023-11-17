@@ -55,12 +55,12 @@ ParameterHandler::ParameterHandler() {
   configFile.open(possibleConfigFileName);
   if (!configFile.good()) {
     htf_warn("Config file didn't exist: %s.\n", possibleConfigFileName);
+    htf_warn("Using the default one: %s\n", to_string().c_str());
     return;
   }
   Json::Value config;
   configFile >> config;
   configFile.close();
-  std::cout << config << std::endl;
   /* Load from file */
 #define MATCH_COMPRESSION_ENUM(value) MATCH_ENUM(compressionAlgorithm, CompressionAlgorithm, value)
   LOAD_FIELD_ENUM(compressionAlgorithm, {
@@ -136,6 +136,7 @@ ParameterHandler::ParameterHandler() {
   if (loopLengthChar) {
     maxLoopLength = std::stoull(loopLengthChar);
   }
+  std::cout << to_string() << std::endl;
 }
 
 size_t ParameterHandler::getMaxLoopLength() const {
@@ -161,6 +162,18 @@ EncodingAlgorithm ParameterHandler::getEncodingAlgorithm() const {
 }
 LoopFindingAlgorithm ParameterHandler::getLoopFindingAlgorithm() const {
   return loopFindingAlgorithm;
+}
+
+std::string ParameterHandler::to_string() const {
+  std::stringstream stream("");
+  stream << "{\n";
+  stream << '\t' << R"("compressionAlgorithm": ")" << algorithmToString(compressionAlgorithm) << "\",\n";
+  stream << '\t' << R"("encodingAlgorithm": ")" << algorithmToString(encodingAlgorithm) << "\",\n";
+  stream << '\t' << R"("loopFindingAlgorithm": ")" << algorithmToString(loopFindingAlgorithm) << "\",\n";
+  stream << '\t' << R"("maxLoopLength": )" << maxLoopLength << ",\n";
+  stream << '\t' << R"("zstdCompressionLevel": )" << zstdCompressionLevel << ",\n";
+  stream << "}";
+  return stream.str();
 }
 
 }  // namespace htf
