@@ -95,7 +95,7 @@ ParameterHandler::ParameterHandler() {
   /* Override from Environment Variables */
 
 #define GET_COMP_FIELD(value) GET_ENV_FIELD(compression, Compression, value)
-  char* compressionChar = std::getenv("COMPRESSION");
+  char* compressionChar = std::getenv("HTF_COMPRESSION");
   if (compressionChar) {
     std::string compressionString = compressionChar;
     GET_COMP_FIELD(None);
@@ -110,7 +110,7 @@ ParameterHandler::ParameterHandler() {
   }
 
 #define GET_ENCO_FIELD(value) GET_ENV_FIELD(encoding, Encoding, value)
-  char* encodingChar = std::getenv("ENCODING");
+  char* encodingChar = std::getenv("HTF_ENCODING");
   if (encodingChar) {
     std::string encodingString = encodingChar;
     GET_ENCO_FIELD(None);
@@ -119,12 +119,22 @@ ParameterHandler::ParameterHandler() {
   }
 
 #define GET_LOOP_FIELD(value) GET_ENV_FIELD(loopFinding, LoopFinding, value)
-  char* loopFindingChar = std::getenv("LOOP_FINDING");
+  char* loopFindingChar = std::getenv("HTF_LOOP_FINDING");
   if (loopFindingChar) {
     std::string loopFindingString = loopFindingChar;
     GET_LOOP_FIELD(None);
     GET_LOOP_FIELD(Basic);
     GET_LOOP_FIELD(BasicTruncated);
+  }
+
+  char* zstdLevelChar = std::getenv("HTF_ZSTD_LVL");
+  if (zstdLevelChar) {
+    zstdCompressionLevel = std::stoull(zstdLevelChar);
+  }
+
+  char* loopLengthChar = std::getenv("HTF_LOOP_LENGTH");
+  if (loopLengthChar) {
+    maxLoopLength = std::stoull(loopLengthChar);
   }
 }
 
