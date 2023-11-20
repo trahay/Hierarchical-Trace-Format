@@ -65,7 +65,7 @@ Here are the default values for each of them:
 | compressionAlgorithm | HTF_COMPRESSION   | None           |
 | encodingAlgorithm    | HTF_ENCODING      | None           |
 | loopFindingAlgorithm | HTF_LOOP_FINDING  | BasicTruncated |
-| zstdCompressionLevel | HTF_ZSTD_LVL      | 1              |
+| zstdCompressionLevel | HTF_ZSTD_LVL      | 3              |
 | maxLoopLength        | HTF_LOOP_LENGTH   | 100            |
 
 ## Contributing

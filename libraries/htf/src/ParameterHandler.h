@@ -128,7 +128,7 @@ class ParameterHandler {
   /** The compression algorithm used during the execution. */
   CompressionAlgorithm compressionAlgorithm{CompressionAlgorithm::None};
   /** The ZSTD compression level. */
-  size_t zstdCompressionLevel{1};
+  size_t zstdCompressionLevel{3};
   /** The encoding algorithm used during the execution. */
   EncodingAlgorithm encodingAlgorithm{EncodingAlgorithm::None};
   /** The compression algorithm used during the execution. */
