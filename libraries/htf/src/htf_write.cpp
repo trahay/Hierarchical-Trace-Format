@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "ParameterHandler.h"
+#include "htf/htf_parameter_handler.h"
 #include "htf/htf.h"
 #include "htf/htf_archive.h"
 #include "htf/htf_hash.h"

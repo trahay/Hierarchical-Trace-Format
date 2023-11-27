@@ -2,12 +2,12 @@
 // Created by khatharsis on 24/10/23.
 //
 
-#include "ParameterHandler.h"
 #include <json/json.h>
 #include <json/value.h>
 #include <fstream>
 #include <iostream>
 #include "htf/htf_dbg.h"
+#include "htf/htf_parameter_handler.h"
 
 /** Given a parameter and an enumValue, will assign the parameter's value to enumValue if the config file says so.*/
 #define MATCH_ENUM(parameterName, enumName, enumValue) \

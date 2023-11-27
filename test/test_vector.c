@@ -4,7 +4,7 @@
  */
 
 #include <stdlib.h>
-#include "htf/LinkedVector.h"
+#include "htf/htf_linked_vector.h"
 #include "htf/htf.h"
 #include "htf/htf_dbg.h"
 

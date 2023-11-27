@@ -21,7 +21,7 @@
 #include <sz.h>
 #endif
 
-#include "ParameterHandler.h"
+#include "htf/htf_parameter_handler.h"
 #include "htf/htf.h"
 #include "htf/htf_dbg.h"
 #include "htf/htf_hash.h"

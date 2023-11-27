@@ -9,7 +9,7 @@
 #pragma once
 
 #include <pthread.h>
-#include "LinkedVector.h"
+#include "htf_linked_vector.h"
 #include "htf_dbg.h"
 #include "htf_timestamp.h"
 #include "htf_config.h"

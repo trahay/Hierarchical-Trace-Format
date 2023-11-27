@@ -23,7 +23,8 @@ set(HTF_HEADERS
         include/htf/htf_storage.h
         include/htf/htf_timestamp.h
         include/htf/htf_write.h
-        include/htf/LinkedVector.h
+        include/htf/htf_linked_vector.h
+	include/htf/htf_parameter_handler.h
 )
 
 target_sources(htf
@@ -37,9 +38,8 @@ target_sources(htf
         src/htf_storage.cpp
         src/htf_timestamp.cpp
         src/htf_write.cpp
-        src/LinkedVector.cpp
-        src/ParameterHandler.cpp
-        src/ParameterHandler.h
+        src/htf_linked_vector.cpp
+        src/htf_parameter_handler.cpp
         PUBLIC
         ${HTF_HEADERS}
 )
