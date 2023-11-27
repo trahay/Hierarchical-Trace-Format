@@ -83,20 +83,20 @@ void info_archive(Archive* archive) {
   }
 
   printf("\tRegions {.nb_regions: %zu } :\n", archive->definitions.regions.size());
-  for (int i = 0; i < archive->definitions.regions.size(); i++) {
+  for (unsigned i = 0; i < archive->definitions.regions.size(); i++) {
     printf("\t\t%x: %x ('%s')\n", archive->definitions.regions[i].region_ref,
            archive->definitions.regions[i].string_ref,
            archive->getString(archive->definitions.regions[i].string_ref)->str);
   }
 
   printf("\tLocation_groups {.nb_lg: %zu }:\n", archive->location_groups.size());
-  for (int i = 0; i < archive->location_groups.size(); i++) {
+  for (unsigned i = 0; i < archive->location_groups.size(); i++) {
     printf("\t\t%x: %x ('%s'), parent: %x\n", archive->location_groups[i].id, archive->location_groups[i].name,
            archive->getString(archive->location_groups[i].name)->str, archive->location_groups[i].parent);
   }
 
   printf("\tLocations {.nb_loc: %zu }:\n", archive->locations.size());
-  for (int i = 0; i < archive->locations.size(); i++) {
+  for (unsigned i = 0; i < archive->locations.size(); i++) {
     printf("\t\t%x: %x ('%s'), parent: %x\n", archive->locations[i].id, archive->locations[i].name,
            archive->getString(archive->locations[i].name)->str, archive->locations[i].parent);
   }
