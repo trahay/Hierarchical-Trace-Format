@@ -15,11 +15,11 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
-	
+
       - name: Cache APT Packages
         uses: awalsh128/cache-apt-pkgs-action@v1.3.1
-	with:
-	   packages: build-essential cmake wget git gawk libzstd-dev libjsoncpp-dev pkg-config libzfp-dev
+        with:
+          packages: build-essential cmake wget git gawk libzstd-dev libjsoncpp-dev pkg-config libzfp-dev
       # - name: download-openmpi
       #   run: wget
       #     https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.5.tar.gz
