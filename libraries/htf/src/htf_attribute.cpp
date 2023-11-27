@@ -197,8 +197,7 @@ void Thread::printAttributeValue(const struct AttributeData* attr, htf_type_t ty
 }
 
 void Thread::printAttribute(const struct AttributeData* attr) const {
-  const char* invalid_attr_string = "INVALID";
-  const char* attr_string = invalid_attr_string;
+  const char* attr_string = "INVALID";
   enum AttributeType type = _guess_attribute_size(attr);
 
   auto* a = archive->getAttribute(attr->ref);

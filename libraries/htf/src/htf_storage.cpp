@@ -67,14 +67,14 @@ void htf_read_thread(htf::Archive* archive, htf::ThreadId thread_id);
 
 static htf::Archive* _htf_get_archive(htf::Archive* global_archive, htf::LocationGroupId archive_id);
 
-static void _htf_mkdir(char* dirname, mode_t mode) {
+static void _htf_mkdir(const char* dirname, mode_t mode) {
   if (mkdir(dirname, mode) != 0) {
     if (errno != EEXIST)
       htf_error("mkdir(%s) failed: %s\n", dirname, strerror(errno));
   }
 }
 
-static FILE* _htf_file_open(char* filename, const char* mode) {
+static FILE* _htf_file_open(const char* filename, const char* mode) {
   htf_log(htf::DebugLevel::Debug, "Open %s with mode %s\n", filename, mode);
   char* filename_copy = strdup(filename);
   _htf_mkdir(dirname(filename_copy), 0777);
