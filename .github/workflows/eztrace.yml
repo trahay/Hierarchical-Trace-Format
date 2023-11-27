@@ -11,7 +11,7 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
-	path: '${{github.workspace}}/htf'
+        path: '${{github.workspace}}/htf'
 
       - name: Configure HTF
         run: cmake ${{github.workspace}}/htf -B ${{github.workspace}}/htf/build -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/htf/install -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DENABLE_OTF2=ON -DENABLE_ZFP=ON -DENABLE_SZ=ON
@@ -29,7 +29,7 @@ jobs:
       - name: Check out eztrace
         uses: actions/checkout@v4
         repository: 'https://gitlab.com/eztrace/eztrace.git'
-	path: '${{github.workspace}}/eztrace'
+        path: '${{github.workspace}}/eztrace'
       - name: Configure EZTrace
         run: cmake ${{github.workspace}}/eztrace -B ${{github.workspace}}/eztrace/build -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/eztrace/install -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DEZTRACE_ENABLE_PTHREAD=ON
       - name: Build EZTrace
