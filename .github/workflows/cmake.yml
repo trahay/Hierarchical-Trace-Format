@@ -16,7 +16,6 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install dependencies
-        id: install-dep
 	uses: awalsh128/cache-apt-pkgs-action@latest
 	with:
 	   packages: build-essential cmake wget git gawk libzstd-dev libjsoncpp-dev pkg-config libzfp-dev
