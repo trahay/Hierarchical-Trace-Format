@@ -6,8 +6,8 @@ if (POLICY CMP0076)
 endif ()
 
 configure_file(
-        ${CMAKE_CURRENT_SOURCE_DIR}/include/htf/htf.h
-        ${CMAKE_CURRENT_BINARY_DIR}/include/htf/htf.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/htf/htf_config.h.in
+        ${CMAKE_CURRENT_BINARY_DIR}/include/htf/htf_config.h
         @ONLY
 )
 
@@ -17,7 +17,7 @@ set(HTF_HEADERS
         include/htf/htf_archive.h
         include/htf/htf_attribute.h
         include/htf/htf_dbg.h
-        ${CMAKE_CURRENT_BINARY_DIR}/include/htf/htf.h
+        ${CMAKE_CURRENT_BINARY_DIR}/include/htf/htf_config.h
         include/htf/htf_hash.h
         include/htf/htf_read.h
         include/htf/htf_storage.h
@@ -49,6 +49,7 @@ target_include_directories(htf
         ${CMAKE_CURRENT_SOURCE_DIR}
         include
         ${JSONCPP_INCLUDE_DIRS}
+        ${CMAKE_CURRENT_BINARY_DIR}/include/htf/
 )
 if (ZFP_FOUND)
     target_include_directories(htf PUBLIC ${ZFP_INCLUDE_DIRS})

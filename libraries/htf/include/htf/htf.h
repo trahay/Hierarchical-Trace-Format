@@ -12,6 +12,7 @@
 #include "LinkedVector.h"
 #include "htf_dbg.h"
 #include "htf_timestamp.h"
+#include "htf_config.h"
 
 #ifdef __cplusplus
 #include <cstring>
@@ -219,12 +220,6 @@ struct TokenCountMap : public std::map<Token, size_t> {
 };
 #endif
 
-#ifndef VECTOR_SIZE
-#define VECTOR_SIZE @SIZEOF_VECTOR@
-#endif
-#ifndef MAP_SIZE
-#define MAP_SIZE @SIZEOF_MAP@
-#endif
 /** Defines a TokenCountMap. In C, defines a char[] of size sizeof(TokenCountMap). */
 #define DEFINE_TokenCountMap(name) C_CXX(byte, TokenCountMap) name C([MAP_SIZE])
 /** Defines a C++ vector. In C, defines a char[] of size sizeof(std::vector). */

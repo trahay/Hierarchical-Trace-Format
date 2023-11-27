@@ -1,0 +1,8 @@
+#pragma once
+
+#ifndef VECTOR_SIZE
+#define VECTOR_SIZE @SIZEOF_VECTOR@
+#endif
+#ifndef MAP_SIZE
+#define MAP_SIZE @SIZEOF_MAP@
+#endif
