@@ -15,9 +15,9 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
-
-      - name: Install dependencies
-	uses: awalsh128/cache-apt-pkgs-action@latest
+	
+      - name: Cache APT Packages
+        uses: awalsh128/cache-apt-pkgs-action@v1.3.1
 	with:
 	   packages: build-essential cmake wget git gawk libzstd-dev libjsoncpp-dev pkg-config libzfp-dev
       # - name: download-openmpi
