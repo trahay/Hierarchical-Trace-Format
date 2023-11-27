@@ -69,7 +69,7 @@ target_compile_options(htf
         PUBLIC
         -D_GNU_SOURCE
         PRIVATE
-        -Wall -Wextra -Wno-sign-compare
+        -Wall -Wextra -Wno-sign-compare -Wno-unused -Wno-class-memaccess
 )
 
 target_link_libraries(htf

@@ -54,6 +54,8 @@ inline std::string algorithmToString(CompressionAlgorithm alg) {
   case CompressionAlgorithm::ZFP:
     return "ZFP";
 #endif
+  default:
+    return "Non Defined Compression Algorithm";
   }
 }
 /** Returns whether a compression algorithm is lossy or not. */
@@ -85,6 +87,8 @@ inline std::string algorithmToString(EncodingAlgorithm alg) {
     return "Masking";
   case EncodingAlgorithm::LeadingZeroes:
     return "LeadingZeroes";
+  default:
+    return "Non Defined Encoding Algorithm";
   }
 }
 
@@ -118,6 +122,8 @@ inline std::string algorithmToString(LoopFindingAlgorithm alg) {
     return "BasicTruncated";
   case LoopFindingAlgorithm::Filter:
     return "Filter";
+  default:
+    return "Non Defined Loop-Finding Algorithm";
   }
 }
 

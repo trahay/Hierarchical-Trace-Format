@@ -60,6 +60,7 @@ Token& Thread::getToken(Token sequenceToken, int index) const {
     }
     return loop->repeated_token;
   }
+  htf_error("Wrong Token Type: %d", sequenceToken.type);
 }
 
 /**
