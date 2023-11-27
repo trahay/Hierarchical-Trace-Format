@@ -24,11 +24,9 @@ jobs:
       - name: Unit Test
         run: ctest -C ${{env.BUILD_TYPE}} --test-dir ${{github.workspace}}/build
 
-      - name: Check out eztrace
-        uses: actions/checkout@v4
-        with:
-          repository: 'https://gitlab.com/eztrace/eztrace.git'
-          path: '${{github.workspace}}/eztrace'
+      - name: Checkout eztrace
+        shell: bash
+        run: git clone --depth=0 --single-branch https://gitlab.com/eztrace/eztrace.git ${{github.workspace}}/eztrace
       - name: Configure EZTrace
         run: cmake ${{github.workspace}}/eztrace -B ${{github.workspace}}/eztrace/build -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/eztrace/install -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DEZTRACE_ENABLE_PTHREAD=ON
       - name: Build EZTrace
