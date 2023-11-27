@@ -11,6 +11,7 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
+        repository: '${{ github.repository }}'
         path: '${{github.workspace}}/htf'
 
       - name: Configure HTF
