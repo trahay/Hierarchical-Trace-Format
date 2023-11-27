@@ -43,7 +43,8 @@ void htf_storage_option_init() {
 }
 static void _htf_store_event(const char* base_dirname, htf::Thread* th, htf::EventSummary* e, htf::Token event);
 static void _htf_store_sequence(const char* base_dirname, htf::Thread* th, htf::Sequence* s, htf::Token sequence);
-static void _htf_store_loop(const char* base_dirname, htf::Thread* th, struct htf_loop* l, htf::Token loop);
+
+static void _htf_store_loop(const char* base_dirname, htf::Thread* th, htf::Loop* l, htf::Token loop);
 
 static void _htf_store_string(htf::Archive* c, htf::String* l, int string_index);
 static void _htf_store_regions(htf::Archive* c);
@@ -54,7 +55,7 @@ static void _htf_store_locations(htf::Archive* a);
 
 static void _htf_read_event(const char* base_dirname, htf::Thread* th, htf::EventSummary* e, htf::Token event);
 static void _htf_read_sequence(const char* base_dirname, htf::Thread* th, htf::Sequence* s, htf::Token sequence);
-static void _htf_read_loop(const char* base_dirname, htf::Thread* th, struct htf_loop* l, htf::Token loop);
+static void _htf_read_loop(const char* base_dirname, htf::Thread* th, htf::Loop* l, htf::Token loop);
 
 static void _htf_read_string(htf::Archive* c, htf::String* l, int string_index);
 static void _htf_read_regions(htf::Archive* c);
@@ -912,7 +913,7 @@ static void _htf_read_locations(htf::Archive* a) {
   _htf_fread(a->locations.data(), sizeof(htf::Location), a->locations.size(), file);
   fclose(file);
 
-  htf_log(htf::DebugLevel::Debug, "\tLoad %zu locations\n", a->locations.size());
+  htf_log(htf::DebugLevel::Debug, "\tLoad %lu locations\n", a->locations.size());
 }
 
 static FILE* _htf_get_thread(const char* dir_name, htf::ThreadId thread_id, const char* mode) {

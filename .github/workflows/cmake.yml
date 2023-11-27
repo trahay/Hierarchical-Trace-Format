@@ -11,7 +11,7 @@ env:
   BUILD_TYPE: RelWithDebInfo
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ftrahay/htf:test
     steps:
       - uses: actions/checkout@v3
       # - name: download-openmpi
