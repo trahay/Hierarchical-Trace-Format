@@ -11,8 +11,9 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
-        repository: '${{ github.repository }}'
-        path: '${{github.workspace}}/htf'
+        with:
+	  repository: '${{ github.repository }}'
+          path: '${{github.workspace}}/htf'
 
       - name: Configure HTF
         run: cmake ${{github.workspace}}/htf -B ${{github.workspace}}/htf/build -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/htf/install -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DENABLE_OTF2=ON -DENABLE_ZFP=ON -DENABLE_SZ=ON
