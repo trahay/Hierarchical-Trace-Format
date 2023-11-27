@@ -17,9 +17,9 @@ jobs:
       - name: Build HTF
         run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
       - name: Install HTF
-        run: cmake --install ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
-      - name: export HTF
-        run: echo "${{github.workspace}}/htf/install/bin" >> $GITHUB_PATH
+        run: |
+          cmake --install ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+          echo "${{github.workspace}}/htf/install/bin" >> $GITHUB_PATH
 
       - name: Unit Test
         run: ctest -C ${{env.BUILD_TYPE}} --test-dir ${{github.workspace}}/build
@@ -32,11 +32,12 @@ jobs:
       - name: Build EZTrace
         run: cmake --build ${{github.workspace}}/eztrace/build --config ${{env.BUILD_TYPE}}
       - name: Install EZTrace
-        run: cmake --install ${{github.workspace}}/eztrace/build --config ${{env.BUILD_TYPE}}
-        run: echo "${{github.workspace}}/eztrace/install/bin" >> $GITHUB_PATH
+        run: |
+          cmake --install ${{github.workspace}}/eztrace/build --config ${{env.BUILD_TYPE}}
+          echo "${{github.workspace}}/eztrace/install/bin" >> $GITHUB_PATH
 
       - name: Test EZTrace:pthread
         run: |
-	  cd  ${{github.workspace}}/eztrace/test/pthread
-	  make
-	  bash ./test_dummy.sh
+          cd  ${{github.workspace}}/eztrace/test/pthread
+          make
+          bash ./test_dummy.sh
