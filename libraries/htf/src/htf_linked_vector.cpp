@@ -1,6 +1,7 @@
-//
-// Created by khatharsis on 04/10/23.
-//
+/*
+ * Copyright (C) Telecom SudParis
+ * See LICENSE in top-level directory.
+ */
 
 #include "htf/htf_linked_vector.h"
 #include <cstring>

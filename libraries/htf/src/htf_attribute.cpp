@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) Telecom SudParis
+ * See LICENSE in top-level directory.
+ */
+
 #include "htf/htf_attribute.h"
 #include "htf/htf.h"
 #include "htf/htf_archive.h"

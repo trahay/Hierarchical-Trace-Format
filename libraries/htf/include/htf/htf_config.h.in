@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) Telecom SudParis
+ * See LICENSE in top-level directory.
+ */
+
 #pragma once
 
 #ifndef VECTOR_SIZE

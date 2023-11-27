@@ -1,6 +1,7 @@
-//
-// Created by khatharsis on 24/10/23.
-//
+/*
+ * Copyright (C) Telecom SudParis
+ * See LICENSE in top-level directory.
+ */
 
 #include <json/json.h>
 #include <json/value.h>
