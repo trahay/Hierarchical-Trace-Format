@@ -43,7 +43,8 @@ void htf_storage_option_init() {
 }
 static void _htf_store_event(const char* base_dirname, htf::Thread* th, htf::EventSummary* e, htf::Token event);
 static void _htf_store_sequence(const char* base_dirname, htf::Thread* th, htf::Sequence* s, htf::Token sequence);
-static void _htf_store_loop(const char* base_dirname, htf::Thread* th, struct htf_loop* l, htf::Token loop);
+
+static void _htf_store_loop(const char* base_dirname, htf::Thread* th, htf::Loop* l, htf::Token loop);
 
 static void _htf_store_string(htf::Archive* c, htf::String* l, int string_index);
 static void _htf_store_regions(htf::Archive* c);
@@ -54,7 +55,7 @@ static void _htf_store_locations(htf::Archive* a);
 
 static void _htf_read_event(const char* base_dirname, htf::Thread* th, htf::EventSummary* e, htf::Token event);
 static void _htf_read_sequence(const char* base_dirname, htf::Thread* th, htf::Sequence* s, htf::Token sequence);
-static void _htf_read_loop(const char* base_dirname, htf::Thread* th, struct htf_loop* l, htf::Token loop);
+static void _htf_read_loop(const char* base_dirname, htf::Thread* th, htf::Loop* l, htf::Token loop);
 
 static void _htf_read_string(htf::Archive* c, htf::String* l, int string_index);
 static void _htf_read_regions(htf::Archive* c);
@@ -73,7 +74,7 @@ static void _htf_mkdir(char* dirname, mode_t mode) {
   }
 }
 
-static FILE* _htf_file_open(char* filename, char* mode) {
+static FILE* _htf_file_open(char* filename, const char* mode) {
   htf_log(htf::DebugLevel::Debug, "Open %s with mode %s\n", filename, mode);
   char* filename_copy = strdup(filename);
   _htf_mkdir(dirname(filename_copy), 0777);
@@ -557,7 +558,7 @@ static const char* base_dirname(htf::Archive* a) {
   return a->dir_name;
 }
 
-static FILE* _htf_get_event_file(const char* base_dirname, htf::Thread* th, htf::Token event, char* mode) {
+static FILE* _htf_get_event_file(const char* base_dirname, htf::Thread* th, htf::Token event, const char* mode) {
   char filename[1024];
   snprintf(filename, 1024, "%s/thread_%u/event_%d", base_dirname, th->id, event.id);
   return _htf_file_open(filename, mode);
@@ -633,7 +634,7 @@ static void _htf_read_event(const char* base_dirname, htf::Thread* th, htf::Even
   fclose(file);
 }
 
-static FILE* _htf_get_sequence_file(const char* base_dirname, htf::Thread* th, htf::Token sequence, char* mode) {
+static FILE* _htf_get_sequence_file(const char* base_dirname, htf::Thread* th, htf::Token sequence, const char* mode) {
   char filename[1024];
   snprintf(filename, 1024, "%s/thread_%u/sequence_%d", base_dirname, th->id, sequence.id);
   return _htf_file_open(filename, mode);
@@ -686,7 +687,7 @@ static void _htf_read_sequence(const char* base_dirname, htf::Thread* th, htf::S
   }
 }
 
-static FILE* _htf_get_loop_file(const char* base_dirname, htf::Thread* th, htf::Token loop, char* mode) {
+static FILE* _htf_get_loop_file(const char* base_dirname, htf::Thread* th, htf::Token loop, const char* mode) {
   char filename[1024];
   snprintf(filename, 1024, "%s/thread_%u/loop_%d", base_dirname, th->id, loop.id);
   return _htf_file_open(filename, mode);
@@ -730,7 +731,7 @@ static void _htf_read_loop(const char* base_dirname, htf::Thread* th, htf::Loop*
   }
 }
 
-static FILE* _htf_get_string_file(htf::Archive* a, int string_index, char* mode) {
+static FILE* _htf_get_string_file(htf::Archive* a, int string_index, const char* mode) {
   char filename[1024];
   snprintf(filename, 1024, "%s/archive_%u/string_%d", base_dirname(a), a->id, string_index);
   return _htf_file_open(filename, mode);
@@ -767,7 +768,7 @@ static void _htf_read_string(htf::Archive* a, htf::String* s, int string_index) 
   fclose(file);
 }
 
-static FILE* _htf_get_regions_file(htf::Archive* a, char* mode) {
+static FILE* _htf_get_regions_file(htf::Archive* a, const char* mode) {
   char filename[1024];
   snprintf(filename, 1024, "%s/archive_%u/regions.dat", base_dirname(a), a->id);
   return _htf_file_open(filename, mode);
@@ -808,7 +809,7 @@ static void _htf_read_regions(htf::Archive* a) {
   fclose(file);
 }
 
-static FILE* _htf_get_attributes_file(htf::Archive* a, char* mode) {
+static FILE* _htf_get_attributes_file(htf::Archive* a, const char* mode) {
   char filename[1024];
   snprintf(filename, 1024, "%s/archive_%u/attributes.dat", base_dirname(a), a->id);
   return _htf_file_open(filename, mode);
@@ -853,7 +854,7 @@ static void _htf_read_attributes(htf::Archive* a) {
   fclose(file);
 }
 
-static FILE* _htf_get_location_groups_file(htf::Archive* a, char* mode) {
+static FILE* _htf_get_location_groups_file(htf::Archive* a, const char* mode) {
   char filename[1024];
   snprintf(filename, 1024, "%s/archive_%u/location_groups.dat", base_dirname(a), a->id);
   return _htf_file_open(filename, mode);
@@ -882,7 +883,7 @@ static void _htf_read_location_groups(htf::Archive* a) {
   htf_log(htf::DebugLevel::Debug, "\tLoad %zu location_groups\n", a->location_groups.size());
 }
 
-static FILE* _htf_get_locations_file(htf::Archive* a, char* mode) {
+static FILE* _htf_get_locations_file(htf::Archive* a, const char* mode) {
   char filename[1024];
   snprintf(filename, 1024, "%s/archive_%u/locations.dat", base_dirname(a), a->id);
   return _htf_file_open(filename, mode);
@@ -912,10 +913,10 @@ static void _htf_read_locations(htf::Archive* a) {
   _htf_fread(a->locations.data(), sizeof(htf::Location), a->locations.size(), file);
   fclose(file);
 
-  htf_log(htf::DebugLevel::Debug, "\tLoad %d locations\n", a->locations.size());
+  htf_log(htf::DebugLevel::Debug, "\tLoad %lu locations\n", a->locations.size());
 }
 
-static FILE* _htf_get_thread(const char* dir_name, htf::ThreadId thread_id, char* mode) {
+static FILE* _htf_get_thread(const char* dir_name, htf::ThreadId thread_id, const char* mode) {
   char filename[1024];
   snprintf(filename, 1024, "%s/thread_%u.dat", dir_name, thread_id);
   return _htf_file_open(filename, mode);

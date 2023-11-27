@@ -125,7 +125,7 @@ typedef struct ThreadReader {
   [[nodiscard]] AttributeList* getEventAttributeList(Token event_id, int occurence_id) const;
 
   /* Skips the given Token and updates the reader. */
-  static void skipToken(Token token) { htf_error("Not implemented yet\n"); };
+  static void skipToken([[maybe_unused]] Token token) { htf_error("Not implemented yet\n"); };
 
  public:
   /** @brief Enter a block (push a new frame in the callstack) */
@@ -154,7 +154,7 @@ typedef struct ThreadReader {
   /** @brief Reads the current level of the thread, and returns it as an array of TokenOccurences. */
   [[nodiscard]] std::vector<TokenOccurence> readCurrentLevel();
   /** @brief Skips the given Sequence and updates the reader. */
-  void skipSequence(Token token) { htf_error("Not implemented yet\n"); };
+  void skipSequence([[maybe_unused]] Token token) { htf_error("Not implemented yet\n"); };
 #endif
 } ThreadReader;
 
