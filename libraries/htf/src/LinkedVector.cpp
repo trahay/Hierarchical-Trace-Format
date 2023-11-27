@@ -7,7 +7,7 @@
 using namespace htf;
 
 LinkedVector::LinkedVector() {
-  first = new SubVector(default_size, nullptr);
+  first = new SubVector(default_size);
   last = first;
 }
 

@@ -35,37 +35,38 @@ An example config file is given here as config.json.
 
 Here are the configuration options with specific values:
 
-- "compressionAlgorithm": Specifies which compression algorithm is used for storing the timestamps. Its values are:
-   - "None"
-   - "ZSTD"
-   - "SZ"
-   - "ZFP"
-   - "Histogram"
-- "encodingAlgorithm": Specifies which encoding algorithm is used for storing the timestamps. If the specified
+- `compressionAlgorithm`: Specifies which compression algorithm is used for storing the timestamps. Its values are:
+  - `None`
+  - `ZSTD`
+  - `SZ`
+  - `ZFP`
+  - `Histogram`
+- `encodingAlgorithm`: Specifies which encoding algorithm is used for storing the timestamps. If the specified
   compression algorithm is lossy, this is defaulted to None. Its values are:
-   - "None"
-   - "Masking"
-   - "LeadingZeroes"
-- "loopFindingAlgorithm": Specifies what loop-finding algorithm is used. Its values are:
-   - "None"
-   - "Basic"
-   - "BasicTruncated"
-   - "Filter"
+  - `None`
+  - `Masking`
+  - `LeadingZeroes`
+- `loopFindingAlgorithm`: Specifies what loop-finding algorithm is used. Its values are:
+  - `None`
+  - `Basic`
+  - `BasicTruncated`
+  - `Filter`
 
 Here are the configuration options with number values:
 
-- "zstdCompressionLevel": Specifies the compression level used by ZSTD. Integer.
-- "maxLoopLength": Specifies the maximum loop length, if using a truncated loop finding algorithm. Integer.
+- `zstdCompressionLevel`: Specifies the compression level used by ZSTD. Integer.
+- `maxLoopLength`: Specifies the maximum loop length, if using a truncated loop finding algorithm. Integer.
 
+You can also override each of these configuration manually with an environment variable.
 Here are the default values for each of them:
 
-|                      | Default Value  |
-|----------------------|----------------|
-| compressionAlgorithm | None           |
-| encodingAlgorithm    | None           |
-| loopFindingAlgorithm | BasicTruncated |
-| zstdCompressionLevel | 1              |
-| maxLoopLength        | 100            |
+| JSON Name            | Env Variable Name | Default Value  |
+|----------------------|-------------------|----------------|
+| compressionAlgorithm | HTF_COMPRESSION   | None           |
+| encodingAlgorithm    | HTF_ENCODING      | None           |
+| loopFindingAlgorithm | HTF_LOOP_FINDING  | BasicTruncated |
+| zstdCompressionLevel | HTF_ZSTD_LVL      | 3              |
+| maxLoopLength        | HTF_LOOP_LENGTH   | 100            |
 
 ## Contributing
 

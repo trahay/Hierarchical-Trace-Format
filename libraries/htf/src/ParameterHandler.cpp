@@ -55,12 +55,12 @@ ParameterHandler::ParameterHandler() {
   configFile.open(possibleConfigFileName);
   if (!configFile.good()) {
     htf_warn("Config file didn't exist: %s.\n", possibleConfigFileName);
+    htf_warn("Using the default one: %s\n", to_string().c_str());
     return;
   }
   Json::Value config;
   configFile >> config;
   configFile.close();
-  std::cout << config << std::endl;
   /* Load from file */
 #define MATCH_COMPRESSION_ENUM(value) MATCH_ENUM(compressionAlgorithm, CompressionAlgorithm, value)
   LOAD_FIELD_ENUM(compressionAlgorithm, {
@@ -95,7 +95,7 @@ ParameterHandler::ParameterHandler() {
   /* Override from Environment Variables */
 
 #define GET_COMP_FIELD(value) GET_ENV_FIELD(compression, Compression, value)
-  char* compressionChar = std::getenv("COMPRESSION");
+  char* compressionChar = std::getenv("HTF_COMPRESSION");
   if (compressionChar) {
     std::string compressionString = compressionChar;
     GET_COMP_FIELD(None);
@@ -110,7 +110,7 @@ ParameterHandler::ParameterHandler() {
   }
 
 #define GET_ENCO_FIELD(value) GET_ENV_FIELD(encoding, Encoding, value)
-  char* encodingChar = std::getenv("ENCODING");
+  char* encodingChar = std::getenv("HTF_ENCODING");
   if (encodingChar) {
     std::string encodingString = encodingChar;
     GET_ENCO_FIELD(None);
@@ -119,13 +119,24 @@ ParameterHandler::ParameterHandler() {
   }
 
 #define GET_LOOP_FIELD(value) GET_ENV_FIELD(loopFinding, LoopFinding, value)
-  char* loopFindingChar = std::getenv("LOOP_FINDING");
+  char* loopFindingChar = std::getenv("HTF_LOOP_FINDING");
   if (loopFindingChar) {
     std::string loopFindingString = loopFindingChar;
     GET_LOOP_FIELD(None);
     GET_LOOP_FIELD(Basic);
     GET_LOOP_FIELD(BasicTruncated);
   }
+
+  char* zstdLevelChar = std::getenv("HTF_ZSTD_LVL");
+  if (zstdLevelChar) {
+    zstdCompressionLevel = std::stoull(zstdLevelChar);
+  }
+
+  char* loopLengthChar = std::getenv("HTF_LOOP_LENGTH");
+  if (loopLengthChar) {
+    maxLoopLength = std::stoull(loopLengthChar);
+  }
+  std::cout << to_string() << std::endl;
 }
 
 size_t ParameterHandler::getMaxLoopLength() const {
@@ -151,6 +162,18 @@ EncodingAlgorithm ParameterHandler::getEncodingAlgorithm() const {
 }
 LoopFindingAlgorithm ParameterHandler::getLoopFindingAlgorithm() const {
   return loopFindingAlgorithm;
+}
+
+std::string ParameterHandler::to_string() const {
+  std::stringstream stream("");
+  stream << "{\n";
+  stream << '\t' << R"("compressionAlgorithm": ")" << algorithmToString(compressionAlgorithm) << "\",\n";
+  stream << '\t' << R"("encodingAlgorithm": ")" << algorithmToString(encodingAlgorithm) << "\",\n";
+  stream << '\t' << R"("loopFindingAlgorithm": ")" << algorithmToString(loopFindingAlgorithm) << "\",\n";
+  stream << '\t' << R"("maxLoopLength": )" << maxLoopLength << ",\n";
+  stream << '\t' << R"("zstdCompressionLevel": )" << zstdCompressionLevel << ",\n";
+  stream << "}";
+  return stream.str();
 }
 
 }  // namespace htf

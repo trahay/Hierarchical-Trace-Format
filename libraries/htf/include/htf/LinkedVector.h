@@ -47,7 +47,7 @@ typedef struct LinkedVector {
     }
     uint64_t& operator[](size_t index) const { return array[index - starting_index]; }
 
-    SubVector(size_t new_array_size, SubVector* previous_subvector) {
+    SubVector(size_t new_array_size, SubVector* previous_subvector = nullptr) {
       previous = previous_subvector;
       starting_index = 0;
       if (previous) {
@@ -56,6 +56,13 @@ typedef struct LinkedVector {
       }
       allocated = new_array_size;
       array = new uint64_t[new_array_size];
+    }
+
+    SubVector(size_t size, uint64_t* array) {
+      previous = nullptr;
+      starting_index = 0;
+      allocated = size;
+      this->array = array;
     }
 
     void copyToArray(uint64_t* given_array) const { memcpy(given_array, array, size * sizeof(uint64_t)); }

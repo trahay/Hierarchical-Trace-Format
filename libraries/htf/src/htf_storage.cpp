@@ -115,15 +115,16 @@ inline static size_t _htf_zstd_compress(void* src, size_t size, void* dest, size
 
 /**
  * Decompresses an array that has been compressed by ZSTD. Returns the size of the uncompressed data.
- * @param dest The array in which the uncompressed data will be written.
+ * @param realSize Size of the uncompressed data.
  * @param compArray The compressed array.
  * @param compSize Size of the compressed array.
- * @returns Size of the uncompressed data.
+ * @returns Uncompressed array.
  */
-inline static size_t _htf_zstd_read(void* dest, void* compArray, size_t compSize) {
-  size_t realSize = ZSTD_getFrameContentSize(compArray, compSize);
+inline static uint64_t* _htf_zstd_read(size_t& realSize, void* compArray, size_t compSize) {
+  realSize = ZSTD_getFrameContentSize(compArray, compSize);
+  auto dest = new byte[realSize];
   ZSTD_decompress(dest, realSize, compArray, compSize);
-  return realSize;
+  return reinterpret_cast<uint64_t*>(dest);
 }
 
 #ifdef WITH_ZFP
@@ -170,13 +171,13 @@ inline static size_t _htf_zfp_compress(uint64_t* src, size_t n, void* dest, size
 /**
  * @brief Decompresses the content in src using the 1D ZFP Algorithm and writes it to dest.
  * Returns the amounts of data written.
- * @param dest The array in which the uncompressed data will be written.
- * @param n Number of items in the source array.
+ * @param n Number of items that should be decompressed.
  * @param compressedArray The compressed array.
  * @param destSize Size of the compressed array.
- * @return Number of bytes read in the compressed array.
+ * @returns Uncompressed array of size uint64 * n.
  */
-inline static size_t _htf_zfp_decompress(uint64_t* dest, size_t n, void* compressedArray, size_t compressedSize) {
+inline static uint64_t* _htf_zfp_decompress(size_t n, void* compressedArray, size_t compressedSize) {
+  auto dest = new uint64_t[n];
   zfp_type type = zfp_type_int64;                  // array scalar type
   zfp_field* field = zfp_field_1d(dest, type, n);  // array metadata
   zfp_stream* zfp = zfp_stream_open(nullptr);      // compressed stream and parameters
@@ -187,7 +188,7 @@ inline static size_t _htf_zfp_decompress(uint64_t* dest, size_t n, void* compres
   size_t outSize = zfp_decompress(zfp, field);                       // return value is byte size of compressed stream
   zfp_stream_close(zfp);
   stream_close(stream);
-  return outSize;
+  return dest;
 }
 #endif
 #ifdef WITH_SZ
@@ -251,13 +252,13 @@ inline static size_t _htf_histogram_compress(const uint64_t* src, size_t n, byte
 
 /** @brief Decompresses the content in compArray using the Histogram method and writes it to dest.
  * Returns the amount of data written.
- * @param dest The array in which the uncompressed data will be written.
  * @param n Number of elements in the dest array.
  * @param compArray The compressed array.
  * @param compSize Size of the compressed array.
- * @returns Number of bytes in the decoded array.
+ * @returns Array of uncompressed data of size uint64_t * n.
  */
-inline static size_t _htf_histogram_read(uint64_t* dest, size_t n, byte* compArray, size_t compSize) {
+inline static uint64_t* _htf_histogram_read(size_t n, byte* compArray, size_t compSize) {
+  auto dest = new uint64_t[n];
   // Compute the min and max
   uint64_t min, max;
   memcpy(&min, compArray, sizeof(min));
@@ -275,7 +276,7 @@ inline static size_t _htf_histogram_read(uint64_t* dest, size_t n, byte* compArr
     dest[i] = min + factor * stepSize;
     printf("Reading %lu as %lu\n", factor, dest[i]);
   }
-  return n * sizeof(uint64_t);
+  return dest;
 }
 
 /**
@@ -311,17 +312,17 @@ inline static size_t _htf_masking_encode(const uint64_t* src, byte* dest, size_t
 }
 
 /** De-encodes an array that has been compressed by the Masking technique. Returns the size of the unencoded data.
- * @param dest The array in which the uncompressed data will be written.
  * @param n Number of elements in the dest array.
  * @param encodedArray The encoded array.
  * @param encodedSize Size of the encoded array.
- * @returns Number of bytes in the decoded array.
+ * @returns Decoded array.
  */
-inline static size_t _htf_masking_read(uint64_t* dest, size_t n, byte* encodedArray, size_t encodedSize) {
+inline static uint64_t* _htf_masking_read(size_t n, byte* encodedArray, size_t encodedSize) {
+  auto dest = new uint64_t[n];
   size_t size = n * sizeof(uint64_t);
   if (encodedSize == size) {
     memcpy(dest, encodedArray, size);
-    return encodedSize;
+    return dest;
   }
   size_t width = encodedSize / n;
   // width is the number of bytes needed to write an element in the encoded array.
@@ -330,8 +331,11 @@ inline static size_t _htf_masking_read(uint64_t* dest, size_t n, byte* encodedAr
     // FIXME Still only works with Little-Endian architecture.
     memcpy(&dest[i], &encodedArray[width * i], width);
   }
-  return size;
+  return dest;
 }
+
+size_t numberRawBytes = 0;
+size_t numberCompressedBytes = 0;
 
 /**
  * Writes the array to the given file, but encodes and compresses it before
@@ -398,6 +402,8 @@ inline static void _htf_compress_write(uint64_t* src, size_t n, FILE* file) {
     htf_log(htf::DebugLevel::Normal, "Compressing %lu bytes as %lu bytes\n", size, compressedSize);
     _htf_fwrite(&compressedSize, sizeof(compressedSize), 1, file);
     _htf_fwrite(compressedArray, compressedSize, 1, file);
+    numberRawBytes += size;
+    numberCompressedBytes += compressedSize;
   } else if (htf::parameterHandler.getEncodingAlgorithm() != htf::EncodingAlgorithm::None) {
     htf_log(htf::DebugLevel::Normal, "Encoding %lu bytes as %lu bytes\n", size, encodedSize);
     _htf_fwrite(&encodedSize, sizeof(encodedSize), 1, file);
@@ -416,11 +422,14 @@ inline static void _htf_compress_write(uint64_t* src, size_t n, FILE* file) {
 /**
  * Reads, de-encodes and decompresses an array from the given file,
  * according to the values of parameterHandler::EncodingAlgorithm and parameterHandler::CompressingAlgorithm.
- * @param dest The destination array.
  * @param n Number of elements of 8 bytes dest is supposed to have.
  * @param file File to read from
+ * @returns Array of uncompressed data of size uint64_t * n.
  */
-inline static void _htf_compress_read(uint64_t* dest, size_t n, FILE* file) {
+inline static uint64_t* _htf_compress_read(size_t n, FILE* file) {
+  size_t expectedSize = n * sizeof(uint64_t);
+  uint64_t* uncompressedArray;
+
   size_t compressedSize;
   byte* compressedArray = nullptr;
 
@@ -428,6 +437,7 @@ inline static void _htf_compress_read(uint64_t* dest, size_t n, FILE* file) {
   byte* encodedArray = nullptr;
 
   auto compressionAlgorithm = htf::parameterHandler.getCompressionAlgorithm();
+  auto encodingAlgorithm = htf::parameterHandler.getEncodingAlgorithm();
   if (compressionAlgorithm != htf::CompressionAlgorithm::None) {
     _htf_fread(&compressedSize, sizeof(compressedSize), 1, file);
     compressedArray = new byte[compressedSize];
@@ -439,36 +449,34 @@ inline static void _htf_compress_read(uint64_t* dest, size_t n, FILE* file) {
     break;
   case htf::CompressionAlgorithm::ZSTD: {
     if (htf::parameterHandler.getEncodingAlgorithm() == htf::EncodingAlgorithm::None) {
-      size_t realSize = _htf_zstd_read(dest, compressedArray, compressedSize);
-      htf_assert(realSize == n * sizeof(uint64_t));
+      size_t uncompressedSize;
+      uncompressedArray = _htf_zstd_read(uncompressedSize, compressedArray, compressedSize);
+      htf_assert(uncompressedSize == expectedSize);
     } else {
-      encodedArray = new byte[n * sizeof(uint64_t)];
-      encodedSize = _htf_zstd_read(encodedArray, compressedArray, compressedSize);
-      htf_assert(encodedSize <= n * sizeof(uint64_t));
+      encodedArray = reinterpret_cast<byte*>(_htf_zstd_read(encodedSize, compressedArray, compressedSize));
+      htf_assert(encodedSize <= expectedSize);
     }
     delete[] compressedArray;
     break;
   }
   case htf::CompressionAlgorithm::Histogram: {
-    size_t realSize = _htf_histogram_read(dest, n, compressedArray, compressedSize);
-    htf_assert(realSize == n * sizeof(uint64_t));
+    uncompressedArray = _htf_histogram_read(n, compressedArray, compressedSize);
     break;
   }
 #ifdef WITH_ZFP
   case htf::CompressionAlgorithm::ZFP: {
-    size_t realSize = _htf_zfp_decompress(dest, n, compressedArray, compressedSize);
+    uncompressedArray = _htf_zfp_decompress(n, compressedArray, compressedSize);
     break;
   }
 #endif
 #ifdef WITH_SZ
   case htf::CompressionAlgorithm::SZ:
-    uint64_t* temp = _htf_sz_decompress(n, compressedArray, compressedSize);
-    memcpy(dest, temp, sizeof(uint64_t) * n);
+    uncompressedArray = _htf_sz_decompress(n, compressedArray, compressedSize);
     break;
 #endif
   }
 
-  switch (htf::parameterHandler.getEncodingAlgorithm()) {
+  switch (encodingAlgorithm) {
   case htf::EncodingAlgorithm::None:
     break;
   case htf::EncodingAlgorithm::Masking: {
@@ -477,7 +485,7 @@ inline static void _htf_compress_read(uint64_t* dest, size_t n, FILE* file) {
       encodedArray = new byte[encodedSize];  // Too big but don't care
       _htf_fread(encodedArray, encodedSize, 1, file);
     }
-    _htf_masking_read(dest, n, encodedArray, encodedSize);
+    uncompressedArray = _htf_masking_read(n, encodedArray, encodedSize);
     delete[] encodedArray;
     break;
   }
@@ -487,13 +495,14 @@ inline static void _htf_compress_read(uint64_t* dest, size_t n, FILE* file) {
   }
   }
 
-  if (htf::parameterHandler.getCompressionAlgorithm() == htf::CompressionAlgorithm::None &&
-      htf::parameterHandler.getEncodingAlgorithm() == htf::EncodingAlgorithm::None) {
+  if (compressionAlgorithm == htf::CompressionAlgorithm::None && encodingAlgorithm == htf::EncodingAlgorithm::None) {
     size_t realSize;
     _htf_fread(&realSize, sizeof(realSize), 1, file);
-    _htf_fread(dest, realSize, 1, file);
+    uncompressedArray = new uint64_t[n];
+    _htf_fread(uncompressedArray, realSize, 1, file);
     htf_assert(realSize == n * sizeof(uint64_t));
   }
+  return uncompressedArray;
 }
 
 void htf::LinkedVector::writeToFile(FILE* file, bool writeSize = true) const {
@@ -519,9 +528,9 @@ void htf::LinkedVector::writeToFile(FILE* file, bool writeSize = true) const {
 htf::LinkedVector::LinkedVector(FILE* file, size_t givenSize) {
   size = givenSize;
   if (size) {
-    last = new SubVector(size, nullptr);
+    auto temp = _htf_compress_read(size, file);
+    last = new SubVector(size, temp);
     first = last;
-    _htf_compress_read(last->array, size, file);
     last->size = size;
   }
 }
@@ -529,9 +538,9 @@ htf::LinkedVector::LinkedVector(FILE* file, size_t givenSize) {
 htf::LinkedVector::LinkedVector(FILE* file) {
   _htf_fread(&size, sizeof(size), 1, file);
   if (size) {
-    last = new SubVector(size, nullptr);
+    auto temp = _htf_compress_read(size, file);
+    last = new SubVector(size, temp);
     first = last;
-    _htf_compress_read(last->array, size, file);
     last->size = size;
   }
 }
@@ -587,7 +596,8 @@ static void _htf_read_attribute_values(htf::EventSummary* e, FILE* file) {
       _htf_fread(&compressedSize, sizeof(compressedSize), 1, file);
       byte* compressedArray = new byte[compressedSize];
       _htf_fread(e->attribute_buffer, compressedSize, 1, file);
-      _htf_zstd_read(e->attribute_buffer, compressedArray, compressedSize);
+      e->attribute_buffer =
+        reinterpret_cast<uint8_t*>(_htf_zstd_read(e->attribute_buffer_size, compressedArray, compressedSize));
       delete[] compressedArray;
     } else {
       _htf_fread(e->attribute_buffer, e->attribute_buffer_size, 1, file);
@@ -941,6 +951,7 @@ static void _htf_store_thread(const char* dir_name, htf::Thread* th) {
 
   for (int i = 0; i < th->nb_loops; i++)
     _htf_store_loop(dir_name, th, &th->loops[i], HTF_LOOP_ID(i));
+  htf_log(htf::DebugLevel::Normal, "Average compression ratio: %.2f\n", (numberRawBytes + .0) / numberCompressedBytes);
 }
 
 void htf::Thread::finalizeThread() {

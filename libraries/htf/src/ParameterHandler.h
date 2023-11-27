@@ -32,6 +32,30 @@ enum class CompressionAlgorithm {
   ZFP = 4
 #endif
 };
+
+/**
+ * @brief Converts a compression algorithm to its string name.
+ * @param alg Algorithm to compress.
+ * @return String such that it shall be parsed to that algorithm's enum.
+ */
+inline std::string algorithmToString(CompressionAlgorithm alg) {
+  switch (alg) {
+  case CompressionAlgorithm::None:
+    return "None";
+  case CompressionAlgorithm::ZSTD:
+    return "ZSTD";
+  case CompressionAlgorithm::Histogram:
+    return "Histogram";
+#ifdef WITH_SZ
+  case CompressionAlgorithm::SZ:
+    return "SZ";
+#endif
+#ifdef WITH_ZFP
+  case CompressionAlgorithm::ZFP:
+    return "ZFP";
+#endif
+  }
+}
 /** Returns whether a compression algorithm is lossy or not. */
 inline bool isLossy(CompressionAlgorithm alg) {
   return alg != CompressionAlgorithm::None && alg != CompressionAlgorithm::ZSTD;
@@ -47,6 +71,22 @@ enum class EncodingAlgorithm {
    * This is done to nullify the number of leading zeroes */
   LeadingZeroes
 };
+
+/**
+ * @brief Converts a compression algorithm to its string name.
+ * @param alg Algorithm to compress.
+ * @return String such that it shall be parsed to that algorithm's enum.
+ */
+inline std::string algorithmToString(EncodingAlgorithm alg) {
+  switch (alg) {
+  case EncodingAlgorithm::None:
+    return "None";
+  case EncodingAlgorithm::Masking:
+    return "Masking";
+  case EncodingAlgorithm::LeadingZeroes:
+    return "LeadingZeroes";
+  }
+}
 
 /** A set of various loop-finding algorithms used by HTF */
 enum class LoopFindingAlgorithm {
@@ -64,13 +104,31 @@ enum class LoopFindingAlgorithm {
 };
 
 /**
+ * @brief Converts a compression algorithm to its string name.
+ * @param alg Algorithm to compress.
+ * @return String such that it shall be parsed to that algorithm's enum.
+ */
+inline std::string algorithmToString(LoopFindingAlgorithm alg) {
+  switch (alg) {
+  case LoopFindingAlgorithm::None:
+    return "None";
+  case LoopFindingAlgorithm::Basic:
+    return "Basic";
+  case LoopFindingAlgorithm::BasicTruncated:
+    return "BasicTruncated";
+  case LoopFindingAlgorithm::Filter:
+    return "Filter";
+  }
+}
+
+/**
  * @brief A simple data class that contains information on different parameters.
  */
 class ParameterHandler {
   /** The compression algorithm used during the execution. */
   CompressionAlgorithm compressionAlgorithm{CompressionAlgorithm::None};
   /** The ZSTD compression level. */
-  size_t zstdCompressionLevel{1};
+  size_t zstdCompressionLevel{3};
   /** The encoding algorithm used during the execution. */
   EncodingAlgorithm encodingAlgorithm{EncodingAlgorithm::None};
   /** The compression algorithm used during the execution. */
@@ -100,6 +158,7 @@ class ParameterHandler {
   /** @brief Creates a ParameterHandler from a config file loaded from CONFIG_FILE_PATH or config.json.
    */
   ParameterHandler();
+  [[nodiscard]] std::string to_string() const;
 };
 
 /** Global ParameterHandler. This is supposed to be the only instance of that class. */
