@@ -24,8 +24,6 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake_modules)
 # Look for libraries
 
 # Options to enable/disable modules
-option(ENABLE_PTHREAD "Enable Pthread module" ON)
-# option(ENABLE_MPI "Enable MPI module" ON)
 option(ENABLE_OTF2 "Enable OTF2 compatibilit layer" ON)
 option(BUILD_DOC "Build Doxygen Documentation" ON)
 option(ENABLE_SZ "Enables compression using the SZ lib" ON)

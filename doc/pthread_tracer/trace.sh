@@ -1,7 +1,7 @@
 #!/bin/bash
 
 prefix=$(dirname $(realpath $0))
-libdir="@INSTALL_LIBDIR@"
+libdir="$prefix"
 
 debug=n
 verbose=
@@ -40,7 +40,7 @@ done
 shift $(($OPTIND - 1))
 
 
-LD_PRELOAD="$libdir/libhtf.so:$libdir/libhtf-trace.so"
+LD_PRELOAD="$libdir/libpthread_tracer.so"
 
 if [ x$debug = xy ]; then
 
