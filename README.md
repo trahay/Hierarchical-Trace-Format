@@ -73,7 +73,6 @@ Here are the default values for each of them:
 Contribution to HTF are welcome. Just send us a pull request.
 
 ## License
-
-OTF2-Profile is distributed under the terms of both the BSD 3-Clause license.
+HTF is distributed under the terms of both the BSD 3-Clause license.
 
 See [LICENSE](LICENSE) for details
