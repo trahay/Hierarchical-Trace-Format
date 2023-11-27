@@ -26,7 +26,7 @@ jobs:
 
       - name: Checkout eztrace
         shell: bash
-        run: git clone --depth=0 --single-branch https://gitlab.com/eztrace/eztrace.git ${{github.workspace}}/eztrace
+        run: git clone --depth=1 --single-branch https://gitlab.com/eztrace/eztrace.git ${{github.workspace}}/eztrace
       - name: Configure EZTrace
         run: cmake ${{github.workspace}}/eztrace -B ${{github.workspace}}/eztrace/build -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/eztrace/install -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DEZTRACE_ENABLE_PTHREAD=ON
       - name: Build EZTrace
