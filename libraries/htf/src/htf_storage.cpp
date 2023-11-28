@@ -942,7 +942,7 @@ static void _htf_store_thread(const char* dir_name, htf::Thread* th) {
   _htf_fwrite(&th->nb_loops, sizeof(th->nb_loops), 1, token_file);
 
   fclose(token_file);
-  htf_finish_timestamp();
+  //  htf_finish_timestamp();
 
   for (int i = 0; i < th->nb_events; i++)
     _htf_store_event(dir_name, th, &th->events[i], HTF_EVENT_ID(i));

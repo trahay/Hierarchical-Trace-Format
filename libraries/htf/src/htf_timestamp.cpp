@@ -11,7 +11,7 @@ using TimePoint = std::chrono::time_point<std::chrono::high_resolution_clock>;
 #define NANOSECONDS(timestamp) std::chrono::duration_cast<std::chrono::nanoseconds>(timestamp).count()
 
 static TimePoint firstTimestamp = {};
-thread_local static std::vector<htf_timestamp_t*> timestampsToDelta = std::vector<htf_timestamp_t*>();
+//thread_local static std::vector<htf_timestamp_t*> timestampsToDelta = std::vector<htf_timestamp_t*>();
 
 htf_timestamp_t htf_get_timestamp() {
   TimePoint start = std::chrono::high_resolution_clock::now();
@@ -28,30 +28,31 @@ htf_timestamp_t htf_timestamp(htf_timestamp_t t) {
 }
 
 void htf_delta_timestamp(htf_timestamp_t* t) {
-  if (!timestampsToDelta.empty()) {
-    htf_timestamp_t startingTimestamp = *timestampsToDelta.front();
-    htf_timestamp_t startingDuration = 0;
-    for (auto& timestamp : timestampsToDelta) {
-      if (!startingDuration) {
-        *timestamp = *t - *timestamp;
-        startingDuration = *timestamp;
-      } else {
-        *timestamp += startingDuration;
-        *timestamp -= startingTimestamp;
-      }
-    }
-    timestampsToDelta.clear();
-  }
-  timestampsToDelta.push_back(t);
+//  if (!timestampsToDelta.empty()) {
+//    htf_timestamp_t* front_ts = timestampsToDelta.front();
+//    htf_timestamp_t startingTimestamp = *front_ts;
+//    htf_timestamp_t startingDuration = 0;
+//    for (auto& timestamp : timestampsToDelta) {
+//      if (!startingDuration) {
+//        *timestamp = *t - *timestamp;
+//        startingDuration = *timestamp;
+//      } else {
+//        *timestamp += startingDuration;
+//        *timestamp -= startingTimestamp;
+//      }
+//    }
+//    timestampsToDelta.clear();
+//  }
+//  timestampsToDelta.push_back(t);
 }
 
-void htf_add_timestamp_to_delta(htf_timestamp_t* t) {
-  timestampsToDelta.push_back(t);
-}
+//void htf_add_timestamp_to_delta(htf_timestamp_t* t) {
+//  timestampsToDelta.push_back(t);
+//}
 
-void htf_finish_timestamp() {
-  *timestampsToDelta.front() = 0;
-}
+//void htf_finish_timestamp() {
+//  *timestampsToDelta.front() = 0;
+//}
 
 /* -*-
    mode: cpp;

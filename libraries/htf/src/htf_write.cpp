@@ -98,7 +98,12 @@ Loop* ThreadWriter::createLoop(int start_index, int loop_len) {
 }
 
 void ThreadWriter::storeTimestamp(EventSummary* es, htf_timestamp_t ts) {
-  htf_delta_timestamp(&es->durations->add(ts));
+  
+  //  htf_delta_timestamp(&es->durations->add(ts));
+  htf_timestamp_t delta = ts - last_timestamp[cur_depth];
+  htf_assert(delta <= 1e9);
+  es->durations->add(ts);
+  last_timestamp[cur_depth] = ts;
 }
 
 void ThreadWriter::storeAttributeList(htf::EventSummary* es,
@@ -151,6 +156,21 @@ void Loop::addIteration() {
   nb_iterations.back()++;
 }
 
+
+/**
+* @brief This function creates a loop of size loop_len
+*
+* @param loop_len The length of each sequence of the loop.
+* @param index_first_iteration The index of the first token of the first iteration of the loop.
+* @param index_second_iteration The index of the first token of the second iteration of the loop.
+*
+* At the beginning of the function, the current sequence loops like this:
+* XXXXXX TA TB TC TD TA TB TC TD
+*
+* The function creates a loop that contains 2 iterations of the sequence TA TB TC TD, and places
+* it in the current sequence:
+* XXXXXX LA
+*/
 void ThreadWriter::replaceTokensInLoop(int loop_len, size_t index_first_iteration, size_t index_second_iteration) {
   if (index_first_iteration > index_second_iteration) {
     size_t tmp = index_second_iteration;
@@ -164,10 +184,13 @@ void ThreadWriter::replaceTokensInLoop(int loop_len, size_t index_first_iteratio
   // We need to go back in the current sequence in order to correctly calculate our durations
   Sequence* loop_seq = thread_trace.getSequence(loop->repeated_token);
 
-  loop_seq->durations->add(thread_trace.getSequenceDuration(&cur_seq->tokens[index_first_iteration], loop_len));
-  loop_seq->durations->add(thread_trace.getSequenceDuration(&cur_seq->tokens[index_second_iteration], loop_len));
+  htf_timestamp_t duration_first_iteration = thread_trace.getSequenceDuration(&cur_seq->tokens[index_first_iteration], loop_len);
+  htf_timestamp_t duration_second_iteration = thread_trace.getSequenceDuration(&cur_seq->tokens[index_second_iteration], loop_len);
 
-  htf_add_timestamp_to_delta(&loop_seq->durations->back());
+  loop_seq->durations->add(duration_first_iteration);
+  loop_seq->durations->add(duration_second_iteration);
+
+  // The current sequence last_timestamp does not need to be updated
 
   cur_seq->tokens.resize(index_first_iteration);
   cur_seq->tokens.push_back(loop->self_id);
@@ -208,8 +231,11 @@ void ThreadWriter::findLoopBasic(size_t maxLoopLength) {
         htf_log(DebugLevel::Debug, "Last tokens were a sequence from L%x aka S%x\n", loop->self_id.id,
                 loop->repeated_token.id);
         loop->addIteration();
-        htf_timestamp_t ts = thread_trace.getSequenceDuration(&currentSequence->tokens[s1Start], loopLength);
-        htf_add_timestamp_to_delta(&seq->durations->add(ts));
+	// The current sequence last_timestamp does not need to be updated
+
+	htf_timestamp_t ts = thread_trace.getSequenceDuration(&currentSequence->tokens[s1Start], loopLength);
+        //htf_add_timestamp_to_delta(&seq->durations->add(ts));
+	&seq->durations->add(ts);
         currentSequence->tokens.resize(s1Start);
         return;
       }
@@ -287,8 +313,13 @@ void ThreadWriter::findLoopFilter() {
       htf_log(DebugLevel::Debug, "Last tokens were a sequence from L%x aka S%x\n", loop->self_id.id,
               loop->repeated_token.id);
       loop->addIteration();
+      // The current sequence last_timestamp does not need to be updated
+
+      
+      //      htf_timestamp_t ts = thread_trace.getSequenceDuration(&currentSequence->tokens[loopIndex + 1], loopLength);
+      //htf_add_timestamp_to_delta(&sequence->durations->add(ts));
       htf_timestamp_t ts = thread_trace.getSequenceDuration(&currentSequence->tokens[loopIndex + 1], loopLength);
-      htf_add_timestamp_to_delta(&sequence->durations->add(ts));
+      sequence->durations->add(ts);
       currentSequence->tokens.resize(loopIndex + 1);
       return;
     }
@@ -337,6 +368,8 @@ void ThreadWriter::recordExitFunction() {
   Sequence* cur_seq = getCurrentSequence();
 
 #ifdef DEBUG
+  // check that the sequence is not bugous
+  
   Token first_token = cur_seq->tokens[0];
   Token last_token = cur_seq->tokens.back();
   if (first_token.type != last_token.type) {
@@ -398,8 +431,11 @@ void ThreadWriter::recordExitFunction() {
 
   Token seq_id = thread_trace.getSequenceId(cur_seq);
   auto* seq = thread_trace.sequences[seq_id.id];
-  htf_timestamp_t ts = thread_trace.getSequenceDuration(seq->tokens.data(), seq->size());
-  htf_add_timestamp_to_delta(&seq->durations->add(ts));
+
+  htf_timestamp_t sequence_duration = last_timestamp[cur_depth] - sequence_start_timestamp[cur_depth];
+  // TODO: update statistics on the sequence (min/max/avg duration)
+  seq->durations->add(sequence_duration);
+
   htf_log(DebugLevel::Debug, "Exiting a function, closing sequence %d (%p)\n", seq_id.id, cur_seq);
 
   cur_depth--;
@@ -420,8 +456,11 @@ size_t ThreadWriter::storeEvent(enum EventType event_type,
                                 TokenId event_id,
                                 htf_timestamp_t ts,
                                 AttributeList* attribute_list) {
+  ts = htf_timestamp(ts);
   if (event_type == HTF_BLOCK_START) {
     recordEnterFunction();
+    sequence_start_timestamp[cur_depth] = ts;
+    last_timestamp[cur_depth] = ts;
   }
 
   Token token = Token(TypeEvent, event_id);
@@ -431,7 +470,7 @@ size_t ThreadWriter::storeEvent(enum EventType event_type,
   EventSummary* es = &thread_trace.events[event_id];
   size_t occurrence_index = es->nb_occurences++;
 
-  storeTimestamp(es, htf_timestamp(ts));
+  storeTimestamp(es, ts);
   if (attribute_list)
     storeAttributeList(es, attribute_list, occurrence_index);
 
@@ -492,6 +531,10 @@ void ThreadWriter::open(Archive* archive, ThreadId thread_id) {
   for (int i = 1; i < max_depth; i++) {
     og_seq[i] = new Sequence();
   }
+
+  last_timestamp = new htf_timestamp_t[max_depth];
+  sequence_start_timestamp = new htf_timestamp_t[max_depth];
+
   cur_depth = 0;
 
   htf_recursion_shield--;

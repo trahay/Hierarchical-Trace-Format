@@ -18,7 +18,12 @@ typedef struct ThreadWriter {
   int cur_depth;
   int max_depth;
   int thread_rank;
+  
+  htf_timestamp_t* last_timestamp;
+  htf_timestamp_t* sequence_start_timestamp;
+
 #ifdef __cplusplus
+
  private:
   void findLoopBasic(size_t maxLoopLength);
   void findLoopFilter();
