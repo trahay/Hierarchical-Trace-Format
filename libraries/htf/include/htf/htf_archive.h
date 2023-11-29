@@ -29,7 +29,7 @@ struct LocationGroup {
 };
 
 /**
- * A Location is basically a thread (or GPU stream)
+ * A Location is basically a thread (or GPU stream).
  */
 struct Location {
   /** Unique id for that location. */

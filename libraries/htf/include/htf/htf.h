@@ -71,9 +71,7 @@ enum TokenType { TypeInvalid = 0, TypeEvent = 1, TypeSequence = 2, TypeLoop = 3 
 typedef uint32_t TokenId;
 
 /**
- * A token is defined as a structure composed of
- *  - its type (2bits)
- *  - its id (30bits )
+ * Most basic element representing Events, Loops or Sequences in HTF.
  */
 typedef struct Token {
   enum TokenType type : 2; /**< Type of our Token. */
@@ -339,18 +337,20 @@ typedef Ref StringRef;
 /** Invalid StringRef */
 #define HTF_STRING_REF_INVALID ((StringRef)HTF_UNDEFINED_UINT32)
 /**
- * Define a String reference structure used by HTF format
+ * Define a String reference structure used by HTF format.
  *
  * It has an ID and an associated char* with its length
  */
 typedef struct String {
-  StringRef string_ref; /** Id of that String.*/
-  char* str;            /** Actual C String */
-  int length;           /** Length of #str.*/
+  StringRef string_ref; /**< Id of that String.*/
+  char* str;            /**< Actual C String */
+  int length;           /**< Length of #str.*/
 } String;
 
-typedef Ref RegionRef;                                          /**< Reference for a htf::Region */
-#define HTF_REGIONREF_INVALID ((RegionRef)HTF_UNDEFINED_UINT32) /**< Invalid RegionRef */
+/** Reference for a htf::Region */
+typedef Ref RegionRef;
+/** Invalid RegionRef */
+#define HTF_REGIONREF_INVALID ((RegionRef)HTF_UNDEFINED_UINT32)
 /**
  * Define a Region that has an ID and a description.
  */
