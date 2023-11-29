@@ -9,6 +9,8 @@ if [ $# -gt 0 ]; then
     BUILD_DIR=$1
 fi
 
+nb_failed=0
+nb_pass=0
 
 test_program="write_benchmark"
 
@@ -60,3 +62,9 @@ trace_check_timestamp_order "$trace_filename" thread_1
 trace_check_timestamp_order "$trace_filename" thread_2
 trace_check_timestamp_order "$trace_filename" thread_3
 
+echo "results: $nb_pass pass, $nb_failed failed"
+if [ $nb_failed -eq 0 ]; then
+    exit 1;
+else
+    exit 0;
+fi
