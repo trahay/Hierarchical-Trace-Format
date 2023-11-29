@@ -429,7 +429,7 @@ inline static void _htf_compress_write(uint64_t* src, size_t n, FILE* file) {
  */
 inline static uint64_t* _htf_compress_read(size_t n, FILE* file) {
   size_t expectedSize = n * sizeof(uint64_t);
-  uint64_t* uncompressedArray;
+  uint64_t* uncompressedArray = nullptr;
 
   size_t compressedSize;
   byte* compressedArray = nullptr;
