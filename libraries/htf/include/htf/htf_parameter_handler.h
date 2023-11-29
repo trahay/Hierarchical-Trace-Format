@@ -164,6 +164,10 @@ class ParameterHandler {
   /** @brief Creates a ParameterHandler from a config file loaded from CONFIG_FILE_PATH or config.json.
    */
   ParameterHandler();
+  /**
+   * @brief Prints a JSON of the ParameterHandler.
+   * @return String containing a JSON of itself.
+   */
   [[nodiscard]] std::string to_string() const;
 };
 

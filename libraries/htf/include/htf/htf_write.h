@@ -23,16 +23,7 @@ typedef struct ThreadWriter {
   int thread_rank;     /**< Rank of this thread. todo: MPI rank ? */
 #ifdef __cplusplus
  private:
-  /**
-   * @brief Finds a loop using the basic algorithm.
-   * @param maxLoopLength Maximum length for a loop we're trying to find.
-   */
   void findLoopBasic(size_t maxLoopLength);
-  /**
-   * @brief Finds a loop using a filtering method.
-   *
-   * Better complexity than findLoopBasic, but slower for smaller loop sizes.
-   */
   void findLoopFilter();
   /** @brief Tries to find a Loop in the current array of tokens.  */
   void findLoop();
@@ -42,7 +33,7 @@ typedef struct ThreadWriter {
    * @param loop_len Lenght of the sequence repeated in the loop.
    * */
   Loop* createLoop(int start_index, int loop_len);
-  /** @brief Create a Loop and change the current array of token to reflect that
+  /** @brief Create a Loop and change the current array of token to reflect that.
    * @example Replaces e1 e2 e3 e4 e1 e2 e3 e4 with l1.
    *
    * @param loop_len Length of the sequence repeated in the loop.

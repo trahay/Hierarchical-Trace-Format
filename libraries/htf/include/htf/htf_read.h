@@ -62,9 +62,9 @@ typedef struct LoopOccurence {
  * @brief Represents any kind of Occurrence.
  */
 typedef union Occurence {
-  struct LoopOccurence loop_occurence;
-  struct SequenceOccurence sequence_occurence;
-  struct EventOccurence event_occurence;
+  struct LoopOccurence loop_occurence;         /**< Occurence for a Loop.*/
+  struct SequenceOccurence sequence_occurence; /**< Occurence for a Sequence.*/
+  struct EventOccurence event_occurence;       /**< Occurence for an Event.*/
 } Occurence;
 
 /**
@@ -109,6 +109,12 @@ typedef struct ThreadReader {
    */
   int options;
 #ifdef __cplusplus
+  /**
+   * @brief Make a new ThreadReader from an Archive and a threadId.
+   * @param archive Archive to read.
+   * @param threadId Id of the thread to read.
+   * @param options Options as defined in ThreadReaderOptions.
+   */
   ThreadReader(const Archive* archive, ThreadId threadId, int options);
 
  private:
@@ -148,7 +154,7 @@ typedef struct ThreadReader {
   /** \todo Write a description here. Also fix the way it's implemented: it does not fit the standard. */
   [[nodiscard]] AttributeList* getEventAttributeList(Token event_id, int occurence_id) const;
 
-  /* Skips the given Token and updates the reader. */
+  /** Skips the given Token and updates the reader. */
   static void skipToken([[maybe_unused]] Token token) { htf_error("Not implemented yet\n"); };
 
  public:
@@ -204,7 +210,8 @@ typedef struct Savestate {
 
   DEFINE_TokenCountMap(tokenCount);
 #ifdef __cplusplus
-  /* Creates a Savestate (ie a screenshot) of the reader at the moment. */
+  /** @brief Creates a savestate of the given reader.
+   * @param reader Reader whose state of reading we want to take a screenshot. */
   Savestate(const ThreadReader* reader);
 #endif
 } Savestate;

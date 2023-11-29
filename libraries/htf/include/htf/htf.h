@@ -79,18 +79,33 @@ typedef struct Token {
   enum TokenType type : 2; /**< Type of our Token. */
   TokenId id : 30;         /**< ID of our Token. */
 #ifdef __cplusplus
+  /**
+   * @brief Construct a Token.
+   * @param type Type of the Token.
+   * @param id ID of the Token.
+   */
   Token(TokenType type, uint32_t id) {
     this->type = type;
     this->id = id;
   }
-  // Default token is an invalid one
+  /**
+   * Construct an Invalid Token.
+   */
   Token() {
     type = TypeInvalid;
     id = HTF_TOKEN_ID_INVALID;
   }
 
  public:
+  /** @brief Checks for equality between Tokens.
+   * @param other Token to check for equality.
+   * @return Boolean indicating if the Tokens are equals.
+   */
   bool operator==(const Token& other) const { return (other.type == type && other.id == id); }
+  /** @brief Checks for ordering between Tokens. Absolute order is decided first on type then on id.
+   * @param other Token to check for ordering.
+   * @return Boolean indicating if this < other.
+   */
   bool operator<(const Token& other) const { return (type < other.type || (type == other.type && id < other.id)); }
   /** Returns true if the Token is a Sequence or a Loop. */
   inline bool isIterable() const { return type == TypeSequence || type == TypeLoop; }
@@ -262,9 +277,9 @@ typedef struct Sequence {
   /** Getter for the size of that Sequence.
    * @returns Number of tokens in that Sequence. */
   [[nodiscard]] size_t size() const { return tokens.size(); }
-  /** Getter for #tokenCountMap.
+  /** Getter for #tokenCount.
    * If need be, counts the number of Token in that Sequence to initialize it.
-   * @returns Reference to #tokenCountMap.*/
+   * @returns Reference to #tokenCount.*/
   const TokenCountMap& getTokenCount(const struct Thread* thread);
 #endif
 } Sequence;
