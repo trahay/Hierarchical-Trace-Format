@@ -476,74 +476,37 @@ extern "C" {
 #ifdef __cplusplus
 };
 #endif
+
+#define htf_realloc(buffer, cur_size, new_size, datatype)		\
+  do {									\
+    datatype* new_buffer = (typeof(buffer)) realloc(buffer, (new_size) * sizeof(datatype)); \
+    if (new_buffer == NULL) {						\
+      new_buffer = (typeof(new_buffer)) malloc((new_size) * sizeof(datatype)); \
+      if (new_buffer == NULL) {						\
+        htf_error("Failed to allocate memory using realloc AND malloc\n"); \
+      }									\
+      memmove(new_buffer, buffer, (cur_size) * sizeof(datatype));	\
+      free(buffer);							\
+    }									\
+    buffer = new_buffer;						\
+    (cur_size) = (new_size);						\
+  } while (0)
+
 /**
  * Given a buffer, a counter that indicates the number of object it holds, and this object's datatype,
  * doubles the size of the buffer using realloc, or if it fails, malloc and memmove then frees the old buffer.
  * This is better than a realloc because it moves the data around, but it is also slower.
  * Checks for error at malloc.
  */
-#ifdef __cplusplus
-#define DOUBLE_MEMORY_SPACE(buffer, counter, datatype)           \
-  do {                                                           \
-    auto new_buffer = new datatype[2 * counter];                 \
-    if (new_buffer == nullptr) {                                 \
-      htf_error("Failed to allocate memory\n");                  \
-    }                                                            \
-    std::memcpy(new_buffer, buffer, counter * sizeof(datatype)); \
-    delete buffer;                                               \
-    buffer = new_buffer;                                         \
-    counter *= 2;                                                \
-  } while (0)
-#else
-#define DOUBLE_MEMORY_SPACE(buffer, counter, datatype)                        \
-  do {                                                                        \
-    datatype* new_buffer = realloc(buffer, (counter * 2) * sizeof(datatype)); \
-    if (new_buffer == NULL) {                                                 \
-      new_buffer = malloc((counter * 2) * sizeof(datatype));                  \
-      if (new_buffer == NULL) {                                               \
-        htf_error("Failed to allocate memory using realloc AND malloc\n");    \
-      }                                                                       \
-      memmove(new_buffer, buffer, counter * sizeof(datatype));                \
-      free(buffer);                                                           \
-    }                                                                         \
-    buffer = new_buffer;                                                      \
-    counter *= 2;                                                             \
-  } while (0)
-#endif
+#define DOUBLE_MEMORY_SPACE(buffer, counter, datatype) htf_realloc(buffer, counter, (counter)*2, datatype)
 /**
  * Given a buffer, a counter that indicates the number of object it holds, and this object's datatype,
  * Increments the size of the buffer by 1 using realloc, or if it fails, malloc and memmove then frees the old buffer.
  * This is better than a realloc because it moves the data around, but it is also slower.
  * Checks for error at malloc.
  */
-#ifdef __cplusplus
-#define INCREMENT_MEMORY_SPACE(buffer, counter, datatype)        \
-  do {                                                           \
-    auto new_buffer = new datatype[counter + 1];                 \
-    if (new_buffer == nullptr) {                                 \
-      htf_error("Failed to allocate memory\n");                  \
-    }                                                            \
-    std::memcpy(new_buffer, buffer, counter * sizeof(datatype)); \
-    delete buffer;                                               \
-    buffer = new_buffer;                                         \
-    counter++;                                                   \
-  } while (0)
-#else
-#define INCREMENT_MEMORY_SPACE(buffer, counter, datatype)                     \
-  do {                                                                        \
-    datatype* new_buffer = realloc(buffer, (counter + 1) * sizeof(datatype)); \
-    if (new_buffer == NULL) {                                                 \
-      new_buffer = malloc((counter + 1) * sizeof(datatype));                  \
-      if (new_buffer == NULL) {                                               \
-        htf_error("Failed to allocate memory using realloc AND malloc\n");    \
-      }                                                                       \
-      memmove(new_buffer, buffer, counter * sizeof(datatype));                \
-      free(buffer);                                                           \
-    }                                                                         \
-    buffer = new_buffer;                                                      \
-    counter++;                                                                \
-  } while (0)
-#endif
+#define INCREMENT_MEMORY_SPACE(buffer, counter, datatype) htf_realloc(buffer, counter, (counter)+1, datatype)
+
 /**
  * Primitive for DOFOR loops
  */
