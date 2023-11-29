@@ -16,178 +16,178 @@
 namespace htf {
 #endif
 
-/** @brief Value container for an attributes.
+/** Value container for an attributes.
  */
 typedef union AttributeValue {
-  /** @brief Arbitrary value of type uint8_t */
+  /** Arbitrary value of type uint8_t */
   uint8_t uint8;
-  /** @brief Arbitrary value of type uint16_t */
+  /** Arbitrary value of type uint16_t */
   uint16_t uint16;
-  /** @brief Arbitrary value of type uint32_t */
+  /** Arbitrary value of type uint32_t */
   uint32_t uint32;
-  /** @brief Arbitrary value of type uint64_t */
+  /** Arbitrary value of type uint64_t */
   uint64_t uint64;
-  /** @brief Arbitrary value of type int8_t */
+  /** Arbitrary value of type int8_t */
   int8_t int8;
-  /** @brief Arbitrary value of type int16_t */
+  /** Arbitrary value of type int16_t */
   int16_t int16;
-  /** @brief Arbitrary value of type int32_t */
+  /** Arbitrary value of type int32_t */
   int32_t int32;
-  /** @brief Arbitrary value of type int64_t */
+  /** Arbitrary value of type int64_t */
   int64_t int64;
-  /** @brief Arbitrary value of type float */
+  /** Arbitrary value of type float */
   float float32;
-  /** @brief Arbitrary value of type double */
+  /** Arbitrary value of type double */
   double float64;
-  /** @brief References a @eref{String} definition */
+  /** References a String definition */
   StringRef string_ref;
-  /** @brief References a @eref{Attribute} definition */
+  /** References a Attribute definition */
   AttributeRef attribute_ref;
-  /** @brief References a @eref{Location} definition */
+  /** References a Location definition */
   Ref location_ref;
-  /** @brief References a @eref{Region} definition */
+  /** References a Region definition */
   RegionRef region_ref;
-  /** @brief References a @eref{Group} definition */
+  /** References a Group definition */
   Ref group_ref;
-  /** @brief References a @eref{MetricClass}, or a @eref{MetricInstance} definition */
+  /** References a MetricClass, or a MetricInstance definition */
   Ref metric_ref;
-  /** @brief References a @eref{Comm}, or a @eref{InterComm} definition */
+  /** References a Comm, or a InterComm definition */
   Ref comm_ref;
-  /** @brief References a @eref{Parameter} definition */
+  /** References a Parameter definition */
   Ref parameter_ref;
-  /** @brief References a @eref{RmaWin} definition */
+  /** References a RmaWin definition */
   Ref rma_win_ref;
-  /** @brief References a @eref{SourceCodeLocation} definition */
+  /** References a SourceCodeLocation definition */
   Ref source_code_location_ref;
-  /** @brief References a @eref{CallingContext} definition */
+  /** References a CallingContext definition */
   Ref calling_context_ref;
-  /** @brief References a @eref{InterruptGenerator} definition */
+  /** References a InterruptGenerator definition */
   Ref interrupt_generator_ref;
-  /** @brief References a @eref{IoRegularFile}, or a @eref{IoDirectory} definition */
+  /** References a IoRegularFile, or a IoDirectory definition */
   Ref io_file_ref;
-  /** @brief References a @eref{IoHandle} definition */
+  /** References a IoHandle definition */
   Ref io_handle_ref;
-  /** @brief References a @eref{LocationGroup} definition */
+  /** References a LocationGroup definition */
   Ref location_group_ref;
 } AttributeValue;
 
-/** @brief HTF basic data types. */
+/** HTF basic data types. */
 enum AttributeType {
-  /** @brief Undefined type.
+  /** Undefined type.
    *
    *  Type category: None
    */
   HTF_TYPE_NONE = 0,
 
-  /** @brief Unsigned 8-bit integer.
+  /** Unsigned 8-bit integer.
    *
    *  Type category: Integer
    */
   HTF_TYPE_UINT8 = 1,
 
-  /** @brief Unsigned 16-bit integer
+  /** Unsigned 16-bit integer
    *
    *  Type category: Integer
    */
   HTF_TYPE_UINT16 = 2,
 
-  /** @brief Unsigned 32-bit integer
+  /** Unsigned 32-bit integer
    *
    *  Type category: Integer
    */
   HTF_TYPE_UINT32 = 3,
 
-  /** @brief Unsigned 64-bit integer
+  /** Unsigned 64-bit integer
    *
    *  Type category: Integer
    */
   HTF_TYPE_UINT64 = 4,
 
-  /** @brief Signed 8-bit integer
+  /** Signed 8-bit integer
    *
    *  Type category: Integer
    */
   HTF_TYPE_INT8 = 5,
 
-  /** @brief Signed 16-bit integer
+  /** Signed 16-bit integer
    *
    *  Type category: Integer
    */
   HTF_TYPE_INT16 = 6,
 
-  /** @brief Signed 32-bit integer
+  /** Signed 32-bit integer
    *
    *  Type category: Integer
    */
   HTF_TYPE_INT32 = 7,
 
-  /** @brief Signed 64-bit integer
+  /** Signed 64-bit integer
    *
    *  Type category: Integer
    */
   HTF_TYPE_INT64 = 8,
 
-  /** @brief 32-bit floating point value
+  /** 32-bit floating point value
    *
    *  Type category: Floating point
    */
   HTF_TYPE_FLOAT = 9,
 
-  /** @brief 64-bit floating point value
+  /** 64-bit floating point value
    *
    *  Type category: Floating point
    */
   HTF_TYPE_DOUBLE = 10,
 
-  /** @brief Mapping of @eref{String} identifiers.
+  /** Mapping of String identifiers.
    *
    *  Type category: Definition reference
    */
   HTF_TYPE_STRING = 11,
 
-  /** @brief Mapping of @eref{Attribute} identifiers.
+  /** Mapping of Attribute identifiers.
    *
    *  Type category: Definition reference
    */
   HTF_TYPE_ATTRIBUTE = 12,
 
-  /** @brief Mapping of @eref{Location} identifiers.
+  /** Mapping of Location identifiers.
    *
    *  Type category: Definition reference
    */
   HTF_TYPE_LOCATION = 13,
 
-  /** @brief Mapping of @eref{Region} identifiers.
+  /** Mapping of Region identifiers.
    *
    *  Type category: Definition reference
    */
   HTF_TYPE_REGION = 14,
 
-  /** @brief Mapping of @eref{Group} identifiers.
+  /** Mapping of Group identifiers.
    *
    *  Type category: Definition reference
    */
   HTF_TYPE_GROUP = 15,
 
-  /** @brief Mapping of @eref{Metric} identifiers.
+  /** Mapping of Metric identifiers.
    *
    *  Type category: Definition reference
    */
   HTF_TYPE_METRIC = 16,
 
-  /** @brief Mapping of @eref{Comm} identifiers.
+  /** Mapping of Comm identifiers.
    *
    *  Type category: Definition reference
    */
   HTF_TYPE_COMM = 17,
 
-  /** @brief Mapping of @eref{Parameter} identifiers.
+  /** Mapping of Parameter identifiers.
    *
    *  Type category: Definition reference
    */
   HTF_TYPE_PARAMETER = 18,
 
-  /** @brief Mapping of @eref{RmaWin} identifiers.
+  /** Mapping of RmaWin identifiers.
    *
    *  @since Version 1.2.
    *
@@ -195,7 +195,7 @@ enum AttributeType {
    */
   HTF_TYPE_RMA_WIN = 19,
 
-  /** @brief Mapping of @eref{SourceCodeLocation} identifiers.
+  /** Mapping of SourceCodeLocation identifiers.
    *
    *  @since Version 1.5.
    *
@@ -203,7 +203,7 @@ enum AttributeType {
    */
   HTF_TYPE_SOURCE_CODE_LOCATION = 20,
 
-  /** @brief Mapping of @eref{CallingContext} identifiers.
+  /** Mapping of CallingContext identifiers.
    *
    *  @since Version 1.5.
    *
@@ -211,7 +211,7 @@ enum AttributeType {
    */
   HTF_TYPE_CALLING_CONTEXT = 21,
 
-  /** @brief Mapping of @eref{InterruptGenerator} identifiers.
+  /** Mapping of InterruptGenerator identifiers.
    *
    *  @since Version 1.5.
    *
@@ -219,7 +219,7 @@ enum AttributeType {
    */
   HTF_TYPE_INTERRUPT_GENERATOR = 22,
 
-  /** @brief Mapping of @eref{IoFile} identifiers.
+  /** Mapping of IoFile identifiers.
    *
    *  @since Version 2.1.
    *
@@ -227,7 +227,7 @@ enum AttributeType {
    */
   HTF_TYPE_IO_FILE = 23,
 
-  /** @brief Mapping of @eref{IoHandle} identifiers.
+  /** Mapping of IoHandle identifiers.
    *
    *  @since Version 2.1.
    *
@@ -235,7 +235,7 @@ enum AttributeType {
    */
   HTF_TYPE_IO_HANDLE = 24,
 
-  /** @brief Mapping of @eref{LocationGroup} identifiers.
+  /** Mapping of LocationGroup identifiers.
    *
    *  @since Version 3.0.
    *

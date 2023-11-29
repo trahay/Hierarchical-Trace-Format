@@ -17,7 +17,7 @@ namespace htf {
 #endif
 
 /**
- * @brief A LocationGroup can be a process, a machine, etc.
+ * A LocationGroup can be a process, a machine, etc.
  */
 struct LocationGroup {
   /** Unique id for that group. */
@@ -29,7 +29,7 @@ struct LocationGroup {
 };
 
 /**
- * @brief A Location is basically a thread (or GPU stream)
+ * A Location is basically a thread (or GPU stream).
  */
 struct Location {
   /** Unique id for that location. */
@@ -41,7 +41,7 @@ struct Location {
 };
 
 /**
- * @brief A Definition stores Strings, Regions and Attributes.
+ * A Definition stores Strings, Regions and Attributes.
  */
 typedef struct Definition {
   /** List of String stored in that Definition. */
@@ -61,7 +61,7 @@ typedef struct Definition {
 } Definition;
 
 /**
- * @brief An Archive represents a program.
+ * An Archive represents a program.
  */
 typedef struct Archive {
   char* dir_name;       /**< Name of the directory in which the archive is recorded. */
