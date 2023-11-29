@@ -400,17 +400,17 @@ inline static void _htf_compress_write(uint64_t* src, size_t n, FILE* file) {
   }
 
   if (htf::parameterHandler.getCompressionAlgorithm() != htf::CompressionAlgorithm::None) {
-    htf_log(htf::DebugLevel::Normal, "Compressing %lu bytes as %lu bytes\n", size, compressedSize);
+    htf_log(htf::DebugLevel::Debug, "Compressing %lu bytes as %lu bytes\n", size, compressedSize);
     _htf_fwrite(&compressedSize, sizeof(compressedSize), 1, file);
     _htf_fwrite(compressedArray, compressedSize, 1, file);
     numberRawBytes += size;
     numberCompressedBytes += compressedSize;
   } else if (htf::parameterHandler.getEncodingAlgorithm() != htf::EncodingAlgorithm::None) {
-    htf_log(htf::DebugLevel::Normal, "Encoding %lu bytes as %lu bytes\n", size, encodedSize);
+    htf_log(htf::DebugLevel::Debug, "Encoding %lu bytes as %lu bytes\n", size, encodedSize);
     _htf_fwrite(&encodedSize, sizeof(encodedSize), 1, file);
     _htf_fwrite(encodedArray, encodedSize, 1, file);
   } else {
-    htf_log(htf::DebugLevel::Normal, "Writing %lu bytes as is.\n", size);
+    htf_log(htf::DebugLevel::Debug, "Writing %lu bytes as is.\n", size);
     _htf_fwrite(&size, sizeof(size), 1, file);
     _htf_fwrite(src, size, 1, file);
   }
@@ -567,7 +567,7 @@ static FILE* _htf_get_event_file(const char* base_dirname, htf::Thread* th, htf:
 static void _htf_store_attribute_values(htf::EventSummary* e, FILE* file) {
   _htf_fwrite(&e->attribute_pos, sizeof(e->attribute_pos), 1, file);
   if (e->attribute_pos > 0) {
-    htf_log(htf::DebugLevel::Normal, "\t\tStore %lu attributes\n", e->attribute_pos);
+    htf_log(htf::DebugLevel::Debug, "\t\tStore %lu attributes\n", e->attribute_pos);
     if (htf::parameterHandler.getCompressionAlgorithm() != htf::CompressionAlgorithm::None) {
       size_t compressedSize = ZSTD_compressBound(e->attribute_pos);
       byte* compressedArray = new byte[compressedSize];
@@ -952,7 +952,7 @@ static void _htf_store_thread(const char* dir_name, htf::Thread* th) {
 
   for (int i = 0; i < th->nb_loops; i++)
     _htf_store_loop(dir_name, th, &th->loops[i], HTF_LOOP_ID(i));
-  htf_log(htf::DebugLevel::Normal, "Average compression ratio: %.2f\n", (numberRawBytes + .0) / numberCompressedBytes);
+  htf_log(htf::DebugLevel::Debug, "Average compression ratio: %.2f\n", (numberRawBytes + .0) / numberCompressedBytes);
 }
 
 void htf::Thread::finalizeThread() {
