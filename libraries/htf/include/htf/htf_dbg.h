@@ -58,37 +58,42 @@ extern enum DebugLevel debugLevel;
 }; /* namespace htf */
 extern "C" {
 #endif
+/** Initializes the DebugLevel using Env Variables. */
 extern void htf_debug_level_init();
+/** Sets the DebugLevel to the given level. */
 extern void htf_debug_level_set(enum HTF(DebugLevel) lvl);
+/** Returns the DebugLevel. */
 extern enum HTF(DebugLevel) htf_debug_level_get();
 CXX(
 };)
-
+/** Stops the execution. */
 #define htf_abort() abort()
+/** Logs a formated message to the given filedescriptor if the given debugLevel is high enough. */
 #define _htf_log(fd, _debug_level_, format, ...)                        \
   do {                                                                  \
     if (C_CXX(htf_debug_level_get(), htf::debugLevel) >= _debug_level_) \
       printf("[HTF - %lx] " format, pthread_self(), ##__VA_ARGS__);     \
   } while (0)
-
+/** Logs a formated message to stdout if the given debugLevel is high enough. */
 #define htf_log(_debug_level_, format, ...) _htf_log(stdout, _debug_level_, format, ##__VA_ARGS__)
-
+/** Logs a formated message to stderr if the debugLevel is under Normal. */
 #define htf_warn(format, ...)                                                                                          \
   do {                                                                                                                 \
     _htf_log(stderr, C_CXX(Normal, htf::DebugLevel::Normal), "HTF warning in %s (%s:%d): " format, __func__, __FILE__, \
              __LINE__, ##__VA_ARGS__);                                                                                 \
   } while (0)
-
+/** Logs a formated message to stderr if the given debugLevel is under Error. */
 #define htf_error(format, ...)                                                                                     \
   do {                                                                                                             \
     _htf_log(stderr, C_CXX(Error, htf::DebugLevel::Error), "HTF error in %s (%s:%d): " format, __func__, __FILE__, \
              __LINE__, ##__VA_ARGS__);                                                                             \
     htf_abort();                                                                                                   \
   } while (0)
-
 #ifdef NDEBUG
+/** Asserts a condition only if in Debug mode (if DEBUG is defined). */
 #define htf_assert(cond)
 #else
+/** Asserts a condition only if in Debug mode (if DEBUG is defined). */
 #define htf_assert(cond)             \
   do {                               \
     if (!(cond))                     \
