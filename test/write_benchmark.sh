@@ -16,6 +16,16 @@ run_and_check_command  "${test_program}"
 
 # Then, check that the generated trace is OK
 trace_filename="${test_program}_trace/main.htf"
+
+echo "content of ${test_program}_trace:"
+ls "${test_program}_trace"
+
+echo "content of src dir ($CUR_PATH):"
+ls "${CUR_PATH}"
+
+echo "content of build dir ($BUILD_DIR):"
+ls "${BUILD_DIR}"
+
 trace_check_integrity "$trace_filename"
 
 # TODO:
