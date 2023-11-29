@@ -26,7 +26,7 @@ enum ThreadReaderOptions {
   NoTimestamps = 2,  /**< Do not load the timestamps / durations. */
 };
 
-/** @brief Represents one occurence of an Event. */
+/** Represents one occurence of an Event. */
 typedef struct EventOccurence {
   struct Event* event;       /**< Pointer to the Event.*/
   htf_timestamp_t timestamp; /**< Timestamp for that occurence.*/
@@ -35,7 +35,7 @@ typedef struct EventOccurence {
 } EventOccurence;
 
 /**
- * @brief Represents one occurence of a Sequence.
+ * Represents one occurence of a Sequence.
  */
 typedef struct SequenceOccurence {
   struct Sequence* sequence;            /**< Pointer to the Sequence.*/
@@ -46,7 +46,7 @@ typedef struct SequenceOccurence {
 } SequenceOccurence;
 
 /**
- * @brief Represents one occurence of a Loop.
+ * Represents one occurence of a Loop.
  */
 typedef struct LoopOccurence {
   struct Loop* loop;                     /**< Pointer to the Loop.*/
@@ -59,7 +59,7 @@ typedef struct LoopOccurence {
 } LoopOccurence;
 
 /**
- * @brief Represents any kind of Occurrence.
+ * Represents any kind of Occurrence.
  */
 typedef union Occurence {
   struct LoopOccurence loop_occurence;         /**< Occurence for a Loop.*/
@@ -68,7 +68,7 @@ typedef union Occurence {
 } Occurence;
 
 /**
- * @brief Tuple containing a Token and its corresponding Occurence.
+ * Tuple containing a Token and its corresponding Occurence.
  */
 typedef struct TokenOccurence {
   /** Token for the occurence. */
@@ -78,7 +78,7 @@ typedef struct TokenOccurence {
 } TokenOccurence;
 
 /**
- * @brief Reads one thread from an HTF trace.
+ * Reads one thread from an HTF trace.
  */
 typedef struct ThreadReader {
   /** Archive being read by this reader. */
@@ -105,12 +105,12 @@ typedef struct ThreadReader {
   DEFINE_TokenCountMap(tokenCount);
 
   /**
-   * @brief Options as defined in htf::ThreadReaderOptions.
+   * Options as defined in htf::ThreadReaderOptions.
    */
   int options;
 #ifdef __cplusplus
   /**
-   * @brief Make a new ThreadReader from an Archive and a threadId.
+   * Make a new ThreadReader from an Archive and a threadId.
    * @param archive Archive to read.
    * @param threadId Id of the thread to read.
    * @param options Options as defined in ThreadReaderOptions.
@@ -158,32 +158,32 @@ typedef struct ThreadReader {
   static void skipToken([[maybe_unused]] Token token) { htf_error("Not implemented yet\n"); };
 
  public:
-  /** @brief Enter a block (push a new frame in the callstack) */
+  /** Enter a block (push a new frame in the callstack) */
   void enterBlock(Token new_block);
-  /** @brief Leaves the current block */
+  /** Leaves the current block */
   void leaveBlock();
-  /** @brief Moves the reader's position to the next token.
+  /** Moves the reader's position to the next token.
    *
    * Moves to the next token in the current block, or exits it recursively as long as it's at the end of a block.*/
   void moveToNextToken();
-  /** @brief Updates the reader's callstacks et al. by reading the current token.
+  /** Updates the reader's callstacks et al. by reading the current token.
    *
    * If the current Token is an event, its index is updated and the referential timestamp as well.
    * If it's a Loop or a Sequence, their indexes are updated, and the reader enters the corresponding block. */
   void updateReadCurToken();
-  /** @brief Fetches the next Token in the trace. Changes the state of the reader to match. */
+  /** Fetches the next Token in the trace. Changes the state of the reader to match. */
   [[nodiscard]] Token getNextToken();
-  /** @brief Returns the current Token. */
+  /** Returns the current Token. */
   [[nodiscard]] const Token& getCurToken() const;
-  /** @brief Returns an Occurence for the given Token appearing at the given occurence_id.
+  /** Returns an Occurence for the given Token appearing at the given occurence_id.
    *
    * Timestamp is set to Reader's referential timestamp.*/
   [[nodiscard]] union Occurence* getOccurence(Token id, int occurence_id) const;
-  /** @brief Loads the given savestate. */
+  /** Loads the given savestate. */
   void loadSavestate(struct Savestate* savestate);
-  /** @brief Reads the current level of the thread, and returns it as an array of TokenOccurences. */
+  /** Reads the current level of the thread, and returns it as an array of TokenOccurences. */
   [[nodiscard]] std::vector<TokenOccurence> readCurrentLevel();
-  /** @brief Skips the given Sequence and updates the reader. */
+  /** Skips the given Sequence and updates the reader. */
   void skipSequence([[maybe_unused]] Token token) { htf_error("Not implemented yet\n"); };
 #endif
 } ThreadReader;
@@ -210,7 +210,7 @@ typedef struct Savestate {
 
   DEFINE_TokenCountMap(tokenCount);
 #ifdef __cplusplus
-  /** @brief Creates a savestate of the given reader.
+  /** Creates a savestate of the given reader.
    * @param reader Reader whose state of reading we want to take a screenshot. */
   Savestate(const ThreadReader* reader);
 #endif
@@ -234,39 +234,39 @@ extern void htf_thread_reader_enter_block(HTF(ThreadReader) * reader, HTF(Token)
 /** Leaves the current block */
 extern void htf_thread_reader_leave_block(HTF(ThreadReader) * reader);
 
-/** @brief Moves the reader's position to the next token.
+/** Moves the reader's position to the next token.
  *
  * Moves to the next token in the current block, or exits it recursively as long as it's at the end of a block.*/
 extern void htf_thread_reader_move_to_next_token(HTF(ThreadReader) * reader);
 
-/** @brief Updates the reader's callstacks et al. by reading the current token.
+/** Updates the reader's callstacks et al. by reading the current token.
  *
  * If the current Token is an event, its index is updated and the referential timestamp as well.
  * If it's a Loop or a Sequence, their indexes are updated, and the reader enters the corresponding block. */
 extern void htf_thread_reader_update_reader_cur_token(HTF(ThreadReader) * reader);
 
-/** @brief Fetches the next Token in the trace. Changes the state of the reader to match. */
+/** Fetches the next Token in the trace. Changes the state of the reader to match. */
 extern HTF(Token) htf_thread_reader_get_next_token(HTF(ThreadReader) * reader);
 
-/** @brief Returns the current Token. */
+/** Returns the current Token. */
 extern HTF(Token) htf_read_thread_cur_token(const HTF(ThreadReader) * reader);
 
-/** @brief Returns an Occurence for the given Token appearing at the given occurence_id.
+/** Returns an Occurence for the given Token appearing at the given occurence_id.
  *
  * Timestamp is set to Reader's referential timestamp.*/
 extern union HTF(Occurence) *
   htf_thread_reader_get_occurence(const HTF(ThreadReader) * reader, HTF(Token) id, int occurence_id);
 
-/** @brief Creates a new savestate from the reader. */
+/** Creates a new savestate from the reader. */
 extern HTF(Savestate) * create_savestate(const HTF(ThreadReader) * reader);
 
-/** @brief Loads the given savestate. */
+/** Loads the given savestate. */
 extern void load_savestate(HTF(ThreadReader) * reader, HTF(Savestate) * savestate);
 
-/** @brief Reads the current level of the thread, and returns it as an array of TokenOccurences. */
+/** Reads the current level of the thread, and returns it as an array of TokenOccurences. */
 extern HTF(TokenOccurence) * htf_thread_reader_read_current_level(HTF(ThreadReader) * reader);
 
-/** @brief Skips the given Sequence and updates the reader. */
+/** Skips the given Sequence and updates the reader. */
 extern void skip_sequence(HTF(ThreadReader) * reader, HTF(Token) token);
 
 #ifdef __cplusplus

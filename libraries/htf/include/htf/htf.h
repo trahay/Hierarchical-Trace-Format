@@ -80,7 +80,7 @@ typedef struct Token {
   TokenId id : 30;         /**< ID of our Token. */
 #ifdef __cplusplus
   /**
-   * @brief Construct a Token.
+   * Construct a Token.
    * @param type Type of the Token.
    * @param id ID of the Token.
    */
@@ -97,12 +97,12 @@ typedef struct Token {
   }
 
  public:
-  /** @brief Checks for equality between Tokens.
+  /** Checks for equality between Tokens.
    * @param other Token to check for equality.
    * @return Boolean indicating if the Tokens are equals.
    */
   bool operator==(const Token& other) const { return (other.type == type && other.id == id); }
-  /** @brief Checks for ordering between Tokens. Absolute order is decided first on type then on id.
+  /** Checks for ordering between Tokens. Absolute order is decided first on type then on id.
    * @param other Token to check for ordering.
    * @return Boolean indicating if this < other.
    */
@@ -111,11 +111,11 @@ typedef struct Token {
   inline bool isIterable() const { return type == TypeSequence || type == TypeLoop; }
 #endif
 } Token;
-/** @brief Creates a Token for an Event. */
+/** Creates a Token for an Event. */
 #define HTF_EVENT_ID(i) HTF(Token)(HTF(TypeEvent), i)
-/** @brief Creates a Token for a Sequence. */
+/** Creates a Token for a Sequence. */
 #define HTF_SEQUENCE_ID(i) HTF(Token)(HTF(TypeSequence), i)
-/** @brief Creates a Token for a Loop. */
+/** Creates a Token for a Loop. */
 #define HTF_LOOP_ID(i) HTF(Token)(HTF(TypeLoop), i)
 
 /*************************** Events **********************/
@@ -197,7 +197,7 @@ enum Record {
 };
 
 /**
- * @brief Structure to store an event in HTF.
+ * Structure to store an event in HTF.
  */
 typedef struct Event {
   enum Record record;      /**< ID of the event recorded in the above enumeration of events. */
@@ -209,7 +209,7 @@ typedef struct Event {
 /*************************** Sequences **********************/
 #ifdef __cplusplus
 /**
- * @brief A Map for counting Tokens.
+ * A Map for counting Tokens.
  *
  * For each token, the size_t member counts the number of time the token appeared in the trace so far.
  *
@@ -226,7 +226,7 @@ struct TokenCountMap : public std::map<Token, size_t> {
       }
     }
   }
-  /** @brief Returns a new map with the same keys, but each value has been multiplied by the given value.
+  /** Returns a new map with the same keys, but each value has been multiplied by the given value.
    * @param multiplier Constant multiplier for each value.
    * @returns New map with a copy of the keys and the values. Each value has been multiplied by `multiplier`.
    */
@@ -238,7 +238,7 @@ struct TokenCountMap : public std::map<Token, size_t> {
     return otherMap;
   }
 
-  /** @brief Return the value associated with t, or 0 if t was not found.
+  /** Return the value associated with t, or 0 if t was not found.
    *
    *  This is useful when searching for a token count: if the token has never been encountered, it
    *  won't be found by the map find() function, and we return 0 (instead of an errornous value such
@@ -261,7 +261,7 @@ struct TokenCountMap : public std::map<Token, size_t> {
 #define DEFINE_Vector(type, name) C_CXX(byte, std::vector<type>) name C_CXX([VECTOR_SIZE], { std::vector<type>() })
 
 /**
- * @brief Structure to store a sequence in HTF format.
+ * Structure to store a sequence in HTF format.
  */
 typedef struct Sequence {
   LinkedVector* durations CXX({new LinkedVector()}); /**< Vector of durations for these type of sequences. */
@@ -287,7 +287,7 @@ typedef struct Sequence {
 /*************************** Loop **********************/
 
 /**
- * @brief Structure to store a Loop in HTF format.
+ * Structure to store a Loop in HTF format.
  */
 typedef struct Loop {
   Token repeated_token;               /**< Token of the Sequence being repeated. */
@@ -297,7 +297,7 @@ typedef struct Loop {
 } Loop;
 
 /**
- * @brief Summary for an htf::Event.
+ * Summary for an htf::Event.
  *
  * Contains the durations for each occurence of that event
  * as well as the number of occurences for that event,
@@ -339,7 +339,7 @@ typedef Ref StringRef;
 /** Invalid StringRef */
 #define HTF_STRING_REF_INVALID ((StringRef)HTF_UNDEFINED_UINT32)
 /**
- * @brief Define a String reference structure used by HTF format
+ * Define a String reference structure used by HTF format
  *
  * It has an ID and an associated char* with its length
  */
@@ -352,7 +352,7 @@ typedef struct String {
 typedef Ref RegionRef;                                          /**< Reference for a htf::Region */
 #define HTF_REGIONREF_INVALID ((RegionRef)HTF_UNDEFINED_UINT32) /**< Invalid RegionRef */
 /**
- * @brief Define a Region that has an ID and a description.
+ * Define a Region that has an ID and a description.
  */
 typedef struct Region {
   RegionRef region_ref; /**< Id of that Region. */
@@ -367,7 +367,7 @@ typedef Ref AttributeRef;
 typedef uint8_t htf_type_t;
 
 /**
- * @brief Define an Attribute of a function call.
+ * Define an Attribute of a function call.
  */
 typedef struct Attribute {
   AttributeRef attribute_ref; /**< Id of that Attribute. */
@@ -377,7 +377,7 @@ typedef struct Attribute {
 } Attribute;
 
 /**
- * @brief A thread contains streams of events.
+ * A thread contains streams of events.
  *
  * It can be a regular thread (eg. a pthread), or a GPU stream.
  */
@@ -511,7 +511,7 @@ extern "C" {
 #ifdef __cplusplus
 };
 #endif
-/** @brief Does a safe-ish realloc the the given buffer.
+/** Does a safe-ish realloc the the given buffer.
  *
  * Given a buffer, its current size, a new desired size and its containing object's datatype,
  * changes the size of the buffer using realloc, or if it fails, malloc and memmove, then frees the old buffer.
@@ -533,7 +533,7 @@ extern "C" {
     (cur_size) = (new_size);                                                               \
   } while (0)
 
-/** @brief Doubles the memory allocated for the given buffer.
+/** Doubles the memory allocated for the given buffer.
  *
  * Given a buffer, a counter that indicates the number of object it holds, and this object's datatype,
  * doubles the size of the buffer using realloc, or if it fails, malloc and memmove then frees the old buffer.
@@ -541,7 +541,7 @@ extern "C" {
  * Checks for error at malloc.
  */
 #define DOUBLE_MEMORY_SPACE(buffer, counter, datatype) htf_realloc(buffer, counter, (counter)*2, datatype)
-/** @brief Increments the memory allocated for the given buffer by one.
+/** Increments the memory allocated for the given buffer by one.
  *
  * Given a buffer, a counter that indicates the number of object it holds, and this object's datatype,
  * Increments the size of the buffer by 1 using realloc, or if it fails, malloc and memmove then frees the old buffer.
@@ -551,7 +551,7 @@ extern "C" {
 #define INCREMENT_MEMORY_SPACE(buffer, counter, datatype) htf_realloc(buffer, counter, (counter) + 1, datatype)
 
 /**
- * @brief Primitive for DOFOR loops
+ * Primitive for DOFOR loops
  */
 #define DOFOR(var_name, max) for (int var_name = 0; var_name < max; var_name++)
 

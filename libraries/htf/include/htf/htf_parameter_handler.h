@@ -34,7 +34,7 @@ enum class CompressionAlgorithm {
 };
 
 /**
- * @brief Converts a compression algorithm to its string name.
+ * Converts a compression algorithm to its string name.
  * @param alg Algorithm to compress.
  * @return String such that it shall be parsed to that algorithm's enum.
  */
@@ -75,7 +75,7 @@ enum class EncodingAlgorithm {
 };
 
 /**
- * @brief Converts a compression algorithm to its string name.
+ * Converts a compression algorithm to its string name.
  * @param alg Algorithm to compress.
  * @return String such that it shall be parsed to that algorithm's enum.
  */
@@ -108,7 +108,7 @@ enum class LoopFindingAlgorithm {
 };
 
 /**
- * @brief Converts a compression algorithm to its string name.
+ * Converts a compression algorithm to its string name.
  * @param alg Algorithm to compress.
  * @return String such that it shall be parsed to that algorithm's enum.
  */
@@ -128,7 +128,7 @@ inline std::string algorithmToString(LoopFindingAlgorithm alg) {
 }
 
 /**
- * @brief A simple data class that contains information on different parameters.
+ * A simple data class that contains information on different parameters.
  */
 class ParameterHandler {
   /** The compression algorithm used during the execution. */
@@ -161,11 +161,11 @@ class ParameterHandler {
    * @returns Value of #loopFindingAlgorithm.
    */
   [[nodiscard]] LoopFindingAlgorithm getLoopFindingAlgorithm() const;
-  /** @brief Creates a ParameterHandler from a config file loaded from CONFIG_FILE_PATH or config.json.
+  /** Creates a ParameterHandler from a config file loaded from CONFIG_FILE_PATH or config.json.
    */
   ParameterHandler();
   /**
-   * @brief Prints a JSON of the ParameterHandler.
+   * Prints a JSON of the ParameterHandler.
    * @return String containing a JSON of itself.
    */
   [[nodiscard]] std::string to_string() const;

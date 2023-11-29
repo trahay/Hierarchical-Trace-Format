@@ -13,29 +13,29 @@
 extern "C" {
 #endif
 /**
- * @brief Creates the directories for the trace to be written.
+ * Creates the directories for the trace to be written.
  * @param archive Archive to be written to a folder.
  */
 void htf_storage_init(HTF(Archive) * archive);
 /**
- * @brief Finalize the writing process by writing the thread.
+ * Finalize the writing process by writing the thread.
  * @param thread Thread to be written to folder.
  */
 void htf_storage_finalize_thread(HTF(Thread) * thread);
 /**
- * @brief Finalize the writing process by writing the whole archive.
+ * Finalize the writing process by writing the whole archive.
  * @param archive Archive to be written to a folder.
  */
 void htf_storage_finalize(HTF(Archive) * archive);
 /**
- * @brief Returns the path of the archive's folder.
+ * Returns the path of the archive's folder.
  * @param dir_name Directory for the archive's storage.
  * @param trace_name Name of the trace.
  * @return Path to the archive's folder.
  */
 char* htf_archive_fullpath(char* dir_name, char* trace_name);
 /**
- * @brief Read an archive from a `main.htf` file.
+ * Read an archive from a `main.htf` file.
  * @param archive Pointer to an allocated archive.
  * @param main_filename Path to a `main.htf` file.
  */

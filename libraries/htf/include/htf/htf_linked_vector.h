@@ -22,7 +22,7 @@
 namespace htf {
 #endif
 /**
- * @brief An hybrid between a LinkedList and a Vector.
+ * An hybrid between a LinkedList and a Vector.
  *
  * Contains many sub-arrays organized in a linked list fashion.
  * Does not implement any methods to remove items from itself.
@@ -34,7 +34,7 @@ typedef struct LinkedVector {
 #ifdef __cplusplus
  private:
   /**
-   * @brief A fixed-sized array functionning as a node in a LinkedList.
+   * A fixed-sized array functionning as a node in a LinkedList.
    *
    * We call it a SubVector since it's the sub-structure of our LinkedVector struct.
    */
@@ -48,7 +48,7 @@ typedef struct LinkedVector {
     size_t starting_index;        /**< Starting index of this SubVector. */
 
     /**
-     * @brief Adds a new element at the end of the vector, after its current last element.
+     * Adds a new element at the end of the vector, after its current last element.
      * The content of `val` is copied to the new element.
      *
      * @param val Value to be copied to the new element.
@@ -60,7 +60,7 @@ typedef struct LinkedVector {
     }
 
     /**
-     * @brief Returns a reference to the element at specified location `pos`, with bounds checking.
+     * Returns a reference to the element at specified location `pos`, with bounds checking.
      * @param pos Position of the element in the LinkedVector.
      * @return Reference to the requested element.
      */
@@ -72,14 +72,14 @@ typedef struct LinkedVector {
     }
 
     /**
-     * @brief Returns a reference to the element at specified location `pos`, without bounds checking.
+     * Returns a reference to the element at specified location `pos`, without bounds checking.
      * @param pos Position of the element in the LinkedVector.
      * @return Reference to the requested element.
      */
     uint64_t& operator[](size_t pos) const { return array[pos - starting_index]; }
 
     /**
-     * @brief Construct a SubVector of a given size.
+     * Construct a SubVector of a given size.
      * @param new_array_size Size of the SubVector.
      * @param previous_subvector Previous SubVector in the LinkedVector.
      */
@@ -95,7 +95,7 @@ typedef struct LinkedVector {
     }
 
     /**
-     * @brief Construct a SubVector from a given already allocated array, and its size.
+     * Construct a SubVector from a given already allocated array, and its size.
      * @param size Size of `array`.
      * @param array Allocated array of values.
      */
@@ -107,7 +107,7 @@ typedef struct LinkedVector {
     }
 
     /**
-     * @brief Copies the values in array to given_array.
+     * Copies the values in array to given_array.
      * @param given_array An allocated array of correct size.
      */
     void copyToArray(uint64_t* given_array) const { memcpy(given_array, array, size * sizeof(uint64_t)); }
@@ -119,7 +119,7 @@ typedef struct LinkedVector {
 #ifdef __cplusplus
  public:
   /**
-   * @brief Creates a new LinkedVector, with a SubVector of size `defaultSize`
+   * Creates a new LinkedVector, with a SubVector of size `defaultSize`.
    */
   LinkedVector();
   /** Loads a LinkedVector from a file without reading the size. */
@@ -127,7 +127,7 @@ typedef struct LinkedVector {
   /** Loads a LinkedVector from a file. */
   LinkedVector(FILE* file);
   /**
-   * @brief Adds a new element at the end of the vector, after its current last element.
+   * Adds a new element at the end of the vector, after its current last element.
    * The content of `val` is copied to the new element.
    *
    * @param val Value to be copied to the new element.
@@ -135,7 +135,7 @@ typedef struct LinkedVector {
    */
   uint64_t& add(uint64_t val);
   /**
-   * @brief Returns a reference to the element at specified location `pos`, with bounds checking.
+   * Returns a reference to the element at specified location `pos`, with bounds checking.
    *
    * To do so, parses the LinkedList from the last SubVector to the first one, stopping once the condition
    * `starting_index` <= `pos` < `starting_index` + `size`
@@ -144,7 +144,7 @@ typedef struct LinkedVector {
    */
   [[nodiscard]] uint64_t& at(size_t pos) const;
   /**
-   * @brief Returns a reference to the element at specified location `pos`, without bounds checking.
+   * Returns a reference to the element at specified location `pos`, without bounds checking.
    *
    * To do so, parses the LinkedList from the last SubVector to the first one, stopping once the condition
    * `starting_index` <= `pos` < `starting_index` + `size`
@@ -153,22 +153,22 @@ typedef struct LinkedVector {
    */
   [[nodiscard]] uint64_t& operator[](size_t pos) const;
   /**
-   * @brief Returns a reference to the first element in the LinkedVector.
+   * Returns a reference to the first element in the LinkedVector.
    * @return Reference to the first element.
    */
   [[nodiscard]] uint64_t& front() const;
   /**
-   * @brief Returns a reference to the last element in the LinkedVector.
+   * Returns a reference to the last element in the LinkedVector.
    * @return Reference to the last element.
    */
   [[nodiscard]] uint64_t& back() const;
 
   /**
-   * @brief Prints the content of the LinkedVector to stdout.
+   * Prints the content of the LinkedVector to stdout.
    */
   void print() const;
   /**
-   * @brief Writes the vector to the given file as an array.
+   * Writes the vector to the given file as an array.
    * @param file File descriptor.
    * @param writeSize Boolean indicating wether you should write the size of the LinkedVector as a header.
    */
@@ -178,6 +178,7 @@ typedef struct LinkedVector {
    * Classic ForwardIterator for LinkedVector.
    */
   struct Iterator {
+    /// @cond NONE
     using iterator_category = std::forward_iterator_tag;
     using difference_type = std::ptrdiff_t;
     using value_type = uint64_t;
@@ -221,10 +222,11 @@ typedef struct LinkedVector {
     SubVector* cur_sub;
     pointer ptr;
     size_t i{0};
+    /// @endcond
   };
-  /** @brief Returns an iterator pointing to the first element in the LinkedVector. */
+  /** Returns an iterator pointing to the first element in the LinkedVector. */
   [[nodiscard]] Iterator begin() const { return {first}; };
-  /** @brief Returns an iterator pointing to the **past-the*end** element in the LinkedVector.
+  /** Returns an iterator pointing to the **past-the*end** element in the LinkedVector.
    * Here, it means nullptr.*/
   [[nodiscard]] Iterator end() const { return {nullptr}; };
 #endif
@@ -235,10 +237,10 @@ CXX(
 
 
 CXX(extern "C" {)
-/** @brief Allocates and returns a new LinkedVector. */
+/** Allocates and returns a new LinkedVector. */
   extern HTF(LinkedVector)* linked_vector_new(void);
   /**
-   * @brief Adds a new element at the end of the vector, after its current last element.
+   * Adds a new element at the end of the vector, after its current last element.
    * The content of `val` is copied to the new element.
    *
    * @param linkedVector Pointer to the vector.
@@ -247,7 +249,7 @@ CXX(extern "C" {)
    */
   extern uint64_t* linked_vector_add(HTF(LinkedVector) * linkedVector, uint64_t val);
   /**
-   * @brief Returns a pointer to the element at specified location `pos`, with bounds checking.
+   * Returns a pointer to the element at specified location `pos`, with bounds checking.
    *
    * To do so, parses the LinkedList from the last SubVector to the first one, stopping once the condition
    * `starting_index` <= `pos` < `starting_index` + `size`
@@ -257,13 +259,13 @@ CXX(extern "C" {)
    */
   extern uint64_t* linked_vector_get(HTF(LinkedVector) * linkedVector, size_t pos);
   /**
-   * @brief Returns a pointer to the last element in the LinkedVector.
+   * Returns a pointer to the last element in the LinkedVector.
    * @param linkedVector Pointer to the vector.
    * @return Pointer to the last element.
    */
   extern uint64_t* linked_vector_get_last(HTF(LinkedVector) * linkedVector);
   /**
-   * @brief Prints the content of the LinkedVector to stdout.
+   * Prints the content of the LinkedVector to stdout.
    */
   extern void print(HTF(LinkedVector));
 CXX(

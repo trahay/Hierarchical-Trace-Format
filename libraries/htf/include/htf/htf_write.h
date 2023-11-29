@@ -13,7 +13,7 @@
 namespace htf {
 #endif
 /**
- * @brief Writes one thread to the HTF trace format.
+ * Writes one thread to the HTF trace format.
  */
 typedef struct ThreadWriter {
   Thread thread_trace; /**< Thread being written. */
@@ -25,15 +25,15 @@ typedef struct ThreadWriter {
  private:
   void findLoopBasic(size_t maxLoopLength);
   void findLoopFilter();
-  /** @brief Tries to find a Loop in the current array of tokens.  */
+  /** Tries to find a Loop in the current array of tokens.  */
   void findLoop();
-  /** @brief Creates a Loop in the trace, and returns a pointer to it.
+  /** Creates a Loop in the trace, and returns a pointer to it.
    * Does not change the current array of tokens.
    * @param start_index Starting index of the loop (first token in the loop).
    * @param loop_len Lenght of the sequence repeated in the loop.
    * */
   Loop* createLoop(int start_index, int loop_len);
-  /** @brief Create a Loop and change the current array of token to reflect that.
+  /** Create a Loop and change the current array of token to reflect that.
    *
    * For example, replaces `[E1, E2, E3, E4, E1, E2, E3, E4]` with `[L1]`,
    * where L1 contains 2 * S1 = `[E1, E2, E3, E4]`
@@ -42,17 +42,17 @@ typedef struct ThreadWriter {
    * @param index_second_iteration Starting index of the second iteration of the loop.
    */
   void replaceTokensInLoop(int loop_len, size_t index_first_iteration, size_t index_second_iteration);
-  /** @brief Returns a pointer to the current Sequence being written. */
+  /** Returns a pointer to the current Sequence being written. */
   [[nodiscard]] Sequence* getCurrentSequence() const { return og_seq[cur_depth]; };
-  /** @brief Stores the timestamp in the given EventSummary. */
+  /** Stores the timestamp in the given EventSummary. */
   void storeTimestamp(EventSummary* es, htf_timestamp_t ts);
-  /** @brief Stores the attribute list in the given EventSummary. */
+  /** Stores the attribute list in the given EventSummary. */
   void storeAttributeList(EventSummary* es, AttributeList* attribute_list, size_t occurence_index);
-  /** @brief Stores the tokens in that Sequence's array of Tokens, then tries to find a Loop.*/
+  /** Stores the tokens in that Sequence's array of Tokens, then tries to find a Loop.*/
   void storeToken(Sequence* seq, Token t);
-  /** @brief Move up the callstack and create a new Sequence. */
+  /** Move up the callstack and create a new Sequence. */
   void recordEnterFunction();
-  /** @brief Close a Sequence and move down the callstack. */
+  /** Close a Sequence and move down the callstack. */
   void recordExitFunction();
 
  public:

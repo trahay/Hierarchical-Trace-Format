@@ -103,7 +103,7 @@ static FILE* _htf_file_open(const char* filename, const char* mode) {
 
 /******************* Read/Write/Compression function for vectors and arrays *******************/
 
-/** @brief Compresses the content in src using ZSTD and writes it to dest. Returns the amount of data written.
+/** Compresses the content in src using ZSTD and writes it to dest. Returns the amount of data written.
  *  @param src The source array.
  *  @param size Size of the source array.
  *  @param dest A free array in which the compressed data will be written.
@@ -130,7 +130,7 @@ inline static uint64_t* _htf_zstd_read(size_t& realSize, void* compArray, size_t
 
 #ifdef WITH_ZFP
 /**
- * @brief Gives a conservative upper bound for the size of the compressed data.
+ * Gives a conservative upper bound for the size of the compressed data.
  * @param src The source array.
  * @param n Number of items in the array.
  * @return Upper bound to compressed array size in bytes.
@@ -145,7 +145,7 @@ inline static size_t _htf_zfp_bound(uint64_t* src, size_t n) {
   return bufsize;
 }
 /**
- * @brief Compresses the content in src using the 1D ZFP Algorithm and writes it to dest.
+ * Compresses the content in src using the 1D ZFP Algorithm and writes it to dest.
  * Returns the amounts of data written.
  * @param src The source array.
  * @param n Number of items in the source array.
@@ -170,7 +170,7 @@ inline static size_t _htf_zfp_compress(uint64_t* src, size_t n, void* dest, size
 }
 
 /**
- * @brief Decompresses the content in src using the 1D ZFP Algorithm and writes it to dest.
+ * Decompresses the content in src using the 1D ZFP Algorithm and writes it to dest.
  * Returns the amounts of data written.
  * @param n Number of items that should be decompressed.
  * @param compressedArray The compressed array.
@@ -194,7 +194,7 @@ inline static uint64_t* _htf_zfp_decompress(size_t n, void* compressedArray, siz
 #endif
 #ifdef WITH_SZ
 /**
- * @brief Compresses the content in src using the 1D SZ Algorithm.
+ * Compresses the content in src using the 1D SZ Algorithm.
  * @param src The source array.
  * @param n Number of items in the source array.
  * @param compressedSize Size of the compressed array. Passed by ref and modified.
@@ -217,7 +217,7 @@ inline static uint64_t* _htf_sz_decompress(size_t n, byte* compressedArray, size
 #define N_BITS (N_BYTES * 8)
 #define MAX_BIT ((1 << N_BITS) - 1)
 
-/** @brief Compresses the content in src using the Histogram method and writes it to dest.
+/** Compresses the content in src using the Histogram method and writes it to dest.
  * Returns the amount of data written.
  *  @param src The source array.
  *  @param n Number of elements in src.
@@ -251,7 +251,7 @@ inline static size_t _htf_histogram_compress(const uint64_t* src, size_t n, byte
   return N_BYTES * n + 2 * sizeof(uint64_t);
 }
 
-/** @brief Decompresses the content in compArray using the Histogram method and writes it to dest.
+/** Decompresses the content in compArray using the Histogram method and writes it to dest.
  * Returns the amount of data written.
  * @param n Number of elements in the dest array.
  * @param compArray The compressed array.

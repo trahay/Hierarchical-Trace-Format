@@ -176,7 +176,7 @@ void ThreadWriter::replaceTokensInLoop(int loop_len, size_t index_first_iteratio
 }
 
 /**
- * @brief Finds a Loop in the current Sequence using a basic quadratic algorithm.
+ * Finds a Loop in the current Sequence using a basic quadratic algorithm.
  *
  * For each correct correct possible loop length, this algorithm tries two things:
  *  - First, it checks if the array of tokens of that length is in front of a loop token
@@ -238,7 +238,7 @@ void ThreadWriter::findLoopBasic(size_t maxLoopLength) {
 }
 
 /**
- * @brief Finds a Loop in the current Sequence by first filtering the correct Tokens.
+ * Finds a Loop in the current Sequence by first filtering the correct Tokens.
  *
  * The idea is that since we always search for a Loop who will end on our last Token,
  * We only need to start searching arrays who end by that token.
