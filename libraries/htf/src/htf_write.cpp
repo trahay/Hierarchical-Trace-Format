@@ -684,6 +684,15 @@ void Thread::printEvent(htf::Event* e) const {
   }
 }
 
+void EventSummary::initEventSummary(TokenId token_id, const Event& e) {
+  id = token_id;
+  nb_occurences = 0;
+  attribute_buffer = 0;
+  attribute_buffer_size = 0;
+  attribute_pos = 0;
+  memcpy(&event, &e, e.event_size);
+}
+
 TokenId Thread::getEventId(htf::Event* e) {
   htf_log(DebugLevel::Max, "Searching for event {.event_type=%d}\n", e->record);
 
@@ -704,9 +713,7 @@ TokenId Thread::getEventId(htf::Event* e) {
   TokenId index = nb_events++;
   htf_log(DebugLevel::Max, "\tNot found. Adding it with id=%x\n", index);
   auto* new_event = &events[index];
-
-  new_event->id = index;
-  memcpy(&new_event->event, e, e->event_size);
+  new_event->initEventSummary(id, *e);
 
   return index;
 }

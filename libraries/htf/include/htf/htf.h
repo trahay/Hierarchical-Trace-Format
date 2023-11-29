@@ -289,6 +289,11 @@ typedef struct EventSummary {
   uint8_t* attribute_buffer;    /**< Storage for Attribute.*/
   size_t attribute_buffer_size; /**< Size of #attribute_buffer.*/
   size_t attribute_pos;         /**< Position of #attribute_buffer.*/
+#ifdef __cplusplus
+ public:
+  /** Initialize and EventSummary */
+  void initEventSummary(TokenId, const Event&);
+#endif
 } EventSummary;
 
 typedef uint32_t ThreadId;                                          /**< Reference for a htf::Thread. */
