@@ -76,7 +76,7 @@ if (ENABLE_SZ)
     find_package(SZ)
     if (SZ_FOUND)
         add_compile_definitions(WITH_SZ)
-	link_libraries(SZ zlib)
+        link_libraries(${SZ_LIBRARIES})
     endif ()
 endif (ENABLE_SZ)
 
