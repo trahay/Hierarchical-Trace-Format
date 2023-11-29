@@ -39,35 +39,35 @@ typedef union AttributeValue {
   float float32;
   /** @brief Arbitrary value of type double */
   double float64;
-  /** @brief References a @eref{String} definition */
+  /** @brief References a String definition */
   StringRef string_ref;
-  /** @brief References a @eref{Attribute} definition */
+  /** @brief References a Attribute definition */
   AttributeRef attribute_ref;
-  /** @brief References a @eref{Location} definition */
+  /** @brief References a Location definition */
   Ref location_ref;
-  /** @brief References a @eref{Region} definition */
+  /** @brief References a Region definition */
   RegionRef region_ref;
-  /** @brief References a @eref{Group} definition */
+  /** @brief References a Group definition */
   Ref group_ref;
-  /** @brief References a @eref{MetricClass}, or a @eref{MetricInstance} definition */
+  /** @brief References a MetricClass, or a MetricInstance definition */
   Ref metric_ref;
-  /** @brief References a @eref{Comm}, or a @eref{InterComm} definition */
+  /** @brief References a Comm, or a InterComm definition */
   Ref comm_ref;
-  /** @brief References a @eref{Parameter} definition */
+  /** @brief References a Parameter definition */
   Ref parameter_ref;
-  /** @brief References a @eref{RmaWin} definition */
+  /** @brief References a RmaWin definition */
   Ref rma_win_ref;
-  /** @brief References a @eref{SourceCodeLocation} definition */
+  /** @brief References a SourceCodeLocation definition */
   Ref source_code_location_ref;
-  /** @brief References a @eref{CallingContext} definition */
+  /** @brief References a CallingContext definition */
   Ref calling_context_ref;
-  /** @brief References a @eref{InterruptGenerator} definition */
+  /** @brief References a InterruptGenerator definition */
   Ref interrupt_generator_ref;
-  /** @brief References a @eref{IoRegularFile}, or a @eref{IoDirectory} definition */
+  /** @brief References a IoRegularFile, or a IoDirectory definition */
   Ref io_file_ref;
-  /** @brief References a @eref{IoHandle} definition */
+  /** @brief References a IoHandle definition */
   Ref io_handle_ref;
-  /** @brief References a @eref{LocationGroup} definition */
+  /** @brief References a LocationGroup definition */
   Ref location_group_ref;
 } AttributeValue;
 
@@ -139,55 +139,55 @@ enum AttributeType {
    */
   HTF_TYPE_DOUBLE = 10,
 
-  /** @brief Mapping of @eref{String} identifiers.
+  /** @brief Mapping of String identifiers.
    *
    *  Type category: Definition reference
    */
   HTF_TYPE_STRING = 11,
 
-  /** @brief Mapping of @eref{Attribute} identifiers.
+  /** @brief Mapping of Attribute identifiers.
    *
    *  Type category: Definition reference
    */
   HTF_TYPE_ATTRIBUTE = 12,
 
-  /** @brief Mapping of @eref{Location} identifiers.
+  /** @brief Mapping of Location identifiers.
    *
    *  Type category: Definition reference
    */
   HTF_TYPE_LOCATION = 13,
 
-  /** @brief Mapping of @eref{Region} identifiers.
+  /** @brief Mapping of Region identifiers.
    *
    *  Type category: Definition reference
    */
   HTF_TYPE_REGION = 14,
 
-  /** @brief Mapping of @eref{Group} identifiers.
+  /** @brief Mapping of Group identifiers.
    *
    *  Type category: Definition reference
    */
   HTF_TYPE_GROUP = 15,
 
-  /** @brief Mapping of @eref{Metric} identifiers.
+  /** @brief Mapping of Metric identifiers.
    *
    *  Type category: Definition reference
    */
   HTF_TYPE_METRIC = 16,
 
-  /** @brief Mapping of @eref{Comm} identifiers.
+  /** @brief Mapping of Comm identifiers.
    *
    *  Type category: Definition reference
    */
   HTF_TYPE_COMM = 17,
 
-  /** @brief Mapping of @eref{Parameter} identifiers.
+  /** @brief Mapping of Parameter identifiers.
    *
    *  Type category: Definition reference
    */
   HTF_TYPE_PARAMETER = 18,
 
-  /** @brief Mapping of @eref{RmaWin} identifiers.
+  /** @brief Mapping of RmaWin identifiers.
    *
    *  @since Version 1.2.
    *
@@ -195,7 +195,7 @@ enum AttributeType {
    */
   HTF_TYPE_RMA_WIN = 19,
 
-  /** @brief Mapping of @eref{SourceCodeLocation} identifiers.
+  /** @brief Mapping of SourceCodeLocation identifiers.
    *
    *  @since Version 1.5.
    *
@@ -203,7 +203,7 @@ enum AttributeType {
    */
   HTF_TYPE_SOURCE_CODE_LOCATION = 20,
 
-  /** @brief Mapping of @eref{CallingContext} identifiers.
+  /** @brief Mapping of CallingContext identifiers.
    *
    *  @since Version 1.5.
    *
@@ -211,7 +211,7 @@ enum AttributeType {
    */
   HTF_TYPE_CALLING_CONTEXT = 21,
 
-  /** @brief Mapping of @eref{InterruptGenerator} identifiers.
+  /** @brief Mapping of InterruptGenerator identifiers.
    *
    *  @since Version 1.5.
    *
@@ -219,7 +219,7 @@ enum AttributeType {
    */
   HTF_TYPE_INTERRUPT_GENERATOR = 22,
 
-  /** @brief Mapping of @eref{IoFile} identifiers.
+  /** @brief Mapping of IoFile identifiers.
    *
    *  @since Version 2.1.
    *
@@ -227,7 +227,7 @@ enum AttributeType {
    */
   HTF_TYPE_IO_FILE = 23,
 
-  /** @brief Mapping of @eref{IoHandle} identifiers.
+  /** @brief Mapping of IoHandle identifiers.
    *
    *  @since Version 2.1.
    *
@@ -235,7 +235,7 @@ enum AttributeType {
    */
   HTF_TYPE_IO_HANDLE = 24,
 
-  /** @brief Mapping of @eref{LocationGroup} identifiers.
+  /** @brief Mapping of LocationGroup identifiers.
    *
    *  @since Version 3.0.
    *

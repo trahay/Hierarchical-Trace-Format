@@ -8,28 +8,37 @@
 using namespace htf;
 
 LinkedVector::LinkedVector() {
-  first = new SubVector(default_size);
+  first = new SubVector(defaultSize);
   last = first;
 }
 
-uint64_t& LinkedVector::add(uint64_t element) {
+uint64_t& LinkedVector::add(uint64_t val) {
   if (this->last->size >= this->last->allocated) {
     htf_log(DebugLevel::Debug, "Adding a new tail to an array: %p\n", this);
-    last = new SubVector(default_size, last);
+    last = new SubVector(defaultSize, last);
   }
   size++;
-  return last->add(element);
+  return last->add(val);
 }
-uint64_t& LinkedVector::at(size_t index) const {
-  if (index >= size) {
-    htf_error("Getting an element whose index (%lu) is bigger than vector size (%lu)\n", index, size);
+uint64_t& LinkedVector::at(size_t pos) const {
+  if (pos >= size) {
+    htf_error("Getting an element whose index (%lu) is bigger than vector size (%lu)\n", pos, size);
   }
   struct SubVector* correct_sub = last;
-  while (index < correct_sub->starting_index) {
+  while (pos < correct_sub->starting_index) {
     correct_sub = correct_sub->previous;
   }
-  return correct_sub->at(index);
+  return correct_sub->at(pos);
 }
+
+uint64_t& LinkedVector::operator[](size_t pos) const {
+  struct SubVector* correct_sub = last;
+  while (pos < correct_sub->starting_index) {
+    correct_sub = correct_sub->previous;
+  }
+  return (*correct_sub)[pos];
+}
+
 uint64_t& LinkedVector::front() const {
   return first->at(0);
 }
@@ -49,11 +58,11 @@ void LinkedVector::print() const {
 LinkedVector* linked_vector_new() {
   return new LinkedVector();
 }
-uint64_t* linked_vector_add(LinkedVector* linkedVector, uint64_t item) {
-  return &linkedVector->add(item);
+uint64_t* linked_vector_add(LinkedVector* linkedVector, uint64_t val) {
+  return &linkedVector->add(val);
 }
-uint64_t* linked_vector_get(LinkedVector* linkedVector, size_t index) {
-  return &linkedVector->at(index);
+uint64_t* linked_vector_get(LinkedVector* linkedVector, size_t pos) {
+  return &linkedVector->at(pos);
 }
 uint64_t* linked_vector_get_last(LinkedVector* linkedVector) {
   return &linkedVector->back();

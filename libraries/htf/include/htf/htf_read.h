@@ -14,51 +14,72 @@
 #ifdef __cplusplus
 namespace htf {
 #endif
+/** Maximum Callstack Size. */
 #define MAX_CALLSTACK_DEPTH 100
 
+/**
+ * Options for the ThreadReader. Values have to be powers of 2.
+ */
 enum ThreadReaderOptions {
-  None = 0,
-  ShowStructure = 1,
-  NoTimestamps = 2,
+  None = 0,          /**< No specific options. */
+  ShowStructure = 1, /**< Read and return the structure (Sequences and Loop). */
+  NoTimestamps = 2,  /**< Do not load the timestamps / durations. */
 };
 
-/** Only used when reading a trace, links an event with a timestamp. */
+/** @brief Represents one occurence of an Event. */
 typedef struct EventOccurence {
-  struct Event* event;
-  htf_timestamp_t timestamp;
-  htf_timestamp_t duration;
-  AttributeList* attributes;
+  struct Event* event;       /**< Pointer to the Event.*/
+  htf_timestamp_t timestamp; /**< Timestamp for that occurence.*/
+  htf_timestamp_t duration;  /**< Duration of that occurence.*/
+  AttributeList* attributes; /**< Attributes for that occurence.*/
 } EventOccurence;
 
+/**
+ * @brief Represents one occurence of a Sequence.
+ */
 typedef struct SequenceOccurence {
-  struct Sequence* sequence;
-  struct Savestate* savestate;
-  htf_timestamp_t timestamp;
-  htf_timestamp_t duration;
-  /**Occurences of the events in this sequence. */
-  struct TokenOccurence* full_sequence;
+  struct Sequence* sequence;            /**< Pointer to the Sequence.*/
+  struct Savestate* savestate;          /**< Savestate of the reader before entering the sequence.*/
+  htf_timestamp_t timestamp;            /**< Timestamp for that occurence.*/
+  htf_timestamp_t duration;             /**< Duration of that occurence.*/
+  struct TokenOccurence* full_sequence; /** Array of the occurrences in this sequence. */
 } SequenceOccurence;
 
+/**
+ * @brief Represents one occurence of a Loop.
+ */
 typedef struct LoopOccurence {
-  struct Loop* loop;
-  unsigned int nb_iterations;
-  htf_timestamp_t timestamp;
-  htf_timestamp_t duration;
-  struct SequenceOccurence* full_loop;
-  struct SequenceOccurence loop_summary;
+  struct Loop* loop;                     /**< Pointer to the Loop.*/
+  unsigned int nb_iterations;            /**< Number of iterations for that occurence.*/
+  htf_timestamp_t timestamp;             /**< Timestamp for that occurence.*/
+  htf_timestamp_t duration;              /**< Duration for that occurence.*/
+  struct SequenceOccurence* full_loop;   /**< Array of the Sequences in this loop.*/
+  struct SequenceOccurence loop_summary; /**< False SequenceOccurence that represents a summary of all the
+                                          * occurrences in full_loop. */
 } LoopOccurence;
 
+/**
+ * @brief Represents any kind of Occurrence.
+ */
 typedef union Occurence {
   struct LoopOccurence loop_occurence;
   struct SequenceOccurence sequence_occurence;
   struct EventOccurence event_occurence;
 } Occurence;
 
+/**
+ * @brief Tuple containing a Token and its corresponding Occurence.
+ */
 typedef struct TokenOccurence {
+  /** Token for the occurence. */
   const Token* token;
+  /** Occurence corresponding to the Token. */
   Occurence* occurence;
 } TokenOccurence;
 
+/**
+ * @brief Reads one thread from an HTF trace.
+ */
 typedef struct ThreadReader {
   /** Archive being read by this reader. */
   const struct Archive* archive;
@@ -83,32 +104,35 @@ typedef struct ThreadReader {
   /** At any point, a token t has been seen tokenCount[t] times. */
   DEFINE_TokenCountMap(tokenCount);
 
+  /**
+   * @brief Options as defined in htf::ThreadReaderOptions.
+   */
   int options;
 #ifdef __cplusplus
   ThreadReader(const Archive* archive, ThreadId threadId, int options);
 
  private:
-  /* Returns the Sequence being run at the given frame. */
+  /** Returns the Sequence being run at the given frame. */
   [[nodiscard]] const Token& getFrameInCallstack(int frame_number) const;
-  /* Returns the token being run at the given frame. */
+  /** Returns the token being run at the given frame. */
   [[nodiscard]] const Token& getTokenInCallstack(int frame_number) const;
-  /* Prints the current Token. */
+  /** Prints the current Token. */
   void printCurToken() const;
-  /* Returns the current Sequence*/
+  /** Returns the current Sequence*/
   [[nodiscard]] const Token& getCurSequence() const;
-  /* Prints the current Sequence. */
+  /** Prints the current Sequence. */
   void printCurSequence() const;
-  /* Prints the whole current callstack. */
+  /** Prints the whole current callstack. */
   void printCallstack() const;
-  /* Returns the EventSummary of the given Event. */
+  /** Returns the EventSummary of the given Event. */
   [[nodiscard]] EventSummary* getEventSummary(Token event) const;
-  /* Returns the timestamp of the given event occurring at the given index. */
+  /** Returns the timestamp of the given event occurring at the given index. */
   [[nodiscard]] htf_timestamp_t getEventTimestamp(Token event, int occurence_id) const;
-  /* Returns whether the given sequence still has more Tokens after the given current_index. */
+  /** Returns whether the given sequence still has more Tokens after the given current_index. */
   [[nodiscard]] bool isEndOfSequence(int current_index, Token sequence_id) const;
-  /* Returns whether the given loop still has more Tokens after the given current_index. */
+  /** Returns whether the given loop still has more Tokens after the given current_index. */
   [[nodiscard]] bool isEndOfLoop(int current_index, Token loop_id) const;
-  /* Returns the duration of the given Loop. */
+  /** Returns the duration of the given Loop. */
   [[nodiscard]] htf_timestamp_t getLoopDuration(Token loop_id) const;
 
   /** Returns an EventOccurence for the given Token appearing at the given occurence_id.
@@ -188,6 +212,9 @@ typedef struct Savestate {
 #ifdef __cplusplus
 }; /* namespace htf */
 
+/**
+ * Counter for how much memory the savestates consume.
+ */
 C_CXX(_Thread_local, thread_local) extern size_t savestate_memory;
 
 extern "C" {
