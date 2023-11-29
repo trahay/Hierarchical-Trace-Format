@@ -74,7 +74,7 @@ void ThreadReader::printCallstack() const {
     if (current_sequence_id.type == TypeLoop) {
       auto* loop = thread_trace->getLoop(current_sequence_id);
       printf(" iter %d/%d", callstack_loop_iteration[i],
-             loop->nb_iterations[tokenCount.find(current_sequence_id)->second]);
+             loop->nb_iterations[tokenCount.get_value(current_sequence_id)]);
       htf_assert(callstack_loop_iteration[i] < MAX_CALLSTACK_DEPTH);
     } else if (current_sequence_id.type == TypeSequence) {
       auto* sequence = thread_trace->getSequence(current_sequence_id);
@@ -124,8 +124,11 @@ htf_timestamp_t ThreadReader::getLoopDuration(Token loop_id) const {
   htf_timestamp_t sum = 0;
   auto* loop = thread_trace->getLoop(loop_id);
   auto* sequence = thread_trace->getSequence(loop->repeated_token);
-  size_t loopIndex = tokenCount.find(loop_id)->second;
-  size_t offset = tokenCount.find(loop->repeated_token)->second;
+
+  Token sequence_id = loop->repeated_token;
+
+  size_t loopIndex = tokenCount.get_value(loop_id);
+  size_t offset = tokenCount.get_value(sequence_id);
   size_t nIterations = loop->nb_iterations.at(loopIndex);
   DOFOR(i, nIterations) {
     sum += sequence->durations->at(offset + i);

@@ -194,9 +194,9 @@ typedef struct Event {
 /**
  * @brief A Map for counting Tokens.
  *
- * This class exists to make token counting easier.
- * Instead of having arrays for each different type of token, we can just use that map.
- * This class also comes with addition and multiplication, so that we can easily use them.
+ * For each token, the size_t member counts the number of time the token appeared in the trace so far.
+ *
+ *  This class also comes with addition and multiplication, so that we can easily use them.
  */
 struct TokenCountMap : public std::map<Token, size_t> {
   /** Adds each (key, value) pair of the other map to this one. */
@@ -216,6 +216,18 @@ struct TokenCountMap : public std::map<Token, size_t> {
       otherMap[keyValue.first] = keyValue.second * multiplier;
     }
     return otherMap;
+  }
+
+  /** Return the value associated with t, or 0 if t was not found.
+   *
+   *  This is useful when searching for a token count: if the token has never been encountered, it
+   *  won't be found by the map find() function, and we return 0 (instead of an errornous value such
+   *  as -1).
+   */
+  size_t get_value(const Token&t) const {
+    auto res = find(t);
+    if(res == end()) return 0;
+    return res->second;
   }
 };
 #endif
