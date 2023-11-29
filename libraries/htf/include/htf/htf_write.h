@@ -35,7 +35,8 @@ typedef struct ThreadWriter {
   Loop* createLoop(int start_index, int loop_len);
   /** @brief Create a Loop and change the current array of token to reflect that.
    *
-   * For example, replaces e1 e2 e3 e4 e1 e2 e3 e4 with l1.
+   * For example, replaces `[E1, E2, E3, E4, E1, E2, E3, E4]` with `[L1]`,
+   * where L1 contains 2 * S1 = `[E1, E2, E3, E4]`
    * @param loop_len Length of the sequence repeated in the loop.
    * @param index_first_iteration Starting index of the first iteration of the loop.
    * @param index_second_iteration Starting index of the second iteration of the loop.
