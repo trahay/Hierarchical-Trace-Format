@@ -481,7 +481,7 @@ void ThreadWriter::open(Archive* archive, ThreadId thread_id) {
 
   htf_log(DebugLevel::Debug, "htf_write_thread_open(%ux)\n", thread_id);
 
-  thread_trace = Thread(archive, thread_id);
+  thread_trace.initThread(archive, thread_id);
   max_depth = CALLSTACK_DEPTH_DEFAULT;
   og_seq = new Sequence*[max_depth];
 

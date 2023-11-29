@@ -110,7 +110,7 @@ void Thread::printSequence(htf::Token token) const {
   printTokenVector(sequence->tokens);
 }
 
-Thread::Thread(Archive* a, ThreadId thread_id) {
+void Thread::initThread(Archive* a, ThreadId thread_id) {
   archive = a;
   id = thread_id;
 

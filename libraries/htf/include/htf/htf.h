@@ -409,9 +409,14 @@ typedef struct Thread {
   htf_timestamp_t getSequenceDuration(Token* array, size_t size);
   void finalizeThread();
   /** Create a new Thread from an archive and an id. This is used when writing the trace. */
-  Thread(Archive* a, ThreadId id);
+  void initThread(Archive* a, ThreadId id);
+
   /** Create a blank new Thread. This is used when reading the trace. */
   Thread() = default;
+
+  // Make sure this object is never copied
+  Thread(const Thread&) = delete;
+  void operator=(const Thread&) = delete; 
 #endif
 } Thread;
 
@@ -493,13 +498,22 @@ extern "C" {
   do {									\
     datatype* new_buffer = (typeof(buffer)) realloc(buffer, (new_size) * sizeof(datatype)); \
     if (new_buffer == NULL) {						\
-      new_buffer = (typeof(new_buffer)) malloc((new_size) * sizeof(datatype)); \
+      new_buffer = (typeof(new_buffer)) calloc((new_size),  sizeof(datatype)); \
       if (new_buffer == NULL) {						\
         htf_error("Failed to allocate memory using realloc AND malloc\n"); \
       }									\
       memmove(new_buffer, buffer, (cur_size) * sizeof(datatype));	\
       free(buffer);							\
-    }									\
+    } else {								\
+      /* realloc changed the size of the buffer, leaving some bytes */	\
+      /* uninitialized. Let's fill the rest of the buffer with zeros to*/ \
+      /* prevent problems. */						\
+      if((new_size) > (cur_size)) {					\
+	uintptr_t old_end_addr = (uintptr_t)(buffer) + ((cur_size)*sizeof(datatype)); \
+	uintptr_t rest_size = ((new_size)-(cur_size))*sizeof(datatype);	\
+	memset((void*)old_end_addr, 0, rest_size);			\
+      }									\
+    } 									\
     buffer = new_buffer;						\
     (cur_size) = (new_size);						\
   } while (0)
