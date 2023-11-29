@@ -131,20 +131,40 @@ function trace_get_nb_event_of_type {
     trace_filename=$1
     event_type=$2
 
-    "$HTF_PRINT_PATH" "$trace_filename" 2>/dev/null |grep "^$event_type[[:space:]]"|wc -l
+    "$HTF_PRINT_PATH" "$trace_filename" 2>/dev/null |grep -E "^[[:space:]]+[[:digit:]]" |awk '{$1=""; $2=""}1' | grep -E "^[[:space:]]+$event_type" |wc -l
 }
 
-function trace_check_integrity {
+function trace_get_nb_function {
+    trace_filename=$1
+    event_type=$2
+    function_name=$3
+
+    "$HTF_PRINT_PATH" "$trace_filename" 2>/dev/null |grep -E "^[[:space:]]+[[:digit:]]" |awk '{$1=""; $2=""}1' |grep -E "^[[:space:]]+$event_type" | grep -E "\($function_name\)" | wc -l
+}
+
+function trace_check_existence {
     trace_filename=$1
 
     ((nb_test++))
-    echo " > Checking for trace integrity"
+    echo " > Checking for trace existence"
 
     if ! [ -f  "$trace_filename" ]; then
 	print_error "Cannot open trace '$trace_filename'"
 	((nb_failed++))
 	return 1
+    else
+	((nb_pass++))
+	print_ok
+	return 0
     fi
+}
+
+function trace_check_htf_print {
+    trace_filename=$1
+
+    ((nb_test++))
+    echo " > Checking if htf_print works"
+
     if ! "$HTF_PRINT_PATH" "$trace_filename" > /dev/null 2>&1 ; then
 	print_error "Cannot parse trace '$trace_filename'"
 	((nb_failed++))
@@ -154,4 +174,129 @@ function trace_check_integrity {
 	print_ok
 	return 0
     fi
+}
+
+function trace_check_htf_info {
+    trace_filename=$1
+
+    ((nb_test++))
+    echo " > Checking if htf_info works"
+
+    if ! "$HTF_INFO_PATH" "$trace_filename" > /dev/null 2>&1 ; then
+	print_error "Cannot parse trace '$trace_filename'"
+	((nb_failed++))
+	return 1
+    else
+	((nb_pass++))
+	print_ok
+	return 0
+    fi
+}
+
+function trace_check_enter_leave_parity {
+    trace_filename=$1
+
+    ((nb_test++))
+    echo " > Checking for Enter/Leave parity"
+
+    nb_enter=$(trace_get_nb_event_of_type "$trace_filename" "Enter")
+    nb_leave=$(trace_get_nb_event_of_type "$trace_filename" "Leave")
+    if [ $nb_enter -ne $nb_leave ]; then
+	print_error "$nb_enter Enter events / $nb_leave Leave events"
+	((nb_failed++))
+	return 1
+    else
+	print_ok "$nb_enter event of each type"
+	((nb_pass++))
+	return 0
+    fi
+}
+
+
+function trace_check_nb_leave {
+    trace_filename=$1
+    event_type="$2"
+    expected_nb=$3
+
+    ((nb_test++))
+    echo " > Checking the number of Leave $event_type events"
+
+    actual_nb=$(trace_get_nb_event_of_type "$trace_filename" "Leave")
+    if [ $expected_nb -ne $actual_nb ]; then
+	print_error "$actual_nb events (expected: $expected_nb)"
+	((nb_failed++))
+	return 1
+    else
+	print_ok
+	((nb_pass++))
+	return 0
+    fi
+}
+
+function trace_check_nb_function {
+    trace_filename=$1
+    function_name="$2"
+    expected_nb=$3
+
+    ((nb_test++))
+    echo " > Checking the number of calls to function $function_name"    
+
+    actual_enter_nb=$(trace_get_nb_function "$trace_filename" "Enter" "$function_name")
+    actual_leave_nb=$(trace_get_nb_function "$trace_filename" "Leave" "$function_name")
+    if [ $expected_nb -ne $actual_enter_nb ]; then
+	print_error "$actual_enter_nb enter events (expected: $expected_nb)"
+	((nb_failed++))
+	return 1
+    elif [ $expected_nb -ne $actual_leave_nb ]; then
+	print_error "$actual_leave_nb leave events (expected: $expected_nb)"
+	((nb_failed++))
+	return 1
+    else
+	print_ok
+	((nb_pass++))
+	return 0
+    fi
+}
+
+
+function trace_check_event_type {
+    trace_filename=$1
+    event_type=$2
+    expected_nb=$3
+
+    ((nb_test++))
+    echo " > Checking the number of $event_type events"
+    actual_nb=$(trace_get_nb_event_of_type "$trace_filename" "$event_type")
+
+    if [ $expected_nb -ne $actual_nb ]; then
+	print_error "$actual_nb events (expected: $expected_nb)"
+	((nb_failed++))
+	return 1
+    else
+	print_ok
+	((nb_pass++))
+	return 0
+    fi
+}
+
+function trace_check_timestamp_order {
+    trace_filename=$1
+    thread_name=$2
+
+    ((nb_test++))
+    echo " > Checking the order of timestamps for thread $thread_name"
+
+    timestamps=$("$HTF_PRINT_PATH" "$trace_filename" 2>/dev/null |grep "[[:space:]]$thread_name[[:space:]]" |awk '{print $1}')
+    generated_timestamps=$(echo $timestamps | sed 's/ /\n/g')
+    ordered_timestamp=$(echo $timestamps | sed 's/ /\n/g' |sort -n)
+    if [ "$generated_timestamps" != "$ordered_timestamp" ]; then
+	print_error "failed"
+	((nb_failed++))
+	return 1
+    else
+	print_ok
+	((nb_pass++))
+	return 0
+    fi
+    
 }
