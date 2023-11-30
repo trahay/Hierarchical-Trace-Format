@@ -165,7 +165,7 @@ function trace_check_htf_print {
     ((nb_test++))
     echo " > Checking if htf_print works"
 
-    if ! "$HTF_PRINT_PATH" "$trace_filename" > /dev/null 2>&1 ; then
+    if ! "$HTF_PRINT_PATH" "$trace_filename"  2>&1 ; then
 	print_error "Cannot parse trace '$trace_filename'"
 	((nb_failed++))
 	return 1

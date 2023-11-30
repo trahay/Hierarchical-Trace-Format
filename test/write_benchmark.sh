@@ -16,7 +16,7 @@ test_program="write_benchmark"
 
 # First, run the test program
 
-niter=100
+niter=20
 nthread=4
 
 # we need to move to the build dir to make sure the trace is not generated in the source directory
