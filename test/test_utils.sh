@@ -3,6 +3,7 @@
 CUR_PATH=$(dirname  $(realpath $0))
 cd "$CUR_PATH"
 
+echo "HTF_PRINT_PATH='$HTF_PRINT_PATH'"
 [ -n "$HTF_PRINT_PATH" ]    || export HTF_PRINT_PATH=htf_print
 [ -n "$HTF_INFO_PATH" ]    || export HTF_INFO_PATH=htf_info
 
