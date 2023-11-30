@@ -527,6 +527,7 @@ void Archive::close() {
 static inline void init_event(Event* e, enum Record record) {
   e->event_size = offsetof(Event, event_data);
   e->record = record;
+  memset(&e->event_data[0], 0, sizeof(e->event_data));
 }
 
 static inline void push_data(Event* e, void* data, size_t data_size) {
@@ -690,7 +691,7 @@ void EventSummary::initEventSummary(TokenId token_id, const Event& e) {
   attribute_buffer = 0;
   attribute_buffer_size = 0;
   attribute_pos = 0;
-  memcpy(&event, &e, e.event_size);
+  memcpy(&event, &e, sizeof(e));
 }
 
 TokenId Thread::getEventId(htf::Event* e) {
