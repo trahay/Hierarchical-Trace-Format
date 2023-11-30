@@ -501,23 +501,27 @@ void ThreadWriter::open(Archive* archive, ThreadId thread_id) {
  * Creates a new LocationGroup and adds it to that Archive.
  */
 void Archive::defineLocationGroup(LocationGroupId id, StringRef name, LocationGroupId parent) {
+  pthread_mutex_lock(&lock);
   LocationGroup l = LocationGroup();
   l.id = id;
   l.name = name;
   l.parent = parent;
   location_groups.push_back(l);
+  pthread_mutex_unlock(&lock);
 }
 
 /**
  * Creates a new Location and adds it to that Archive.
  */
 void Archive::defineLocation(ThreadId id, StringRef name, LocationGroupId parent) {
+  pthread_mutex_lock(&lock);
   Location l = Location();
   l.id = id;
   htf_assert(l.id != HTF_THREAD_ID_INVALID);
   l.name = name;
   l.parent = parent;
   locations.push_back(l);
+  pthread_mutex_unlock(&lock);
 }
 
 void Archive::close() {

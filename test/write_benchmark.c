@@ -38,7 +38,7 @@ static pthread_barrier_t bench_stop;
 #define TIME_DIFF(t1, t2) (((t2).tv_sec - (t1).tv_sec) + ((t2).tv_nsec - (t1).tv_nsec) / 1e9)
 
 static StringRef _register_string(char* str) {
-  static StringRef next_ref = 0;
+  static _Atomic StringRef next_ref = 0;
   StringRef ref = next_ref++;
 
   htf_archive_register_string(global_archive, ref, str);
