@@ -10,22 +10,20 @@
 
 int main(int argc, char** argv) {
   if (argc < 2) {
-    htf_error("Not enough arguments ! 2 argument required.\n");
+    htf_error("Not enough arguments ! 1 argument required.\n");
   }
-  if (argc > 3) {
-    htf_error("Too many arguments ! 2 argument required.\n");
+  if (argc > 2) {
+    htf_error("Too many arguments ! 1 argument required.\n");
   }
-  long vector_size = strtol(argv[1], NULL, 10);
-  size_t TEST_SIZE = strtol(argv[2], NULL, 10);
+  int TEST_SIZE = atoi(argv[1]);
 
   LinkedVector* vector = linked_vector_new();
-  int adding;
+
   DOFOR(i, TEST_SIZE) {
     linked_vector_add(vector, i);
   }
 
-  htf_assert(vector->size == TEST_SIZE);
-  //  htf_vector_print_as_int(&vector);
+  htf_assert(vector->size == (size_t)TEST_SIZE);
   printf("\n");
   return EXIT_SUCCESS;
 }

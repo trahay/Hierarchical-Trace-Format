@@ -21,7 +21,7 @@ add_executable(find_loop find_loop.c)
 add_test(NAME find_loop COMMAND find_loop 50 100)
 
 add_executable(test_vector test_vector.c)
-add_test(NAME test_vector COMMAND test_vector 10 100)
+add_test(NAME test_vector COMMAND test_vector 100)
 
 add_executable(test_hash test_hash.cpp)
 #add_test(NAME test_hash COMMAND test_hash)
