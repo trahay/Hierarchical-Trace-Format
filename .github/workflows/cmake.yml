@@ -3,7 +3,7 @@ name: CMake_tests
 on:
   push:
     branches:
-      - CI
+      - main
   pull_request:
     branches:
       - main
