@@ -3,7 +3,7 @@ name: CMake_tests
 on:
   push:
     branches:
-      - main
+      - CI
   pull_request:
     branches:
       - main
@@ -36,5 +36,6 @@ jobs:
 
       - name: Unit Test
         working-directory: ${{github.workspace}}/build
-        run:
+        run: |
+          echo "htf_print_path: ${{env.HTF_PRINT_PATH}}
           ctest -C ${{env.BUILD_TYPE}} --rerun-failed --output-on-failure
