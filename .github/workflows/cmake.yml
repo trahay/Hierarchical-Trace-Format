@@ -28,7 +28,7 @@ jobs:
 
       - name: Unit Test
         working-directory: ${{github.workspace}}/build
-        run:|
+        run: |
           echo "HTF_INFO_PATH=${{github.workspace}}/build/apps/htf_info" >> $GITHUB_ENV
           echo "HTF_PRINT_PATH=${{github.workspace}}/build/apps/htf_print" >> $GITHUB_ENV
           ctest -C ${{env.BUILD_TYPE}} --rerun-failed --output-on-failure
