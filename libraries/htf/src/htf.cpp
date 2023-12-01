@@ -110,6 +110,23 @@ void Thread::printSequence(htf::Token token) const {
   printTokenVector(sequence->tokens);
 }
 
+Thread::Thread() {
+  archive = nullptr;
+  id=HTF_THREAD_ID_INVALID;
+
+  events = nullptr;
+  nb_allocated_events = 0;
+  nb_events = 0;
+
+  sequences = nullptr;
+  nb_allocated_sequences = 0;
+  nb_sequences = 0;
+ 
+  loops = 0;
+  nb_allocated_loops = 0;
+  nb_loops = 0;
+}
+
 void Thread::initThread(Archive* a, ThreadId thread_id) {
   archive = a;
   id = thread_id;
@@ -169,6 +186,30 @@ const TokenCountMap& Sequence::getTokenCount(const Thread* thread) {
   return tokenCount;
 }
 }  // namespace htf
+
+
+void* htf_realloc(void* buffer, int cur_size, int new_size, size_t datatype_size) {
+  void* new_buffer = (void*) realloc(buffer, new_size * datatype_size);
+    if (new_buffer == NULL) {
+      new_buffer = (void*) calloc(new_size, datatype_size);
+      if (new_buffer == NULL) {
+        htf_error("Failed to allocate memory using realloc AND malloc\n");
+      }
+      memmove(new_buffer, buffer, cur_size * datatype_size);
+      free(buffer);
+    } else {
+      /* realloc changed the size of the buffer, leaving some bytes */ 
+      /* uninitialized. Let's fill the rest of the buffer with zeros to*/
+      /* prevent problems. */
+
+      if(new_size > cur_size) {
+	uintptr_t old_end_addr = (uintptr_t)(new_buffer) + (cur_size*datatype_size);
+	uintptr_t rest_size = (new_size-cur_size)*datatype_size;
+	memset((void*)old_end_addr, 0, rest_size);
+      }
+    }
+    return new_buffer;
+}
 
 /* C bindings now */
 

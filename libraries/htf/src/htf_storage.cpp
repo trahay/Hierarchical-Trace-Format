@@ -1106,7 +1106,7 @@ static void _htf_read_archive(htf::Archive* global_archive, htf::Archive* archiv
 
   _htf_fread(&archive->nb_threads, sizeof(int), 1, f);
 
-  archive->threads = new htf::Thread*[archive->nb_threads];
+  archive->threads = (htf::Thread**) calloc(sizeof(htf::Thread*), archive->nb_threads);
   archive->nb_allocated_threads = archive->nb_threads;
 
   //  _htf_fread(&COMPRESSION_OPTIONS, sizeof(COMPRESSION_OPTIONS), 1, f);
@@ -1164,7 +1164,7 @@ static htf::Archive* _htf_get_archive(htf::Archive* global_archive, htf::Locatio
     return nullptr;
   }
   printf("Reading archive %s\n", fullpath);
-  free(fullpath);
+  delete [] fullpath;
 
   while (global_archive->nb_archives >= global_archive->nb_allocated_archives) {
     INCREMENT_MEMORY_SPACE(global_archive->archive_list, global_archive->nb_allocated_archives, htf::Archive*);
@@ -1191,7 +1191,7 @@ void htf_read_thread(htf::Archive* archive, htf::ThreadId thread_id) {
   }
 
   int index = archive->nb_threads++;
-  archive->threads[index] = new htf::Thread();
+  archive->threads[index] = htf_thread_new();
   _htf_read_thread(archive, archive->threads[index], thread_id);
   htf_assert(archive->threads[index]->nb_events > 0);
 }

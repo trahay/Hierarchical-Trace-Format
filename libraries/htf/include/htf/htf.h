@@ -441,8 +441,8 @@ typedef struct Thread {
   /** Create a new Thread from an archive and an id. This is used when writing the trace. */
   void initThread(Archive* a, ThreadId id);
 
-  /** Create a blank new Thread. This is used when reading the trace. */
-  Thread() = default;
+  //  /** Create a blank new Thread. This is used when reading the trace. */
+  Thread();
 
   // Make sure this object is never copied
   Thread(const Thread&) = delete;
@@ -518,40 +518,19 @@ extern "C" {
   /** Returns the number of loops for the nth loop. */
   extern size_t htf_loop_get_count(HTF(Loop) * loop, size_t index);
 
+
+  /** Does a safe-ish realloc the the given buffer.
+   *
+   * Given a buffer, its current size, a new desired size and its containing object's datatype,
+   * changes the size of the buffer using realloc, or if it fails, malloc and memmove, then frees the old buffer.
+   * This is better than a realloc because it moves the data around, but it is also slower.
+   * Checks for error at malloc.
+   */
+  extern void* htf_realloc(void* buffer, int cur_size, int new_size, size_t datatype_size);
+
 #ifdef __cplusplus
 };
 #endif
-
-/** Does a safe-ish realloc the the given buffer.
- *
- * Given a buffer, its current size, a new desired size and its containing object's datatype,
- * changes the size of the buffer using realloc, or if it fails, malloc and memmove, then frees the old buffer.
- * This is better than a realloc because it moves the data around, but it is also slower.
- * Checks for error at malloc.
- */
-#define htf_realloc(buffer, cur_size, new_size, datatype)		\
-  do {									\
-    datatype* new_buffer = (typeof(buffer)) realloc(buffer, (new_size) * sizeof(datatype)); \
-    if (new_buffer == NULL) {						\
-      new_buffer = (typeof(new_buffer)) calloc((new_size),  sizeof(datatype)); \
-      if (new_buffer == NULL) {						\
-        htf_error("Failed to allocate memory using realloc AND malloc\n"); \
-      }									\
-      memmove(new_buffer, buffer, (cur_size) * sizeof(datatype));	\
-      free(buffer);							\
-    } else {								\
-      /* realloc changed the size of the buffer, leaving some bytes */	\
-      /* uninitialized. Let's fill the rest of the buffer with zeros to*/ \
-      /* prevent problems. */						\
-      if((new_size) > (cur_size)) {					\
-	uintptr_t old_end_addr = (uintptr_t)(buffer) + ((cur_size)*sizeof(datatype)); \
-	uintptr_t rest_size = ((new_size)-(cur_size))*sizeof(datatype);	\
-	memset((void*)old_end_addr, 0, rest_size);			\
-      }									\
-    } 									\
-    buffer = new_buffer;						\
-    (cur_size) = (new_size);						\
-  } while (0)
 
 /** Doubles the memory allocated for the given buffer.
  *
@@ -560,7 +539,11 @@ extern "C" {
  * This is better than a realloc because it moves the data around, but it is also slower.
  * Checks for error at malloc.
  */
-#define DOUBLE_MEMORY_SPACE(buffer, counter, datatype) htf_realloc(buffer, counter, (counter)*2, datatype)
+#define DOUBLE_MEMORY_SPACE(buffer, counter, datatype) do {		\
+    buffer = (datatype*) htf_realloc((void*)buffer, counter, (counter)*2, sizeof(datatype)); \
+    counter = (counter)*2;						\
+  } while(0)
+
 /** Increments the memory allocated for the given buffer by one.
  *
  * Given a buffer, a counter that indicates the number of object it holds, and this object's datatype,
@@ -568,7 +551,10 @@ extern "C" {
  * This is better than a realloc because it moves the data around, but it is also slower.
  * Checks for error at malloc.
  */
-#define INCREMENT_MEMORY_SPACE(buffer, counter, datatype) htf_realloc(buffer, counter, (counter) + 1, datatype)
+#define INCREMENT_MEMORY_SPACE(buffer, counter, datatype) do {		\
+  buffer = (datatype*) htf_realloc((void*)buffer, counter, (counter)+1, sizeof(datatype)); \
+  counter = (counter) + 1;						\
+} while(0)
 
 /**
  * Primitive for DOFOR loops
