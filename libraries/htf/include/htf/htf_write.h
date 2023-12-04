@@ -16,22 +16,18 @@ namespace htf {
  * Writes one thread to the HTF trace format.
  */
 typedef struct ThreadWriter {
-  Thread thread_trace;
-  Sequence** og_seq;
-  int cur_depth;
-  int max_depth;
-  int thread_rank;
-  
-  htf_timestamp_t* last_timestamp;
-  htf_timestamp_t* sequence_start_timestamp;
 
-=======
   Thread thread_trace; /**< Thread being written. */
   Sequence** og_seq;   /**< Array of pointers to sequences. todo: Complete this. */
   int cur_depth;       /**< Current depth in the callstack. */
   int max_depth;       /**< Maximum depth in the callstack. */
   int thread_rank;     /**< Rank of this thread. todo: MPI rank ? */
->>>>>>> main
+
+  htf_timestamp_t* last_timestamp;
+  htf_duration_t* last_duration;
+
+  htf_timestamp_t* sequence_start_timestamp;
+
 #ifdef __cplusplus
 
  private:

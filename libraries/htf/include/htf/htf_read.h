@@ -30,7 +30,7 @@ enum ThreadReaderOptions {
 typedef struct EventOccurence {
   struct Event* event;       /**< Pointer to the Event.*/
   htf_timestamp_t timestamp; /**< Timestamp for that occurence.*/
-  htf_timestamp_t duration;  /**< Duration of that occurence.*/
+  htf_duration_t duration;  /**< Duration of that occurence.*/
   AttributeList* attributes; /**< Attributes for that occurence.*/
 } EventOccurence;
 
@@ -41,7 +41,7 @@ typedef struct SequenceOccurence {
   struct Sequence* sequence;            /**< Pointer to the Sequence.*/
   struct Savestate* savestate;          /**< Savestate of the reader before entering the sequence.*/
   htf_timestamp_t timestamp;            /**< Timestamp for that occurence.*/
-  htf_timestamp_t duration;             /**< Duration of that occurence.*/
+  htf_duration_t duration;             /**< Duration of that occurence.*/
   struct TokenOccurence* full_sequence; /** Array of the occurrences in this sequence. */
 } SequenceOccurence;
 
@@ -52,7 +52,7 @@ typedef struct LoopOccurence {
   struct Loop* loop;                     /**< Pointer to the Loop.*/
   unsigned int nb_iterations;            /**< Number of iterations for that occurence.*/
   htf_timestamp_t timestamp;             /**< Timestamp for that occurence.*/
-  htf_timestamp_t duration;              /**< Duration for that occurence.*/
+  htf_duration_t duration;              /**< Duration for that occurence.*/
   struct SequenceOccurence* full_loop;   /**< Array of the Sequences in this loop.*/
   struct SequenceOccurence loop_summary; /**< False SequenceOccurence that represents a summary of all the
                                           * occurrences in full_loop. */
@@ -139,7 +139,7 @@ typedef struct ThreadReader {
   /** Returns whether the given loop still has more Tokens after the given current_index. */
   [[nodiscard]] bool isEndOfLoop(int current_index, Token loop_id) const;
   /** Returns the duration of the given Loop. */
-  [[nodiscard]] htf_timestamp_t getLoopDuration(Token loop_id) const;
+  [[nodiscard]] htf_duration_t getLoopDuration(Token loop_id) const;
 
   /** Returns an EventOccurence for the given Token appearing at the given occurence_id.
    * Timestamp is set to Reader's referential timestamp.*/

@@ -436,7 +436,7 @@ typedef struct Thread {
    */
   Token getSequenceIdFromArray(Token* token_array, size_t array_len);
   /** Returns the duration for the given array. */
-  htf_timestamp_t getSequenceDuration(Token* array, size_t size);
+  htf_duration_t getSequenceDuration(Token* array, size_t size);
   void finalizeThread();
   /** Create a new Thread from an archive and an id. This is used when writing the trace. */
   void initThread(Archive* a, ThreadId id);

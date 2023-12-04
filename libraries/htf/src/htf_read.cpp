@@ -119,9 +119,9 @@ bool ThreadReader::isEndOfLoop(int current_index, Token loop_id) const {
   htf_error("The given loop_id was the wrong type: %d\n", loop_id.type);
 }
 
-htf_timestamp_t ThreadReader::getLoopDuration(Token loop_id) const {
+htf_duration_t ThreadReader::getLoopDuration(Token loop_id) const {
   htf_assert(loop_id.type == TypeLoop);
-  htf_timestamp_t sum = 0;
+  htf_duration_t sum = 0;
   auto* loop = thread_trace->getLoop(loop_id);
   auto* sequence = thread_trace->getSequence(loop->repeated_token);
 

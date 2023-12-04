@@ -20,6 +20,12 @@ extern "C" {
 typedef uint64_t htf_timestamp_t;
 #define HTF_TIMESTAMP_INVALID UINT64_MAX
 
+typedef uint64_t htf_duration_t;
+#define HTF_DURATION_INVALID UINT64_MAX
+
+/** return the time difference of two events */
+htf_duration_t htf_get_duration(htf_timestamp_t t1, htf_timestamp_t t2);
+
 /** return the current timestamp */
 htf_timestamp_t htf_get_timestamp();
 

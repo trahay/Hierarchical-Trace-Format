@@ -97,8 +97,7 @@ Loop* ThreadWriter::createLoop(int start_index, int loop_len) {
   return l;
 }
 
-void ThreadWriter::storeTimestamp(EventSummary* es, htf_timestamp_t ts) {
-  
+void ThreadWriter::storeTimestamp(EventSummary* es, htf_timestamp_t ts) {  
   //  htf_delta_timestamp(&es->durations->add(ts));
   htf_timestamp_t delta = ts - last_timestamp[cur_depth];
   htf_assert(delta <= 1e9);
@@ -765,8 +764,8 @@ TokenId Thread::getEventId(htf::Event* e) {
 
   return index;
 }
-htf_timestamp_t Thread::getSequenceDuration(Token* array, size_t size) {
-  htf_timestamp_t sum = 0;
+htf_duration_t Thread::getSequenceDuration(Token* array, size_t size) {
+  htf_duration_t sum = 0;
   auto tokenCount = TokenCountMap();
   for (size_t i = 0; i < size; i++) {
     auto& token = array[i];

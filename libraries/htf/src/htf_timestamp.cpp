@@ -13,6 +13,10 @@ using TimePoint = std::chrono::time_point<std::chrono::high_resolution_clock>;
 static TimePoint firstTimestamp = {};
 //thread_local static std::vector<htf_timestamp_t*> timestampsToDelta = std::vector<htf_timestamp_t*>();
 
+htf_duration_t htf_get_duration(htf_timestamp_t t1, htf_timestamp_t t2) {
+  return t2 - t1;
+}
+
 htf_timestamp_t htf_get_timestamp() {
   TimePoint start = std::chrono::high_resolution_clock::now();
   if (NANOSECONDS(firstTimestamp.time_since_epoch()) == 0) {
