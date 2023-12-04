@@ -12,7 +12,7 @@ LinkedVector::LinkedVector() {
   last = first;
 }
 
-uint64_t& LinkedVector::add(uint64_t val) {
+uint64_t* LinkedVector::add(uint64_t val) {
   if (this->last->size >= this->last->allocated) {
     htf_log(DebugLevel::Debug, "Adding a new tail to an array: %p\n", this);
     last = new SubVector(defaultSize, last);
@@ -20,6 +20,7 @@ uint64_t& LinkedVector::add(uint64_t val) {
   size++;
   return last->add(val);
 }
+
 uint64_t& LinkedVector::at(size_t pos) const {
   if (pos >= size) {
     htf_error("Getting an element whose index (%lu) is bigger than vector size (%lu)\n", pos, size);
@@ -59,7 +60,7 @@ LinkedVector* linked_vector_new() {
   return new LinkedVector();
 }
 uint64_t* linked_vector_add(LinkedVector* linkedVector, uint64_t val) {
-  return &linkedVector->add(val);
+  return linkedVector->add(val);
 }
 uint64_t* linked_vector_get(LinkedVector* linkedVector, size_t pos) {
   return &linkedVector->at(pos);

@@ -23,10 +23,11 @@ typedef struct ThreadWriter {
   int max_depth;       /**< Maximum depth in the callstack. */
   int thread_rank;     /**< Rank of this thread. todo: MPI rank ? */
 
-  htf_timestamp_t* last_timestamp;
-  htf_duration_t* last_duration;
+  htf_timestamp_t last_timestamp; /**< Timestamp of the last encountered event */
 
-  htf_timestamp_t* sequence_start_timestamp;
+  htf_duration_t* last_duration;  /**< Pointer to the last event duration (to be updated when the timestamp of the next event is known) */
+
+  htf_timestamp_t* sequence_start_timestamp;  /**< Start date of each ongoing sequence (used for computing the sequence duration) */
 
 #ifdef __cplusplus
 

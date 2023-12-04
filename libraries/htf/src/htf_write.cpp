@@ -98,11 +98,27 @@ Loop* ThreadWriter::createLoop(int start_index, int loop_len) {
 }
 
 void ThreadWriter::storeTimestamp(EventSummary* es, htf_timestamp_t ts) {  
-  //  htf_delta_timestamp(&es->durations->add(ts));
-  htf_timestamp_t delta = ts - last_timestamp[cur_depth];
-  htf_assert(delta <= 1e9);
-  es->durations->add(ts);
-  last_timestamp[cur_depth] = ts;
+#if 0
+  // Not yet implemented
+  if(store_event_timestamps) {
+    es->timestamps->add(ts);
+  }
+#endif
+
+  int store_event_durations = 1; // TODO: make is optional
+  if(store_event_durations) {
+    // update the last event's duration
+    if(last_duration) {
+      htf_timestamp_t delta = htf_get_duration(last_timestamp, ts);
+      htf_assert(delta <= 1e9);
+      *last_duration = delta;
+    }
+
+    // allocate a new duration for the current event
+    last_duration = es->durations->add(ts);
+  }
+
+  last_timestamp = ts;
 }
 
 void ThreadWriter::storeAttributeList(htf::EventSummary* es,
@@ -234,7 +250,7 @@ void ThreadWriter::findLoopBasic(size_t maxLoopLength) {
 
 	htf_timestamp_t ts = thread_trace.getSequenceDuration(&currentSequence->tokens[s1Start], loopLength);
         //htf_add_timestamp_to_delta(&seq->durations->add(ts));
-	&seq->durations->add(ts);
+	seq->durations->add(ts);
         currentSequence->tokens.resize(s1Start);
         return;
       }
@@ -431,7 +447,7 @@ void ThreadWriter::recordExitFunction() {
   Token seq_id = thread_trace.getSequenceId(cur_seq);
   auto* seq = thread_trace.sequences[seq_id.id];
 
-  htf_timestamp_t sequence_duration = last_timestamp[cur_depth] - sequence_start_timestamp[cur_depth];
+  htf_timestamp_t sequence_duration = last_timestamp - sequence_start_timestamp[cur_depth];
   // TODO: update statistics on the sequence (min/max/avg duration)
   seq->durations->add(sequence_duration);
 
@@ -459,7 +475,6 @@ size_t ThreadWriter::storeEvent(enum EventType event_type,
   if (event_type == HTF_BLOCK_START) {
     recordEnterFunction();
     sequence_start_timestamp[cur_depth] = ts;
-    last_timestamp[cur_depth] = ts;
   }
 
   Token token = Token(TypeEvent, event_id);
@@ -531,7 +546,8 @@ void ThreadWriter::open(Archive* archive, ThreadId thread_id) {
     og_seq[i] = new Sequence();
   }
 
-  last_timestamp = new htf_timestamp_t[max_depth];
+  last_timestamp = HTF_TIMESTAMP_INVALID;
+  last_duration = NULL;
   sequence_start_timestamp = new htf_timestamp_t[max_depth];
 
   cur_depth = 0;

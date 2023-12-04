@@ -54,9 +54,9 @@ typedef struct LinkedVector {
      * @param val Value to be copied to the new element.
      * @return Reference to the new element.
      */
-    uint64_t& add(uint64_t val) {
+    uint64_t* add(uint64_t val) {
       array[size] = val;
-      return array[size++];
+      return &array[size++];
     }
 
     /**
@@ -133,7 +133,7 @@ typedef struct LinkedVector {
    * @param val Value to be copied to the new element.
    * @return Reference to the new element.
    */
-  uint64_t& add(uint64_t val);
+  uint64_t* add(uint64_t val);
   /**
    * Returns a reference to the element at specified location `pos`, with bounds checking.
    *
