@@ -67,10 +67,13 @@ function check_dependencies {
     for d in $@; do
         if ! command -v $d &>/dev/null; then
             print_error "Missing command: $d"
+	    ((nb_failed++))
             return 1
         fi	
     done
+    ((nb_pass++))
     print_ok
+    return 0
 }
 
 function check_compilation {
@@ -83,9 +86,12 @@ function check_compilation {
 
     if [ "$?" != "0" ]; then
 	print_error "Compilation failed"
+	((nb_failed++))
 	return 1
     fi
+    ((nb_pass++))
     print_ok
+    return 0
 }
 
 function run_test {
@@ -102,9 +108,12 @@ function run_test {
 
     if [ "$?" != "0" ]; then
         print_error "Test $test failed"
+	((nb_failed++))
         return 1
     fi
     print_ok
+    ((nb_pass++))
+    return 0
 }
 
 function run_and_check_command {
@@ -119,6 +128,7 @@ function run_and_check_command {
     fi
     if [ "$?" != "0" ]; then
 	print_error "command '$cmd' failed"
+	((nb_failed++))
 	return 1
     fi
 
@@ -165,7 +175,7 @@ function trace_check_htf_print {
     ((nb_test++))
     echo " > Checking if htf_print works"
 
-    if ! "$HTF_PRINT_PATH" "$trace_filename"  2>&1 ; then
+    if ! "$HTF_PRINT_PATH" "$trace_filename"  > /dev/null 2>&1 ; then
 	print_error "Cannot parse trace '$trace_filename'"
 	((nb_failed++))
 	return 1
