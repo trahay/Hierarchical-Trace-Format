@@ -367,7 +367,12 @@ int main(int argc, char** argv) {
     }
   }
 
-  if (!show_structure) {
+  if (show_structure) {
+    if(!per_thread) {
+      htf_log(htf::DebugLevel::Normal, "Structure mode is only available in Thread mode. Enabling the -T option\n");
+      per_thread = 1;
+    }
+  } else {
     unroll_loops = true;
   }
 
