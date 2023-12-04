@@ -199,7 +199,7 @@ void ThreadWriter::replaceTokensInLoop(int loop_len, size_t index_first_iteratio
 }
 
 /**
- * @brief Finds a Loop in the current Sequence using a basic quadratic algorithm.
+ * Finds a Loop in the current Sequence using a basic quadratic algorithm.
  *
  * For each correct correct possible loop length, this algorithm tries two things:
  *  - First, it checks if the array of tokens of that length is in front of a loop token
@@ -264,7 +264,7 @@ void ThreadWriter::findLoopBasic(size_t maxLoopLength) {
 }
 
 /**
- * @brief Finds a Loop in the current Sequence by first filtering the correct Tokens.
+ * Finds a Loop in the current Sequence by first filtering the correct Tokens.
  *
  * The idea is that since we always search for a Loop who will end on our last Token,
  * We only need to start searching arrays who end by that token.
@@ -520,7 +520,7 @@ void ThreadWriter::open(Archive* archive, ThreadId thread_id) {
 
   htf_log(DebugLevel::Debug, "htf_write_thread_open(%ux)\n", thread_id);
 
-  thread_trace = Thread(archive, thread_id);
+  thread_trace.initThread(archive, thread_id);
   max_depth = CALLSTACK_DEPTH_DEFAULT;
   og_seq = new Sequence*[max_depth];
 
@@ -544,23 +544,27 @@ void ThreadWriter::open(Archive* archive, ThreadId thread_id) {
  * Creates a new LocationGroup and adds it to that Archive.
  */
 void Archive::defineLocationGroup(LocationGroupId id, StringRef name, LocationGroupId parent) {
+  pthread_mutex_lock(&lock);
   LocationGroup l = LocationGroup();
   l.id = id;
   l.name = name;
   l.parent = parent;
   location_groups.push_back(l);
+  pthread_mutex_unlock(&lock);
 }
 
 /**
  * Creates a new Location and adds it to that Archive.
  */
 void Archive::defineLocation(ThreadId id, StringRef name, LocationGroupId parent) {
+  pthread_mutex_lock(&lock);
   Location l = Location();
   l.id = id;
   htf_assert(l.id != HTF_THREAD_ID_INVALID);
   l.name = name;
   l.parent = parent;
   locations.push_back(l);
+  pthread_mutex_unlock(&lock);
 }
 
 void Archive::close() {
@@ -570,6 +574,7 @@ void Archive::close() {
 static inline void init_event(Event* e, enum Record record) {
   e->event_size = offsetof(Event, event_data);
   e->record = record;
+  memset(&e->event_data[0], 0, sizeof(e->event_data));
 }
 
 static inline void push_data(Event* e, void* data, size_t data_size) {
@@ -727,6 +732,15 @@ void Thread::printEvent(htf::Event* e) const {
   }
 }
 
+void EventSummary::initEventSummary(TokenId token_id, const Event& e) {
+  id = token_id;
+  nb_occurences = 0;
+  attribute_buffer = 0;
+  attribute_buffer_size = 0;
+  attribute_pos = 0;
+  memcpy(&event, &e, sizeof(e));
+}
+
 TokenId Thread::getEventId(htf::Event* e) {
   htf_log(DebugLevel::Max, "Searching for event {.event_type=%d}\n", e->record);
 
@@ -747,9 +761,7 @@ TokenId Thread::getEventId(htf::Event* e) {
   TokenId index = nb_events++;
   htf_log(DebugLevel::Max, "\tNot found. Adding it with id=%x\n", index);
   auto* new_event = &events[index];
-
-  new_event->id = index;
-  memcpy(&new_event->event, e, e->event_size);
+  new_event->initEventSummary(id, *e);
 
   return index;
 }

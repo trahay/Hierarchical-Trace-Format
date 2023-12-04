@@ -16,15 +16,16 @@ add_library(htf SHARED)
 set(HTF_HEADERS
         include/htf/htf_archive.h
         include/htf/htf_attribute.h
-        include/htf/htf_dbg.h
         ${CMAKE_CURRENT_BINARY_DIR}/include/htf/htf_config.h
+        include/htf/htf_dbg.h
+        include/htf/htf.h
         include/htf/htf_hash.h
+        include/htf/htf_linked_vector.h
+	include/htf/htf_parameter_handler.h
         include/htf/htf_read.h
         include/htf/htf_storage.h
         include/htf/htf_timestamp.h
         include/htf/htf_write.h
-        include/htf/htf_linked_vector.h
-	include/htf/htf_parameter_handler.h
 )
 
 target_sources(htf
@@ -93,12 +94,15 @@ if (DOXYGEN_FOUND AND BUILD_DOC)
     # request to configure the file
     configure_file(${DOXYGEN_IN} ${DOXYGEN_OUT} @ONLY)
 
+    set(DOXYGEN_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/doc")
+
     # note the option ALL which allows to build the docs together with the application
-    add_custom_target(htf_doc ALL
-            COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_OUT}
-            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-            COMMENT "Generating API documentation with Doxygen"
-            VERBATIM)
+    doxygen_add_docs(htf_doc ALL
+			WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+			COMMENT "Generating API documentation with Doxygen"
+			CONFIG_FILE ${DOXYGEN_OUT})
+
+    install(DIRECTORY "${DOXYGEN_OUTPUT_DIRECTORY}" TYPE DOC)
 else ()
     if (NOT DOXYGEN_FOUND)
         message("Doxygen need to be installed to generate the doxygen documentation")

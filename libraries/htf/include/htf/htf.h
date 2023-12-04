@@ -9,10 +9,10 @@
 #pragma once
 
 #include <pthread.h>
-#include "htf_linked_vector.h"
-#include "htf_dbg.h"
-#include "htf_timestamp.h"
 #include "htf_config.h"
+#include "htf_dbg.h"
+#include "htf_linked_vector.h"
+#include "htf_timestamp.h"
 
 #ifdef __cplusplus
 #include <cstring>
@@ -71,34 +71,49 @@ enum TokenType { TypeInvalid = 0, TypeEvent = 1, TypeSequence = 2, TypeLoop = 3 
 typedef uint32_t TokenId;
 
 /**
- * A token is defined as a structure composed of
- *  - its type (2bits)
- *  - its id (30bits )
+ * Most basic element representing Events, Loops or Sequences in HTF.
  */
 typedef struct Token {
-  enum TokenType type : 2;
-  TokenId id : 30;
+  enum TokenType type : 2; /**< Type of our Token. */
+  TokenId id : 30;         /**< ID of our Token. */
 #ifdef __cplusplus
+  /**
+   * Construct a Token.
+   * @param type Type of the Token.
+   * @param id ID of the Token.
+   */
   Token(TokenType type, uint32_t id) {
     this->type = type;
     this->id = id;
   }
-  // Default token is an invalid one
+  /**
+   * Construct an Invalid Token.
+   */
   Token() {
     type = TypeInvalid;
     id = HTF_TOKEN_ID_INVALID;
   }
 
  public:
+  /** Checks for equality between Tokens.
+   * @param other Token to check for equality.
+   * @return Boolean indicating if the Tokens are equals.
+   */
   bool operator==(const Token& other) const { return (other.type == type && other.id == id); }
+  /** Checks for ordering between Tokens. Absolute order is decided first on type then on id.
+   * @param other Token to check for ordering.
+   * @return Boolean indicating if this < other.
+   */
   bool operator<(const Token& other) const { return (type < other.type || (type == other.type && id < other.id)); }
-  /* Returns true if the Token is a Sequence or a Loop. */
+  /** Returns true if the Token is a Sequence or a Loop. */
   inline bool isIterable() const { return type == TypeSequence || type == TypeLoop; }
 #endif
 } Token;
-
+/** Creates a Token for an Event. */
 #define HTF_EVENT_ID(i) HTF(Token)(HTF(TypeEvent), i)
+/** Creates a Token for a Sequence. */
 #define HTF_SEQUENCE_ID(i) HTF(Token)(HTF(TypeSequence), i)
+/** Creates a Token for a Loop. */
 #define HTF_LOOP_ID(i) HTF(Token)(HTF(TypeLoop), i)
 
 /*************************** Events **********************/
@@ -180,7 +195,7 @@ enum Record {
 };
 
 /**
- * @brief Structure to store an event in HTF.
+ * Structure to store an event in HTF.
  */
 typedef struct Event {
   enum Record record;      /**< ID of the event recorded in the above enumeration of events. */
@@ -192,11 +207,11 @@ typedef struct Event {
 /*************************** Sequences **********************/
 #ifdef __cplusplus
 /**
- * @brief A Map for counting Tokens.
+ * A Map for counting Tokens.
  *
- * This class exists to make token counting easier.
- * Instead of having arrays for each different type of token, we can just use that map.
- * This class also comes with addition and multiplication, so that we can easily use them.
+ * For each token, the size_t member counts the number of time the token appeared in the trace so far.
+ *
+ *  This class also comes with addition and multiplication, so that we can easily use them.
  */
 struct TokenCountMap : public std::map<Token, size_t> {
   /** Adds each (key, value) pair of the other map to this one. */
@@ -209,13 +224,31 @@ struct TokenCountMap : public std::map<Token, size_t> {
       }
     }
   }
-  /** Returns a new map with the same keys, but each value has been multiplied by the given value. */
+  /** Returns a new map with the same keys, but each value has been multiplied by the given value.
+   * @param multiplier Constant multiplier for each value.
+   * @returns New map with a copy of the keys and the values. Each value has been multiplied by `multiplier`.
+   */
   TokenCountMap operator*(size_t multiplier) const {
     auto otherMap = TokenCountMap();
     for (auto keyValue : otherMap) {
       otherMap[keyValue.first] = keyValue.second * multiplier;
     }
     return otherMap;
+  }
+
+  /** Return the value associated with t, or 0 if t was not found.
+   *
+   *  This is useful when searching for a token count: if the token has never been encountered, it
+   *  won't be found by the map find() function, and we return 0 (instead of an errornous value such
+   *  as -1).
+   *  @param t Token whose mapped value is accessed.
+   *  @returns Mapped value associated with `t`, or 0 if t was not found..
+   */
+  [[nodiscard]] size_t get_value(const Token& t) const {
+    auto res = find(t);
+    if (res == end())
+      return 0;
+    return res->second;
   }
 };
 #endif
@@ -226,7 +259,7 @@ struct TokenCountMap : public std::map<Token, size_t> {
 #define DEFINE_Vector(type, name) C_CXX(byte, std::vector<type>) name C_CXX([VECTOR_SIZE], { std::vector<type>() })
 
 /**
- * @brief Structure to store a sequence in HTF format.
+ * Structure to store a sequence in HTF format.
  */
 typedef struct Sequence {
   LinkedVector* durations CXX({new LinkedVector()}); /**< Vector of durations for these type of sequences. */
@@ -242,9 +275,9 @@ typedef struct Sequence {
   /** Getter for the size of that Sequence.
    * @returns Number of tokens in that Sequence. */
   [[nodiscard]] size_t size() const { return tokens.size(); }
-  /** Getter for #tokenCountMap.
+  /** Getter for #tokenCount.
    * If need be, counts the number of Token in that Sequence to initialize it.
-   * @returns Reference to #tokenCountMap.*/
+   * @returns Reference to #tokenCount.*/
   const TokenCountMap& getTokenCount(const struct Thread* thread);
 #endif
 } Sequence;
@@ -252,7 +285,7 @@ typedef struct Sequence {
 /*************************** Loop **********************/
 
 /**
- * @brief Structure to store a Loop in HTF format.
+ * Structure to store a Loop in HTF format.
  */
 typedef struct Loop {
   Token repeated_token;               /**< Token of the Sequence being repeated. */
@@ -262,7 +295,7 @@ typedef struct Loop {
 } Loop;
 
 /**
- * @brief Summary for an htf::Event.
+ * Summary for an htf::Event.
  *
  * Contains the durations for each occurence of that event
  * as well as the number of occurences for that event,
@@ -277,6 +310,11 @@ typedef struct EventSummary {
   uint8_t* attribute_buffer;    /**< Storage for Attribute.*/
   size_t attribute_buffer_size; /**< Size of #attribute_buffer.*/
   size_t attribute_pos;         /**< Position of #attribute_buffer.*/
+#ifdef __cplusplus
+ public:
+  /** Initialize and EventSummary */
+  void initEventSummary(TokenId, const Event&);
+#endif
 } EventSummary;
 
 typedef uint32_t ThreadId;                                          /**< Reference for a htf::Thread. */
@@ -299,23 +337,27 @@ typedef uint32_t Ref;
 #define HTF_UNDEFINED_INT64 ((int64_t)(~(HTF_UNDEFINED_UINT64 >> 1)))
 #define HTF_UNDEFINED_TYPE HTF_UNDEFINED_UINT8
 
-typedef Ref StringRef;                                           /**< Reference for a htf::String */
-#define HTF_STRING_REF_INVALID ((StringRef)HTF_UNDEFINED_UINT32) /**< Invalid StringRef */
+/** Reference for a htf::String */
+typedef Ref StringRef;
+/** Invalid StringRef */
+#define HTF_STRING_REF_INVALID ((StringRef)HTF_UNDEFINED_UINT32)
 /**
- * @brief Define a String reference structure used by HTF format
+ * Define a String reference structure used by HTF format.
  *
  * It has an ID and an associated char* with its length
  */
 typedef struct String {
-  StringRef string_ref; /** Id of that String.*/
-  char* str;            /** Actual C String */
-  int length;           /** Length of #str.*/
+  StringRef string_ref; /**< Id of that String.*/
+  char* str;            /**< Actual C String */
+  int length;           /**< Length of #str.*/
 } String;
 
-typedef Ref RegionRef;                                          /**< Reference for a htf::Region */
-#define HTF_REGIONREF_INVALID ((RegionRef)HTF_UNDEFINED_UINT32) /**< Invalid RegionRef */
+/** Reference for a htf::Region */
+typedef Ref RegionRef;
+/** Invalid RegionRef */
+#define HTF_REGIONREF_INVALID ((RegionRef)HTF_UNDEFINED_UINT32)
 /**
- * @brief Define a Region that has an ID and a description.
+ * Define a Region that has an ID and a description.
  */
 typedef struct Region {
   RegionRef region_ref; /**< Id of that Region. */
@@ -330,7 +372,7 @@ typedef Ref AttributeRef;
 typedef uint8_t htf_type_t;
 
 /**
- * @brief Define an Attribute of a function call.
+ * Define an Attribute of a function call.
  */
 typedef struct Attribute {
   AttributeRef attribute_ref; /**< Id of that Attribute. */
@@ -340,7 +382,7 @@ typedef struct Attribute {
 } Attribute;
 
 /**
- * @brief A thread contains streams of events.
+ * A thread contains streams of events.
  *
  * It can be a regular thread (eg. a pthread), or a GPU stream.
  */
@@ -397,9 +439,14 @@ typedef struct Thread {
   htf_timestamp_t getSequenceDuration(Token* array, size_t size);
   void finalizeThread();
   /** Create a new Thread from an archive and an id. This is used when writing the trace. */
-  Thread(Archive* a, ThreadId id);
-  /** Create a blank new Thread. This is used when reading the trace. */
-  Thread() = default;
+  void initThread(Archive* a, ThreadId id);
+
+  //  /** Create a blank new Thread. This is used when reading the trace. */
+  Thread();
+
+  // Make sure this object is never copied
+  Thread(const Thread&) = delete;
+  void operator=(const Thread&) = delete; 
 #endif
 } Thread;
 
@@ -409,7 +456,7 @@ CXX(
 extern "C" {
 #endif
   /*************************** C Functions **********************/
-  /* Allocates a new thread */
+  /** Allocates a new thread */
   extern HTF(Thread) * htf_thread_new(void);
   /**
    * Return the thread name of thread thread
@@ -442,9 +489,9 @@ extern "C" {
    */
   extern struct HTF(Loop) * htf_get_loop(HTF(Thread) * thread_trace, HTF(Token) loop_id);
 
-  /*
+  /**
    * Return the sequence whose id is sequence_id
-   *  - return NULL if sequence_id is unknown
+   * @returns NULL if sequence_id is unknown
    */
   extern struct HTF(Sequence) * htf_get_sequence(HTF(Thread) * thread_trace, HTF(Token) seq_id);
 
@@ -462,107 +509,57 @@ extern "C" {
   // We made the htf_token type that matches it. This works as long as the C++ and C version
   // of the struct both have the same elements. Don't care about the rest.
 
-  /* Returns the size of the given sequence. */
+  /** Returns the size of the given sequence. */
   extern size_t htf_sequence_get_size(HTF(Sequence) * sequence);
-  /* Returns the nth token of the given sequence. */
+  /** Returns the nth token of the given sequence. */
   extern HTF(Token) htf_sequence_get_token(HTF(Sequence) * sequence, int index);
-  /* Returns the number of similar loops. */
+  /** Returns the number of similar loops. */
   extern size_t htf_loop_count(HTF(Loop) * loop);
-  /* Returns the number of loops for the nth loop. */
+  /** Returns the number of loops for the nth loop. */
   extern size_t htf_loop_get_count(HTF(Loop) * loop, size_t index);
-  extern HTF(Token) * htf_loop_get_data();
-  extern HTF(Token) * htf_sequence_get_data();
+
+
+  /** Does a safe-ish realloc the the given buffer.
+   *
+   * Given a buffer, its current size, a new desired size and its containing object's datatype,
+   * changes the size of the buffer using realloc, or if it fails, malloc and memmove, then frees the old buffer.
+   * This is better than a realloc because it moves the data around, but it is also slower.
+   * Checks for error at malloc.
+   */
+  extern void* htf_realloc(void* buffer, int cur_size, int new_size, size_t datatype_size);
 
 #ifdef __cplusplus
 };
 #endif
-/**
+
+/** Doubles the memory allocated for the given buffer.
+ *
  * Given a buffer, a counter that indicates the number of object it holds, and this object's datatype,
  * doubles the size of the buffer using realloc, or if it fails, malloc and memmove then frees the old buffer.
  * This is better than a realloc because it moves the data around, but it is also slower.
  * Checks for error at malloc.
  */
-#ifdef __cplusplus
-#define DOUBLE_MEMORY_SPACE(buffer, counter, datatype)           \
-  do {                                                           \
-    auto new_buffer = new datatype[2 * counter];                 \
-    if (new_buffer == nullptr) {                                 \
-      htf_error("Failed to allocate memory\n");                  \
-    }                                                            \
-    std::memcpy(new_buffer, buffer, counter * sizeof(datatype)); \
-    delete buffer;                                               \
-    buffer = new_buffer;                                         \
-    counter *= 2;                                                \
-  } while (0)
-#else
-#define DOUBLE_MEMORY_SPACE(buffer, counter, datatype)                        \
-  do {                                                                        \
-    datatype* new_buffer = realloc(buffer, (counter * 2) * sizeof(datatype)); \
-    if (new_buffer == NULL) {                                                 \
-      new_buffer = malloc((counter * 2) * sizeof(datatype));                  \
-      if (new_buffer == NULL) {                                               \
-        htf_error("Failed to allocate memory using realloc AND malloc\n");    \
-      }                                                                       \
-      memmove(new_buffer, buffer, counter * sizeof(datatype));                \
-      free(buffer);                                                           \
-    }                                                                         \
-    buffer = new_buffer;                                                      \
-    counter *= 2;                                                             \
-  } while (0)
-#endif
-/**
+#define DOUBLE_MEMORY_SPACE(buffer, counter, datatype) do {		\
+    buffer = (datatype*) htf_realloc((void*)buffer, counter, (counter)*2, sizeof(datatype)); \
+    counter = (counter)*2;						\
+  } while(0)
+
+/** Increments the memory allocated for the given buffer by one.
+ *
  * Given a buffer, a counter that indicates the number of object it holds, and this object's datatype,
  * Increments the size of the buffer by 1 using realloc, or if it fails, malloc and memmove then frees the old buffer.
  * This is better than a realloc because it moves the data around, but it is also slower.
  * Checks for error at malloc.
  */
-#ifdef __cplusplus
-#define INCREMENT_MEMORY_SPACE(buffer, counter, datatype)        \
-  do {                                                           \
-    auto new_buffer = new datatype[counter + 1];                 \
-    if (new_buffer == nullptr) {                                 \
-      htf_error("Failed to allocate memory\n");                  \
-    }                                                            \
-    std::memcpy(new_buffer, buffer, counter * sizeof(datatype)); \
-    delete buffer;                                               \
-    buffer = new_buffer;                                         \
-    counter++;                                                   \
-  } while (0)
-#else
-#define INCREMENT_MEMORY_SPACE(buffer, counter, datatype)                     \
-  do {                                                                        \
-    datatype* new_buffer = realloc(buffer, (counter + 1) * sizeof(datatype)); \
-    if (new_buffer == NULL) {                                                 \
-      new_buffer = malloc((counter + 1) * sizeof(datatype));                  \
-      if (new_buffer == NULL) {                                               \
-        htf_error("Failed to allocate memory using realloc AND malloc\n");    \
-      }                                                                       \
-      memmove(new_buffer, buffer, counter * sizeof(datatype));                \
-      free(buffer);                                                           \
-    }                                                                         \
-    buffer = new_buffer;                                                      \
-    counter++;                                                                \
-  } while (0)
-#endif
+#define INCREMENT_MEMORY_SPACE(buffer, counter, datatype) do {		\
+  buffer = (datatype*) htf_realloc((void*)buffer, counter, (counter)+1, sizeof(datatype)); \
+  counter = (counter) + 1;						\
+} while(0)
+
 /**
  * Primitive for DOFOR loops
  */
 #define DOFOR(var_name, max) for (int var_name = 0; var_name < max; var_name++)
-
-#define NB_EVENT_DEFAULT 1000
-#define NB_SEQUENCE_DEFAULT 1000
-#define NB_LOOP_DEFAULT 1000
-#define NB_STRING_DEFAULT 100
-#define NB_REGION_DEFAULT 100
-#define NB_TIMESTAMP_DEFAULT 1000
-#define NB_ATTRIBUTE_DEFAULT 1000
-#define SEQUENCE_SIZE_DEFAULT 1024
-#define LOOP_SIZE_DEFAULT 16
-#define CALLSTACK_DEPTH_DEFAULT 128
-#define NB_ARCHIVES_DEFAULT 1
-#define NB_THREADS_DEFAULT 16
-#define NB_LOCATION_GROUPS_DEFAULT 16
-#define NB_LOCATIONS_DEFAULT NB_THREADS_DEFAULT
 
 /* -*-
    mode: c++;

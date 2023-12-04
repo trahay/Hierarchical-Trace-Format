@@ -137,7 +137,8 @@ ParameterHandler::ParameterHandler() {
   if (loopLengthChar) {
     maxLoopLength = std::stoull(loopLengthChar);
   }
-  std::cout << to_string() << std::endl;
+
+  htf_log(htf::DebugLevel::Verbose, "%s\n", to_string().c_str());
 }
 
 size_t ParameterHandler::getMaxLoopLength() const {

@@ -51,8 +51,8 @@ int main(int argc, char** argv __attribute__((unused))) {
   if (argc > 3) {
     htf_error("Too many arguments ! 3 argument required.\n");
   }
-  size_t MAX_EVENT = strtol(argv[1], NULL, 10);
-  size_t NUM_LOOPS = strtol(argv[2], NULL, 10);
+  int MAX_EVENT = atoi(argv[1]);
+  int NUM_LOOPS = atoi(argv[2]);
 
   /* Make a dummy archive and a dummy thread writer. */
   struct Archive archive;
@@ -110,7 +110,7 @@ int main(int argc, char** argv __attribute__((unused))) {
   htf_assert(thread_writer.cur_depth == 0);
   htf_assert(htf_sequence_get_size(thread_writer.og_seq[0]) == 3);  // L0 E L0
   htf_assert(htf_loop_get_count(l, 0) == 3);
-  htf_assert(htf_loop_get_count(l, 1) == NUM_LOOPS);
+  htf_assert(htf_loop_get_count(l, 1) == (size_t)NUM_LOOPS);
 
   return 0;
 }

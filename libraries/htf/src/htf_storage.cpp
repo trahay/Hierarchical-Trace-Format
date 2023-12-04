@@ -103,7 +103,7 @@ static FILE* _htf_file_open(const char* filename, const char* mode) {
 
 /******************* Read/Write/Compression function for vectors and arrays *******************/
 
-/** @brief Compresses the content in src using ZSTD and writes it to dest. Returns the amount of data written.
+/** Compresses the content in src using ZSTD and writes it to dest. Returns the amount of data written.
  *  @param src The source array.
  *  @param size Size of the source array.
  *  @param dest A free array in which the compressed data will be written.
@@ -130,7 +130,7 @@ inline static uint64_t* _htf_zstd_read(size_t& realSize, void* compArray, size_t
 
 #ifdef WITH_ZFP
 /**
- * @brief Gives a conservative upper bound for the size of the compressed data.
+ * Gives a conservative upper bound for the size of the compressed data.
  * @param src The source array.
  * @param n Number of items in the array.
  * @return Upper bound to compressed array size in bytes.
@@ -145,7 +145,7 @@ inline static size_t _htf_zfp_bound(uint64_t* src, size_t n) {
   return bufsize;
 }
 /**
- * @brief Compresses the content in src using the 1D ZFP Algorithm and writes it to dest.
+ * Compresses the content in src using the 1D ZFP Algorithm and writes it to dest.
  * Returns the amounts of data written.
  * @param src The source array.
  * @param n Number of items in the source array.
@@ -170,7 +170,7 @@ inline static size_t _htf_zfp_compress(uint64_t* src, size_t n, void* dest, size
 }
 
 /**
- * @brief Decompresses the content in src using the 1D ZFP Algorithm and writes it to dest.
+ * Decompresses the content in src using the 1D ZFP Algorithm and writes it to dest.
  * Returns the amounts of data written.
  * @param n Number of items that should be decompressed.
  * @param compressedArray The compressed array.
@@ -194,7 +194,7 @@ inline static uint64_t* _htf_zfp_decompress(size_t n, void* compressedArray, siz
 #endif
 #ifdef WITH_SZ
 /**
- * @brief Compresses the content in src using the 1D SZ Algorithm.
+ * Compresses the content in src using the 1D SZ Algorithm.
  * @param src The source array.
  * @param n Number of items in the source array.
  * @param compressedSize Size of the compressed array. Passed by ref and modified.
@@ -217,7 +217,7 @@ inline static uint64_t* _htf_sz_decompress(size_t n, byte* compressedArray, size
 #define N_BITS (N_BYTES * 8)
 #define MAX_BIT ((1 << N_BITS) - 1)
 
-/** @brief Compresses the content in src using the Histogram method and writes it to dest.
+/** Compresses the content in src using the Histogram method and writes it to dest.
  * Returns the amount of data written.
  *  @param src The source array.
  *  @param n Number of elements in src.
@@ -251,7 +251,7 @@ inline static size_t _htf_histogram_compress(const uint64_t* src, size_t n, byte
   return N_BYTES * n + 2 * sizeof(uint64_t);
 }
 
-/** @brief Decompresses the content in compArray using the Histogram method and writes it to dest.
+/** Decompresses the content in compArray using the Histogram method and writes it to dest.
  * Returns the amount of data written.
  * @param n Number of elements in the dest array.
  * @param compArray The compressed array.
@@ -400,17 +400,17 @@ inline static void _htf_compress_write(uint64_t* src, size_t n, FILE* file) {
   }
 
   if (htf::parameterHandler.getCompressionAlgorithm() != htf::CompressionAlgorithm::None) {
-    htf_log(htf::DebugLevel::Normal, "Compressing %lu bytes as %lu bytes\n", size, compressedSize);
+    htf_log(htf::DebugLevel::Debug, "Compressing %lu bytes as %lu bytes\n", size, compressedSize);
     _htf_fwrite(&compressedSize, sizeof(compressedSize), 1, file);
     _htf_fwrite(compressedArray, compressedSize, 1, file);
     numberRawBytes += size;
     numberCompressedBytes += compressedSize;
   } else if (htf::parameterHandler.getEncodingAlgorithm() != htf::EncodingAlgorithm::None) {
-    htf_log(htf::DebugLevel::Normal, "Encoding %lu bytes as %lu bytes\n", size, encodedSize);
+    htf_log(htf::DebugLevel::Debug, "Encoding %lu bytes as %lu bytes\n", size, encodedSize);
     _htf_fwrite(&encodedSize, sizeof(encodedSize), 1, file);
     _htf_fwrite(encodedArray, encodedSize, 1, file);
   } else {
-    htf_log(htf::DebugLevel::Normal, "Writing %lu bytes as is.\n", size);
+    htf_log(htf::DebugLevel::Debug, "Writing %lu bytes as is.\n", size);
     _htf_fwrite(&size, sizeof(size), 1, file);
     _htf_fwrite(src, size, 1, file);
   }
@@ -429,7 +429,7 @@ inline static void _htf_compress_write(uint64_t* src, size_t n, FILE* file) {
  */
 inline static uint64_t* _htf_compress_read(size_t n, FILE* file) {
   size_t expectedSize = n * sizeof(uint64_t);
-  uint64_t* uncompressedArray;
+  uint64_t* uncompressedArray = nullptr;
 
   size_t compressedSize;
   byte* compressedArray = nullptr;
@@ -567,7 +567,7 @@ static FILE* _htf_get_event_file(const char* base_dirname, htf::Thread* th, htf:
 static void _htf_store_attribute_values(htf::EventSummary* e, FILE* file) {
   _htf_fwrite(&e->attribute_pos, sizeof(e->attribute_pos), 1, file);
   if (e->attribute_pos > 0) {
-    htf_log(htf::DebugLevel::Normal, "\t\tStore %lu attributes\n", e->attribute_pos);
+    htf_log(htf::DebugLevel::Debug, "\t\tStore %lu attributes\n", e->attribute_pos);
     if (htf::parameterHandler.getCompressionAlgorithm() != htf::CompressionAlgorithm::None) {
       size_t compressedSize = ZSTD_compressBound(e->attribute_pos);
       byte* compressedArray = new byte[compressedSize];
@@ -952,7 +952,7 @@ static void _htf_store_thread(const char* dir_name, htf::Thread* th) {
 
   for (int i = 0; i < th->nb_loops; i++)
     _htf_store_loop(dir_name, th, &th->loops[i], HTF_LOOP_ID(i));
-  htf_log(htf::DebugLevel::Normal, "Average compression ratio: %.2f\n", (numberRawBytes + .0) / numberCompressedBytes);
+  htf_log(htf::DebugLevel::Debug, "Average compression ratio: %.2f\n", (numberRawBytes + .0) / numberCompressedBytes);
 }
 
 void htf::Thread::finalizeThread() {
@@ -1106,7 +1106,7 @@ static void _htf_read_archive(htf::Archive* global_archive, htf::Archive* archiv
 
   _htf_fread(&archive->nb_threads, sizeof(int), 1, f);
 
-  archive->threads = new htf::Thread*[archive->nb_threads];
+  archive->threads = (htf::Thread**) calloc(sizeof(htf::Thread*), archive->nb_threads);
   archive->nb_allocated_threads = archive->nb_threads;
 
   //  _htf_fread(&COMPRESSION_OPTIONS, sizeof(COMPRESSION_OPTIONS), 1, f);
@@ -1164,7 +1164,7 @@ static htf::Archive* _htf_get_archive(htf::Archive* global_archive, htf::Locatio
     return nullptr;
   }
   printf("Reading archive %s\n", fullpath);
-  free(fullpath);
+  delete [] fullpath;
 
   while (global_archive->nb_archives >= global_archive->nb_allocated_archives) {
     INCREMENT_MEMORY_SPACE(global_archive->archive_list, global_archive->nb_allocated_archives, htf::Archive*);
@@ -1191,7 +1191,7 @@ void htf_read_thread(htf::Archive* archive, htf::ThreadId thread_id) {
   }
 
   int index = archive->nb_threads++;
-  archive->threads[index] = new htf::Thread();
+  archive->threads[index] = htf_thread_new();
   _htf_read_thread(archive, archive->threads[index], thread_id);
   htf_assert(archive->threads[index]->nb_events > 0);
 }

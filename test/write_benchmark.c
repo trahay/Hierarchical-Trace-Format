@@ -19,14 +19,17 @@ static int nb_iter_default = 100000;
 static int nb_functions_default = 2;
 static int nb_threads_default = 4;
 static int pattern_default = 0;
+static int use_logical_clock_default = 0;
 
 static int nb_iter;
 static int nb_functions;
 static int nb_threads;
 static int pattern;
+static int use_logical_clock;
 
 struct ThreadWriter** thread_writers;
 static RegionRef* regions;
+static char** region_names;
 static StringRef* strings;
 
 static pthread_barrier_t bench_start;
@@ -35,7 +38,7 @@ static pthread_barrier_t bench_stop;
 #define TIME_DIFF(t1, t2) (((t2).tv_sec - (t1).tv_sec) + ((t2).tv_nsec - (t1).tv_nsec) / 1e9)
 
 static StringRef _register_string(char* str) {
-  static StringRef next_ref = 0;
+  static _Atomic StringRef next_ref = 0;
   StringRef ref = next_ref++;
 
   htf_archive_register_string(global_archive, ref, str);
@@ -48,10 +51,21 @@ static LocationGroupId _new_location_group() {
   return id;
 }
 
+
 static ThreadId _new_thread() {
   static _Atomic ThreadId next_id = 0;
   ThreadId id = next_id++;
   return id;
+}
+
+static htf_timestamp_t get_timestamp() {
+  htf_timestamp_t res = HTF_TIMESTAMP_INVALID;
+
+  if(use_logical_clock) {
+      static _Thread_local int next_ts = 1;
+      res = next_ts++;
+  }
+  return res;
 }
 
 void* worker(void* arg __attribute__((unused))) {
@@ -79,8 +93,8 @@ void* worker(void* arg __attribute__((unused))) {
        * E_f1 L_f1 E_f2 L_f2 E_f3 L_f3 ...
        */
       for (int j = 0; j < nb_functions; j++) {
-        htf_record_enter(thread_writer, NULL, HTF_TIMESTAMP_INVALID, regions[j]);
-        htf_record_leave(thread_writer, NULL, HTF_TIMESTAMP_INVALID, regions[j]);
+        htf_record_enter(thread_writer, NULL, get_timestamp(), regions[j]);
+        htf_record_leave(thread_writer, NULL, get_timestamp(), regions[j]);
       }
       break;
 
@@ -89,10 +103,10 @@ void* worker(void* arg __attribute__((unused))) {
        * E_f1 E_f2 E_f3 ... L_f3 L_f2 L_f1
        */
       for (int j = 0; j < nb_functions; j++) {
-        htf_record_enter(thread_writer, NULL, HTF_TIMESTAMP_INVALID, regions[j]);
+        htf_record_enter(thread_writer, NULL, get_timestamp(), regions[j]);
       }
       for (int j = nb_functions - 1; j >= 0; j--) {
-        htf_record_leave(thread_writer, NULL, HTF_TIMESTAMP_INVALID, regions[j]);
+        htf_record_leave(thread_writer, NULL, get_timestamp(), regions[j]);
       }
       break;
     default:
@@ -120,6 +134,8 @@ void usage(const char* prog_name) {
   printf("\t-f X    Set the number of functions (default: %d)\n", nb_functions_default);
   printf("\t-t X    Set the number of threads (default: %d)\n", nb_threads_default);
   printf("\t-p X    Select the event pattern\n");
+  printf("\t-l      Use a per-thread logical clock instead of the default clock (default: %d)\n", use_logical_clock_default);
+
   printf("\t-? -h   Display this help and exit\n");
 }
 
@@ -148,6 +164,9 @@ int main(int argc, char** argv) {
       pattern = atoi(argv[i + 1]);
       nb_opts += 2;
       i++;
+    } else if (!strcmp(argv[i], "-l")) {
+      use_logical_clock = 1;
+      nb_opts += 1;
     } else if (!strcmp(argv[i], "-?") || !strcmp(argv[i], "-h")) {
       usage(argv[0]);
       return EXIT_SUCCESS;
@@ -181,10 +200,11 @@ int main(int argc, char** argv) {
 
   regions = malloc(sizeof(RegionRef) * nb_functions);
   strings = malloc(sizeof(StringRef) * nb_functions);
+  region_names = malloc(sizeof(char*) * nb_functions);
   for (int i = 0; i < nb_functions; i++) {
-    char str[50];
-    snprintf(str, 50, "function_%d", i);
-    strings[i] = _register_string(str);
+    region_names[i] = malloc(sizeof(char)*50);
+    snprintf(region_names[i], 50, "function_%d", i);
+    strings[i] = _register_string(region_names[i]);
     regions[i] = strings[i];
     htf_archive_register_region(trace, regions[i], strings[i]);
   }

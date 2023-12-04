@@ -97,7 +97,7 @@ int main(int argc __attribute__((unused)), char** argv __attribute__((unused))) 
       if (buffer)
         count_collision++;
     }
-    free(token);
+    delete [] token;
   }
 
   struct timespec end_time;
