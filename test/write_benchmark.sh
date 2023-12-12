@@ -62,6 +62,11 @@ trace_check_timestamp_order "$trace_filename" thread_1
 trace_check_timestamp_order "$trace_filename" thread_2
 trace_check_timestamp_order "$trace_filename" thread_3
 
+trace_check_timestamp_values "$trace_filename" thread_0
+trace_check_timestamp_values "$trace_filename" thread_1
+trace_check_timestamp_values "$trace_filename" thread_2
+trace_check_timestamp_values "$trace_filename" thread_3
+
 echo "results: $nb_pass pass, $nb_failed failed"
 if [ $nb_failed -gt 0 ]; then
     exit 1;

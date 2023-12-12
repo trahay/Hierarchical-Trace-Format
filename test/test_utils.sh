@@ -307,6 +307,29 @@ function trace_check_timestamp_order {
 	print_ok
 	((nb_pass++))
 	return 0
+    fi   
+}
+
+function trace_check_timestamp_values {
+    trace_filename=$1
+    thread_name=$2
+
+    ((nb_test++))
+    echo " > Checking the order of timestamps for thread $thread_name"
+
+    timestamps=$("$HTF_PRINT_PATH" "$trace_filename" 2>/dev/null |grep "[[:space:]]$thread_name[[:space:]]" |awk '{print $1}' | sed 's/0\.//' | perl -pe 's/ ^0+ //xg' |tr '\n' ' ')
+    nblines=$(echo $timestamps |wc -w)
+    expected_timestamps=" "$(seq 1 $nblines |tr '\n' ' ')
+
+    if [ "$timestamps" != "$expected_timestamps" ]; then
+	print_error "failed"
+	((nb_failed++))
+	return 1
+    else
+	print_ok
+	((nb_pass++))
+	return 0
     fi
     
 }
+
