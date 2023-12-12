@@ -110,7 +110,6 @@ void ThreadWriter::storeTimestamp(EventSummary* es, htf_timestamp_t ts) {
     // update the last event's duration
     if(last_duration) {
       htf_timestamp_t delta = htf_get_duration(last_timestamp, ts);
-      htf_assert(delta <= 1e9);
       *last_duration = delta;
     }
 
