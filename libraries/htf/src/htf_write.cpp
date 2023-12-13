@@ -779,12 +779,16 @@ TokenId Thread::getEventId(htf::Event* e) {
 
   return index;
 }
-htf_duration_t Thread::getSequenceDuration(Token* array, size_t size) {
+htf_duration_t Thread::getSequenceDuration(Token* array, size_t size, bool ignoreLast) {
   htf_duration_t sum = 0;
   auto tokenCount = TokenCountMap();
-  for (size_t i = 0; i < size; i++) {
+  size_t i = size;
+  do {
+    i--;
     auto& token = array[i];
     tokenCount[token]++;
+    if (ignoreLast && i == size - 1)
+      continue;
     switch (token.type) {
     case TypeInvalid: {
       htf_error("Error parsing the given array, a Token was invalid\n");
@@ -813,7 +817,7 @@ htf_duration_t Thread::getSequenceDuration(Token* array, size_t size) {
       break;
     }
     }
-  }
+  } while (i != 0);
   return sum;
 }
 }  // namespace htf

@@ -435,8 +435,9 @@ typedef struct Thread {
    * \todo Speed this up using hashmap
    */
   Token getSequenceIdFromArray(Token* token_array, size_t array_len);
-  /** Returns the duration for the given array. */
-  htf_duration_t getSequenceDuration(Token* array, size_t size);
+  /** Returns the duration for the given array.
+   * You can choose to ignore the last token. */
+  htf_duration_t getSequenceDuration(Token* array, size_t size, bool ignoreLast = false);
   void finalizeThread();
   /** Create a new Thread from an archive and an id. This is used when writing the trace. */
   void initThread(Archive* a, ThreadId id);
