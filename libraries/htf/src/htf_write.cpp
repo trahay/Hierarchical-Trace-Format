@@ -368,6 +368,8 @@ void ThreadWriter::findLoop() {
     findLoopFilter();
     break;
   }
+  default:
+      htf_error("Invalid LoopFinding algorithm\n");
   }
 }
 
