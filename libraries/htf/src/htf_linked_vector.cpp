@@ -50,9 +50,12 @@ uint64_t& LinkedVector::back() const {
 
 void LinkedVector::print() const {
   std::cout << "[";
-  for (auto& i : *this) {
-    std::cout << i << ((&i != &this->back()) ? ", " : "]");
-  }
+  if (size) {
+    for (auto& i : *this) {
+      std::cout << i << ((&i != &this->back()) ? ", " : "]");
+    }
+  } else
+    std::cout << "]";
 }
 
 /* C++ Callbacks for C Usage */
