@@ -34,9 +34,9 @@ htf_timestamp_t htf_timestamp(htf_timestamp_t t);
 
 /** Writes the difference between the given timestamp and the last timestamp to the adress of the last timestamp,
  * and then stores the given adress. */
-//void htf_delta_timestamp(htf_timestamp_t* t);
+void htf_delta_timestamp(htf_timestamp_t t);
 
-//void htf_add_timestamp_to_delta(htf_timestamp_t* t);
+void htf_add_timestamp_to_delta(htf_timestamp_t* t);
 
 /** Writes 0 to the last timestamp */
 //void htf_finish_timestamp();

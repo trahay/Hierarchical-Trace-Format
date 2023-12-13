@@ -11,7 +11,13 @@ using TimePoint = std::chrono::time_point<std::chrono::high_resolution_clock>;
 #define NANOSECONDS(timestamp) std::chrono::duration_cast<std::chrono::nanoseconds>(timestamp).count()
 
 static TimePoint firstTimestamp = {};
-//thread_local static std::vector<htf_timestamp_t*> timestampsToDelta = std::vector<htf_timestamp_t*>();
+/**
+ * This is a vector of timestamps to delta.
+ * Those are timestamps from sequences that are concluded,
+ * but since durations are calculated when the next event drops,
+ * we need to keep that stack of pointers and update it. It should never be too big, hopefully.
+ */
+static std::vector<htf_timestamp_t*> timestampsToDelta = std::vector<htf_timestamp_t*>();
 
 htf_duration_t htf_get_duration(htf_timestamp_t t1, htf_timestamp_t t2) {
   return t2 - t1;
@@ -31,28 +37,16 @@ htf_timestamp_t htf_timestamp(htf_timestamp_t t) {
   return t;
 }
 
-void htf_delta_timestamp(htf_timestamp_t* t) {
-//  if (!timestampsToDelta.empty()) {
-//    htf_timestamp_t* front_ts = timestampsToDelta.front();
-//    htf_timestamp_t startingTimestamp = *front_ts;
-//    htf_timestamp_t startingDuration = 0;
-//    for (auto& timestamp : timestampsToDelta) {
-//      if (!startingDuration) {
-//        *timestamp = *t - *timestamp;
-//        startingDuration = *timestamp;
-//      } else {
-//        *timestamp += startingDuration;
-//        *timestamp -= startingTimestamp;
-//      }
-//    }
-//    timestampsToDelta.clear();
-//  }
-//  timestampsToDelta.push_back(t);
+void htf_delta_timestamp(htf_timestamp_t ts) {
+  for (auto t : timestampsToDelta) {
+    *t += ts;
+  }
+  timestampsToDelta.resize(0);
 }
 
-//void htf_add_timestamp_to_delta(htf_timestamp_t* t) {
-//  timestampsToDelta.push_back(t);
-//}
+void htf_add_timestamp_to_delta(htf_timestamp_t* t) {
+  timestampsToDelta.push_back(t);
+}
 
 //void htf_finish_timestamp() {
 //  *timestampsToDelta.front() = 0;
