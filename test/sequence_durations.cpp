@@ -4,7 +4,6 @@
  *
  * This is a test for the computation of durations during sequence creation.
  */
-#include <algorithm>
 #include "htf/htf.h"
 #include "htf/htf_write.h"
 using namespace htf;
@@ -23,7 +22,9 @@ static inline void check_event_allocation(Thread* thread_trace, unsigned id) {
     htf_warn("Doubling mem space of events for thread trace %p\n", (void*)thread_trace);
     DOUBLE_MEMORY_SPACE(thread_trace->events, thread_trace->nb_allocated_events, struct EventSummary);
   }
-  thread_trace->nb_events = std::max(thread_trace->nb_events, id + 1);
+  if (thread_trace->nb_events < id + 1) {
+    thread_trace->nb_events = id + 1;
+  }
 }
 
 static void init_dummy_event(ThreadWriter* thread_writer, int id) {
