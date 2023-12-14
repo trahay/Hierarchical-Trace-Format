@@ -23,7 +23,7 @@ add_test(NAME find_loop COMMAND find_loop 50 100)
 add_executable(sequence_duration sequence_durations.cpp)
 add_test(NAME sequence_duration COMMAND sequence_duration)
 
-add_executable(test_vector test_vector.c)
+add_executable(test_vector test_vector.cpp)
 add_test(NAME test_vector COMMAND test_vector 100)
 
 add_executable(test_hash test_hash.cpp)
