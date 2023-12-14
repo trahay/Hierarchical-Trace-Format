@@ -530,7 +530,7 @@ void ThreadWriter::open(Archive* archive, ThreadId thread_id) {
     return;
   htf_recursion_shield++;
 
-  htf_assert(htf_archive_get_thread(archive, thread_id) == nullptr);
+  htf_assert(archive->getThread(thread_id) == nullptr);
 
   htf_log(DebugLevel::Debug, "htf_write_thread_open(%ux)\n", thread_id);
 
@@ -547,7 +547,7 @@ void ThreadWriter::open(Archive* archive, ThreadId thread_id) {
   }
 
   last_timestamp = HTF_TIMESTAMP_INVALID;
-  last_duration = NULL;
+  last_duration = nullptr;
   sequence_start_timestamp = new htf_timestamp_t[max_depth];
 
   cur_depth = 0;
