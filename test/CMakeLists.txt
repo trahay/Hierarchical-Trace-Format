@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.13)
 enable_testing()
 # add_subdirectory(mpi)
 
-add_compile_options(-Wall -Wextra -Wpedantic)
+add_compile_options(-Wall -Wextra -Wpedantic -Wno-sign-compare)
 include_directories(${CMAKE_SOURCE_DIR}/src/)
 link_libraries(htf)
 configure_file(../config.json config.json COPYONLY)

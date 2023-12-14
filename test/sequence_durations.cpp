@@ -28,26 +28,20 @@ static inline void check_event_allocation(Thread* thread_trace, unsigned id) {
 }
 
 static void init_dummy_event(ThreadWriter* thread_writer, int id) {
-  struct Event e {};
-  e.event_size = offsetof(struct Event, event_data);
-  e.record = HTF_EVENT_MPI_SEND;
   check_event_allocation(&thread_writer->thread_trace, id);
   thread_writer->storeEvent(HTF_SINGLETON, id, get_timestamp(), nullptr);
 }
 
-int main(int argc, char** argv __attribute__((unused))) {
-  //  if (argc < 2) {
-  //    htf_error("Not enough arguments ! 2 argument required.\n");
-  //  }
-  //  if (argc > 3) {
-  //    htf_error("Too many arguments ! 3 argument required.\n");
-  //  }
-
+int main(int argc __attribute__((unused)), char** argv __attribute__((unused))) {
   /* Make a dummy archive and a dummy thread writer. */
-  struct Archive archive;
-  htf_write_archive_open(&archive, "dummy_trace", "dummy_trace", 0);
+  Archive archive;
+  archive.open("dummy_trace", "dummy_trace", 0);
+  std::cout << "Hoi" << std::endl;
+
   ThreadWriter thread_writer;
-  htf_write_thread_open(&archive, &thread_writer, 0);
+  std::cout << "Hoi" << std::endl;
+
+  thread_writer.open(&archive, 0);
 
   /* Here's what we're going to do: we'll define some sequences as the following:
    * S1 = E1 E2
