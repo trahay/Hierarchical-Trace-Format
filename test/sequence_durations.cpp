@@ -59,9 +59,9 @@ int main(int argc, char** argv __attribute__((unused))) {
    * And then we'll check that the durations of all the sequences is oki doki
    */
 
-  unsigned long OUTER_LOOP_SIZE = 2;
-  unsigned long INNER_LOOP_SIZE = 10;
-  unsigned long MAX_SUBSEQUENCE_NUMBER = 10;
+  int OUTER_LOOP_SIZE = 2;
+  int INNER_LOOP_SIZE = 10;
+  int MAX_SUBSEQUENCE_NUMBER = 10;
   for (int outer_loop_number = 1; outer_loop_number <= OUTER_LOOP_SIZE; outer_loop_number++) {
     // Outer loop for S_n
     for (int sequence_number = 1; sequence_number <= MAX_SUBSEQUENCE_NUMBER; sequence_number++) {
