@@ -3,15 +3,15 @@
  * See LICENSE in top-level directory.
  */
 
+#include "htf/htf_parameter_handler.h"
 #include <json/json.h>
 #include <json/value.h>
 #include <fstream>
 #include <iostream>
 #include "htf/htf_dbg.h"
-#include "htf/htf_parameter_handler.h"
 
-std::string loadStringFromConfig(Json::Value &config, std::string fieldName) {
-  if(config[fieldName]) {
+std::string loadStringFromConfig(Json::Value& config, std::string fieldName) {
+  if (config[fieldName]) {
     if (config[fieldName].isString()) {
       return config[fieldName].asString();
     }
@@ -19,8 +19,8 @@ std::string loadStringFromConfig(Json::Value &config, std::string fieldName) {
   return "";
 }
 
-uint64_t loadUInt64FromConfig(Json::Value &config, std::string fieldName) {
-  if(config[fieldName]) {
+uint64_t loadUInt64FromConfig(Json::Value& config, std::string fieldName) {
+  if (config[fieldName]) {
     if (config[fieldName].isUInt64()) {
       return config[fieldName].asUInt64();
     }
@@ -28,22 +28,22 @@ uint64_t loadUInt64FromConfig(Json::Value &config, std::string fieldName) {
   return UINT64_MAX;
 }
 
-std::string loadStringFromEnv(Json::Value &config, std::string envName) {
+std::string loadStringFromEnv(Json::Value& config, std::string envName) {
   const char* env_value = getenv(envName.c_str());
-  if(env_value)
+  if (env_value)
     return std::string(env_value);
   return "";
 }
 
-uint64_t loadUInt64FromEnv(Json::Value &config, std::string envName) {
+uint64_t loadUInt64FromEnv(Json::Value& config, std::string envName) {
   const char* env_value = getenv(envName.c_str());
-  if(env_value) {
+  if (env_value) {
     return std::stoull(env_value);
   }
   return UINT64_MAX;
 }
 
-std::map<htf::CompressionAlgorithm,std::string> CompressionAlgorithmMap = {
+std::map<htf::CompressionAlgorithm, std::string> CompressionAlgorithmMap = {
   {htf::CompressionAlgorithm::None, "None"},
   {htf::CompressionAlgorithm::ZSTD, "ZSTD"},
   {htf::CompressionAlgorithm::Histogram, "Histogram"},
@@ -61,19 +61,19 @@ std::string htf::toString(htf::CompressionAlgorithm alg) {
 }
 
 htf::CompressionAlgorithm compressionAlgorithmFromString(std::string str) {
-  for(auto &it : CompressionAlgorithmMap) {
-    if(it.second.compare(str)==0) {
+  for (auto& it : CompressionAlgorithmMap) {
+    if (it.second.compare(str) == 0) {
       return it.first;
     }
   }
   return htf::CompressionAlgorithm::Invalid;
 }
 
-htf::CompressionAlgorithm loadCompressionAlgorithmConfig(Json::Value &config) {
+htf::CompressionAlgorithm loadCompressionAlgorithmConfig(Json::Value& config) {
   htf::CompressionAlgorithm ret = htf::CompressionAlgorithm::None;
 
   std::string value = loadStringFromEnv(config, "HTF_COMPRESSION");
-  if(value.empty()) {
+  if (value.empty()) {
     value = loadStringFromConfig(config, "compressionAlgorithm");
   }
   ret = compressionAlgorithmFromString(value);
@@ -81,9 +81,7 @@ htf::CompressionAlgorithm loadCompressionAlgorithmConfig(Json::Value &config) {
   return ret;
 }
 
-
-
-std::map<htf::EncodingAlgorithm,std::string> EncodingAlgorithmMap = {
+std::map<htf::EncodingAlgorithm, std::string> EncodingAlgorithmMap = {
   {htf::EncodingAlgorithm::None, "None"},
   {htf::EncodingAlgorithm::Masking, "Masking"},
   {htf::EncodingAlgorithm::LeadingZeroes, "LeadingZeroes"},
@@ -95,27 +93,26 @@ std::string htf::toString(htf::EncodingAlgorithm alg) {
 }
 
 htf::EncodingAlgorithm encodingAlgorithmFromString(std::string str) {
-  for(auto &it : EncodingAlgorithmMap) {
-    if(it.second.compare(str)==0) {
+  for (auto& it : EncodingAlgorithmMap) {
+    if (it.second.compare(str) == 0) {
       return it.first;
     }
   }
   return htf::EncodingAlgorithm::Invalid;
 }
 
-htf::EncodingAlgorithm loadEncodingAlgorithmConfig(Json::Value &config) {
+htf::EncodingAlgorithm loadEncodingAlgorithmConfig(Json::Value& config) {
   htf::EncodingAlgorithm ret = htf::EncodingAlgorithm::None;
 
   std::string value = loadStringFromEnv(config, "HTF_ENCODING");
-  if(value.empty()) {
+  if (value.empty()) {
     value = loadStringFromConfig(config, "encodingAlgorithm");
-  }  
+  }
   ret = encodingAlgorithmFromString(value);
   return ret;
 }
 
-
-std::map<htf::LoopFindingAlgorithm,std::string> LoopFindingAlgorithmMap = {
+std::map<htf::LoopFindingAlgorithm, std::string> LoopFindingAlgorithmMap = {
   {htf::LoopFindingAlgorithm::None, "None"},
   {htf::LoopFindingAlgorithm::Basic, "Basic"},
   {htf::LoopFindingAlgorithm::BasicTruncated, "BasicTruncated"},
@@ -128,77 +125,72 @@ std::string htf::toString(htf::LoopFindingAlgorithm alg) {
 }
 
 htf::LoopFindingAlgorithm loopFindingAlgorithmFromString(std::string str) {
-  for(auto &it : LoopFindingAlgorithmMap) {
-    if(it.second.compare(str)==0) {
+  for (auto& it : LoopFindingAlgorithmMap) {
+    if (it.second.compare(str) == 0) {
       return it.first;
     }
   }
   return htf::LoopFindingAlgorithm::Invalid;
 }
 
-htf::LoopFindingAlgorithm loadLoopFindingAlgorithmConfig(Json::Value &config) {
+htf::LoopFindingAlgorithm loadLoopFindingAlgorithmConfig(Json::Value& config) {
   htf::LoopFindingAlgorithm ret = htf::LoopFindingAlgorithm::BasicTruncated;
 
   std::string value = loadStringFromEnv(config, "HTF_LOOP_FINDING");
-  if(value.empty()) {
+  if (value.empty()) {
     value = loadStringFromConfig(config, "loopFindingAlgorithm");
-  }  
+  }
   ret = loopFindingAlgorithmFromString(value);
   return ret;
 }
 
-uint64_t loadMaxLoopLength(Json::Value &config) {
+uint64_t loadMaxLoopLength(Json::Value& config) {
   uint64_t ret = 100;
 
   uint64_t value = loadUInt64FromEnv(config, "HTF_LOOP_LENGTH");
-  if(value == UINT64_MAX) {
+  if (value == UINT64_MAX) {
     value = loadUInt64FromConfig(config, "maxLoopLength");
-  }  
+  }
 
   return value;
 }
 
-
-uint64_t loadZSTDCompressionLevel(Json::Value &config) {
+uint64_t loadZSTDCompressionLevel(Json::Value& config) {
   uint64_t ret = 3;
 
   uint64_t value = loadUInt64FromEnv(config, "HTF_ZSTD_LVL");
-  if(value == UINT64_MAX) {
+  if (value == UINT64_MAX) {
     value = loadUInt64FromConfig(config, "zstdCompressionLevel");
   }
 
   return value;
 }
 
-
-
-std::map<htf::TimestampStorage,std::string> TimestampStorageMap = {
-  { htf::TimestampStorage::None, "None"},
-  { htf::TimestampStorage::Delta, "Delta"},
-  { htf::TimestampStorage::Timestamp, "Timestamp"},
-  { htf::TimestampStorage::Invalid, "Invalid"}
-};
+std::map<htf::TimestampStorage, std::string> TimestampStorageMap = {{htf::TimestampStorage::None, "None"},
+                                                                    {htf::TimestampStorage::Delta, "Delta"},
+                                                                    {htf::TimestampStorage::Timestamp, "Timestamp"},
+                                                                    {htf::TimestampStorage::Invalid, "Invalid"}};
 
 std::string htf::toString(htf::TimestampStorage ts) {
   return TimestampStorageMap[ts];
 }
 
 htf::TimestampStorage timestampStorageFromString(std::string str) {
-  for(auto &it : TimestampStorageMap) {
-    if(it.second.compare(str)==0) {
+  for (auto& it : TimestampStorageMap) {
+    if (it.second.compare(str) == 0) {
       return it.first;
     }
   }
   return htf::TimestampStorage::Invalid;
 }
 
-htf::TimestampStorage loadTimestampStorageConfig(Json::Value &config) {
+htf::TimestampStorage loadTimestampStorageConfig(Json::Value& config) {
   htf::TimestampStorage ret = htf::TimestampStorage::Delta;
 
   std::string value = loadStringFromEnv(config, "HTF_TIMESTAMP_STORAGE");
-  if(value.empty()) {
+  if (value.empty()) {
     value = loadStringFromConfig(config, "timestampStorage");
-  }  
+  }
   ret = timestampStorageFromString(value);
   return ret;
 }
