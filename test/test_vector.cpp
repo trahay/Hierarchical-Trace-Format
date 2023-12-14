@@ -17,7 +17,7 @@ int main(int argc, char** argv) {
 
   htf::LinkedVector vector = htf::LinkedVector();
 
-  for (size_t i; i < TEST_SIZE; i++) {
+  for (size_t i = 0; i < TEST_SIZE; i++) {
     vector.add(i);
   }
 
