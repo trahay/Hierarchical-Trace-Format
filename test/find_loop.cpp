@@ -51,11 +51,11 @@ int main(int argc, char** argv __attribute__((unused))) {
     init_dummy_event(&thread_writer, (Record)eid);
 
   /* Check they've been correctly registered. */
-  htf_assert(thread_writer.cur_depth == 0);
-  htf_assert(thread_writer.og_seq[0]->size() == (unsigned int)MAX_EVENT);
+  htf_assert_always(thread_writer.cur_depth == 0);
+  htf_assert_always(thread_writer.og_seq[0]->size() == (unsigned int)MAX_EVENT);
   for (int eid = 0; eid < MAX_EVENT; eid++) {
-    htf_assert(thread_writer.og_seq[0]->tokens[eid].type == TypeEvent);
-    htf_assert(thread_writer.og_seq[0]->tokens[eid].id == eid);
+    htf_assert_always(thread_writer.og_seq[0]->tokens[eid].type == TypeEvent);
+    htf_assert_always(thread_writer.og_seq[0]->tokens[eid].id == eid);
   }
 
   /* Start recording some more events. This should make a first loop. */
@@ -63,29 +63,29 @@ int main(int argc, char** argv __attribute__((unused))) {
     init_dummy_event(&thread_writer, eid);
 
   /* This should have been recognized as a loop, so now there should be some changes. */
-  htf_assert(thread_writer.cur_depth == 0);
-  htf_assert(thread_writer.og_seq[0]->size() == 1);
-  htf_assert(thread_writer.og_seq[0]->tokens[0].type == TypeLoop);
+  htf_assert_always(thread_writer.cur_depth == 0);
+  htf_assert_always(thread_writer.og_seq[0]->size() == 1);
+  htf_assert_always(thread_writer.og_seq[0]->tokens[0].type == TypeLoop);
   /* Check that the loop is correct */
   struct Loop* l = thread_writer.thread_trace.getLoop(thread_writer.og_seq[0]->tokens[0]);
-  htf_assert(l->nb_iterations[0] == 2);
+  htf_assert_always(l->nb_iterations[0] == 2);
 
   /* Check that the sequence inside that loop is correct */
   struct Sequence* s = thread_writer.thread_trace.getSequence(l->repeated_token);
 
-  htf_assert(s->size() == (unsigned int)MAX_EVENT);
+  htf_assert_always(s->size() == (unsigned int)MAX_EVENT);
 
   for (int eid = 0; eid < MAX_EVENT; eid++) {
-    htf_assert(s->tokens[eid].type == TypeEvent);
-    htf_assert(s->tokens[eid].id == eid);
+    htf_assert_always(s->tokens[eid].type == TypeEvent);
+    htf_assert_always(s->tokens[eid].id == eid);
   }
 
   /* Start recording even more events. The first loop happens 3 times now.*/
   for (int eid = 0; eid < MAX_EVENT; eid++)
     init_dummy_event(&thread_writer, eid);
-  htf_assert(thread_writer.cur_depth == 0);
-  htf_assert(thread_writer.og_seq[0]->size() == 1);
-  htf_assert(l->nb_iterations[0] == 3);
+  htf_assert_always(thread_writer.cur_depth == 0);
+  htf_assert_always(thread_writer.og_seq[0]->size() == 1);
+  htf_assert_always(l->nb_iterations[0] == 3);
 
   /* Now start recording one more event and then loop again. */
   init_dummy_event(&thread_writer, MAX_EVENT);
@@ -93,10 +93,10 @@ int main(int argc, char** argv __attribute__((unused))) {
     DOFOR(eid, MAX_EVENT)
     init_dummy_event(&thread_writer, eid);
   }
-  htf_assert(thread_writer.cur_depth == 0);
-  htf_assert(thread_writer.og_seq[0]->size() == 3);  // L0 E L0
-  htf_assert(l->nb_iterations[0] == 3);
-  htf_assert(l->nb_iterations[1] == (size_t)NUM_LOOPS);
+  htf_assert_always(thread_writer.cur_depth == 0);
+  htf_assert_always(thread_writer.og_seq[0]->size() == 3);  // L0 E L0
+  htf_assert_always(l->nb_iterations[0] == 3);
+  htf_assert_always(l->nb_iterations[1] == (size_t)NUM_LOOPS);
 
   return 0;
 }
