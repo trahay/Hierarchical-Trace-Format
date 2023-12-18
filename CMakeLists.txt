@@ -50,6 +50,11 @@ check_type_size("std::vector<size_t>" SIZEOF_VECTOR LANGUAGE CXX)
 message("Size of std::vector<size_t>: ${SIZEOF_VECTOR}")
 add_compile_definitions(VECTOR_SIZE=${SIZEOF_VECTOR})
 
+SET(CMAKE_EXTRA_INCLUDE_FILES "chrono")
+check_type_size("std::chrono::time_point<std::chrono::high_resolution_clock>" SIZEOF_TIMEPOINT LANGUAGE CXX)
+message("Size of TimePoint: ${SIZEOF_TIMEPOINT}")
+add_compile_definitions(TIMEPOINT_SIZE=${SIZEOF_TIMEPOINT})
+
 ####################################################
 # Some flags for compilation
 

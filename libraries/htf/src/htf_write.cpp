@@ -9,10 +9,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "htf/htf_parameter_handler.h"
 #include "htf/htf.h"
 #include "htf/htf_archive.h"
 #include "htf/htf_hash.h"
+#include "htf/htf_parameter_handler.h"
 #include "htf/htf_storage.h"
 #include "htf/htf_timestamp.h"
 #include "htf/htf_write.h"
@@ -97,7 +97,7 @@ Loop* ThreadWriter::createLoop(int start_index, int loop_len) {
   return l;
 }
 
-void ThreadWriter::storeTimestamp(EventSummary* es, htf_timestamp_t ts) {  
+void ThreadWriter::storeTimestamp(EventSummary* es, htf_timestamp_t ts) {
 #if 0
   // Not yet implemented
   if(store_event_timestamps) {
@@ -111,7 +111,7 @@ void ThreadWriter::storeTimestamp(EventSummary* es, htf_timestamp_t ts) {
     if (last_duration) {
       htf_timestamp_t delta = htf_get_duration(last_timestamp, ts);
       *last_duration = delta;
-      htf_delta_timestamp(delta);
+      completeDurations(delta);
     }
 
     // allocate a new duration for the current event
@@ -205,7 +205,7 @@ void ThreadWriter::replaceTokensInLoop(int loop_len, size_t index_first_iteratio
   // We don't take into account the last token because it's not a duration yet
 
   loop_seq->durations->add(duration_first_iteration - duration_second_iteration);
-  htf_add_timestamp_to_delta(loop_seq->durations->add(duration_second_iteration));
+  addDurationToComplete(loop_seq->durations->add(duration_second_iteration));
 
   // The current sequence last_timestamp does not need to be updated
 
@@ -251,7 +251,7 @@ void ThreadWriter::findLoopBasic(size_t maxLoopLength) {
         // The current sequence last_timestamp does not need to be updated
 
         htf_timestamp_t ts = thread_trace.getSequenceDuration(&currentSequence->tokens[s1Start], loopLength, true);
-        htf_add_timestamp_to_delta(seq->durations->add(ts));
+        addDurationToComplete(seq->durations->add(ts));
         currentSequence->tokens.resize(s1Start);
         return;
       }
@@ -332,7 +332,7 @@ void ThreadWriter::findLoopFilter() {
       // The current sequence last_timestamp does not need to be updated
 
       htf_timestamp_t ts = thread_trace.getSequenceDuration(&currentSequence->tokens[loopIndex + 1], loopLength, true);
-      htf_add_timestamp_to_delta(sequence->durations->add(ts));
+      addDurationToComplete(sequence->durations->add(ts));
       currentSequence->tokens.resize(loopIndex + 1);
       return;
     }
@@ -368,7 +368,7 @@ void ThreadWriter::findLoop() {
     break;
   }
   default:
-      htf_error("Invalid LoopFinding algorithm\n");
+    htf_error("Invalid LoopFinding algorithm\n");
   }
 }
 
@@ -384,7 +384,7 @@ void ThreadWriter::recordExitFunction() {
 
 #ifdef DEBUG
   // check that the sequence is not bugous
-  
+
   Token first_token = cur_seq->tokens[0];
   Token last_token = cur_seq->tokens.back();
   if (first_token.type != last_token.type) {
@@ -471,7 +471,7 @@ size_t ThreadWriter::storeEvent(enum EventType event_type,
                                 TokenId event_id,
                                 htf_timestamp_t ts,
                                 AttributeList* attribute_list) {
-  ts = htf_timestamp(ts);
+  ts = timestamp(ts);
   if (event_type == HTF_BLOCK_START) {
     recordEnterFunction();
     sequence_start_timestamp[cur_depth] = ts;
