@@ -21,7 +21,7 @@ int main(int argc, char** argv) {
     vector.add(i);
   }
 
-  htf_assert(vector.size == TEST_SIZE);
+  htf_assert_always(vector.size == TEST_SIZE);
   return EXIT_SUCCESS;
 }
 

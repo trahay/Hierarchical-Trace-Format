@@ -91,14 +91,14 @@ int main(int argc __attribute__((unused)), char** argv __attribute__((unused))) 
     std::cout << std::endl;
 
     if (sequence_number > 0) {
-      htf_assert(s->tokens.size() == sequence_number + 1);
-      htf_assert(s->durations->size == INNER_LOOP_SIZE * OUTER_LOOP_SIZE);
+      htf_assert_always(s->tokens.size() == sequence_number + 1);
+      htf_assert_always(s->durations->size == INNER_LOOP_SIZE * OUTER_LOOP_SIZE);
       for (auto t : *s->durations) {
-        htf_assert(t == s->size());
+        htf_assert_always(t == s->size());
       }
     } else {
-      //      htf_assert(s->tokens.size() == )
-      //      htf_assert(s->durations->back() == )
+      //      htf_assert_always(s->tokens.size() == )
+      //      htf_assert_always(s->durations->back() == )
     }
   }
 

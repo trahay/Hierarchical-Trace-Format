@@ -22,8 +22,8 @@ htf_timestamp_t htf::ThreadWriter::timestamp(htf_timestamp_t t) {
 }
 
 void htf::ThreadWriter::completeDurations(htf_duration_t duration) {
-  for (auto t : incompleteDurations) {
-    *t += duration;
+  for (auto it : incompleteDurations) {
+    *it += duration;
   }
   incompleteDurations.resize(0);
 }
