@@ -171,20 +171,6 @@ void Loop::addIteration() {
   nb_iterations.back()++;
 }
 
-/**
- * @brief This function creates a loop of size loop_len
- *
- * @param loop_len The length of each sequence of the loop.
- * @param index_first_iteration The index of the first token of the first iteration of the loop.
- * @param index_second_iteration The index of the first token of the second iteration of the loop.
- *
- * At the beginning of the function, the current sequence loops like this:
- * XXXXXX TA TB TC TD TA TB TC TD
- *
- * The function creates a loop that contains 2 iterations of the sequence TA TB TC TD, and places
- * it in the current sequence:
- * XXXXXX LA
- */
 void ThreadWriter::replaceTokensInLoop(int loop_len, size_t index_first_iteration, size_t index_second_iteration) {
   if (index_first_iteration > index_second_iteration) {
     size_t tmp = index_second_iteration;

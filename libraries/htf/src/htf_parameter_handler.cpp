@@ -171,8 +171,8 @@ std::map<htf::TimestampStorage, std::string> TimestampStorageMap = {{htf::Timest
                                                                     {htf::TimestampStorage::Timestamp, "Timestamp"},
                                                                     {htf::TimestampStorage::Invalid, "Invalid"}};
 
-std::string htf::toString(htf::TimestampStorage ts) {
-  return TimestampStorageMap[ts];
+std::string htf::toString(htf::TimestampStorage alg) {
+  return TimestampStorageMap[alg];
 }
 
 htf::TimestampStorage timestampStorageFromString(std::string str) {

@@ -185,8 +185,8 @@ class ParameterHandler {
    */
 
   /**
-   * Getter for #timestampStorageAlgorithm.
-   * @returns Value of #timestampStorageAlgorithm. */
+   * Getter for #timestampStorage.
+   * @returns Value of #timestampStorage. */
   [[nodiscard]] TimestampStorage getTimestampStorage() const;
 
   ParameterHandler();
