@@ -3,10 +3,8 @@
  * See LICENSE in top-level directory.
  */
 
-#include <stdlib.h>
-#include "htf/htf_linked_vector.h"
-#include "htf/htf.h"
 #include "htf/htf_dbg.h"
+#include "htf/htf_linked_vector.h"
 
 int main(int argc, char** argv) {
   if (argc < 2) {
@@ -15,21 +13,20 @@ int main(int argc, char** argv) {
   if (argc > 2) {
     htf_error("Too many arguments ! 1 argument required.\n");
   }
-  int TEST_SIZE = atoi(argv[1]);
+  size_t TEST_SIZE = std::stoi(argv[1]);
 
-  LinkedVector* vector = linked_vector_new();
+  htf::LinkedVector vector = htf::LinkedVector();
 
-  DOFOR(i, TEST_SIZE) {
-    linked_vector_add(vector, i);
+  for (size_t i = 0; i < TEST_SIZE; i++) {
+    vector.add(i);
   }
 
-  htf_assert(vector->size == (size_t)TEST_SIZE);
-  printf("\n");
+  htf_assert_always(vector.size == TEST_SIZE);
   return EXIT_SUCCESS;
 }
 
 /* -*-
-   mode: c;
+   mode: cpp;
    c-file-style: "k&r";
    c-basic-offset 2;
    tab-width 2 ;

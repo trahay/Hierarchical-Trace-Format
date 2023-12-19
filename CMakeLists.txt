@@ -24,7 +24,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake_modules)
 # Look for libraries
 
 # Options to enable/disable modules
-option(ENABLE_OTF2 "Enable OTF2 compatibilit layer" ON)
+option(ENABLE_OTF2 "Enable OTF2 compatibility layer" ON)
 option(BUILD_DOC "Build Doxygen Documentation" ON)
 option(ENABLE_SZ "Enables compression using the SZ lib" ON)
 option(ENABLE_ZFP "Enables compression using the ZFP lib" ON)
@@ -49,6 +49,11 @@ SET(CMAKE_EXTRA_INCLUDE_FILES "vector")
 check_type_size("std::vector<size_t>" SIZEOF_VECTOR LANGUAGE CXX)
 message("Size of std::vector<size_t>: ${SIZEOF_VECTOR}")
 add_compile_definitions(VECTOR_SIZE=${SIZEOF_VECTOR})
+
+SET(CMAKE_EXTRA_INCLUDE_FILES "chrono")
+check_type_size("std::chrono::time_point<std::chrono::high_resolution_clock>" SIZEOF_TIMEPOINT LANGUAGE CXX)
+message("Size of TimePoint: ${SIZEOF_TIMEPOINT}")
+add_compile_definitions(TIMEPOINT_SIZE=${SIZEOF_TIMEPOINT})
 
 ####################################################
 # Some flags for compilation

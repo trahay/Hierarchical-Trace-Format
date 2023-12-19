@@ -16,7 +16,6 @@ namespace htf {
  * Writes one thread to the HTF trace format.
  */
 typedef struct ThreadWriter {
-
   Thread thread_trace; /**< Thread being written. */
   Sequence** og_seq;   /**< Array of pointers to sequences. todo: Complete this. */
   int cur_depth;       /**< Current depth in the callstack. */
@@ -25,10 +24,21 @@ typedef struct ThreadWriter {
 
   htf_timestamp_t last_timestamp; /**< Timestamp of the last encountered event */
 
-  htf_duration_t* last_duration;  /**< Pointer to the last event duration (to be updated when the timestamp of the next event is known) */
+  htf_duration_t* last_duration; /**< Pointer to the last event duration (to be updated when the timestamp of the next
+                                    event is known) */
 
-  htf_timestamp_t* sequence_start_timestamp;  /**< Start date of each ongoing sequence (used for computing the sequence duration) */
+  htf_timestamp_t*
+    sequence_start_timestamp; /**< Start date of each ongoing sequence (used for computing the sequence duration) */
 
+  /**
+   * This is a vector of durations that are incomplete.
+   * Those are durations from sequence whose last duration was still a timestamp.
+   * Next time a timestamp is registered, and thus the duration for the last event in those sequences is computed,
+   * they'll be updated.
+   */
+  DEFINE_Vector(htf_duration_t*, incompleteDurations);
+  /** The first recorded timestamp for this thread.*/
+  C_CXX(uint8_t firstTimestamp[TIMEPOINT_SIZE], Timepoint firstTimestamp = {});
 #ifdef __cplusplus
 
  private:
@@ -63,6 +73,14 @@ typedef struct ThreadWriter {
   void recordEnterFunction();
   /** Close a Sequence and move down the callstack. */
   void recordExitFunction();
+  /** Returns the current timestamp. */
+  htf_timestamp_t getTimestamp();
+  /** Returns t if it's valid, of the current timestamp. */
+  htf_timestamp_t timestamp(htf_timestamp_t t);
+  /** Adds the given duration to all the stored addresses to complete.*/
+  void completeDurations(htf_duration_t duration);
+  /** Adds the given address to a list of duration to complete. */
+  void addDurationToComplete(htf_duration_t* duration);
 
  public:
   void open(Archive* archive, ThreadId thread_id);
@@ -72,7 +90,6 @@ typedef struct ThreadWriter {
                     TokenId event_id,
                     htf_timestamp_t ts,
                     struct AttributeList* attribute_list);
-
 #endif
 } ThreadWriter;
 #ifdef __cplusplus

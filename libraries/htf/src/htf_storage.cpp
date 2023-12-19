@@ -362,6 +362,8 @@ inline static void _htf_compress_write(uint64_t* src, size_t n, FILE* file) {
     htf_error("Not yet implemented\n");
     break;
   }
+  default:
+      htf_error("Invalid Encoding algorithm\n");
   }
 
   byte* compressedArray = nullptr;
@@ -397,6 +399,8 @@ inline static void _htf_compress_write(uint64_t* src, size_t n, FILE* file) {
     compressedArray = _htf_sz_compress(src, n, compressedSize);
     break;
 #endif
+  default:
+      htf_error("Invalid Compression algorithm\n");
   }
 
   if (htf::parameterHandler.getCompressionAlgorithm() != htf::CompressionAlgorithm::None) {
@@ -475,6 +479,8 @@ inline static uint64_t* _htf_compress_read(size_t n, FILE* file) {
     uncompressedArray = _htf_sz_decompress(n, compressedArray, compressedSize);
     break;
 #endif
+  default:
+      htf_error("Invalid Compression algorithm\n");
   }
 
   switch (encodingAlgorithm) {
@@ -494,6 +500,8 @@ inline static uint64_t* _htf_compress_read(size_t n, FILE* file) {
     htf_error("Not yet implemented\n");
     break;
   }
+  default:
+    htf_error("Invalid Encoding algorithm\n");
   }
 
   if (compressionAlgorithm == htf::CompressionAlgorithm::None && encodingAlgorithm == htf::EncodingAlgorithm::None) {

@@ -29,40 +29,34 @@ enum class CompressionAlgorithm {
 #endif
 #ifdef WITH_ZFP
   /**Compression using ZFP (lossy). */
-  ZFP = 4
+  ZFP = 4,
 #endif
+  Invalid
 };
 
-/**
- * Converts a compression algorithm to its string name.
- * @param alg Algorithm to compress.
- * @return String such that it shall be parsed to that algorithm's enum.
- */
-inline std::string algorithmToString(CompressionAlgorithm alg) {
-  switch (alg) {
-  case CompressionAlgorithm::None:
-    return "None";
-  case CompressionAlgorithm::ZSTD:
-    return "ZSTD";
-  case CompressionAlgorithm::Histogram:
-    return "Histogram";
-#ifdef WITH_SZ
-  case CompressionAlgorithm::SZ:
-    return "SZ";
-#endif
-#ifdef WITH_ZFP
-  case CompressionAlgorithm::ZFP:
-    return "ZFP";
-#endif
-  default:
-    return "Non Defined Compression Algorithm";
+  const enum CompressionAlgorithm CompressionAlgorithmDefault = CompressionAlgorithm::None;
+  const size_t zstdCompressionLevelDefault = 3;
+
+  /**
+   * Converts a compression algorithm to its string name.
+   * @param alg Algorithm to compress.
+   * @return String such that it shall be parsed to that algorithm's enum.
+   */
+  std::string toString(CompressionAlgorithm alg);
+
+  /**
+   * Converts a string to a  compression algorithm.
+   * @param str the string.
+   * @return Compression Algorithm that corresponds to the string.
+   */
+  htf::CompressionAlgorithm compressionAlgorithmFromString(std::string str);
+
+  /** Returns whether a compression algorithm is lossy or not. */
+  inline bool isLossy(CompressionAlgorithm alg) {
+    return alg != CompressionAlgorithm::None && alg != CompressionAlgorithm::ZSTD;
   }
-}
-/** Returns whether a compression algorithm is lossy or not. */
-inline bool isLossy(CompressionAlgorithm alg) {
-  return alg != CompressionAlgorithm::None && alg != CompressionAlgorithm::ZSTD;
-}
-/** A set of various encoding algorithms supported by HTF */
+
+  /** A set of various encoding algorithms supported by HTF */
 enum class EncodingAlgorithm {
   /** No encoding. */
   None,
@@ -71,27 +65,26 @@ enum class EncodingAlgorithm {
   Masking,
   /** LeadingZeroes encoding: the first byte of each element in the array indicates the size of that element.
    * This is done to nullify the number of leading zeroes */
-  LeadingZeroes
+  LeadingZeroes,
+  Invalid
 };
 
+  const enum EncodingAlgorithm EncodingAlgorithmDefault = EncodingAlgorithm::None;
+
 /**
- * Converts a compression algorithm to its string name.
- * @param alg Algorithm to compress.
+ * Converts an EncodingAlgorithm to its string name.
+ * @param alg the EncodingAlgorithm.
  * @return String such that it shall be parsed to that algorithm's enum.
  */
-inline std::string algorithmToString(EncodingAlgorithm alg) {
-  switch (alg) {
-  case EncodingAlgorithm::None:
-    return "None";
-  case EncodingAlgorithm::Masking:
-    return "Masking";
-  case EncodingAlgorithm::LeadingZeroes:
-    return "LeadingZeroes";
-  default:
-    return "Non Defined Encoding Algorithm";
-  }
-}
+  std::string toString(EncodingAlgorithm alg);
 
+  /**
+   * Converts a string to an EncodingAlgorithm.
+   * @param str the string.
+   * @return EncodingAlgorithm that corresponds to the string.
+   */
+  htf::EncodingAlgorithm encodingAlgorithmFromString(std::string str);
+  
 /** A set of various loop-finding algorithms used by HTF */
 enum class LoopFindingAlgorithm {
   /** No loop finding */
@@ -104,43 +97,70 @@ enum class LoopFindingAlgorithm {
   /** Start by filtering the tokens and only running the loop finding algorithm on the interesting ones.
    * See ThreadWriter::findLoopFilter for more information.
    */
-  Filter
+  Filter,
+  Invalid
 };
+  const enum LoopFindingAlgorithm LoopFindingAlgorithmDefault = LoopFindingAlgorithm::BasicTruncated;
+  const size_t maxLoopLengthDefault = 100;
 
 /**
- * Converts a compression algorithm to its string name.
- * @param alg Algorithm to compress.
+ * Converts a LoopFindingAlgorithm to its string name.
+ * @param alg the LoopFindingAlgorithm.
  * @return String such that it shall be parsed to that algorithm's enum.
  */
-inline std::string algorithmToString(LoopFindingAlgorithm alg) {
-  switch (alg) {
-  case LoopFindingAlgorithm::None:
-    return "None";
-  case LoopFindingAlgorithm::Basic:
-    return "Basic";
-  case LoopFindingAlgorithm::BasicTruncated:
-    return "BasicTruncated";
-  case LoopFindingAlgorithm::Filter:
-    return "Filter";
-  default:
-    return "Non Defined Loop-Finding Algorithm";
-  }
-}
+  std::string toString(LoopFindingAlgorithm alg);
+
+  /**
+   * Converts a string to an LoopFindingAlgorithm.
+   * @param str the string.
+   * @return LoopFindingAlgorithm that corresponds to the string.
+   */
+  htf::LoopFindingAlgorithm loopFindingAlgorithmFromString(std::string str);
+
+  /** A set of various encoding algorithms supported by HTF */
+enum class TimestampStorage {
+  /** Do not store timestamps. */
+  None,
+  /** Store event durations (default). */
+  Delta,
+  /** Store event timestamps (not implemented yet). */
+  Timestamp,
+
+  Invalid,
+};
+  const enum TimestampStorage TimestampStorageDefault = TimestampStorage::Delta;
+
+  /**
+   * Converts a TimestampStorage to its string name.
+   * @param alg the TimestampStorage.
+   * @return String such that it shall be parsed to that TimestampStorage's enum.
+   */
+  std::string toString(TimestampStorage alg);
+
+  /**
+   * Converts a string to an TimestampStorage.
+   * @param str the string.
+   * @return TimestampStorage that corresponds to the string.
+   */
+  htf::TimestampStorage timestampStorageFromString(std::string str);
+
 
 /**
  * A simple data class that contains information on different parameters.
  */
 class ParameterHandler {
   /** The compression algorithm used during the execution. */
-  CompressionAlgorithm compressionAlgorithm{CompressionAlgorithm::None};
+  CompressionAlgorithm compressionAlgorithm{CompressionAlgorithmDefault};
   /** The ZSTD compression level. */
-  size_t zstdCompressionLevel{3};
+  size_t zstdCompressionLevel{zstdCompressionLevelDefault};
   /** The encoding algorithm used during the execution. */
-  EncodingAlgorithm encodingAlgorithm{EncodingAlgorithm::None};
+  EncodingAlgorithm encodingAlgorithm{EncodingAlgorithmDefault};
   /** The compression algorithm used during the execution. */
-  LoopFindingAlgorithm loopFindingAlgorithm{LoopFindingAlgorithm::BasicTruncated};
+  LoopFindingAlgorithm loopFindingAlgorithm{LoopFindingAlgorithmDefault};
   /** The max length the LoopFindingAlgorithm::BasicTruncated will go to.*/
-  size_t maxLoopLength{100};
+  size_t maxLoopLength{maxLoopLengthDefault};
+
+  TimestampStorage timestampStorage{TimestampStorageDefault};
 
  public:
   /** Getter for #maxLoopLength. Error if you're not supposed to have a maximum loop length.
@@ -163,6 +183,12 @@ class ParameterHandler {
   [[nodiscard]] LoopFindingAlgorithm getLoopFindingAlgorithm() const;
   /** Creates a ParameterHandler from a config file loaded from CONFIG_FILE_PATH or config.json.
    */
+
+  /**
+   * Getter for #timestampStorageAlgorithm.
+   * @returns Value of #timestampStorageAlgorithm. */
+  [[nodiscard]] TimestampStorage getTimestampStorage() const;
+
   ParameterHandler();
   /**
    * Prints a JSON of the ParameterHandler.

@@ -9,10 +9,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "htf/htf_parameter_handler.h"
 #include "htf/htf.h"
 #include "htf/htf_archive.h"
 #include "htf/htf_hash.h"
+#include "htf/htf_parameter_handler.h"
 #include "htf/htf_storage.h"
 #include "htf/htf_timestamp.h"
 #include "htf/htf_write.h"
@@ -97,7 +97,7 @@ Loop* ThreadWriter::createLoop(int start_index, int loop_len) {
   return l;
 }
 
-void ThreadWriter::storeTimestamp(EventSummary* es, htf_timestamp_t ts) {  
+void ThreadWriter::storeTimestamp(EventSummary* es, htf_timestamp_t ts) {
 #if 0
   // Not yet implemented
   if(store_event_timestamps) {
@@ -105,12 +105,13 @@ void ThreadWriter::storeTimestamp(EventSummary* es, htf_timestamp_t ts) {
   }
 #endif
 
-  int store_event_durations = 1; // TODO: make is optional
-  if(store_event_durations) {
+  int store_event_durations = 1;  // TODO: make is optional
+  if (store_event_durations) {
     // update the last event's duration
-    if(last_duration) {
+    if (last_duration) {
       htf_timestamp_t delta = htf_get_duration(last_timestamp, ts);
       *last_duration = delta;
+      completeDurations(delta);
     }
 
     // allocate a new duration for the current event
@@ -170,21 +171,20 @@ void Loop::addIteration() {
   nb_iterations.back()++;
 }
 
-
 /**
-* @brief This function creates a loop of size loop_len
-*
-* @param loop_len The length of each sequence of the loop.
-* @param index_first_iteration The index of the first token of the first iteration of the loop.
-* @param index_second_iteration The index of the first token of the second iteration of the loop.
-*
-* At the beginning of the function, the current sequence loops like this:
-* XXXXXX TA TB TC TD TA TB TC TD
-*
-* The function creates a loop that contains 2 iterations of the sequence TA TB TC TD, and places
-* it in the current sequence:
-* XXXXXX LA
-*/
+ * @brief This function creates a loop of size loop_len
+ *
+ * @param loop_len The length of each sequence of the loop.
+ * @param index_first_iteration The index of the first token of the first iteration of the loop.
+ * @param index_second_iteration The index of the first token of the second iteration of the loop.
+ *
+ * At the beginning of the function, the current sequence loops like this:
+ * XXXXXX TA TB TC TD TA TB TC TD
+ *
+ * The function creates a loop that contains 2 iterations of the sequence TA TB TC TD, and places
+ * it in the current sequence:
+ * XXXXXX LA
+ */
 void ThreadWriter::replaceTokensInLoop(int loop_len, size_t index_first_iteration, size_t index_second_iteration) {
   if (index_first_iteration > index_second_iteration) {
     size_t tmp = index_second_iteration;
@@ -198,11 +198,14 @@ void ThreadWriter::replaceTokensInLoop(int loop_len, size_t index_first_iteratio
   // We need to go back in the current sequence in order to correctly calculate our durations
   Sequence* loop_seq = thread_trace.getSequence(loop->repeated_token);
 
-  htf_timestamp_t duration_first_iteration = thread_trace.getSequenceDuration(&cur_seq->tokens[index_first_iteration], loop_len);
-  htf_timestamp_t duration_second_iteration = thread_trace.getSequenceDuration(&cur_seq->tokens[index_second_iteration], loop_len);
+  htf_timestamp_t duration_first_iteration =
+    thread_trace.getSequenceDuration(&cur_seq->tokens[index_first_iteration], 2 * loop_len, true);
+  htf_timestamp_t duration_second_iteration =
+    thread_trace.getSequenceDuration(&cur_seq->tokens[index_second_iteration], loop_len, true);
+  // We don't take into account the last token because it's not a duration yet
 
-  loop_seq->durations->add(duration_first_iteration);
-  loop_seq->durations->add(duration_second_iteration);
+  loop_seq->durations->add(duration_first_iteration - duration_second_iteration);
+  addDurationToComplete(loop_seq->durations->add(duration_second_iteration));
 
   // The current sequence last_timestamp does not need to be updated
 
@@ -245,11 +248,10 @@ void ThreadWriter::findLoopBasic(size_t maxLoopLength) {
         htf_log(DebugLevel::Debug, "Last tokens were a sequence from L%x aka S%x\n", loop->self_id.id,
                 loop->repeated_token.id);
         loop->addIteration();
-	// The current sequence last_timestamp does not need to be updated
+        // The current sequence last_timestamp does not need to be updated
 
-	htf_timestamp_t ts = thread_trace.getSequenceDuration(&currentSequence->tokens[s1Start], loopLength);
-        //htf_add_timestamp_to_delta(&seq->durations->add(ts));
-	seq->durations->add(ts);
+        htf_timestamp_t ts = thread_trace.getSequenceDuration(&currentSequence->tokens[s1Start], loopLength, true);
+        addDurationToComplete(seq->durations->add(ts));
         currentSequence->tokens.resize(s1Start);
         return;
       }
@@ -329,11 +331,8 @@ void ThreadWriter::findLoopFilter() {
       loop->addIteration();
       // The current sequence last_timestamp does not need to be updated
 
-      
-      //      htf_timestamp_t ts = thread_trace.getSequenceDuration(&currentSequence->tokens[loopIndex + 1], loopLength);
-      //htf_add_timestamp_to_delta(&sequence->durations->add(ts));
-      htf_timestamp_t ts = thread_trace.getSequenceDuration(&currentSequence->tokens[loopIndex + 1], loopLength);
-      sequence->durations->add(ts);
+      htf_timestamp_t ts = thread_trace.getSequenceDuration(&currentSequence->tokens[loopIndex + 1], loopLength, true);
+      addDurationToComplete(sequence->durations->add(ts));
       currentSequence->tokens.resize(loopIndex + 1);
       return;
     }
@@ -368,6 +367,8 @@ void ThreadWriter::findLoop() {
     findLoopFilter();
     break;
   }
+  default:
+    htf_error("Invalid LoopFinding algorithm\n");
   }
 }
 
@@ -383,7 +384,7 @@ void ThreadWriter::recordExitFunction() {
 
 #ifdef DEBUG
   // check that the sequence is not bugous
-  
+
   Token first_token = cur_seq->tokens[0];
   Token last_token = cur_seq->tokens.back();
   if (first_token.type != last_token.type) {
@@ -470,7 +471,7 @@ size_t ThreadWriter::storeEvent(enum EventType event_type,
                                 TokenId event_id,
                                 htf_timestamp_t ts,
                                 AttributeList* attribute_list) {
-  ts = htf_timestamp(ts);
+  ts = timestamp(ts);
   if (event_type == HTF_BLOCK_START) {
     recordEnterFunction();
     sequence_start_timestamp[cur_depth] = ts;
@@ -478,12 +479,12 @@ size_t ThreadWriter::storeEvent(enum EventType event_type,
 
   Token token = Token(TypeEvent, event_id);
   auto* sequence = getCurrentSequence();
-  storeToken(sequence, token);
 
   EventSummary* es = &thread_trace.events[event_id];
   size_t occurrence_index = es->nb_occurences++;
-
   storeTimestamp(es, ts);
+  storeToken(sequence, token);
+
   if (attribute_list)
     storeAttributeList(es, attribute_list, occurrence_index);
 
@@ -529,7 +530,7 @@ void ThreadWriter::open(Archive* archive, ThreadId thread_id) {
     return;
   htf_recursion_shield++;
 
-  htf_assert(htf_archive_get_thread(archive, thread_id) == nullptr);
+  htf_assert(archive->getThread(thread_id) == nullptr);
 
   htf_log(DebugLevel::Debug, "htf_write_thread_open(%ux)\n", thread_id);
 
@@ -546,7 +547,7 @@ void ThreadWriter::open(Archive* archive, ThreadId thread_id) {
   }
 
   last_timestamp = HTF_TIMESTAMP_INVALID;
-  last_duration = NULL;
+  last_duration = nullptr;
   sequence_start_timestamp = new htf_timestamp_t[max_depth];
 
   cur_depth = 0;
@@ -779,12 +780,16 @@ TokenId Thread::getEventId(htf::Event* e) {
 
   return index;
 }
-htf_duration_t Thread::getSequenceDuration(Token* array, size_t size) {
+htf_duration_t Thread::getSequenceDuration(Token* array, size_t size, bool ignoreLast) {
   htf_duration_t sum = 0;
   auto tokenCount = TokenCountMap();
-  for (size_t i = 0; i < size; i++) {
+  size_t i = size;
+  do {
+    i--;
     auto& token = array[i];
     tokenCount[token]++;
+    if (ignoreLast && i == size - 1)
+      continue;
     switch (token.type) {
     case TypeInvalid: {
       htf_error("Error parsing the given array, a Token was invalid\n");
@@ -813,7 +818,7 @@ htf_duration_t Thread::getSequenceDuration(Token* array, size_t size) {
       break;
     }
     }
-  }
+  } while (i != 0);
   return sum;
 }
 }  // namespace htf

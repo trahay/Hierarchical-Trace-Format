@@ -89,16 +89,21 @@ CXX(
              __LINE__, ##__VA_ARGS__);                                                                             \
     htf_abort();                                                                                                   \
   } while (0)
+
+/** Asserts a condition whatever the build mode (ie. Debug or Release). */
+#define htf_assert_always(cond)	     \
+  do {                               \
+    if (!(cond))                     \
+      htf_error("Assertion failed"); \
+  } while (0)
+
+
 #ifdef NDEBUG
 /** Asserts a condition only if in Debug mode (if DEBUG is defined). */
 #define htf_assert(cond)
 #else
 /** Asserts a condition only if in Debug mode (if DEBUG is defined). */
-#define htf_assert(cond)             \
-  do {                               \
-    if (!(cond))                     \
-      htf_error("Assertion failed"); \
-  } while (0)
+#define htf_assert(cond) htf_assert_always(cond)
 #endif
 
 /* -*-

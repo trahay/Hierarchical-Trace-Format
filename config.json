@@ -1,6 +1,7 @@
 {
-  "compressionAlgorithm": "ZSTD",
-  "encodingAlgorithm": "Masking",
-  "loopFindingAlgorithm": "BasicTruncated",
-  "maxLoopLength": 100
+    "compressionAlgorithm": "ZSTD",
+    "encodingAlgorithm": "Masking",
+    "loopFindingAlgorithm": "BasicTruncated",
+    "maxLoopLength": 100,
+    "timestampStorageAlgorithm": "Delta"
 }
